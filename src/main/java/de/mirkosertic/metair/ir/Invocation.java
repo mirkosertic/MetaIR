@@ -1,17 +1,15 @@
 package de.mirkosertic.metair.ir;
 
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.MethodInsnNode;
-
+import java.lang.classfile.Opcode;
+import java.lang.classfile.instruction.InvokeInstruction;
 import java.util.List;
 
 public class Invocation extends Value {
 
-    public final MethodInsnNode ins;
+    public final InvokeInstruction ins;
 
-    Invocation(final MethodInsnNode ins, final List<Value> arguments) {
-        super(Type.getReturnType(ins.desc));
+    Invocation(final InvokeInstruction ins, final List<Value> arguments) {
+        super(ins.typeSymbol().returnType());
         this.ins = ins;
         int index = 0;
         for (final Value v : arguments) {
@@ -20,39 +18,39 @@ public class Invocation extends Value {
     }
 
     public boolean isInvokeStatic() {
-        return ins.getOpcode() == Opcodes.INVOKESTATIC;
+        return ins.opcode() == Opcode.INVOKESTATIC;
     }
 
     public boolean isInvokeSpecial() {
-        return ins.getOpcode() == Opcodes.INVOKESPECIAL;
+        return ins.opcode() == Opcode.INVOKESPECIAL;
     }
 
     public boolean isInvokeVirtual() {
-        return ins.getOpcode() == Opcodes.INVOKEVIRTUAL;
+        return ins.opcode() == Opcode.INVOKEVIRTUAL;
     }
 
     public boolean isInvokeInterface() {
-        return ins.getOpcode() == Opcodes.INVOKEINTERFACE;
+        return ins.opcode() == Opcode.INVOKEINTERFACE;
     }
 
     public boolean isInvokeDynamic() {
-        return ins.getOpcode() == Opcodes.INVOKEDYNAMIC;
+        return ins.opcode() == Opcode.INVOKEDYNAMIC;
     }
 
     @Override
     public String debugDescription() {
         if (isInvokeStatic()) {
-            return "Invoke static " + ins.name + " : " + ins.desc;
+            return "Invoke static " + ins.name() + " : " + DebugUtils.toString(ins.typeSymbol());
         } else if (isInvokeSpecial()) {
-            return "Invoke special " + ins.name + " : " + ins.desc;
+            return "Invoke special " + ins.name() + " : " + DebugUtils.toString(ins.typeSymbol());
         } else if (isInvokeVirtual()) {
-            return "Invoke virtual " + ins.name + " : " + ins.desc;
+            return "Invoke virtual " + ins.name() + " : " + DebugUtils.toString(ins.typeSymbol());
         } else if (isInvokeInterface()) {
-            return "Invoke interface " + ins.name + " : " + ins.desc;
+            return "Invoke interface " + ins.name() + " : " + DebugUtils.toString(ins.typeSymbol());
         } else if (isInvokeDynamic()) {
-            return "Invoke dynamic " + ins.name + " : " + ins.desc;
+            return "Invoke dynamic " + ins.name() + " : " + DebugUtils.toString(ins.typeSymbol());
         } else {
-            throw new IllegalArgumentException("Unknown opcode " + ins.getOpcode());
+            throw new IllegalArgumentException("Unknown opcode " + ins.opcode());
         }
     }
 }

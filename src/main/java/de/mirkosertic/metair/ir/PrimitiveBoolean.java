@@ -1,13 +1,13 @@
 package de.mirkosertic.metair.ir;
 
-import org.objectweb.asm.Type;
+import java.lang.constant.ConstantDescs;
 
 public class PrimitiveBoolean extends Value {
 
     public final boolean value;
 
     PrimitiveBoolean(final boolean value) {
-        super(Type.BOOLEAN_TYPE);
+        super(ConstantDescs.CD_boolean);
         this.value = value;
     }
 

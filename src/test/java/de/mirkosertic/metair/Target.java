@@ -1,4 +1,4 @@
-package de.mirkosertic.metair.ir;
+package de.mirkosertic.metair;
 
 public class Target {
 

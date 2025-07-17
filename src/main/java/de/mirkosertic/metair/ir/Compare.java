@@ -1,6 +1,6 @@
 package de.mirkosertic.metair.ir;
 
-import org.objectweb.asm.Type;
+import java.lang.constant.ConstantDescs;
 
 public class Compare extends Value {
 
@@ -11,7 +11,7 @@ public class Compare extends Value {
     public final Operation operation;
 
     Compare(final Operation operation, final Value a, final Value b) {
-        super(Type.BOOLEAN_TYPE);
+        super(ConstantDescs.CD_boolean);
 
         this.operation = operation;
 

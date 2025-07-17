@@ -1,10 +1,10 @@
 package de.mirkosertic.metair.ir;
 
-import org.objectweb.asm.Type;
+import java.lang.constant.ClassDesc;
 
 public class RuntimeclassReference extends Value {
 
-    RuntimeclassReference(final Type type) {
+    RuntimeclassReference(final ClassDesc type) {
         super(type);
     }
 
@@ -15,6 +15,6 @@ public class RuntimeclassReference extends Value {
 
     @Override
     public String debugDescription() {
-        return "Class " + type;
+        return "Class " + DebugUtils.toString(type);
     }
 }

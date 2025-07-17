@@ -1,15 +1,15 @@
 package de.mirkosertic.metair.ir;
 
-import org.objectweb.asm.Type;
+import java.lang.constant.ClassDesc;
 
 public class Result extends Value {
 
-    Result(final Type type) {
+    Result(final ClassDesc type) {
         super(type);
     }
 
     @Override
     public String debugDescription() {
-        return "Result : " + type;
+        return "Result : " + DebugUtils.toString(type);
     }
 }

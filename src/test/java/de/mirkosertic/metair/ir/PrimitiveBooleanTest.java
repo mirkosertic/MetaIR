@@ -1,7 +1,8 @@
 package de.mirkosertic.metair.ir;
 
 import org.junit.jupiter.api.Test;
-import org.objectweb.asm.Type;
+
+import java.lang.constant.ConstantDescs;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -11,7 +12,7 @@ public class PrimitiveBooleanTest {
     public void testUsage() {
         final PrimitiveBoolean a = new PrimitiveBoolean(true);
 
-        assertThat(a.type).isEqualTo(Type.BOOLEAN_TYPE);
+        assertThat(a.type).isEqualTo(ConstantDescs.CD_boolean);
         assertThat(a.value).isTrue();
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).isEmpty();

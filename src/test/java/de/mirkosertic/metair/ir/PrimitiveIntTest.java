@@ -1,7 +1,8 @@
 package de.mirkosertic.metair.ir;
 
 import org.junit.jupiter.api.Test;
-import org.objectweb.asm.Type;
+
+import java.lang.constant.ConstantDescs;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -11,7 +12,7 @@ public class PrimitiveIntTest {
     public void testUsage() {
         final PrimitiveInt a = new PrimitiveInt(10);
 
-        assertThat(a.type).isEqualTo(Type.INT_TYPE);
+        assertThat(a.type).isEqualTo(ConstantDescs.CD_int);
         assertThat(a.value).isEqualTo(10);
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).isEmpty();

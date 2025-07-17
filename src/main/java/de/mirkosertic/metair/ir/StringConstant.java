@@ -1,13 +1,13 @@
 package de.mirkosertic.metair.ir;
 
-import org.objectweb.asm.Type;
+import java.lang.constant.ConstantDescs;
 
 public class StringConstant extends Value {
 
     public final String value;
 
     StringConstant(final String value) {
-        super(Type.getType(String.class));
+        super(ConstantDescs.CD_String);
         this.value = value;
     }
 

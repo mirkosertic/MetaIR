@@ -1,18 +1,17 @@
 package de.mirkosertic.metair.ir;
 
-import org.objectweb.asm.Type;
-
+import java.lang.constant.ClassDesc;
 import java.util.*;
 
 public class PHI extends Value {
 
-    PHI(final Type type) {
+    PHI(final ClassDesc type) {
         super(type);
     }
 
     @Override
     public String debugDescription() {
-        return "Φ " + type;
+        return "Φ " + DebugUtils.toString(type);
     }
 
     @Override

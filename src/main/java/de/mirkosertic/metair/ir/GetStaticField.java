@@ -1,20 +1,19 @@
 package de.mirkosertic.metair.ir;
 
-import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.FieldInsnNode;
+import java.lang.classfile.instruction.FieldInstruction;
 
 public class GetStaticField extends Value {
 
-    public final FieldInsnNode node;
+    public final FieldInstruction node;
 
-    GetStaticField(final FieldInsnNode node, final RuntimeclassReference source) {
-        super(Type.getType(node.desc));
+    GetStaticField(final FieldInstruction node, final RuntimeclassReference source) {
+        super(node.typeSymbol());
         this.node = node;
         use(source, new ArgumentUse(0));
     }
 
     @Override
     public String debugDescription() {
-        return "GetStaticField : " + node.name + " : " + type;
+        return "GetStaticField : " + node.name() + " : " + DebugUtils.toString(type);
     }
 }

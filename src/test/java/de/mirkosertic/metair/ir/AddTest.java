@@ -3,7 +3,8 @@ package de.mirkosertic.metair.ir;
 import static org.assertj.core.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
-import org.objectweb.asm.Type;
+
+import java.lang.constant.ConstantDescs;
 
 public class AddTest {
 
@@ -11,11 +12,11 @@ public class AddTest {
     public void testUsage() {
         final PrimitiveInt a = new PrimitiveInt(10);
         final PrimitiveInt b = new PrimitiveInt(20);
-        final Add add = new Add(Type.INT_TYPE, a, b);
+        final Add add = new Add(ConstantDescs.CD_int, a, b);
 
-        assertThat(add.debugDescription()).isEqualTo("Add : I");
+        assertThat(add.debugDescription()).isEqualTo("Add : int");
 
-        assertThat(add.type).isEqualTo(Type.INT_TYPE);
+        assertThat(add.type).isEqualTo(ConstantDescs.CD_int);
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).containsExactly(add);
         assertThat(b.usedBy).containsExactly(add);

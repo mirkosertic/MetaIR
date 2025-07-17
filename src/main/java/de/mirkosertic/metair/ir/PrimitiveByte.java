@@ -1,13 +1,13 @@
 package de.mirkosertic.metair.ir;
 
-import org.objectweb.asm.Type;
+import java.lang.constant.ConstantDescs;
 
 public class PrimitiveByte extends Value {
 
     public final int value;
 
     PrimitiveByte(final int value) {
-        super(Type.BYTE_TYPE);
+        super(ConstantDescs.CD_byte);
         this.value = value;
     }
 

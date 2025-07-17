@@ -1,18 +1,17 @@
 package de.mirkosertic.metair.ir;
 
-import org.objectweb.asm.Type;
-
+import java.lang.constant.ClassDesc;
 import java.util.*;
 
-public class Label extends Node {
+public class LabelNode extends Node {
 
     public final String label;
 
-    Label(final String label) {
+    LabelNode(final String label) {
         this.label = label;
     }
 
-    public PHI definePHI(final Type type) {
+    public PHI definePHI(final ClassDesc type) {
         final PHI p = new PHI(type);
         p.use(this, DefinedByUse.INSTANCE);
         return p;
@@ -58,5 +57,10 @@ public class Label extends Node {
         }
 
         return Collections.emptySet();
+    }
+
+    @Override
+    public String debugDescription() {
+        return getClass().getSimpleName();
     }
 }

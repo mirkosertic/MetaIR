@@ -1,9 +1,11 @@
 package de.mirkosertic.metair.ir;
 
 import org.junit.jupiter.api.Test;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.FieldInsnNode;
+
+import java.lang.classfile.Opcode;
+import java.lang.classfile.constantpool.ConstantPoolBuilder;
+import java.lang.classfile.instruction.FieldInstruction;
+import java.lang.constant.ConstantDescs;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -11,8 +13,8 @@ public class GetStaticFieldTest {
 
     @Test
     public void testUsage() {
-        final FieldInsnNode node = new FieldInsnNode(Opcodes.GETSTATIC, null, "field", Type.INT_TYPE.getDescriptor());
-        final RuntimeclassReference v = new RuntimeclassReference(Type.getType(String.class));
+        final FieldInstruction node = FieldInstruction.of(Opcode.GETSTATIC, ConstantPoolBuilder.of().fieldRefEntry(ConstantDescs.CD_String, "field", ConstantDescs.CD_int));
+        final RuntimeclassReference v = new RuntimeclassReference(ConstantDescs.CD_String);
         final GetStaticField get = new GetStaticField(node, v);
 
         assertThat(v.usedBy).containsExactly(get);
@@ -22,7 +24,7 @@ public class GetStaticFieldTest {
         assertThat(get.uses.getFirst().use).isEqualTo(new ArgumentUse(0));
 
         assertThat(get.peepholeOptimization()).isEmpty();
-        assertThat(get.debugDescription()).isEqualTo("GetStaticField : field : I");
+        assertThat(get.debugDescription()).isEqualTo("GetStaticField : field : int");
         assertThat(get.isConstant()).isFalse();
     }
 }

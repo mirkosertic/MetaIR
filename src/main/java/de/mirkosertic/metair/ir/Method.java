@@ -1,24 +1,24 @@
 package de.mirkosertic.metair.ir;
 
-import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.MethodNode;
 
+import java.lang.classfile.Label;
+import java.lang.classfile.MethodModel;
+import java.lang.constant.ClassDesc;
 import java.util.*;
 
 public class Method extends Node {
 
-    private final Map<AbstractInsnNode, Label> labelMap;
-    private final MethodNode methodNode;
-    private final Map<Type, RuntimeclassReference> runtimeclassReferences;
+    private final Map<Label, LabelNode> labelMap;
+    private final MethodModel methodNode;
+    private final Map<ClassDesc, RuntimeclassReference> runtimeclassReferences;
 
-    Method(final MethodNode methodNode) {
+    Method(final MethodModel methodNode) {
         this.labelMap = new HashMap<>();
         this.methodNode = methodNode;
         this.runtimeclassReferences = new HashMap<>();
     }
 
-    public RuntimeclassReference defineRuntimeclassReference(final Type type) {
+    public RuntimeclassReference defineRuntimeclassReference(final ClassDesc type) {
         return runtimeclassReferences.computeIfAbsent(type, key -> {
             final RuntimeclassReference r = new RuntimeclassReference(key);
             r.use(Method.this, DefinedByUse.INSTANCE);
@@ -26,24 +26,30 @@ public class Method extends Node {
         });
     }
 
-    public ThisRef defineThisRef(final Type type) {
+    public ThisRef defineThisRef(final ClassDesc type) {
         final ThisRef t = new ThisRef(type);
         t.use(this, DefinedByUse.INSTANCE);
         return t;
     }
 
-    public MethodArgument defineMethodArgument(final Type type, final int index) {
+    public MethodArgument defineMethodArgument(final ClassDesc type, final int index) {
         final MethodArgument a = new MethodArgument(type, index);
         a.use(this, DefinedByUse.INSTANCE);
         return a;
     }
 
-    public Label createLabel(final AbstractInsnNode node) {
-        return labelMap.computeIfAbsent(node, key -> new Label("Label" + methodNode.instructions.indexOf(key)));
+    public LabelNode createLabel(final Label label) {
+        return labelMap.computeIfAbsent(label, key -> new LabelNode(label.toString()));
     }
 
     public PrimitiveInt definePrimitiveInt(final int value) {
         final PrimitiveInt i = new PrimitiveInt(value);
+        i.use(this, DefinedByUse.INSTANCE);
+        return i;
+    }
+
+    public PrimitiveByte definePrimitiveByte(final int value) {
+        final PrimitiveByte i = new PrimitiveByte(value);
         i.use(this, DefinedByUse.INSTANCE);
         return i;
     }
@@ -89,5 +95,10 @@ public class Method extends Node {
                 }
             }
         }
+    }
+
+    @Override
+    public String debugDescription() {
+        return getClass().getSimpleName();
     }
 }

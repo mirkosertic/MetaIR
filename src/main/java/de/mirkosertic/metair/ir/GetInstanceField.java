@@ -1,14 +1,13 @@
 package de.mirkosertic.metair.ir;
 
-import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.FieldInsnNode;
+import java.lang.classfile.instruction.FieldInstruction;
 
 public class GetInstanceField extends Value {
 
-    public final FieldInsnNode node;
+    public final FieldInstruction node;
 
-    GetInstanceField(final FieldInsnNode node, final Value source) {
-        super(Type.getType(node.desc));
+    GetInstanceField(final FieldInstruction node, final Value source) {
+        super(node.typeSymbol());
         this.node = node;
 
         use(source, new ArgumentUse(0));
@@ -16,6 +15,6 @@ public class GetInstanceField extends Value {
 
     @Override
     public String debugDescription() {
-        return "GetField : " + node.name + " : " + type;
+        return "GetField : " + node.name() + " : " + DebugUtils.toString(type);
     }
 }

@@ -1,17 +1,12 @@
 package de.mirkosertic.metair.ir;
 
-import org.objectweb.asm.Type;
+import java.lang.constant.ClassDesc;
 
 public abstract class Value extends Node {
 
-    public final Type type;
+    public final ClassDesc type;
 
-    protected Value(final Type type) {
+    protected Value(final ClassDesc type) {
         this.type = type;
-    }
-
-    @Override
-    public String debugDescription() {
-        return type.toString();
     }
 }

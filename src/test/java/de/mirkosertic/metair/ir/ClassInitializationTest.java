@@ -1,7 +1,8 @@
 package de.mirkosertic.metair.ir;
 
 import org.junit.jupiter.api.Test;
-import org.objectweb.asm.Type;
+
+import java.lang.constant.ConstantDescs;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -9,7 +10,7 @@ public class ClassInitializationTest {
 
     @Test
     public void testUsage() {
-        final RuntimeclassReference cr = new RuntimeclassReference(Type.getType(String.class));
+        final RuntimeclassReference cr = new RuntimeclassReference(ConstantDescs.CD_String);
         final ClassInitialization ci = new ClassInitialization(cr);
 
         assertThat(ci.debugDescription()).isEqualTo("ClassInit");

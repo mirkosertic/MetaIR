@@ -1,7 +1,8 @@
 package de.mirkosertic.metair.ir;
 
 import org.junit.jupiter.api.Test;
-import org.objectweb.asm.Type;
+
+import java.lang.constant.ConstantDescs;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -15,7 +16,7 @@ public class CompareTest {
 
         assertThat(compare.debugDescription()).isEqualTo("Compare : GE");
 
-        assertThat(compare.type).isEqualTo(Type.BOOLEAN_TYPE);
+        assertThat(compare.type).isEqualTo(ConstantDescs.CD_boolean);
         assertThat(compare.operation).isEqualTo(Compare.Operation.GE);
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).containsExactly(compare);

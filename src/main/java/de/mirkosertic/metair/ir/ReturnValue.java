@@ -1,12 +1,11 @@
 package de.mirkosertic.metair.ir;
 
-import org.objectweb.asm.Type;
-
+import java.lang.constant.ClassDesc;
 import java.util.Optional;
 
 public class ReturnValue extends Value {
 
-    ReturnValue(final Type type, final Value value) {
+    ReturnValue(final ClassDesc type, final Value value) {
         super(type);
         use(value, new ArgumentUse(0));
     }
@@ -19,6 +18,6 @@ public class ReturnValue extends Value {
 
     @Override
     public String debugDescription() {
-        return "ReturnValue : " + type;
+        return "ReturnValue : " + DebugUtils.toString(type);
     }
 }

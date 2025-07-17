@@ -21,5 +21,7 @@ public class IfTest {
         assertThat(compare.isConstant()).isFalse();
 
         assertThat(iff.peepholeOptimization()).isEmpty();
+
+        assertThat(iff.debugDescription()).isEqualTo("If");
     }
 }

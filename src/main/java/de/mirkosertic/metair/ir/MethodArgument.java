@@ -1,19 +1,19 @@
 package de.mirkosertic.metair.ir;
 
-import org.objectweb.asm.Type;
+import java.lang.constant.ClassDesc;
 
 public class MethodArgument extends Value {
 
     public final int index;
 
-    MethodArgument(final Type type, final int index) {
+    MethodArgument(final ClassDesc type, final int index) {
         super(type);
         this.index = index;
     }
 
     @Override
     public String debugDescription() {
-        return "arg " + index + " : " + type;
+        return "arg " + index + " : " + DebugUtils.toString(type);
     }
 
     @Override

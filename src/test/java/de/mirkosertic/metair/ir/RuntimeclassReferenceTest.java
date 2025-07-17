@@ -2,7 +2,8 @@
 package de.mirkosertic.metair.ir;
 
 import org.junit.jupiter.api.Test;
-import org.objectweb.asm.Type;
+
+import java.lang.constant.ConstantDescs;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -10,14 +11,14 @@ public class RuntimeclassReferenceTest {
 
     @Test
     public void testUsage() {
-        final RuntimeclassReference a = new RuntimeclassReference(Type.getType(String.class));
+        final RuntimeclassReference a = new RuntimeclassReference(ConstantDescs.CD_String);
 
-        assertThat(a.type.getClassName()).isEqualTo(String.class.getName());
+        assertThat(a.type).isEqualTo(ConstantDescs.CD_String);
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).isEmpty();
         assertThat(a.uses).isEmpty();
         assertThat(a.isConstant()).isTrue();
-        assertThat(a.debugDescription()).isEqualTo("Class Ljava/lang/String;");
+        assertThat(a.debugDescription()).isEqualTo("Class String");
 
         assertThat(a.peepholeOptimization()).isEmpty();
     }

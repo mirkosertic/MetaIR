@@ -45,9 +45,7 @@ public abstract class Node {
         uses.clear();
     }
 
-    public String debugDescription() {
-        return this.getClass().getSimpleName();
-    }
+    public abstract String debugDescription();
 
     @Override
     public String toString() {

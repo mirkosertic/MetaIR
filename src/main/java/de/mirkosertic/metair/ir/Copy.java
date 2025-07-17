@@ -14,4 +14,9 @@ public class Copy extends Node {
         final Optional<Node> argument = uses.stream().filter(t -> t.use instanceof DataFlowUse).map(t -> t.node).findFirst();
         return argument.map(Node::isConstant).orElse(false);
     }
+
+    @Override
+    public String debugDescription() {
+        return getClass().getSimpleName();
+    }
 }

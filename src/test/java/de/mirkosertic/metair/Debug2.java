@@ -1,7 +1,5 @@
 package de.mirkosertic.metair;
 
-import de.mirkosertic.metair.ir.Target;
-
 public class Debug2 {
 
     static int i;
@@ -30,4 +28,7 @@ public class Debug2 {
         return Target.compute(10, 20);
     }
 
+    public double intdoubletest(int a, double b, double c, int d, int e) {
+        return b + c;
+    }
 }
