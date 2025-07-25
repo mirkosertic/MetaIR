@@ -31,7 +31,7 @@ public class HelloWorld {
 
             final MethodAnalyzer analyzer = new MethodAnalyzer(model.thisClass().asSymbol(), method);
 
-            DOTExporter.writeTo(analyzer.ir(), new PrintStream(new FileOutputStream((method.methodName().stringValue() + "_" + method.methodTypeSymbol().descriptorString() + ".dot").replace("(", "").replace(")", ""))));
+            DOTExporter.writeTo(analyzer.ir(), new PrintStream(new FileOutputStream((method.methodName().stringValue() + "_" + method.methodTypeSymbol().descriptorString() + ".dot").replace("<","").replace(">", "").replace("(", "").replace(")", ""))));
 
 
             System.out.println();
