@@ -1,6 +1,7 @@
 package de.mirkosertic.metair.ir;
 
 import java.lang.classfile.*;
+import java.lang.classfile.attribute.CodeAttribute;
 import java.lang.classfile.instruction.*;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.ConstantDescs;
@@ -139,73 +140,15 @@ public class MethodAnalyzer {
         return type.equals(ConstantDescs.CD_long) || type.equals(ConstantDescs.CD_double);
     }
 
-    private int determineMaximumNumberOfLocals(final CodeModel codeModel) {
-        int max = 0;
-        if (!method.flags().flags().contains(AccessFlag.STATIC)) {
-            max = 1;
-        }
-        final MethodTypeDesc desc = method.methodTypeSymbol();
-        for (final ClassDesc type : desc.parameterArray()) {
-            if (type.equals(ConstantDescs.CD_long) || type.equals(ConstantDescs.CD_double)) {
-                max+=2;
-            } else {
-                max++;
-            }
-        }
-
-        for (final CodeElement elem : codeModel.elementList()) {
-            if (elem instanceof final LocalVariable localVariable) {
-                int pos = localVariable.slot();
-                if (ConstantDescs.CD_long.equals(localVariable.typeSymbol()) || ConstantDescs.CD_double.equals(localVariable.typeSymbol())) {
-                    pos++;
-                }
-                max = Math.max(max, pos);
-            } else if (elem instanceof final LoadInstruction load) {
-                int pos = load.slot();
-                switch (load.opcode()) {
-                    case Opcode.DLOAD:
-                    case Opcode.DLOAD_0:
-                    case Opcode.DLOAD_1:
-                    case Opcode.DLOAD_2:
-                    case Opcode.DLOAD_3:
-                    case Opcode.LLOAD:
-                    case Opcode.LLOAD_0:
-                    case Opcode.LLOAD_1:
-                    case Opcode.LLOAD_2:
-                    case Opcode.LLOAD_3: {
-                        pos++;
-                    }
-                }
-                max = Math.max(max, pos);
-            } else if (elem instanceof final StoreInstruction store) {
-                int pos = store.slot();
-                switch (store.opcode()) {
-                    case Opcode.DSTORE:
-                    case Opcode.DSTORE_0:
-                    case Opcode.DSTORE_1:
-                    case Opcode.DSTORE_2:
-                    case Opcode.DSTORE_3:
-                    case Opcode.LSTORE:
-                    case Opcode.LSTORE_0:
-                    case Opcode.LSTORE_1:
-                    case Opcode.LSTORE_2:
-                    case Opcode.LSTORE_3: {
-                        pos++;
-                    }
-                }
-                max = Math.max(max, pos);
-            }
-        }
-        return max + 1;
-    }
-
     private void step2FollowCFGAndInterpret(final CodeModel code) {
 
         final Deque<InterpretTask> tasks = new ArrayDeque<>();
         final CodeElement start = code.elementList().getFirst();
 
+        final CodeAttribute cm = (CodeAttribute) code;
+
         final Status initStatus = new Status();
-        initStatus.locals = new Value[determineMaximumNumberOfLocals(code)];
+        initStatus.locals = new Value[cm.maxLocals()];
         initStatus.stack = new Stack<>();
         initStatus.node = ir;
 
@@ -228,8 +171,8 @@ public class MethodAnalyzer {
         initialTask.status = initStatus;
         tasks.push(initialTask);
 
-        final Set<CodeElement> visited = new HashSet<>();
-        visited.add(start);
+        final Set<Integer> visited = new HashSet<>();
+        visited.add(0);
 
         final List<CodeElement> allElements = code.elementList();
 
@@ -242,17 +185,18 @@ public class MethodAnalyzer {
 
         while (!tasks.isEmpty()) {
             final InterpretTask task = tasks.pop();
-            final Status status = task.status;
+            Status status = task.status;
 
             System.out.print("Analyzing basic block at #");
             System.out.print(task.eleementIndex);
             System.out.println();
 
-            int elementIndex = task.eleementIndex;
-            CodeElement current = allElements.get(elementIndex);
-            while (current != null) {
-                if (current instanceof final LabelTarget labelnode && !visited.contains(current)) {
-                    visited.add(current);
+            for (int elementIndex = task.eleementIndex; elementIndex < allElements.size(); elementIndex++) {
+                final CodeElement current = allElements.get(elementIndex);
+
+                if (current instanceof final LabelTarget labelnode && !visited.contains(elementIndex)) {
+                    visited.add(elementIndex);
+
                     final InterpretTask newTask = new InterpretTask();
                     newTask.eleementIndex = allElements.indexOf(labelnode);
                     newTask.status = incomingStatusFor(status, labelnode.label());
@@ -314,18 +258,21 @@ public class MethodAnalyzer {
 
                 System.out.print("]");
 
-                visitNode(current, status);
+                status = visitNode(current, status);
 
-                visited.add(current);
+                visited.add(elementIndex);
 
                 if (current instanceof final BranchInstruction jumpInsnNode) {
-                    if (!visited.contains(labelToCodeElements.get(jumpInsnNode.target()))) {
+                    final int jumpIndex = allElements.indexOf(labelToCodeElements.get(jumpInsnNode.target()));
+                    if (!visited.contains(jumpIndex)) {
                         final InterpretTask newTask = new InterpretTask();
-                        newTask.eleementIndex = allElements.indexOf(labelToCodeElements.get(jumpInsnNode.target()));
+                        // TODO: Check if this holds true!!
+                        newTask.eleementIndex = jumpIndex;
                         newTask.status = incomingStatusFor(status, jumpInsnNode.target());
                         switch (jumpInsnNode.opcode()) {
                             case Opcode.IFEQ:
-                            case Opcode.IF_ICMPGE: {
+                            case Opcode.IF_ICMPGE:
+                            case Opcode.IF_ICMPLE: {
                                 newTask.condition = ControlFlowConditionOnTrue.INSTANCE;
                                 break;
                             }
@@ -333,7 +280,19 @@ public class MethodAnalyzer {
                         tasks.push(newTask);
                     }
                     if (jumpInsnNode.opcode() == Opcode.GOTO) {
-                        // Unconditional jump
+                        // Unconditional jump and a back edge, we stop analysis here
+                        final Status target = incomingStatus.get(jumpInsnNode.target());
+                        if (target == null) {
+                            throw new IllegalStateException("Unconditional jump to " + jumpInsnNode.target() + " without a target status");
+                        }
+                        // Do some sanity checking here
+                        for (int i = 0; i < status.locals.length; i++) {
+                            final Value source = status.locals[i];
+                            final Value dest = target.locals[i];
+                            if (dest != null && dest != source) {
+                                throw new IllegalStateException("Missing copy for local index " + i + ", got " + source + " and expected " + dest);
+                            }
+                        }
                         break;
                     }
                 }
@@ -358,12 +317,9 @@ public class MethodAnalyzer {
                     }
                 }
 
-                elementIndex++;
-                final CodeElement next = allElements.get(elementIndex);
-                if (visited.contains(next)) {
+                if (visited.contains(elementIndex+1)) {
                     break;
                 }
-                current = next;
             }
             System.out.println("Basic block finished");
         }
@@ -377,720 +333,567 @@ public class MethodAnalyzer {
         ir.peepholeOptimizations();
     }
 
-    private void visitNode(final CodeElement node, final Status status) {
+    private Status visitNode(final CodeElement node, final Status incoming) {
 
         if (node instanceof final PseudoInstruction psi) {
             // Pseudo Instructions
-            switch (psi) {
-                case final LabelTarget labelTarget -> visitLabelTarget(labelTarget, status);
-                case final LineNumber lineNumber -> visitLineNumberNode(lineNumber, status);
-                case final LocalVariable localVariable -> {
+            return switch (psi) {
+                case final LabelTarget labelTarget -> visitLabelTarget(labelTarget, incoming);
+                case final LineNumber lineNumber -> visitLineNumberNode(lineNumber, incoming);
+                case final LocalVariable localVariable ->
                     // Maybe we can use this for debugging?
-                }
+                        incoming;
                 default -> throw new IllegalArgumentException("Not implemented yet : " + psi);
-            }
+            };
         } else if (node instanceof final Instruction ins) {
             // Real bytecode instructions
-            switch (ins) {
-                case final IncrementInstruction incrementInstruction -> parse_IINC(incrementInstruction, status);
-                case final InvokeInstruction invokeInstruction -> visitInvokeInstruction(invokeInstruction, status);
-                case final LoadInstruction load -> visitLoadInstruction(load, status);
-                case final StoreInstruction store -> visitStoreInstruction(store, status);
-                case final BranchInstruction branchInstruction -> visitBranchInstruction(branchInstruction, status);
-                case final ConstantInstruction constantInstruction -> visitConstantInstruction(constantInstruction, status);
-                case final FieldInstruction fieldInstruction -> visitFieldInstruction(fieldInstruction, status);
+            return switch (ins) {
+                case final IncrementInstruction incrementInstruction -> parse_IINC(incrementInstruction, incoming);
+                case final InvokeInstruction invokeInstruction -> visitInvokeInstruction(invokeInstruction, incoming);
+                case final LoadInstruction load -> visitLoadInstruction(load, incoming);
+                case final StoreInstruction store -> visitStoreInstruction(store, incoming);
+                case final BranchInstruction branchInstruction -> visitBranchInstruction(branchInstruction, incoming);
+                case final ConstantInstruction constantInstruction ->
+                        visitConstantInstruction(constantInstruction, incoming);
+                case final FieldInstruction fieldInstruction -> visitFieldInstruction(fieldInstruction, incoming);
                 case final NewObjectInstruction newObjectInstruction ->
-                        visitNewObjectInstruction(newObjectInstruction, status);
-                case final ReturnInstruction returnInstruction -> visitReturnInstruction(returnInstruction, status);
+                        visitNewObjectInstruction(newObjectInstruction, incoming);
+                case final ReturnInstruction returnInstruction -> visitReturnInstruction(returnInstruction, incoming);
                 case final InvokeDynamicInstruction invokeDynamicInstruction ->
-                        parse_INVOKEDYNAMIC(invokeDynamicInstruction, status);
-                case final TypeCheckInstruction typeCheckInstruction -> parse_CHECKCAST(typeCheckInstruction, status);
-                case final StackInstruction stackInstruction -> visitStackInstruction(stackInstruction, status);
-                case final OperatorInstruction operatorInstruction -> visitOperatorInstruction(operatorInstruction, status);
+                        parse_INVOKEDYNAMIC(invokeDynamicInstruction, incoming);
+                case final TypeCheckInstruction typeCheckInstruction -> parse_CHECKCAST(typeCheckInstruction, incoming);
+                case final StackInstruction stackInstruction -> visitStackInstruction(stackInstruction, incoming);
+                case final OperatorInstruction operatorInstruction ->
+                        visitOperatorInstruction(operatorInstruction, incoming);
                 default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
-            }
+            };
         } else {
             throw new IllegalArgumentException("Not implemented yet : " + node);
         }
     }
 
-    private void visitOperatorInstruction(final OperatorInstruction ins, final Status status) {
-        switch (ins.opcode()) {
-            case Opcode.IADD -> parse_IADD(ins, status);
-            case Opcode.DADD -> parse_DADD(ins, status);
+    private Status visitOperatorInstruction(final OperatorInstruction ins, final Status incoming) {
+        return switch (ins.opcode()) {
+            case Opcode.IADD -> parse_ADD_X(ins, incoming, ConstantDescs.CD_int);
+            case Opcode.DADD -> parse_ADD_X(ins, incoming, ConstantDescs.CD_double);
             default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
-        }
+        };
     }
 
-    private void visitStackInstruction(final StackInstruction ins, final Status status) {
-        switch (ins.opcode()) {
-            case Opcode.DUP: {
-                parse_DUP(ins, status);
-                break;
-            }
-            default: {
-                throw new IllegalArgumentException("Not implemented yet : " + ins);
-            }
-        }
+    private Status visitStackInstruction(final StackInstruction ins, final Status incominmg) {
+        return switch (ins.opcode()) {
+            case Opcode.DUP -> parse_DUP(ins, incominmg);
+            default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
+        };
     }
 
-    private void visitReturnInstruction(final ReturnInstruction ins, final Status status) {
-        switch (ins.opcode()) {
-            case Opcode.RETURN: {
-                parse_RETURN(ins, status);
-                break;
-            }
-            case Opcode.IRETURN: {
-                parse_IRETURN(ins, status);
-                break;
-            }
-            case Opcode.DRETURN: {
-                parse_DRETURN(ins, status);
-                break;
-            }
-            default: {
-                throw new IllegalArgumentException("Not implemented yet : " + ins);
-            }
-        }
+    private Status visitReturnInstruction(final ReturnInstruction ins, final Status incoming) {
+        return switch (ins.opcode()) {
+            case Opcode.RETURN -> parse_RETURN(ins, incoming);
+            case Opcode.IRETURN -> parse_RETURN_X(ins, incoming, ConstantDescs.CD_int);
+            case Opcode.DRETURN -> parse_RETURN_X(ins, incoming, ConstantDescs.CD_double);
+            default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
+        };
     }
 
-    private void visitNewObjectInstruction(final NewObjectInstruction ins, final Status status) {
-        switch (ins.opcode()) {
-            case Opcode.NEW: {
-                parse_NEW(ins, status);
-                break;
-            }
-            default: {
-                throw new IllegalArgumentException("Not implemented yet : " + ins);
-            }
-        }
+    private Status visitNewObjectInstruction(final NewObjectInstruction ins, final Status incoming) {
+        return switch (ins.opcode()) {
+            case Opcode.NEW -> parse_NEW(ins, incoming);
+            default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
+        };
     }
 
-    private void visitFieldInstruction(final FieldInstruction ins, final Status status) {
-        switch (ins.opcode()) {
-            case GETFIELD: {
-                parse_GETFIELD(ins, status);
-                break;
-            }
-            case GETSTATIC: {
-                parse_GETSTATIC(ins, status);
-                break;
-            }
-            default: {
-                throw new IllegalArgumentException("Not implemented yet : " + ins);
-            }
-        }
+    private Status visitFieldInstruction(final FieldInstruction ins, final Status incoming) {
+        return switch (ins.opcode()) {
+            case GETFIELD -> parse_GETFIELD(ins, incoming);
+            case GETSTATIC -> parse_GETSTATIC(ins, incoming);
+            default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
+        };
     }
 
-    private void visitConstantInstruction(final ConstantInstruction ins, final Status status) {
-        switch (ins.opcode()) {
-            case Opcode.LDC: {
-                parse_LDC(ins, status);
-                break;
-            }
-            case Opcode.ICONST_0: {
-                parse_ICONST(ins, status);
-                break;
-            }
-            case Opcode.ICONST_1: {
-                parse_ICONST(ins, status);
-                break;
-            }
-            case Opcode.ICONST_2: {
-                parse_ICONST(ins, status);
-                break;
-            }
-            case Opcode.ICONST_3: {
-                parse_ICONST(ins, status);
-                break;
-            }
-            case Opcode.ICONST_4: {
-                parse_ICONST(ins, status);
-                break;
-            }
-            case Opcode.ICONST_5: {
-                parse_ICONST(ins, status);
-                break;
-            }
-            case Opcode.BIPUSH: {
-                parse_BIPUSH(ins, status);
-                break;
-            }
-            default: {
-                throw new IllegalArgumentException("Not implemented yet : " + ins);
-            }
-        }
+    private Status visitConstantInstruction(final ConstantInstruction ins, final Status incoming) {
+        return switch (ins.opcode()) {
+            case Opcode.LDC -> parse_LDC(ins, incoming);
+            case Opcode.ICONST_0, Opcode.ICONST_5, Opcode.ICONST_4, Opcode.ICONST_3, Opcode.ICONST_2, Opcode.ICONST_1 -> parse_ICONST(ins, incoming);
+            case Opcode.BIPUSH -> parse_BIPUSH(ins, incoming);
+            default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
+        };
     }
 
-    private void parse_INVOKEDYNAMIC(final InvokeDynamicInstruction node, final Status status) {
+    private Status parse_INVOKEDYNAMIC(final InvokeDynamicInstruction node, final Status incoming) {
         final MethodTypeDesc methodTypeDesc = node.typeSymbol();
         System.out.println("  opcode INVOKEDYNAMIC Method " + node.name() + " " + methodTypeDesc);
         final ClassDesc returnType = methodTypeDesc.returnType();
         final ClassDesc[] args = methodTypeDesc.parameterArray();
         final int expectedarguments = args.length;
-        if (status.stack.size() < expectedarguments) {
-            throw new IllegalStateException("Not enough arguments on stack for " + node.name() + " " + methodTypeDesc + " expected " + expectedarguments + " but got " + status.stack.size());
+        if (incoming.stack.size() < expectedarguments) {
+            throw new IllegalStateException("Not enough arguments on stack for " + node.name() + " " + methodTypeDesc + " expected " + expectedarguments + " but got " + incoming.stack.size());
         }
+        final Status outgoing = incoming.copy();
         for (int i = 0; i < expectedarguments; i++) {
-            final Value v = status.stack.pop();
+            final Value v = outgoing.stack.pop();
         }
         if (!returnType.equals(ConstantDescs.CD_void)) {
             final Result r = new Result(returnType);
             // TODO: Create invocation here
-            status.stack.push(new Result(returnType));
+            outgoing.stack.push(new Result(returnType));
         }
+        return outgoing;
     }
 
-    private void parse_NEW(final NewObjectInstruction node, final Status status) {
+    private Status parse_NEW(final NewObjectInstruction node, final Status incoming) {
         System.out.println("  opcode NEW Creating " + node.className().asSymbol());
         final ClassDesc type = node.className().asSymbol();
 
         final RuntimeclassReference ri = ir.defineRuntimeclassReference(type);
         final ClassInitialization init = new ClassInitialization(ri);
 
-        status.node = status.node.controlFlowsTo(init, ControlType.FORWARD);
+        final Status outgoing = incoming.copy();
+
+        outgoing.node = outgoing.node.controlFlowsTo(init, ControlType.FORWARD);
 
         final Result r = new Result(type);
         final New n = new New(ri);
         final Copy c = new Copy(n, r);
 
-        status.stack.push(r);
+        outgoing.stack.push(r);
 
-        status.node = status.node.controlFlowsTo(c, ControlType.FORWARD);
+        outgoing.node = outgoing.node.controlFlowsTo(c, ControlType.FORWARD);
+        return outgoing;
     }
 
-    private void parse_CHECKCAST(final TypeCheckInstruction node, final Status status) {
+    private Status parse_CHECKCAST(final TypeCheckInstruction node, final Status incoming) {
         System.out.println("  opcode CHECKCAST Checking for " + node.type().asSymbol());
+        return incoming;
     }
 
-    private void parse_IINC(final IncrementInstruction node, final Status status) {
+    private Status parse_IINC(final IncrementInstruction node, final Status incoming) {
         // A node that represents an IINC instruction.
         System.out.println("  opcode IINC Local " + node.slot() + " Increment " + node.constant());
 
         final Result r = new Result(ConstantDescs.CD_int);
-        final Copy c = new Copy(new Add(ConstantDescs.CD_int, status.locals[node.slot()], ir.definePrimitiveInt(node.constant())), r);
+        final Copy c = new Copy(new Add(ConstantDescs.CD_int, incoming.locals[node.slot()], ir.definePrimitiveInt(node.constant())), r);
 
-        status.locals[node.slot()] = r;
-        status.node = status.node.controlFlowsTo(c, ControlType.FORWARD);
+        final Status outgoing = incoming.copy();
+        outgoing.locals[node.slot()] = r;
+        outgoing.node = outgoing.node.controlFlowsTo(c, ControlType.FORWARD);
+        return outgoing;
     }
 
-    private void parse_IF_ICMPGE(final BranchInstruction node, final Status status) {
+    private Status parse_IF_ICMP_OP(final BranchInstruction node, final Status incoming, final Compare.Operation op) {
         System.out.println("  opcode IFCMP_GE Target " + node.target());
-        if (status.stack.size() < 2) {
+        if (incoming.stack.size() < 2) {
             throw new IllegalStateException("Need a minium of two values on stack for comparison");
         }
-        final Value v1 = status.stack.pop();
-        final Value v2 = status.stack.pop();
 
-        final Compare compare = new Compare(Compare.Operation.GE, v1, v2);
+        final Status outgoing = incoming.copy();
+
+        final Value v1 = outgoing.stack.pop();
+        final Value v2 = outgoing.stack.pop();
+
+        final Compare compare = new Compare(op, v1, v2);
         final If next = new If(compare);
         //next.controlFlowsTo(ir.createLabel(node.label), ControlType.FORWARD, ControlFlowConditionOnTrue.INSTANCE);
 
-        status.node = status.node.controlFlowsTo(next, ControlType.FORWARD);
+        outgoing.node = outgoing.node.controlFlowsTo(next, ControlType.FORWARD);
         // TODO: Handle jumps and copy of phi?
+        return outgoing;
     }
 
-    private void parse_IFEQ(final BranchInstruction node, final Status status) {
+    private Status parse_IFEQ(final BranchInstruction node, final Status incoming) {
         System.out.println("  opcode IFEQ Target " + node.target());
-        if (status.stack.isEmpty()) {
+        if (incoming.stack.isEmpty()) {
             throw new IllegalStateException("Need a value on stack for comparison");
         }
-        final Value v = status.stack.pop();
+        final Status outgoing = incoming.copy();
+        final Value v = outgoing.stack.pop();
 
         final Compare compare = new Compare(Compare.Operation.EQ, v, ir.definePrimitiveInt(0));
         final If next = new If(compare);
 
         //next.controlFlowsTo(ir.createLabel(node.label), ControlType.FORWARD, ControlFlowConditionOnTrue.INSTANCE);
 
-        status.node = status.node.controlFlowsTo(next, ControlType.FORWARD);
+        outgoing.node = outgoing.node.controlFlowsTo(next, ControlType.FORWARD);
+        return outgoing;
     }
 
-    private void parse_GOTO(final BranchInstruction node, final Status status) {
+    private Status parse_GOTO(final BranchInstruction node, final Status incoming) {
         System.out.println("  opcode GOTO Target " + node.target());
 
         final LabelNode label = ir.createLabel(node.target());
 
-        final Status incoming = incomingStatusFor(status, node.target());
+        final Status targetIncoming = incomingStatusFor(incoming, node.target());
 
-        Node control = status.node;
-        for (int i = 0; i < status.locals.length; i++) {
-            final Value v = status.locals[i];
-            final Value target = incoming.locals[i];
+        final Status outgoing = incoming.copy();
+
+        Node control = outgoing.node;
+        for (int i = 0; i < incoming.locals.length; i++) {
+            final Value v = incoming.locals[i];
+            final Value target = targetIncoming.locals[i];
             if (v != null && v != target) {
 
                 final Copy next = new Copy(v, target);
                 control = control.controlFlowsTo(next, ControlType.FORWARD);
+
+                outgoing.locals[i] = target;
             }
         }
 
 
         final Goto next = new Goto();
-        status.node = control.controlFlowsTo(next, ControlType.FORWARD);
+        outgoing.node = control.controlFlowsTo(next, ControlType.FORWARD);
 
         next.controlFlowsTo(label, ControlType.FORWARD);
+
+        return outgoing;
     }
 
-    private void visitBranchInstruction(final BranchInstruction node, final Status status) {
+    private Status visitBranchInstruction(final BranchInstruction node, final Status incoming) {
         // A node that represents a jump instruction. A jump instruction is an instruction that may jump to another instruction.
-        switch (node.opcode()) {
-            case Opcode.IF_ICMPGE: {
-                parse_IF_ICMPGE(node, status);
-                break;
-            }
-            case Opcode.IFEQ: {
-                parse_IFEQ(node, status);
-                break;
-            }
-            case Opcode.GOTO: {
-                parse_GOTO(node, status);
-                break;
-            }
-            default: {
-                throw new IllegalArgumentException("Not implemented yet : " + node);
-            }
-        }
+        return switch (node.opcode()) {
+            case Opcode.IF_ICMPGE -> parse_IF_ICMP_OP(node, incoming, Compare.Operation.GE);
+            case Opcode.IF_ICMPLE -> parse_IF_ICMP_OP(node, incoming, Compare.Operation.LE);
+            case Opcode.IFEQ -> parse_IFEQ(node, incoming);
+            case Opcode.GOTO -> parse_GOTO(node, incoming);
+            default -> throw new IllegalArgumentException("Not implemented yet : " + node);
+        };
     }
 
-    private void parse_BIPUSH(final ConstantInstruction node, final Status status) {
+    private Status parse_BIPUSH(final ConstantInstruction node, final Status incoming) {
         System.out.println("  opcode " + node.opcode());
-        status.stack.push(ir.definePrimitiveByte((Integer) node.constantValue()));
+        final Status outgoing = incoming.copy();
+        outgoing.stack.push(ir.definePrimitiveByte((Integer) node.constantValue()));
+        return outgoing;
     }
 
-    private void parse_LDC(final ConstantInstruction node, final Status status) {
+    private Status parse_LDC(final ConstantInstruction node, final Status incoming) {
         // A node that represents an LDC instruction.
         System.out.println("  opcode LDC Constant " + node.constantValue());
+        final Status outgoing = incoming.copy();
         if (node.constantValue() instanceof final String str) {
-            status.stack.push(new StringConstant(str));
+            outgoing.stack.push(new StringConstant(str));
         } else if (node.constantValue() instanceof final ClassDesc classDesc) {
-            status.stack.push(ir.defineRuntimeclassReference(classDesc));
+            outgoing.stack.push(ir.defineRuntimeclassReference(classDesc));
         } else {
             throw new IllegalArgumentException("Not implemented yet : " + node);
         }
+        return outgoing;
     }
 
-    private void parse_GETSTATIC(final FieldInstruction node, final Status status) {
+    private Status parse_GETSTATIC(final FieldInstruction node, final Status incoming) {
         System.out.println("  opcode GETSTATIC Field " + node.field());
 
         final RuntimeclassReference ri = ir.defineRuntimeclassReference(node.field().owner().asSymbol());
         final ClassInitialization init = new ClassInitialization(ri);
 
-        status.node = status.node.controlFlowsTo(init, ControlType.FORWARD);
+        final Status outgoing = incoming.copy();
+
+        outgoing.node = outgoing.node.controlFlowsTo(init, ControlType.FORWARD);
 
         final GetStaticField get = new GetStaticField(node, ri);
 
         final Result r = new Result(get.type);
         final Copy c = new Copy(get, r);
-        status.stack.push(r);
+        outgoing.stack.push(r);
 
-        status.node = status.node.controlFlowsTo(c, ControlType.FORWARD);
+        outgoing.node = outgoing.node.controlFlowsTo(c, ControlType.FORWARD);
+        return outgoing;
     }
 
-    private void parse_GETFIELD(final FieldInstruction node, final Status status) {
+    private Status parse_GETFIELD(final FieldInstruction node, final Status incoming) {
         System.out.println("  opcode GETFIELD Field " + node.field());
-        if (status.stack.isEmpty()) {
+        if (incoming.stack.isEmpty()) {
             throw new IllegalStateException("Cannot load field from empty stack");
         }
-        final Value v = status.stack.pop();
+        final Status outgoing = incoming.copy();
+        final Value v = outgoing.stack.pop();
         if (v.type.isPrimitive() || v.type.isArray()) {
             throw new IllegalStateException("Cannot load field from non object value " + v);
         }
         final GetInstanceField get = new GetInstanceField(node, v);
         final Result r = new Result(get.type);
         final Copy c = new Copy(get, r);
-        status.stack.push(r);
+        outgoing.stack.push(r);
 
-        status.node = status.node.controlFlowsTo(c, ControlType.FORWARD);
+        outgoing.node = outgoing.node.controlFlowsTo(c, ControlType.FORWARD);
+        return outgoing;
     }
 
-    private void parse_RETURN(final ReturnInstruction node, final Status status) {
+    private Status parse_RETURN(final ReturnInstruction node, final Status incoming) {
         System.out.println("  opcode RETURN");
 
         final Return next = new Return();
-        status.node = status.node.controlFlowsTo(next, ControlType.FORWARD);
+
+        final Status outgoing = incoming.copy();
+        outgoing.node = outgoing.node.controlFlowsTo(next, ControlType.FORWARD);
+        return outgoing;
     }
 
-    private void parse_ICONST(final ConstantInstruction node, final Status status) {
+    private Status parse_ICONST(final ConstantInstruction node, final Status incoming) {
         System.out.println("  opcode ICONST " + node.constantValue());
-        status.stack.push(ir.definePrimitiveInt((Integer) node.constantValue()));
+        final Status outgoing = incoming.copy();
+        outgoing.stack.push(ir.definePrimitiveInt((Integer) node.constantValue()));
+        return outgoing;
     }
 
-    private void parse_IADD(final OperatorInstruction node, final Status status) {
-        System.out.println("  opcode IADD");
-        if (status.stack.size() < 2) {
+    private Status parse_ADD_X(final OperatorInstruction node, final Status incoming, final ClassDesc desc) {
+        System.out.println("  opcode " + node.opcode());
+        if (incoming.stack.size() < 2) {
             throw new IllegalStateException("Need a minium of two values on stack for addition");
         }
-        final Value a = status.stack.pop();
-        if (!a.type.equals(ConstantDescs.CD_int)) {
+        final Status outgoing = incoming.copy();
+        final Value a = outgoing.stack.pop();
+        if (!a.type.equals(desc)) {
             throw new IllegalStateException("Cannot add non int value " + a + " for addition");
         }
-        final Value b = status.stack.pop();
-        if (!b.type.equals(ConstantDescs.CD_int)) {
+        final Value b = outgoing.stack.pop();
+        if (!b.type.equals(desc)) {
             throw new IllegalStateException("Cannot add non int value " + b + " for addition");
         }
-        final Add add = new Add(ConstantDescs.CD_int, b, a);
-        status.stack.push(add);
+        final Add add = new Add(desc, b, a);
+        outgoing.stack.push(add);
+        return outgoing;
     }
 
-    private void parse_DADD(final OperatorInstruction node, final Status status) {
-        System.out.println("  opcode DADD");
-        if (status.stack.size() < 2) {
-            throw new IllegalStateException("Need a minium of two values on stack for addition");
-        }
-        final Value a = status.stack.pop();
-        if (!a.type.equals(ConstantDescs.CD_double)) {
-            throw new IllegalStateException("Cannot add non double value " + a + " for addition");
-        }
-        final Value b = status.stack.pop();
-        if (!b.type.equals(ConstantDescs.CD_double)) {
-            throw new IllegalStateException("Cannot add non double value " + b + " for addition");
-        }
-        final Add add = new Add(ConstantDescs.CD_double, b, a);
-        status.stack.push(add);
-    }
-
-    private void parse_IRETURN(final ReturnInstruction node, final Status status) {
+    private Status parse_RETURN_X(final ReturnInstruction node, final Status incoming, final ClassDesc type) {
         System.out.println("  opcode IRETURN");
-        if (status.stack.isEmpty()) {
+        if (incoming.stack.isEmpty()) {
             throw new IllegalStateException("Cannot return empty stack");
         }
-        final Value v = status.stack.pop();
-        if (!v.type.equals(ConstantDescs.CD_int)) {
+        final Status outgoing = incoming.copy();
+        final Value v = outgoing.stack.pop();
+        if (!v.type.equals(type)) {
             throw new IllegalStateException("Cannot return non int value " + v);
         }
-        final ReturnValue next = new ReturnValue(ConstantDescs.CD_int, v);
-        status.node = status.node.controlFlowsTo(next, ControlType.FORWARD);
+        final ReturnValue next = new ReturnValue(type, v);
+        outgoing.node = outgoing.node.controlFlowsTo(next, ControlType.FORWARD);
+        return outgoing;
     }
 
-    private void parse_DRETURN(final ReturnInstruction node, final Status status) {
-        System.out.println("  opcode DRETURN");
-        if (status.stack.isEmpty()) {
-            throw new IllegalStateException("Cannot return empty stack");
-        }
-        final Value v = status.stack.pop();
-        if (!v.type.equals(ConstantDescs.CD_double)) {
-            throw new IllegalStateException("Cannot return non double value " + v);
-        }
-        final ReturnValue next = new ReturnValue(ConstantDescs.CD_double, v);
-        status.node = status.node.controlFlowsTo(next, ControlType.FORWARD);
-    }
-
-    private void parse_DUP(final StackInstruction node, final Status status) {
+    private Status parse_DUP(final StackInstruction node, final Status incoming) {
         System.out.println("  " + node + " opcode DUP");
-        if (status.stack.isEmpty()) {
+        if (incoming.stack.isEmpty()) {
             throw new IllegalStateException("Cannot duplicate empty stack");
         }
-        final Value v = status.stack.peek();
-        status.stack.push(v);
+        final Status outgoing = incoming.copy();
+        final Value v = outgoing.stack.peek();
+        outgoing.stack.push(v);
+        return outgoing;
     }
 
-    private void parse_ALOAD(final LoadInstruction node, final Status status) {
+    private Status parse_ALOAD(final LoadInstruction node, final Status incoming) {
         System.out.println("  opcode ALOAD Local " + node.slot());
-        final Value v = status.locals[node.slot()];
+        final Value v = incoming.locals[node.slot()];
         if (v == null) {
             throw new IllegalStateException("Cannot local is null for index " + node.slot());
         }
-        status.stack.push(v);
+
+        final Status outgoing = incoming.copy();
+        outgoing.stack.push(v);
+        return outgoing;
     }
 
-    private void parse_ILOAD(final LoadInstruction node, final Status status) {
+    private Status parse_LOAD_TYPE(final LoadInstruction node, final Status incoming, final ClassDesc type) {
         System.out.println("  opcode ILOAD Local " + node.slot());
-        final Value v = status.locals[node.slot()];
+        final Value v = incoming.locals[node.slot()];
         if (v == null) {
             throw new IllegalStateException("Cannot local is null for index " + node.slot());
         }
-        if (!v.type.equals(ConstantDescs.CD_int)) {
-            throw new IllegalStateException("Cannot load non int value " + v + " for index " + node.slot());
+        if (!v.type.equals(type)) {
+            throw new IllegalStateException("Cannot load non " + type + " value " + v + " for index " + node.slot());
         }
-        status.stack.push(v);
+        final Status outgoing = incoming.copy();
+        outgoing.stack.push(v);
+        return outgoing;
     }
 
-    private void parse_DLOAD(final LoadInstruction node, final Status status) {
-        System.out.println("  opcode DLOAD Local " + node.slot());
-        final Value v = status.locals[node.slot()];
-        if (v == null) {
-            throw new IllegalStateException("Cannot local is null for index " + node.slot());
-        }
-        if (!v.type.equals(ConstantDescs.CD_double)) {
-            throw new IllegalStateException("Cannot load non double value " + v + " for index " + node.slot());
-        }
-        status.stack.push(v);
-    }
-
-    private void parse_ISTORE(final StoreInstruction node, final Status status) {
+    private Status parse_STORE_TYPE(final StoreInstruction node, final Status incoming, final ClassDesc type) {
         System.out.println("  opcode ISTORE Local " + node.slot());
-        if (status.stack.isEmpty()) {
+        if (incoming.stack.isEmpty()) {
             throw new IllegalStateException("Cannot store empty stack");
         }
-        status.locals[node.slot()] = status.stack.pop();
+        final Status outgoing = incoming.copy();
+
+        final Value v = outgoing.stack.pop();
+        if (!v.type.equals(type)) {
+            throw new IllegalStateException("Cannot store non " + type + " value " + v + " for index " + node.slot());
+        }
+        outgoing.locals[node.slot()] = v;
         if (node.slot() > 0) {
-            if (status.locals[node.slot() - 1] != null && needsTwoSlots(status.locals[node.slot() - 1].type)) {
+            if (outgoing.locals[node.slot() - 1] != null && needsTwoSlots(outgoing.locals[node.slot() - 1].type)) {
                 // Remove potential illegal values
-                status.locals[node.slot() - 1] = null;
+                outgoing.locals[node.slot() - 1] = null;
             }
         }
+        return outgoing;
     }
 
-    private void parse_ASTORE(final StoreInstruction node, final Status status) {
+    private Status parse_ASTORE(final StoreInstruction node, final Status incoming) {
         System.out.println("  opcode ASTORE Local " + node.slot());
-        if (status.stack.isEmpty()) {
+        if (incoming.stack.isEmpty()) {
             throw new IllegalStateException("Cannot store empty stack");
         }
-        status.locals[node.slot()] = status.stack.pop();
+        final Status outgoing = incoming.copy();
+        outgoing.locals[node.slot()] = outgoing.stack.pop();
         if (node.slot() > 0) {
-            if (status.locals[node.slot() - 1] != null && needsTwoSlots(status.locals[node.slot() - 1].type)) {
+            if (outgoing.locals[node.slot() - 1] != null && needsTwoSlots(outgoing.locals[node.slot() - 1].type)) {
                 // Remove potential illegal values
-                status.locals[node.slot() - 1] = null;
+                outgoing.locals[node.slot() - 1] = null;
             }
         }
+        return outgoing;
     }
 
-    private void visitLoadInstruction(final LoadInstruction node, final Status status) {
+    private Status visitLoadInstruction(final LoadInstruction node, final Status incoming) {
         // A node that represents a local variable instruction. A local variable instruction is an instruction that loads or stores the value of a local variable.
-        switch (node.opcode()) {
-            case Opcode.ALOAD: {
-                parse_ALOAD(node, status);
-                break;
-            }
-            case Opcode.ALOAD_0: {
-                parse_ALOAD(node, status);
-                break;
-            }
-            case Opcode.ALOAD_1: {
-                parse_ALOAD(node, status);
-                break;
-            }
-            case Opcode.ALOAD_2: {
-                parse_ALOAD(node, status);
-                break;
-            }
-            case Opcode.ALOAD_3: {
-                parse_ALOAD(node, status);
-                break;
-            }
-            case Opcode.ILOAD: {
-                parse_ILOAD(node, status);
-                break;
-            }
-            case Opcode.ILOAD_0: {
-                parse_ILOAD(node, status);
-                break;
-            }
-            case Opcode.ILOAD_1: {
-                parse_ILOAD(node, status);
-                break;
-            }
-            case Opcode.ILOAD_2: {
-                parse_ILOAD(node, status);
-                break;
-            }
-            case Opcode.ILOAD_3: {
-                parse_ILOAD(node, status);
-                break;
-            }
-            case Opcode.DLOAD: {
-                parse_DLOAD(node, status);
-                break;
-            }
-            case Opcode.DLOAD_0: {
-                parse_DLOAD(node, status);
-                break;
-            }
-            case Opcode.DLOAD_1: {
-                parse_DLOAD(node, status);
-                break;
-            }
-            case Opcode.DLOAD_2: {
-                parse_DLOAD(node, status);
-                break;
-            }
-            case Opcode.DLOAD_3: {
-                parse_DLOAD(node, status);
-                break;
-            }
-            default: {
-                throw new IllegalArgumentException("Not implemented yet : " + node);
-            }
-        }
+        return switch (node.opcode()) {
+            case Opcode.ALOAD, Opcode.ALOAD_3, Opcode.ALOAD_2, Opcode.ALOAD_1, Opcode.ALOAD_0 -> parse_ALOAD(node, incoming);
+            case Opcode.ILOAD, Opcode.ILOAD_3, Opcode.ILOAD_2, Opcode.ILOAD_1, Opcode.ILOAD_0 -> parse_LOAD_TYPE(node, incoming, ConstantDescs.CD_int);
+            case Opcode.DLOAD, Opcode.DLOAD_3, Opcode.DLOAD_2, Opcode.DLOAD_1, Opcode.DLOAD_0 -> parse_LOAD_TYPE(node, incoming, ConstantDescs.CD_double);
+            default -> throw new IllegalArgumentException("Not implemented yet : " + node);
+        };
     }
 
-    private void visitStoreInstruction(final StoreInstruction node, final Status status) {
+    private Status visitStoreInstruction(final StoreInstruction node, final Status incoming) {
         // A node that represents a local variable instruction. A local variable instruction is an instruction that loads or stores the value of a local variable.
-        switch (node.opcode()) {
-            case Opcode.ASTORE: {
-                parse_ASTORE(node, status);
-                break;
-            }
-            case Opcode.ASTORE_0: {
-                parse_ASTORE(node, status);
-                break;
-            }
-            case Opcode.ASTORE_1: {
-                parse_ASTORE(node, status);
-                break;
-            }
-            case Opcode.ASTORE_2: {
-                parse_ASTORE(node, status);
-                break;
-            }
-            case Opcode.ASTORE_3: {
-                parse_ASTORE(node, status);
-                break;
-            }
-            case Opcode.ISTORE: {
-                parse_ISTORE(node, status);
-                break;
-            }
-            case Opcode.ISTORE_0: {
-                parse_ISTORE(node, status);
-                break;
-            }
-            case Opcode.ISTORE_1: {
-                parse_ISTORE(node, status);
-                break;
-            }
-            case Opcode.ISTORE_2: {
-                parse_ISTORE(node, status);
-                break;
-            }
-            case Opcode.ISTORE_3: {
-                parse_ISTORE(node, status);
-                break;
-            }
-            default: {
-                throw new IllegalArgumentException("Not implemented yet : " + node);
-            }
-        }
+        return switch (node.opcode()) {
+            case Opcode.ASTORE, Opcode.ASTORE_3, Opcode.ASTORE_2, Opcode.ASTORE_1, Opcode.ASTORE_0 -> parse_ASTORE(node, incoming);
+            case Opcode.ISTORE, Opcode.ISTORE_3, Opcode.ISTORE_2, Opcode.ISTORE_1, Opcode.ISTORE_0 -> parse_STORE_TYPE(node, incoming, ConstantDescs.CD_int);
+            case Opcode.LSTORE, Opcode.LSTORE_3, Opcode.LSTORE_2, Opcode.LSTORE_1, Opcode.LSTORE_0 -> parse_STORE_TYPE(node, incoming, ConstantDescs.CD_long);
+            default -> throw new IllegalArgumentException("Not implemented yet : " + node);
+        };
     }
 
-    private void parse_INVOKESPECIAL(final InvokeInstruction node, final Status status) {
+    private Status parse_INVOKESPECIAL(final InvokeInstruction node, final Status incoming) {
 
         final MethodTypeDesc methodTypeDesc = node.typeSymbol();
+
+        final Status outgoing = incoming.copy();
 
         System.out.println("  opcode INVOKESPECIAL Method " + node.name() + " desc " + methodTypeDesc);
         final ClassDesc returnType = methodTypeDesc.returnType();
         final ClassDesc[] args = methodTypeDesc.parameterArray();
         final int expectedarguments = 1 + args.length;
-        if (status.stack.size() < expectedarguments) {
-            throw new IllegalStateException("Not enough arguments on stack for " + node.name() + " " + methodTypeDesc + " expected " + expectedarguments + " but got " + status.stack.size());
+        if (outgoing.stack.size() < expectedarguments) {
+            throw new IllegalStateException("Not enough arguments on stack for " + node.name() + " " + methodTypeDesc + " expected " + expectedarguments + " but got " + incoming.stack.size());
         }
         final List<Value> arguments = new ArrayList<>();
         for (int i = 0; i < expectedarguments; i++) {
-            arguments.add(status.stack.pop());
+            arguments.add(outgoing.stack.pop());
         }
 
         final Value next = new Invocation(node, arguments.reversed());
-        status.node = status.node.controlFlowsTo(next, ControlType.FORWARD);
+        outgoing.node = outgoing.node.controlFlowsTo(next, ControlType.FORWARD);
 
         if (!returnType.equals(ConstantDescs.CD_void)) {
-            status.stack.push(next);
+            outgoing.stack.push(next);
         }
+
+        return outgoing;
     }
 
-    private void parse_INVOKEVIRTUAL(final InvokeInstruction node, final Status status) {
+    private Status parse_INVOKEVIRTUAL(final InvokeInstruction node, final Status incoming) {
 
         final MethodTypeDesc methodTypeDesc = node.typeSymbol();
+
+        final Status outgoing = incoming.copy();
 
         System.out.println("  opcode INVOKEVIRTUAL Method " + node.name() + " " + methodTypeDesc);
         final ClassDesc returnType = methodTypeDesc.returnType();
         final ClassDesc[] args = methodTypeDesc.parameterArray();
         final int expectedarguments = 1 + args.length;
-        if (status.stack.size() < expectedarguments) {
-            throw new IllegalStateException("Not enough arguments on stack for " + node.name() + " " + methodTypeDesc + " expected " + expectedarguments + " but got " + status.stack.size());
+        if (outgoing.stack.size() < expectedarguments) {
+            throw new IllegalStateException("Not enough arguments on stack for " + node.name() + " " + methodTypeDesc + " expected " + expectedarguments + " but got " + incoming.stack.size());
         }
         final List<Value> arguments = new ArrayList<>();
         for (int i = 0; i < expectedarguments; i++) {
-            final Value v = status.stack.pop();
+            final Value v = outgoing.stack.pop();
             arguments.add(v);
         }
         final Invocation invocation = new Invocation(node, arguments.reversed());
         if (!returnType.equals(ConstantDescs.CD_void)) {
             final Result r = new Result(returnType);
             final Copy copy = new Copy(invocation, r);
-            status.stack.push(r);
-            status.node = status.node.controlFlowsTo(copy, ControlType.FORWARD);
+            outgoing.stack.push(r);
+            outgoing.node = outgoing.node.controlFlowsTo(copy, ControlType.FORWARD);
         } else {
-            status.node = status.node.controlFlowsTo(invocation, ControlType.FORWARD);
+            outgoing.node = outgoing.node.controlFlowsTo(invocation, ControlType.FORWARD);
         }
+        return outgoing;
     }
 
-    private void parse_INVOKEINTERFACE(final InvokeInstruction node, final Status status) {
+    private Status parse_INVOKEINTERFACE(final InvokeInstruction node, final Status incoming) {
         final MethodTypeDesc methodTypeDesc = node.typeSymbol();
 
         System.out.println("  opcode INVOKEINTERFACE Method " + node.name() + " " + methodTypeDesc);
         final ClassDesc returnType = methodTypeDesc.returnType();
         final ClassDesc[] args = methodTypeDesc.parameterArray();
         final int expectedarguments = 1 + args.length;
-        if (status.stack.size() < expectedarguments) {
-            throw new IllegalStateException("Not enough arguments on stack for " + node.name() + " " + methodTypeDesc + " expected " + expectedarguments + " but got " + status.stack.size());
+        if (incoming.stack.size() < expectedarguments) {
+            throw new IllegalStateException("Not enough arguments on stack for " + node.name() + " " + methodTypeDesc + " expected " + expectedarguments + " but got " + incoming.stack.size());
         }
+
+        final Status outgoing = incoming.copy();
+
         final List<Value> arguments = new ArrayList<>();
         for (int i = 0; i < expectedarguments; i++) {
-            final Value v = status.stack.pop();
+            final Value v = outgoing.stack.pop();
             arguments.add(v);
         }
         final Invocation invocation = new Invocation(node, arguments.reversed());
         if (!returnType.equals(ConstantDescs.CD_void)) {
             final Result r = new Result(returnType);
             final Copy copy = new Copy(invocation, r);
-            status.stack.push(r);
-            status.node = status.node.controlFlowsTo(copy, ControlType.FORWARD);
+            outgoing.stack.push(r);
+            outgoing.node = outgoing.node.controlFlowsTo(copy, ControlType.FORWARD);
         } else {
-            status.node = status.node.controlFlowsTo(invocation, ControlType.FORWARD);
+            outgoing.node = outgoing.node.controlFlowsTo(invocation, ControlType.FORWARD);
         }
+        return outgoing;
     }
 
-    private void parse_INVOKESTATIC(final InvokeInstruction node, final Status status) {
+    private Status parse_INVOKESTATIC(final InvokeInstruction node, final Status incoming) {
         final MethodTypeDesc methodTypeDesc = node.typeSymbol();
 
         System.out.println("  opcode INVOKESTATIC Method " + node.name() + " " + methodTypeDesc);
         final ClassDesc returnType = methodTypeDesc.returnType();
         final ClassDesc[] args = methodTypeDesc.parameterArray();
         final int expectedarguments = args.length;
-        if (status.stack.size() < expectedarguments) {
-            throw new IllegalStateException("Not enough arguments on stack for " + node.name() + " " + methodTypeDesc + " expected " + expectedarguments + " but got " + status.stack.size());
+        if (incoming.stack.size() < expectedarguments) {
+            throw new IllegalStateException("Not enough arguments on stack for " + node.name() + " " + methodTypeDesc + " expected " + expectedarguments + " but got " + incoming.stack.size());
         }
+
+        final Status outgoing = incoming.copy();
+
         final List<Value> arguments = new ArrayList<>();
         for (int i = 0; i < expectedarguments; i++) {
-            final Value v = status.stack.pop();
+            final Value v = outgoing.stack.pop();
             arguments.add(v);
         }
         final Invocation invocation = new Invocation(node, arguments.reversed());
         if (!returnType.equals(ConstantDescs.CD_void)) {
             final Result r = new Result(returnType);
             final Copy copy = new Copy(invocation, r);
-            status.stack.push(r);
-            status.node = status.node.controlFlowsTo(copy, ControlType.FORWARD);
+            outgoing.stack.push(r);
+            outgoing.node = outgoing.node.controlFlowsTo(copy, ControlType.FORWARD);
         } else {
-            status.node = status.node.controlFlowsTo(invocation, ControlType.FORWARD);
+            outgoing.node = outgoing.node.controlFlowsTo(invocation, ControlType.FORWARD);
         }
+        return outgoing;
     }
 
-    private void visitInvokeInstruction(final InvokeInstruction node, final Status status) {
+    private Status visitInvokeInstruction(final InvokeInstruction node, final Status incoming) {
         // A node that represents a method instruction. A method instruction is an instruction that invokes a method.
-        switch (node.opcode()) {
-            case Opcode.INVOKESPECIAL: {
-                parse_INVOKESPECIAL(node, status);
-                break;
-            }
-            case Opcode.INVOKEVIRTUAL: {
-                parse_INVOKEVIRTUAL(node, status);
-                break;
-            }
-            case Opcode.INVOKEINTERFACE: {
-                parse_INVOKEINTERFACE(node, status);
-                break;
-            }
-            case Opcode.INVOKESTATIC: {
-                parse_INVOKESTATIC(node, status);
-                break;
-            }
-            default: {
-                throw new IllegalArgumentException("Not implemented yet : " + node);
-            }
-        }
+        return switch (node.opcode()) {
+            case Opcode.INVOKESPECIAL -> parse_INVOKESPECIAL(node, incoming);
+            case Opcode.INVOKEVIRTUAL -> parse_INVOKEVIRTUAL(node, incoming);
+            case Opcode.INVOKEINTERFACE -> parse_INVOKEINTERFACE(node, incoming);
+            case Opcode.INVOKESTATIC -> parse_INVOKESTATIC(node, incoming);
+            default -> throw new IllegalArgumentException("Not implemented yet : " + node);
+        };
     }
 
-    private void visitLabelTarget(final LabelTarget node, final Status status) {
+    private Status visitLabelTarget(final LabelTarget node, final Status incoming) {
         // An AbstractInsnNode that encapsulates a Label.
         System.out.print("  Label: " + node.label());
         final List<CodeElement> preds = predecessors.get(node.label());
@@ -1105,11 +908,15 @@ public class MethodAnalyzer {
             System.out.print("]");
         }
         System.out.println();
+
+        return incoming;
     }
 
-    private void visitLineNumberNode(final LineNumber node, final Status status) {
+    private Status visitLineNumberNode(final LineNumber node, final Status incoming) {
         // A node that represents a line number declaration. These nodes are pseudo instruction nodes in order to be inserted in an instruction list.
-        status.lineNumber = node.line();
+        final Status n = incoming.copy();
+        n.lineNumber = node.line();
         System.out.println("  Line " + node.line());
+        return n;
     }
 }

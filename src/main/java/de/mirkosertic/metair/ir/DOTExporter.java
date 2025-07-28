@@ -1,6 +1,8 @@
 package de.mirkosertic.metair.ir;
 
+import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.*;
 
 public final class DOTExporter {
@@ -61,9 +63,13 @@ public final class DOTExporter {
                         ps.print("]");
                     } else if (useEdge.use instanceof final ControlFlowUse cfu) {
                         ps.print("[");
-                        ps.print("headlabel=\"" + cfu.condition.debugDescription() + "\",labeldistance=2,color=red, fontcolor=red");
+                        if (useEdge.node instanceof ConditionalNode) {
+                            ps.print("headlabel=\"" + cfu.condition.debugDescription() + "\",labeldistance=2,color=red, fontcolor=red");
+                        } else {
+                            ps.print("labeldistance=2,color=red, fontcolor=red");
+                        }
                         if (cfu.type == ControlType.BACKWARD) {
-                            ps.print(" ,style=dashed");
+                            ps.print(", style=dashed");
                         }
                         ps.print("]");
                     }
@@ -93,6 +99,28 @@ public final class DOTExporter {
             ps.println(" }");
         }
 
+        ps.println("""
+                 subgraph cluster_000 {
+                  label = "Legend";
+                  node [shape=point]
+                  {
+                   rank=same;
+                   c0 [style = invis];
+                   c1 [style = invis];
+                   c2 [style = invis];
+                   c3 [style = invis];
+                   d0 [style = invis];
+                   d1 [style = invis];
+                   d2 [style = invis];
+                   d3 [style = invis];
+                  }
+                  c0 -> c1 [label="Control flow", style=solid, color=red]
+                  c1 -> c2 [label="Control flow back edge", style=dashed, color=red]
+                  d0 -> d1 [label="Data flow"]
+                  d2 -> d3 [label="Declaration", style=dotted]
+                 }
+                """);
+
         ps.println("}");
     }
 
@@ -105,5 +133,40 @@ public final class DOTExporter {
         } else if (node instanceof Value) {
             ps.print(",shape=octagon,fillcolor=orange,style=filled");
         }
+    }
+
+    public static void writeTo(final DominatorTree tree, final OutputStream fileOutputStream) {
+        final PrintWriter pw = new PrintWriter(fileOutputStream);
+
+        pw.println("digraph debugoutput {");
+        for (final Node n : tree.preOrder) {
+            final String label = "#" + tree.preOrder.indexOf(n) + " " + n.debugDescription() + " Order : " + tree.rpo.indexOf(n);
+
+            pw.print(" node_" + tree.preOrder.indexOf(n) + "[label=\"" + label + "\" ");
+            pw.print("shape=\"box\" fillcolor=\"orangered\" style=\"filled\"");
+            pw.println("];");
+
+            final Node id = tree.idom.get(n);
+            if (id != n) {
+                pw.print(" node_" + tree.preOrder.indexOf(n) + " -> node_" + tree.preOrder.indexOf(id) + "[dir=\"forward\"");
+                pw.print(" color=\"black\" penwidth=\"2\"");
+                pw.println("];");
+            }
+
+            for (final Map.Entry<Node, List<Node.UseEdge>> entry : n.outgoingControlFlows().entrySet()) {
+                for (final Node.UseEdge use : entry.getValue()) {
+                    if (use.use instanceof final ControlFlowUse cfu) {
+                        pw.print(" node_" + tree.preOrder.indexOf(n) + " -> node_" + tree.preOrder.indexOf(entry.getKey()) + "[dir=\"forward\"");
+                        pw.print(" color=\"red\" penwidth=\"1\"");
+                        if (cfu.type == ControlType.BACKWARD) {
+                            pw.print(" style=\"dashed\"");
+                        }
+                        pw.println("];");
+                    }
+                }
+            }
+        }
+        pw.println("}");
+        pw.flush();
     }
 }

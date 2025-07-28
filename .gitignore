@@ -1,4 +1,5 @@
 target/
 .idea
 .mvn
-*.dot
+.dot
+.yaml

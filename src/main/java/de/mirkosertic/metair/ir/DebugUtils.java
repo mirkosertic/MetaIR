@@ -8,11 +8,11 @@ public final class DebugUtils {
     private DebugUtils() {
     }
 
-    public static String toString(ClassDesc classDesc) {
+    public static String toString(final ClassDesc classDesc) {
         return classDesc.displayName();
     }
 
-    public static String toString(MethodTypeDesc methodTypeDesc) {
+    public static String toString(final MethodTypeDesc methodTypeDesc) {
         return methodTypeDesc.displayDescriptor();
     }
 

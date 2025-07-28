@@ -1,6 +1,6 @@
 package de.mirkosertic.metair.ir;
 
-public class If extends Node {
+public class If extends ConditionalNode {
 
     If(final Value condition) {
         use(condition, new ArgumentUse(0));
