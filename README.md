@@ -114,57 +114,54 @@ A simple Java example with a loop:
 public class Test {
 
     public static int forLoop(int a) {
-        int k = 0;
         for (int i = 0; i < a; i++) {
-            k = k + i;
+            compute(i);
         }
-        return k;
+        return a;
+    }
+
+    private static int compute(int a) {
+        return a + 1;
     }
 }
 ```
 
 Class-File API Debug YAML:
 ```
-
   - method name: forLoop
     flags: [PUBLIC, STATIC]
     method type: (I)I
     attributes: [Code]
     code: 
         max stack: 2
-        max locals: 3
+        max locals: 2
         attributes: [LineNumberTable, LocalVariableTable, StackMapTable]
         line numbers: 
           - {start: 0, line number: 17}
-          - {start: 2, line number: 18}
-          - {start: 9, line number: 19}
-          - {start: 13, line number: 18}
-          - {start: 19, line number: 21}
+          - {start: 7, line number: 18}
+          - {start: 12, line number: 17}
+          - {start: 18, line number: 20}
         local variables: 
-          - {start: 4, end: 19, slot: 2, name: i, type: I}
-          - {start: 0, end: 21, slot: 0, name: a, type: I}
-          - {start: 2, end: 21, slot: 1, name: k, type: I}
+          - {start: 2, end: 18, slot: 1, name: i, type: I}
+          - {start: 0, end: 20, slot: 0, name: a, type: I}
         stack map frames: 
-            4: {locals: [int, int, int], stack: []}
-            19: {locals: [int, int], stack: []}
+            2: {locals: [int, int], stack: []}
+            18: {locals: [int], stack: []}
         //stack map frame @0: {locals: [int], stack: []}
         0: {opcode: ICONST_0, constant value: 0}
         1: {opcode: ISTORE_1, slot: 1}
-        2: {opcode: ICONST_0, constant value: 0}
-        3: {opcode: ISTORE_2, slot: 2}
-        //stack map frame @4: {locals: [int, int, int], stack: []}
-        4: {opcode: ILOAD_2, slot: 2, type: I, variable name: i}
-        5: {opcode: ILOAD_0, slot: 0, type: I, variable name: a}
-        6: {opcode: IF_ICMPGE, target: 19}
-        9: {opcode: ILOAD_1, slot: 1, type: I, variable name: k}
-        10: {opcode: ILOAD_2, slot: 2, type: I, variable name: i}
-        11: {opcode: IADD}
-        12: {opcode: ISTORE_1, slot: 1, type: I, variable name: k}
-        13: {opcode: IINC, slot: 2, const: 1, type: I, variable name: i}
-        16: {opcode: GOTO, target: 4}
-        //stack map frame @19: {locals: [int, int], stack: []}
-        19: {opcode: ILOAD_1, slot: 1, type: I, variable name: k}
-        20: {opcode: IRETURN}
+        //stack map frame @2: {locals: [int, int], stack: []}
+        2: {opcode: ILOAD_1, slot: 1, type: I, variable name: i}
+        3: {opcode: ILOAD_0, slot: 0, type: I, variable name: a}
+        4: {opcode: IF_ICMPGE, target: 18}
+        7: {opcode: ILOAD_1, slot: 1, type: I, variable name: i}
+        8: {opcode: INVOKESTATIC, owner: de/mirkosertic/metair/Test, method name: compute, method type: (I)I}
+        11: {opcode: POP}
+        12: {opcode: IINC, slot: 1, const: 1, type: I, variable name: i}
+        15: {opcode: GOTO, target: 2}
+        //stack map frame @18: {locals: [int], stack: []}
+        18: {opcode: ILOAD_0, slot: 0, type: I, variable name: a}
+        19: {opcode: IRETURN}
 ```
 
 Generated IR (raw and unoptimized):

@@ -11,16 +11,26 @@ public class Method extends Node {
     private final Map<Label, LabelNode> labelMap;
     private final MethodModel methodNode;
     private final Map<ClassDesc, RuntimeclassReference> runtimeclassReferences;
+    private final Map<String, StringConstant> stringConstants;
 
     Method(final MethodModel methodNode) {
         this.labelMap = new HashMap<>();
         this.methodNode = methodNode;
         this.runtimeclassReferences = new HashMap<>();
+        this.stringConstants = new HashMap<>();
     }
 
     public RuntimeclassReference defineRuntimeclassReference(final ClassDesc type) {
         return runtimeclassReferences.computeIfAbsent(type, key -> {
             final RuntimeclassReference r = new RuntimeclassReference(key);
+            r.use(Method.this, DefinedByUse.INSTANCE);
+            return r;
+        });
+    }
+
+    public StringConstant defineStringConstant(final String value) {
+        return stringConstants.computeIfAbsent(value, key -> {
+            final StringConstant r = new StringConstant(key);
             r.use(Method.this, DefinedByUse.INSTANCE);
             return r;
         });
@@ -43,15 +53,33 @@ public class Method extends Node {
     }
 
     public PrimitiveInt definePrimitiveInt(final int value) {
-        final PrimitiveInt i = new PrimitiveInt(value);
-        i.use(this, DefinedByUse.INSTANCE);
-        return i;
+        final PrimitiveInt v = new PrimitiveInt(value);
+        v.use(this, DefinedByUse.INSTANCE);
+        return v;
+    }
+
+    public PrimitiveLong definePrimitiveLong(final long value) {
+        final PrimitiveLong v = new PrimitiveLong(value);
+        v.use(this, DefinedByUse.INSTANCE);
+        return v;
     }
 
     public PrimitiveByte definePrimitiveByte(final int value) {
-        final PrimitiveByte i = new PrimitiveByte(value);
-        i.use(this, DefinedByUse.INSTANCE);
-        return i;
+        final PrimitiveByte v = new PrimitiveByte(value);
+        v.use(this, DefinedByUse.INSTANCE);
+        return v;
+    }
+
+    public PrimitiveFloat definePrimitiveFloat(final float value) {
+        final PrimitiveFloat v = new PrimitiveFloat(value);
+        v.use(this, DefinedByUse.INSTANCE);
+        return v;
+    }
+
+    public PrimitiveDouble definePrimitiveDouble(final double value) {
+        final PrimitiveDouble v = new PrimitiveDouble(value);
+        v.use(this, DefinedByUse.INSTANCE);
+        return v;
     }
 
     public void markBackEdges() {

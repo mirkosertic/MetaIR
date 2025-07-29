@@ -1,11 +1,11 @@
 package de.mirkosertic.metair;
 
-public class Debug3 {
+public class Test {
 
-    public Debug3() {
+    public Test() {
     }
 
-    public static int simpleIf(int a, int b, int c, int d) {
+    public static int simpleIf(final int a, final int b, final int c, final int d) {
         if (a > b) {
             return c;
         } else {
@@ -13,15 +13,14 @@ public class Debug3 {
         }
     }
 
-    public static int forLoop(int a) {
-        int k = 0;
+    public static int forLoop(final int a) {
         for (int i = 0; i < a; i++) {
-            k = k + i;
+            compute(i);
         }
-        return k;
+        return a;
     }
 
-    private static int compute(int a) {
+    private static int compute(final int a) {
         return a + 1;
     }
 

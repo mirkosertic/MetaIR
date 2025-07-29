@@ -16,15 +16,19 @@ public class DFS {
             final Node currentNode = currentPath.peek();
             final List<Node> forwardNodes = new ArrayList<>();
 
-            for (final Map.Entry<Node, List<Node.UseEdge>> emtry : currentNode.outgoingControlFlows().entrySet()) {
-                for (final Node.UseEdge use : emtry.getValue()) {
-                    if (use.use instanceof final ControlFlowUse cfu) {
-                        if (cfu.type == ControlType.FORWARD) {
-                            forwardNodes.add(emtry.getKey());
-                        }
+            for (final Node user : currentNode.usedBy) {
+                for (final Node.UseEdge edge : user.uses) {
+                    if (edge.use instanceof final ControlFlowUse cfu && cfu.type == ControlType.FORWARD && edge.node == currentNode) {
+                        forwardNodes.add(user);
+                    } else if (edge.use instanceof DefinedByUse) {
+                        forwardNodes.add(user);
+                    } else if (edge.use instanceof DataFlowUse) {
+                        forwardNodes.add(user);
                     }
                 }
             }
+
+            forwardNodes.sort(Comparator.comparing(o -> o.getClass().getSimpleName()));
 
             if (!forwardNodes.isEmpty()) {
                 boolean somethingFound = false;

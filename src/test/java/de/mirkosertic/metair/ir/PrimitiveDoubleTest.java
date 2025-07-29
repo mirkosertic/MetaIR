@@ -1,0 +1,26 @@
+package de.mirkosertic.metair.ir;
+
+import org.junit.jupiter.api.Test;
+
+import java.lang.constant.ConstantDescs;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class PrimitiveDoubleTest {
+
+    @Test
+    public void testUsage() {
+        final PrimitiveDouble a = new PrimitiveDouble(10.0d);
+
+        assertThat(a.type).isEqualTo(ConstantDescs.CD_double);
+        assertThat(a.value).isEqualTo(10.0d);
+        assertThat(a).isInstanceOf(Value.class);
+        assertThat(a.usedBy).isEmpty();
+        assertThat(a.uses).isEmpty();
+        assertThat(a.isConstant()).isTrue();
+        assertThat(a.debugDescription()).isEqualTo("double 10.0");
+
+        assertThat(a.peepholeOptimization()).isEmpty();
+    }
+
+}

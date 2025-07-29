@@ -11,12 +11,12 @@ import java.lang.classfile.ClassFile;
 import java.lang.classfile.ClassModel;
 import java.lang.classfile.MethodModel;
 
-public class HelloWorld {
+public final class HelloWorld {
 
     public static void main(final String[] args) throws IOException {
 
-        ClassFile cf = ClassFile.of();
-        ClassModel model = cf.parse(new File("target/test-classes/de/mirkosertic/metair/Debug3.class").toPath());
+        final ClassFile cf = ClassFile.of();
+        final ClassModel model = cf.parse(new File("target/test-classes/de/mirkosertic/metair/Test.class").toPath());
 
         System.out.println("Analyse der Klasse: " + model.thisClass().name());
         System.out.println("Superklasse: " + model.superclass().get().name());
@@ -39,7 +39,7 @@ public class HelloWorld {
 
             DOTExporter.writeTo(analyzer.ir(), new PrintStream(new FileOutputStream(prefix + ".dot")));
 
-            try (final PrintStream ps = new PrintStream(new FileOutputStream(new File(prefix + ".yaml")))) {
+            try (final PrintStream ps = new PrintStream(new FileOutputStream(prefix + ".yaml"))) {
                 ps.print(method.toDebugString());
             }
 

@@ -28,11 +28,15 @@ public class DominatorTree {
 
     private void computeRPO(final Node current, final List<Node> finished, final Set<Node> visited) {
         if (visited.add(current)) {
-            for (final Map.Entry<Node, List<Node.UseEdge>> emtry : current.outgoingControlFlows().entrySet()) {
-                for (final Node.UseEdge use : emtry.getValue()) {
-                    if (use.use instanceof final ControlFlowUse cfu) {
-                        if (cfu.type == ControlType.FORWARD) {
-                            computeRPO(emtry.getKey(), finished, visited);
+            for (final Node user : current.usedBy.stream().sorted(Comparator.comparing((Node o) -> o.getClass().getSimpleName())).toList()) {
+                for (final Node.UseEdge edge : user.uses) {
+                    if (edge.node == current) {
+                        if (edge.use instanceof final ControlFlowUse cfu) {
+                            if (cfu.type == ControlType.FORWARD) {
+                                computeRPO(user, finished, visited);
+                            }
+                        } else {
+                            computeRPO(user, finished, visited);
                         }
                     }
                 }
@@ -62,7 +66,7 @@ public class DominatorTree {
                 final Node oldIdom = getIDom(v);
                 Node newIdom = null;
                 for (final Node.UseEdge edge : v.uses) {
-                    if (edge.use instanceof final ControlFlowUse cfu) {
+                    if (edge.use instanceof ControlFlowUse || edge.use instanceof DefinedByUse || edge.use instanceof DataFlowUse) {
                         if (getIDom(edge.node) == null)
                             /* not yet analyzed */ continue;
                         if (newIdom == null) {

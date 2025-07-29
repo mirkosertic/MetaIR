@@ -201,8 +201,6 @@ public class MethodAnalyzer {
                     newTask.eleementIndex = allElements.indexOf(labelnode);
                     newTask.status = incomingStatusFor(status, labelnode.label());
 
-                    Node startFlow = status.node;
-
                     // Create PHI assignments / initializations here...
                     final List<CodeElement> preds = predecessors.get(labelnode.label());
                     if (preds != null && preds.size() > 1) {
@@ -210,15 +208,15 @@ public class MethodAnalyzer {
                         for (int i = 0; i < newTask.status.locals.length; i++) {
                             final Value v = newTask.status.locals[i];
                             if (v != null && v != status.locals[i]) {
-                                final Copy next = new Copy(status.locals[i], v);
-                                startFlow = startFlow.controlFlowsTo(next, ControlType.FORWARD);
+                                //final Copy next = new Copy(status.locals[i], v);
+                                v.use(status.locals[i], new PHIUse(status.node));
                             }
                         }
                     }
 
                     // Keep control flow
                     final LabelNode next = ir.createLabel(labelnode.label());
-                    newTask.status.node = startFlow.controlFlowsTo(next, ControlType.FORWARD, task.condition);
+                    newTask.status.node = status.node.controlFlowsTo(next, ControlType.FORWARD, task.condition);
                     task.condition = ControlFlowConditionDefault.INSTANCE;
 
                     tasks.push(newTask);
@@ -376,6 +374,16 @@ public class MethodAnalyzer {
         return switch (ins.opcode()) {
             case Opcode.IADD -> parse_ADD_X(ins, incoming, ConstantDescs.CD_int);
             case Opcode.DADD -> parse_ADD_X(ins, incoming, ConstantDescs.CD_double);
+            case Opcode.FADD -> parse_ADD_X(ins, incoming, ConstantDescs.CD_float);
+            case Opcode.LADD -> parse_ADD_X(ins, incoming, ConstantDescs.CD_long);
+            case Opcode.DSUB -> parse_SUB_X(ins, incoming, ConstantDescs.CD_double);
+            case Opcode.FSUB -> parse_SUB_X(ins, incoming, ConstantDescs.CD_float);
+            case Opcode.ISUB -> parse_SUB_X(ins, incoming, ConstantDescs.CD_int);
+            case Opcode.LSUB -> parse_SUB_X(ins, incoming, ConstantDescs.CD_long);
+            case Opcode.DMUL -> parse_MUL_X(ins, incoming, ConstantDescs.CD_double);
+            case Opcode.FMUL -> parse_MUL_X(ins, incoming, ConstantDescs.CD_float);
+            case Opcode.IMUL -> parse_MUL_X(ins, incoming, ConstantDescs.CD_int);
+            case Opcode.LMUL -> parse_MUL_X(ins, incoming, ConstantDescs.CD_long);
             default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
         };
     }
@@ -383,6 +391,7 @@ public class MethodAnalyzer {
     private Status visitStackInstruction(final StackInstruction ins, final Status incominmg) {
         return switch (ins.opcode()) {
             case Opcode.DUP -> parse_DUP(ins, incominmg);
+            case Opcode.POP -> parse_POP(ins, incominmg);
             default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
         };
     }
@@ -392,6 +401,8 @@ public class MethodAnalyzer {
             case Opcode.RETURN -> parse_RETURN(ins, incoming);
             case Opcode.IRETURN -> parse_RETURN_X(ins, incoming, ConstantDescs.CD_int);
             case Opcode.DRETURN -> parse_RETURN_X(ins, incoming, ConstantDescs.CD_double);
+            case Opcode.FRETURN -> parse_RETURN_X(ins, incoming, ConstantDescs.CD_float);
+            case Opcode.LRETURN -> parse_RETURN_X(ins, incoming, ConstantDescs.CD_long);
             default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
         };
     }
@@ -414,7 +425,11 @@ public class MethodAnalyzer {
     private Status visitConstantInstruction(final ConstantInstruction ins, final Status incoming) {
         return switch (ins.opcode()) {
             case Opcode.LDC -> parse_LDC(ins, incoming);
-            case Opcode.ICONST_0, Opcode.ICONST_5, Opcode.ICONST_4, Opcode.ICONST_3, Opcode.ICONST_2, Opcode.ICONST_1 -> parse_ICONST(ins, incoming);
+            case Opcode.LDC2_W -> parse_LDC(ins, incoming);
+            case Opcode.ICONST_M1, Opcode.ICONST_0, Opcode.ICONST_5, Opcode.ICONST_4, Opcode.ICONST_3, Opcode.ICONST_2, Opcode.ICONST_1 -> parse_ICONST(ins, incoming);
+            case Opcode.LCONST_0, Opcode.LCONST_1 -> parse_LCONST(ins, incoming);
+            case Opcode.FCONST_0, Opcode.FCONST_1, Opcode.FCONST_2 -> parse_FCONST(ins, incoming);
+            case Opcode.DCONST_0, Opcode.DCONST_1 -> parse_DCONST(ins, incoming);
             case Opcode.BIPUSH -> parse_BIPUSH(ins, incoming);
             default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
         };
@@ -451,14 +466,8 @@ public class MethodAnalyzer {
         final Status outgoing = incoming.copy();
 
         outgoing.node = outgoing.node.controlFlowsTo(init, ControlType.FORWARD);
+        outgoing.stack.push(new New(ri));
 
-        final Result r = new Result(type);
-        final New n = new New(ri);
-        final Copy c = new Copy(n, r);
-
-        outgoing.stack.push(r);
-
-        outgoing.node = outgoing.node.controlFlowsTo(c, ControlType.FORWARD);
         return outgoing;
     }
 
@@ -471,12 +480,8 @@ public class MethodAnalyzer {
         // A node that represents an IINC instruction.
         System.out.println("  opcode IINC Local " + node.slot() + " Increment " + node.constant());
 
-        final Result r = new Result(ConstantDescs.CD_int);
-        final Copy c = new Copy(new Add(ConstantDescs.CD_int, incoming.locals[node.slot()], ir.definePrimitiveInt(node.constant())), r);
-
         final Status outgoing = incoming.copy();
-        outgoing.locals[node.slot()] = r;
-        outgoing.node = outgoing.node.controlFlowsTo(c, ControlType.FORWARD);
+        outgoing.locals[node.slot()] = new Add(ConstantDescs.CD_int, incoming.locals[node.slot()], ir.definePrimitiveInt(node.constant()));
         return outgoing;
     }
 
@@ -526,25 +531,19 @@ public class MethodAnalyzer {
 
         final Status outgoing = incoming.copy();
 
-        Node control = outgoing.node;
+        final Goto next = new Goto();
+        outgoing.node = outgoing.node.controlFlowsTo(next, ControlType.FORWARD);
+
         for (int i = 0; i < incoming.locals.length; i++) {
             final Value v = incoming.locals[i];
             final Value target = targetIncoming.locals[i];
             if (v != null && v != target) {
-
-                final Copy next = new Copy(v, target);
-                control = control.controlFlowsTo(next, ControlType.FORWARD);
-
+                target.use(v, new PHIUse(next));
                 outgoing.locals[i] = target;
             }
         }
 
-
-        final Goto next = new Goto();
-        outgoing.node = control.controlFlowsTo(next, ControlType.FORWARD);
-
         next.controlFlowsTo(label, ControlType.FORWARD);
-
         return outgoing;
     }
 
@@ -571,7 +570,15 @@ public class MethodAnalyzer {
         System.out.println("  opcode LDC Constant " + node.constantValue());
         final Status outgoing = incoming.copy();
         if (node.constantValue() instanceof final String str) {
-            outgoing.stack.push(new StringConstant(str));
+            outgoing.stack.push(ir.defineStringConstant(str));
+        } else if (node.constantValue() instanceof final Integer i) {
+            outgoing.stack.push(ir.definePrimitiveInt(i));
+        } else if (node.constantValue() instanceof final Long l) {
+            outgoing.stack.push(ir.definePrimitiveLong(l));
+        } else if (node.constantValue() instanceof final Float f) {
+            outgoing.stack.push(ir.definePrimitiveFloat(f));
+        } else if (node.constantValue() instanceof final Double d) {
+            outgoing.stack.push(ir.definePrimitiveDouble(d));
         } else if (node.constantValue() instanceof final ClassDesc classDesc) {
             outgoing.stack.push(ir.defineRuntimeclassReference(classDesc));
         } else {
@@ -591,12 +598,9 @@ public class MethodAnalyzer {
         outgoing.node = outgoing.node.controlFlowsTo(init, ControlType.FORWARD);
 
         final GetStaticField get = new GetStaticField(node, ri);
+        outgoing.stack.push(get);
 
-        final Result r = new Result(get.type);
-        final Copy c = new Copy(get, r);
-        outgoing.stack.push(r);
-
-        outgoing.node = outgoing.node.controlFlowsTo(c, ControlType.FORWARD);
+        outgoing.node = outgoing.node.controlFlowsTo(get, ControlType.FORWARD);
         return outgoing;
     }
 
@@ -611,11 +615,9 @@ public class MethodAnalyzer {
             throw new IllegalStateException("Cannot load field from non object value " + v);
         }
         final GetInstanceField get = new GetInstanceField(node, v);
-        final Result r = new Result(get.type);
-        final Copy c = new Copy(get, r);
-        outgoing.stack.push(r);
+        outgoing.stack.push(get);
 
-        outgoing.node = outgoing.node.controlFlowsTo(c, ControlType.FORWARD);
+        outgoing.node = outgoing.node.controlFlowsTo(get, ControlType.FORWARD);
         return outgoing;
     }
 
@@ -636,6 +638,27 @@ public class MethodAnalyzer {
         return outgoing;
     }
 
+    private Status parse_LCONST(final ConstantInstruction node, final Status incoming) {
+        System.out.println("  opcode LCONST " + node.constantValue());
+        final Status outgoing = incoming.copy();
+        outgoing.stack.push(ir.definePrimitiveLong((Long) node.constantValue()));
+        return outgoing;
+    }
+
+    private Status parse_FCONST(final ConstantInstruction node, final Status incoming) {
+        System.out.println("  opcode FCONST " + node.constantValue());
+        final Status outgoing = incoming.copy();
+        outgoing.stack.push(ir.definePrimitiveFloat((Float) node.constantValue()));
+        return outgoing;
+    }
+
+    private Status parse_DCONST(final ConstantInstruction node, final Status incoming) {
+        System.out.println("  opcode DCONST " + node.constantValue());
+        final Status outgoing = incoming.copy();
+        outgoing.stack.push(ir.definePrimitiveDouble((Double) node.constantValue()));
+        return outgoing;
+    }
+
     private Status parse_ADD_X(final OperatorInstruction node, final Status incoming, final ClassDesc desc) {
         System.out.println("  opcode " + node.opcode());
         if (incoming.stack.size() < 2) {
@@ -644,14 +667,52 @@ public class MethodAnalyzer {
         final Status outgoing = incoming.copy();
         final Value a = outgoing.stack.pop();
         if (!a.type.equals(desc)) {
-            throw new IllegalStateException("Cannot add non int value " + a + " for addition");
+            throw new IllegalStateException("Cannot add non " + desc + " value " + a + " for addition");
         }
         final Value b = outgoing.stack.pop();
         if (!b.type.equals(desc)) {
-            throw new IllegalStateException("Cannot add non int value " + b + " for addition");
+            throw new IllegalStateException("Cannot add non " + desc + " value " + b + " for addition");
         }
         final Add add = new Add(desc, b, a);
         outgoing.stack.push(add);
+        return outgoing;
+    }
+
+    private Status parse_SUB_X(final OperatorInstruction node, final Status incoming, final ClassDesc desc) {
+        System.out.println("  opcode " + node.opcode());
+        if (incoming.stack.size() < 2) {
+            throw new IllegalStateException("Need a minium of two values on stack for substraction");
+        }
+        final Status outgoing = incoming.copy();
+        final Value a = outgoing.stack.pop();
+        if (!a.type.equals(desc)) {
+            throw new IllegalStateException("Cannot add non " + desc + " value " + a + " for substraction");
+        }
+        final Value b = outgoing.stack.pop();
+        if (!b.type.equals(desc)) {
+            throw new IllegalStateException("Cannot add non " + desc + " value " + b + " for substraction");
+        }
+        final Sub sub = new Sub(desc, b, a);
+        outgoing.stack.push(sub);
+        return outgoing;
+    }
+
+    private Status parse_MUL_X(final OperatorInstruction node, final Status incoming, final ClassDesc desc) {
+        System.out.println("  opcode " + node.opcode());
+        if (incoming.stack.size() < 2) {
+            throw new IllegalStateException("Need a minium of two values on stack for multiplication");
+        }
+        final Status outgoing = incoming.copy();
+        final Value a = outgoing.stack.pop();
+        if (!a.type.equals(desc)) {
+            throw new IllegalStateException("Cannot add non " + desc + " value " + a + " for multiplication");
+        }
+        final Value b = outgoing.stack.pop();
+        if (!b.type.equals(desc)) {
+            throw new IllegalStateException("Cannot add non " + desc + " value " + b + " for multiplication");
+        }
+        final Mul mul = new Mul(desc, b, a);
+        outgoing.stack.push(mul);
         return outgoing;
     }
 
@@ -678,6 +739,16 @@ public class MethodAnalyzer {
         final Status outgoing = incoming.copy();
         final Value v = outgoing.stack.peek();
         outgoing.stack.push(v);
+        return outgoing;
+    }
+
+    private Status parse_POP(final StackInstruction node, final Status incoming) {
+        System.out.println("  " + node + " opcode POP");
+        if (incoming.stack.isEmpty()) {
+            throw new IllegalStateException("Cannot duplicate empty stack");
+        }
+        final Status outgoing = incoming.copy();
+        outgoing.stack.pop();
         return outgoing;
     }
 
@@ -812,10 +883,8 @@ public class MethodAnalyzer {
         }
         final Invocation invocation = new Invocation(node, arguments.reversed());
         if (!returnType.equals(ConstantDescs.CD_void)) {
-            final Result r = new Result(returnType);
-            final Copy copy = new Copy(invocation, r);
-            outgoing.stack.push(r);
-            outgoing.node = outgoing.node.controlFlowsTo(copy, ControlType.FORWARD);
+            outgoing.stack.push(invocation);
+            outgoing.node = outgoing.node.controlFlowsTo(invocation, ControlType.FORWARD);
         } else {
             outgoing.node = outgoing.node.controlFlowsTo(invocation, ControlType.FORWARD);
         }
@@ -842,10 +911,8 @@ public class MethodAnalyzer {
         }
         final Invocation invocation = new Invocation(node, arguments.reversed());
         if (!returnType.equals(ConstantDescs.CD_void)) {
-            final Result r = new Result(returnType);
-            final Copy copy = new Copy(invocation, r);
-            outgoing.stack.push(r);
-            outgoing.node = outgoing.node.controlFlowsTo(copy, ControlType.FORWARD);
+            outgoing.stack.push(invocation);
+            outgoing.node = outgoing.node.controlFlowsTo(invocation, ControlType.FORWARD);
         } else {
             outgoing.node = outgoing.node.controlFlowsTo(invocation, ControlType.FORWARD);
         }
@@ -865,17 +932,23 @@ public class MethodAnalyzer {
 
         final Status outgoing = incoming.copy();
 
+        final RuntimeclassReference runtimeClass = ir.defineRuntimeclassReference(node.method().owner().asSymbol());
+
         final List<Value> arguments = new ArrayList<>();
         for (int i = 0; i < expectedarguments; i++) {
             final Value v = outgoing.stack.pop();
             arguments.add(v);
         }
+        arguments.add(runtimeClass);
+
+        final ClassInitialization init = new ClassInitialization(runtimeClass);
+
+        outgoing.node = outgoing.node.controlFlowsTo(init, ControlType.FORWARD);
+
         final Invocation invocation = new Invocation(node, arguments.reversed());
         if (!returnType.equals(ConstantDescs.CD_void)) {
-            final Result r = new Result(returnType);
-            final Copy copy = new Copy(invocation, r);
-            outgoing.stack.push(r);
-            outgoing.node = outgoing.node.controlFlowsTo(copy, ControlType.FORWARD);
+            outgoing.stack.push(invocation);
+            outgoing.node = outgoing.node.controlFlowsTo(invocation, ControlType.FORWARD);
         } else {
             outgoing.node = outgoing.node.controlFlowsTo(invocation, ControlType.FORWARD);
         }
