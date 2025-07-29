@@ -1,7 +1,7 @@
 # MetaIR
 
-MetaIR is a graph-based intermediate representation (IR) for JVM bytecode, built on Cliff Click's Sea-of-Nodes concept. T
-he framework leverages the Java Class-File API introduced in Java 24 (JEP 484).
+MetaIR is a graph-based intermediate representation (IR) for JVM bytecode, built on Cliff Click's Sea-of-Nodes concept. 
+The framework leverages the Java Class-File API introduced in Java 24 (JEP 484).
 
 ## Key Features
 
