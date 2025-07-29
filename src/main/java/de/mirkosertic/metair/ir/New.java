@@ -2,7 +2,7 @@ package de.mirkosertic.metair.ir;
 
 public class New extends Value {
 
-    New(final RuntimeclassReference runtimeclassReference) {
+    New(final Value runtimeclassReference) {
         super(runtimeclassReference.type);
 
         use(runtimeclassReference, new ArgumentUse(0));

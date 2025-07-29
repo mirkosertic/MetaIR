@@ -35,7 +35,7 @@ public final class HelloWorld {
 
             final MethodAnalyzer analyzer = new MethodAnalyzer(model.thisClass().asSymbol(), method);
 
-            final String prefix = (method.methodName().stringValue() + "_" + method.methodTypeSymbol().descriptorString()).replace("<","").replace(">", "").replace("(", "").replace(")", "");
+            final String prefix = (method.methodName().stringValue() + "_" + method.methodTypeSymbol().descriptorString()).replace("<","").replace(">", "").replace("(", "").replace(")", "").replace("/", "").replace(";", "");
 
             DOTExporter.writeTo(analyzer.ir(), new PrintStream(new FileOutputStream(prefix + ".dot")));
 

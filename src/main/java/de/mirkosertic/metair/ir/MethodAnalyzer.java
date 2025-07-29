@@ -399,6 +399,7 @@ public class MethodAnalyzer {
     private Status visitReturnInstruction(final ReturnInstruction ins, final Status incoming) {
         return switch (ins.opcode()) {
             case Opcode.RETURN -> parse_RETURN(ins, incoming);
+            case Opcode.ARETURN -> parse_ARETURN(ins, incoming);
             case Opcode.IRETURN -> parse_RETURN_X(ins, incoming, ConstantDescs.CD_int);
             case Opcode.DRETURN -> parse_RETURN_X(ins, incoming, ConstantDescs.CD_double);
             case Opcode.FRETURN -> parse_RETURN_X(ins, incoming, ConstantDescs.CD_float);
@@ -466,7 +467,7 @@ public class MethodAnalyzer {
         final Status outgoing = incoming.copy();
 
         outgoing.node = outgoing.node.controlFlowsTo(init, ControlType.FORWARD);
-        outgoing.stack.push(new New(ri));
+        outgoing.stack.push(new New(init));
 
         return outgoing;
     }
@@ -716,15 +717,33 @@ public class MethodAnalyzer {
         return outgoing;
     }
 
+    private Status parse_ARETURN(final ReturnInstruction node, final Status incoming) {
+        System.out.println("  opcode ARETURN");
+        if (incoming.stack.isEmpty()) {
+            throw new IllegalStateException("Cannot return empty stack");
+        }
+        final Status outgoing = incoming.copy();
+        final Value v = outgoing.stack.pop();
+
+        final MethodTypeDesc methodTypeDesc = method.methodTypeSymbol();
+        if (!v.type.equals(methodTypeDesc.returnType())) {
+            throw new IllegalStateException("Expecting type " + methodTypeDesc.returnType() + " on stack, got " + v.type);
+        }
+
+        final ReturnValue next = new ReturnValue(v.type, v);
+        outgoing.node = outgoing.node.controlFlowsTo(next, ControlType.FORWARD);
+        return outgoing;
+    }
+
     private Status parse_RETURN_X(final ReturnInstruction node, final Status incoming, final ClassDesc type) {
-        System.out.println("  opcode IRETURN");
+        System.out.println("  opcode RETURN");
         if (incoming.stack.isEmpty()) {
             throw new IllegalStateException("Cannot return empty stack");
         }
         final Status outgoing = incoming.copy();
         final Value v = outgoing.stack.pop();
         if (!v.type.equals(type)) {
-            throw new IllegalStateException("Cannot return non int value " + v);
+            throw new IllegalStateException("Cannot return non " + type + " value " + v);
         }
         final ReturnValue next = new ReturnValue(type, v);
         outgoing.node = outgoing.node.controlFlowsTo(next, ControlType.FORWARD);

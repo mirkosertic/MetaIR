@@ -27,4 +27,8 @@ public class Test {
     public int staticInvocationInMember() {
         return compute(10);
     }
+
+    public static Test newInstance() {
+        return new Test();
+    }
 }

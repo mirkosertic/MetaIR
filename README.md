@@ -17,6 +17,41 @@ he framework leverages the Java Class-File API introduced in Java 24 (JEP 484).
 
 > 🚧 Scheduling logic for machine code transformation is under development.
 
+## Example new instance creation
+
+A simple Java example with constructor invocation:
+```
+public class Test {
+
+    public static Test newInstance() {
+        return new Test();
+    }
+}
+```
+
+Class-File API Debug YAML:
+```
+  - method name: newInstance
+    flags: [PUBLIC, STATIC]
+    method type: ()Lde/mirkosertic/metair/Test;
+    attributes: [Code]
+    code: 
+        max stack: 2
+        max locals: 0
+        attributes: [LineNumberTable]
+        line numbers: 
+          - {start: 0, line number: 32}
+        //stack map frame @0: {locals: [], stack: []}
+        0: {opcode: NEW, type: de/mirkosertic/metair/Test}
+        3: {opcode: DUP}
+        4: {opcode: INVOKESPECIAL, owner: de/mirkosertic/metair/Test, method name: <init>, method type: ()V}
+        7: {opcode: ARETURN}
+```
+
+Generated IR (raw and unoptimized):
+
+![IRExample New Instance Creation](./docs/newinstance_1.png)
+
 ## Example constructor invocation
 
 A simple Java example with constructor invocation:
@@ -26,7 +61,6 @@ public class Test {
     public Test() {
     }
 }
-
 ```
 
 Class-File API Debug YAML:
@@ -72,7 +106,6 @@ public class Test {
 
 Class-File API Debug YAML:
 ```
-
   - method name: simpleIf
     flags: [PUBLIC, STATIC]
     method type: (IIII)I
