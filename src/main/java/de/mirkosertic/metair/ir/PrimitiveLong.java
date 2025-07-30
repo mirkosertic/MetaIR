@@ -2,7 +2,7 @@ package de.mirkosertic.metair.ir;
 
 import java.lang.constant.ConstantDescs;
 
-public class PrimitiveLong extends Value {
+public class PrimitiveLong extends PrimitiveValue {
 
     public final long value;
 

@@ -2,7 +2,7 @@ package de.mirkosertic.metair.ir;
 
 import java.lang.constant.ConstantDescs;
 
-public class PrimitiveDouble extends Value {
+public class PrimitiveDouble extends PrimitiveValue {
 
     public final double value;
 

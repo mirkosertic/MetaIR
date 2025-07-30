@@ -2,7 +2,7 @@ package de.mirkosertic.metair.ir;
 
 import java.lang.constant.ConstantDescs;
 
-public class PrimitiveByte extends Value {
+public class PrimitiveByte extends PrimitiveValue {
 
     public final int value;
 

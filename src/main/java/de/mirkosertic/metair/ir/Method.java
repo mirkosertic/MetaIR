@@ -11,13 +11,13 @@ public class Method extends Node {
     private final Map<Label, LabelNode> labelMap;
     private final MethodModel methodNode;
     private final Map<ClassDesc, RuntimeclassReference> runtimeclassReferences;
-    private final Map<String, StringConstant> stringConstants;
+    private final Map<Object, Value> constants;
 
     Method(final MethodModel methodNode) {
         this.labelMap = new HashMap<>();
         this.methodNode = methodNode;
         this.runtimeclassReferences = new HashMap<>();
-        this.stringConstants = new HashMap<>();
+        this.constants = new HashMap<>();
     }
 
     public RuntimeclassReference defineRuntimeclassReference(final ClassDesc type) {
@@ -29,8 +29,8 @@ public class Method extends Node {
     }
 
     public StringConstant defineStringConstant(final String value) {
-        return stringConstants.computeIfAbsent(value, key -> {
-            final StringConstant r = new StringConstant(key);
+        return (StringConstant) constants.computeIfAbsent(value, key -> {
+            final StringConstant r = new StringConstant(value);
             r.use(Method.this, DefinedByUse.INSTANCE);
             return r;
         });
@@ -53,33 +53,51 @@ public class Method extends Node {
     }
 
     public PrimitiveInt definePrimitiveInt(final int value) {
-        final PrimitiveInt v = new PrimitiveInt(value);
-        v.use(this, DefinedByUse.INSTANCE);
-        return v;
+        return (PrimitiveInt) constants.computeIfAbsent(value, key -> {
+            final PrimitiveInt v = new PrimitiveInt(value);
+            v.use(Method.this, DefinedByUse.INSTANCE);
+            return v;
+        });
     }
 
     public PrimitiveLong definePrimitiveLong(final long value) {
-        final PrimitiveLong v = new PrimitiveLong(value);
-        v.use(this, DefinedByUse.INSTANCE);
-        return v;
+        return (PrimitiveLong) constants.computeIfAbsent(value, key -> {
+            final PrimitiveLong v = new PrimitiveLong(value);
+            v.use(Method.this, DefinedByUse.INSTANCE);
+            return v;
+        });
     }
 
-    public PrimitiveByte definePrimitiveByte(final int value) {
-        final PrimitiveByte v = new PrimitiveByte(value);
-        v.use(this, DefinedByUse.INSTANCE);
-        return v;
+    public PrimitiveByte definePrimitiveByte(final byte value) {
+        return (PrimitiveByte) constants.computeIfAbsent(value, key -> {
+            final PrimitiveByte v = new PrimitiveByte(value);
+            v.use(Method.this, DefinedByUse.INSTANCE);
+            return v;
+        });
+    }
+
+    public PrimitiveShort definePrimitiveShort(final short value) {
+        return (PrimitiveShort) constants.computeIfAbsent(value, key -> {
+            final PrimitiveShort v = new PrimitiveShort(value);
+            v.use(Method.this, DefinedByUse.INSTANCE);
+            return v;
+        });
     }
 
     public PrimitiveFloat definePrimitiveFloat(final float value) {
-        final PrimitiveFloat v = new PrimitiveFloat(value);
-        v.use(this, DefinedByUse.INSTANCE);
-        return v;
+        return (PrimitiveFloat) constants.computeIfAbsent(value, key -> {
+            final PrimitiveFloat v = new PrimitiveFloat(value);
+            v.use(Method.this, DefinedByUse.INSTANCE);
+            return v;
+        });
     }
 
     public PrimitiveDouble definePrimitiveDouble(final double value) {
-        final PrimitiveDouble v = new PrimitiveDouble(value);
-        v.use(this, DefinedByUse.INSTANCE);
-        return v;
+        return (PrimitiveDouble) constants.computeIfAbsent(value, key -> {
+            final PrimitiveDouble v = new PrimitiveDouble(value);
+            v.use(Method.this, DefinedByUse.INSTANCE);
+            return v;
+        });
     }
 
     public void markBackEdges() {

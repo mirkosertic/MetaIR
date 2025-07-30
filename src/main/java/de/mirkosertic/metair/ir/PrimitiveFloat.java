@@ -2,7 +2,7 @@ package de.mirkosertic.metair.ir;
 
 import java.lang.constant.ConstantDescs;
 
-public class PrimitiveFloat extends Value {
+public class PrimitiveFloat extends PrimitiveValue {
 
     public final float value;
 

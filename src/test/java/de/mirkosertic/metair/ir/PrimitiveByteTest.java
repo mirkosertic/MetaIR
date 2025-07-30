@@ -14,7 +14,7 @@ public class PrimitiveByteTest {
 
         assertThat(a.type).isEqualTo(ConstantDescs.CD_byte);
         assertThat(a.value).isEqualTo(10);
-        assertThat(a).isInstanceOf(Value.class);
+        assertThat(a).isInstanceOf(PrimitiveValue.class);
         assertThat(a.usedBy).isEmpty();
         assertThat(a.uses).isEmpty();
         assertThat(a.isConstant()).isTrue();

@@ -103,7 +103,8 @@ public class MethodAnalyzer {
                         case Opcode.FRETURN:
                         case Opcode.LRETURN:
                         case Opcode.DRETURN:
-                        case Opcode.RETURN: {
+                        case Opcode.RETURN:
+                        case Opcode.ATHROW:{
                             prev = null;
                             break;
                         }
@@ -294,7 +295,9 @@ public class MethodAnalyzer {
                         break;
                     }
                 }
-                if (current instanceof final ReturnInstruction returnInstruction) {
+                if (current instanceof ThrowInstruction) {
+                    break;
+                } else if (current instanceof final ReturnInstruction returnInstruction) {
                     if (returnInstruction.opcode() == Opcode.RETURN) {
                         break;
                     }
@@ -341,6 +344,7 @@ public class MethodAnalyzer {
                 case final LocalVariable localVariable ->
                     // Maybe we can use this for debugging?
                         incoming;
+                case final ExceptionCatch exceptionCatch -> visitExceptionCatch(exceptionCatch, incoming);
                 default -> throw new IllegalArgumentException("Not implemented yet : " + psi);
             };
         } else if (node instanceof final Instruction ins) {
@@ -363,11 +367,96 @@ public class MethodAnalyzer {
                 case final StackInstruction stackInstruction -> visitStackInstruction(stackInstruction, incoming);
                 case final OperatorInstruction operatorInstruction ->
                         visitOperatorInstruction(operatorInstruction, incoming);
+                case final MonitorInstruction monitorInstruction ->
+                        visitMonitorInstruction(monitorInstruction, incoming);
+                case final ThrowInstruction thr ->
+                        visitThrowInstruction(thr, incoming);
+                case final NewPrimitiveArrayInstruction na ->
+                        visitNewPrimitiveArray(na, incoming);
+                case final ArrayStoreInstruction as ->
+                        visitArrayStoreInstruction(as, incoming);
+                case final ArrayLoadInstruction al ->
+                        visitArrayLoadInstruction(al, incoming);
                 default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
             };
         } else {
             throw new IllegalArgumentException("Not implemented yet : " + node);
         }
+    }
+
+    private Status visitNewPrimitiveArray(final NewPrimitiveArrayInstruction ins, final Status incoming) {
+        System.out.println("  " + ins + " opcode " + ins.opcode());
+        if (incoming.stack.isEmpty()) {
+            throw new IllegalStateException("Cannot throw with empty stack");
+        }
+        final Status outgoing = incoming.copy();
+        final Value length = outgoing.stack.pop();
+        final ClassDesc type;
+        switch (ins.typeKind()) {
+            case BYTE -> type = ConstantDescs.CD_byte.arrayType();
+            case SHORT -> type = ConstantDescs.CD_short.arrayType();
+            case CHAR -> type = ConstantDescs.CD_char.arrayType();
+            case INT -> type = ConstantDescs.CD_int.arrayType();
+            case LONG -> type = ConstantDescs.CD_long.arrayType();
+            case FLOAT -> type = ConstantDescs.CD_float.arrayType();
+            case DOUBLE -> type = ConstantDescs.CD_double.arrayType();
+            default -> throw new IllegalArgumentException("Not implemented type kind for array creation " + ins.typeKind());
+        }
+        outgoing.stack.push(new NewArray(type, length));
+        return outgoing;
+    }
+
+    private Status visitArrayStoreInstruction(final ArrayStoreInstruction ins, final Status incoming) {
+        return switch (ins.opcode()) {
+            case Opcode.BASTORE -> parse_ASTORE_X(ins, incoming, ConstantDescs.CD_byte.arrayType());
+            case Opcode.CASTORE -> parse_ASTORE_X(ins, incoming, ConstantDescs.CD_char.arrayType());
+            case Opcode.SASTORE -> parse_ASTORE_X(ins, incoming, ConstantDescs.CD_short.arrayType());
+            case Opcode.IASTORE -> parse_ASTORE_X(ins, incoming, ConstantDescs.CD_int.arrayType());
+            case Opcode.LASTORE -> parse_ASTORE_X(ins, incoming, ConstantDescs.CD_long.arrayType());
+            case Opcode.FASTORE -> parse_ASTORE_X(ins, incoming, ConstantDescs.CD_float.arrayType());
+            case Opcode.DASTORE -> parse_ASTORE_X(ins, incoming, ConstantDescs.CD_double.arrayType());
+            default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
+        };
+    }
+
+    private Status parse_ASTORE_X(final ArrayStoreInstruction node, final Status incoming, final ClassDesc arrayType) {
+        System.out.println("  " + node + " opcode " + node.opcode());
+        if (incoming.stack.size() < 3) {
+            throw new IllegalStateException("Three stack entries required for array store");
+        }
+        final Status outgoing = incoming.copy();
+        final Value value = outgoing.stack.pop();
+        final Value index = outgoing.stack.pop();
+        final Value array = outgoing.stack.pop();
+        outgoing.node = outgoing.node.controlFlowsTo(new ArrayStore(arrayType, array, index, value), ControlType.FORWARD);
+        return outgoing;
+    }
+
+    private Status visitArrayLoadInstruction(final ArrayLoadInstruction ins, final Status incoming) {
+        return switch (ins.opcode()) {
+            case Opcode.BALOAD -> parse_ALOAD_X(ins, incoming, ConstantDescs.CD_byte.arrayType(), ConstantDescs.CD_int); // Sign extend!
+            case Opcode.CALOAD -> parse_ALOAD_X(ins, incoming, ConstantDescs.CD_char.arrayType(), ConstantDescs.CD_int); // Zero extend!
+            case Opcode.SALOAD -> parse_ALOAD_X(ins, incoming, ConstantDescs.CD_short.arrayType(), ConstantDescs.CD_int); // Sign extend!
+            case Opcode.IALOAD -> parse_ALOAD_X(ins, incoming, ConstantDescs.CD_int.arrayType(), ConstantDescs.CD_int);
+            case Opcode.LALOAD -> parse_ALOAD_X(ins, incoming, ConstantDescs.CD_long.arrayType(), ConstantDescs.CD_long);
+            case Opcode.FALOAD -> parse_ALOAD_X(ins, incoming, ConstantDescs.CD_float.arrayType(), ConstantDescs.CD_float);
+            case Opcode.DALOAD -> parse_ALOAD_X(ins, incoming, ConstantDescs.CD_double.arrayType(), ConstantDescs.CD_double);
+            default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
+        };
+    }
+
+    private Status parse_ALOAD_X(final ArrayLoadInstruction node, final Status incoming, final ClassDesc arrayType, final ClassDesc elementType) {
+        System.out.println("  " + node + " opcode " + node.opcode());
+        if (incoming.stack.size() < 2) {
+            throw new IllegalStateException("Two stack entries required for array store");
+        }
+        final Status outgoing = incoming.copy();
+        final Value index = outgoing.stack.pop();
+        final Value array = outgoing.stack.pop();
+        final Value value = new ArrayLoad(elementType, arrayType, array, index);
+        outgoing.node = outgoing.node.controlFlowsTo(value, ControlType.FORWARD);
+        outgoing.stack.push(value);
+        return outgoing;
     }
 
     private Status visitOperatorInstruction(final OperatorInstruction ins, final Status incoming) {
@@ -384,6 +473,48 @@ public class MethodAnalyzer {
             case Opcode.FMUL -> parse_MUL_X(ins, incoming, ConstantDescs.CD_float);
             case Opcode.IMUL -> parse_MUL_X(ins, incoming, ConstantDescs.CD_int);
             case Opcode.LMUL -> parse_MUL_X(ins, incoming, ConstantDescs.CD_long);
+            case Opcode.ARRAYLENGTH -> parse_ARRAYLENGTH(ins, incoming);
+            default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
+        };
+    }
+
+    private Status visitThrowInstruction(final ThrowInstruction ins, final Status incoming) {
+        System.out.println("  " + ins + " opcode " + ins.opcode());
+        if (incoming.stack.isEmpty()) {
+            throw new IllegalStateException("Cannot throw with empty stack");
+        }
+        final Status outgoing = incoming.copy();
+        final Value v = outgoing.stack.pop();
+        outgoing.node = outgoing.node.controlFlowsTo(new Throw(v), ControlType.FORWARD);
+        return outgoing;
+    }
+
+    private Status parse_MONITORENTER(final MonitorInstruction node, final Status incoming) {
+        System.out.println("  " + node + " opcode MONITORENTER");
+        if (incoming.stack.isEmpty()) {
+            throw new IllegalStateException("Cannot duplicate empty stack");
+        }
+        final Status outgoing = incoming.copy();
+        final Value v = outgoing.stack.pop();
+        outgoing.node = outgoing.node.controlFlowsTo(new MonitorEnter(v), ControlType.FORWARD);
+        return outgoing;
+    }
+
+    private Status parse_MONITOREXIT(final MonitorInstruction node, final Status incoming) {
+        System.out.println("  " + node + " opcode MONITOREXIT");
+        if (incoming.stack.isEmpty()) {
+            throw new IllegalStateException("Cannot duplicate empty stack");
+        }
+        final Status outgoing = incoming.copy();
+        final Value v = outgoing.stack.pop();
+        outgoing.node = outgoing.node.controlFlowsTo(new MonitorExit(v), ControlType.FORWARD);
+        return outgoing;
+    }
+
+    private Status visitMonitorInstruction(final MonitorInstruction ins, final Status incoming) {
+        return switch (ins.opcode()) {
+            case Opcode.MONITORENTER -> parse_MONITORENTER(ins, incoming);
+            case Opcode.MONITOREXIT -> parse_MONITOREXIT(ins, incoming);
             default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
         };
     }
@@ -432,6 +563,7 @@ public class MethodAnalyzer {
             case Opcode.FCONST_0, Opcode.FCONST_1, Opcode.FCONST_2 -> parse_FCONST(ins, incoming);
             case Opcode.DCONST_0, Opcode.DCONST_1 -> parse_DCONST(ins, incoming);
             case Opcode.BIPUSH -> parse_BIPUSH(ins, incoming);
+            case Opcode.SIPUSH -> parse_SIPUSH(ins, incoming);
             default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
         };
     }
@@ -562,7 +694,14 @@ public class MethodAnalyzer {
     private Status parse_BIPUSH(final ConstantInstruction node, final Status incoming) {
         System.out.println("  opcode " + node.opcode());
         final Status outgoing = incoming.copy();
-        outgoing.stack.push(ir.definePrimitiveByte((Integer) node.constantValue()));
+        outgoing.stack.push(ir.definePrimitiveInt((Integer) node.constantValue()));
+        return outgoing;
+    }
+
+    private Status parse_SIPUSH(final ConstantInstruction node, final Status incoming) {
+        System.out.println("  opcode " + node.opcode());
+        final Status outgoing = incoming.copy();
+        outgoing.stack.push(ir.definePrimitiveShort(((Number) node.constantValue()).shortValue()));
         return outgoing;
     }
 
@@ -743,10 +882,21 @@ public class MethodAnalyzer {
         final Status outgoing = incoming.copy();
         final Value v = outgoing.stack.pop();
         if (!v.type.equals(type)) {
-            throw new IllegalStateException("Cannot return non " + type + " value " + v);
+            throw new IllegalStateException("Cannot return non " + type + " value " + v + " of type " + v.type);
         }
         final ReturnValue next = new ReturnValue(type, v);
         outgoing.node = outgoing.node.controlFlowsTo(next, ControlType.FORWARD);
+        return outgoing;
+    }
+
+    private Status parse_ARRAYLENGTH(final OperatorInstruction node, final Status incoming) {
+        System.out.println("  opcode ARRAYLENGTH");
+        if (incoming.stack.isEmpty()) {
+            throw new IllegalStateException("Array on stack is required!");
+        }
+        final Status outgoing = incoming.copy();
+        final Value array = outgoing.stack.pop();
+        outgoing.stack.push(new ArrayLength(array));
         return outgoing;
     }
 
@@ -784,7 +934,7 @@ public class MethodAnalyzer {
     }
 
     private Status parse_LOAD_TYPE(final LoadInstruction node, final Status incoming, final ClassDesc type) {
-        System.out.println("  opcode ILOAD Local " + node.slot());
+        System.out.println("  opcode LOAD Local " + node.slot() + " opcpde " + node.opcode());
         final Value v = incoming.locals[node.slot()];
         if (v == null) {
             throw new IllegalStateException("Cannot local is null for index " + node.slot());
@@ -798,7 +948,8 @@ public class MethodAnalyzer {
     }
 
     private Status parse_STORE_TYPE(final StoreInstruction node, final Status incoming, final ClassDesc type) {
-        System.out.println("  opcode ISTORE Local " + node.slot());
+        System.out.println("  opcode STORE Local " + node.slot() + " opcode " + node.opcode());
+        System.out.println("  opcode STORE Local " + node.slot() + " opcode " + node.opcode());
         if (incoming.stack.isEmpty()) {
             throw new IllegalStateException("Cannot store empty stack");
         }
@@ -850,6 +1001,8 @@ public class MethodAnalyzer {
             case Opcode.ASTORE, Opcode.ASTORE_3, Opcode.ASTORE_2, Opcode.ASTORE_1, Opcode.ASTORE_0 -> parse_ASTORE(node, incoming);
             case Opcode.ISTORE, Opcode.ISTORE_3, Opcode.ISTORE_2, Opcode.ISTORE_1, Opcode.ISTORE_0 -> parse_STORE_TYPE(node, incoming, ConstantDescs.CD_int);
             case Opcode.LSTORE, Opcode.LSTORE_3, Opcode.LSTORE_2, Opcode.LSTORE_1, Opcode.LSTORE_0 -> parse_STORE_TYPE(node, incoming, ConstantDescs.CD_long);
+            case Opcode.FSTORE, Opcode.FSTORE_0, Opcode.FSTORE_1, Opcode.FSTORE_2, Opcode.FSTORE_3 -> parse_STORE_TYPE(node, incoming, ConstantDescs.CD_float);
+            case Opcode.DSTORE, Opcode.DSTORE_0, Opcode.DSTORE_1, Opcode.DSTORE_2, Opcode.DSTORE_3 -> parse_STORE_TYPE(node, incoming, ConstantDescs.CD_double);
             default -> throw new IllegalArgumentException("Not implemented yet : " + node);
         };
     }
@@ -952,15 +1105,14 @@ public class MethodAnalyzer {
         final Status outgoing = incoming.copy();
 
         final RuntimeclassReference runtimeClass = ir.defineRuntimeclassReference(node.method().owner().asSymbol());
+        final ClassInitialization init = new ClassInitialization(runtimeClass);
 
         final List<Value> arguments = new ArrayList<>();
         for (int i = 0; i < expectedarguments; i++) {
             final Value v = outgoing.stack.pop();
             arguments.add(v);
         }
-        arguments.add(runtimeClass);
-
-        final ClassInitialization init = new ClassInitialization(runtimeClass);
+        arguments.add(init);
 
         outgoing.node = outgoing.node.controlFlowsTo(init, ControlType.FORWARD);
 
@@ -1010,5 +1162,9 @@ public class MethodAnalyzer {
         n.lineNumber = node.line();
         System.out.println("  Line " + node.line());
         return n;
+    }
+
+    private Status visitExceptionCatch(final ExceptionCatch node, final Status incoming) {
+        return incoming;
     }
 }

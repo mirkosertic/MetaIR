@@ -14,7 +14,7 @@ public class PrimitiveBooleanTest {
 
         assertThat(a.type).isEqualTo(ConstantDescs.CD_boolean);
         assertThat(a.value).isTrue();
-        assertThat(a).isInstanceOf(Value.class);
+        assertThat(a).isInstanceOf(PrimitiveValue.class);
         assertThat(a.usedBy).isEmpty();
         assertThat(a.uses).isEmpty();
         assertThat(a.isConstant()).isTrue();

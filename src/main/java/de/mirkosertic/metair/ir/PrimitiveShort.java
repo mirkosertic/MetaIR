@@ -2,18 +2,18 @@ package de.mirkosertic.metair.ir;
 
 import java.lang.constant.ConstantDescs;
 
-public class PrimitiveBoolean extends PrimitiveValue {
+public class PrimitiveShort extends PrimitiveValue {
 
-    public final boolean value;
+    public final short value;
 
-    PrimitiveBoolean(final boolean value) {
-        super(ConstantDescs.CD_boolean);
+    PrimitiveShort(final short value) {
+        super(ConstantDescs.CD_short);
         this.value = value;
     }
 
     @Override
     public String debugDescription() {
-        return "boolean " + value;
+        return "short " + value;
     }
 
     @Override

@@ -14,7 +14,7 @@ public class PrimitiveDoubleTest {
 
         assertThat(a.type).isEqualTo(ConstantDescs.CD_double);
         assertThat(a.value).isEqualTo(10.0d);
-        assertThat(a).isInstanceOf(Value.class);
+        assertThat(a).isInstanceOf(PrimitiveValue.class);
         assertThat(a.usedBy).isEmpty();
         assertThat(a.uses).isEmpty();
         assertThat(a.isConstant()).isTrue();
