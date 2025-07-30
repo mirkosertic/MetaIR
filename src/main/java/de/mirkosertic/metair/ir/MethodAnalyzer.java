@@ -570,6 +570,10 @@ public class MethodAnalyzer {
             case Opcode.LDIV -> parse_DIV_X(ins, incoming, ConstantDescs.CD_long);
             case Opcode.FDIV -> parse_DIV_X(ins, incoming, ConstantDescs.CD_float);
             case Opcode.DDIV -> parse_DIV_X(ins, incoming, ConstantDescs.CD_double);
+            case Opcode.IREM -> parse_REM_X(ins, incoming, ConstantDescs.CD_int);
+            case Opcode.LREM -> parse_REM_X(ins, incoming, ConstantDescs.CD_long);
+            case Opcode.FREM -> parse_REM_X(ins, incoming, ConstantDescs.CD_float);
+            case Opcode.DREM -> parse_REM_X(ins, incoming, ConstantDescs.CD_double);
             default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
         };
     }
@@ -943,15 +947,35 @@ public class MethodAnalyzer {
         final Status outgoing = incoming.copy();
         final Value a = outgoing.stack.pop();
         if (!a.type.equals(desc)) {
-            throw new IllegalStateException("Cannot add non " + desc + " value " + a + " for division");
+            throw new IllegalStateException("Cannot use non " + desc + " value " + a + " for division");
         }
         final Value b = outgoing.stack.pop();
         if (!b.type.equals(desc)) {
-            throw new IllegalStateException("Cannot add non " + desc + " value " + b + " for division");
+            throw new IllegalStateException("Cannot use non " + desc + " value " + b + " for division");
         }
         final Div div = new Div(desc, b, a);
         outgoing.node = outgoing.node.controlFlowsTo(div, ControlType.FORWARD);
         outgoing.stack.push(div);
+        return outgoing;
+    }
+
+    private Status parse_REM_X(final OperatorInstruction node, final Status incoming, final ClassDesc desc) {
+        System.out.println("  opcode " + node.opcode());
+        if (incoming.stack.size() < 2) {
+            throw new IllegalStateException("Need a minium of two values on stack for remainder");
+        }
+        final Status outgoing = incoming.copy();
+        final Value a = outgoing.stack.pop();
+        if (!a.type.equals(desc)) {
+            throw new IllegalStateException("Cannot use non " + desc + " value " + a + " for remainder");
+        }
+        final Value b = outgoing.stack.pop();
+        if (!b.type.equals(desc)) {
+            throw new IllegalStateException("Cannot use non " + desc + " value " + b + " for remainder");
+        }
+        final Rem rem = new Rem(desc, b, a);
+        outgoing.node = outgoing.node.controlFlowsTo(rem, ControlType.FORWARD);
+        outgoing.stack.push(rem);
         return outgoing;
     }
 

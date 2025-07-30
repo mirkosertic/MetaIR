@@ -295,38 +295,6 @@ Generated IR (raw and unoptimized):
     DUP2_X2(RawBytecodeHelper.DUP2_X2, 1, Kind.STACK),
 
     /**
-     * Remainder {@link TypeKind#INT int}.
-     *
-     * @jvms 6.5.irem <em>irem</em>
-     * @see Kind#OPERATOR
-     */
-    IREM(RawBytecodeHelper.IREM, 1, Kind.OPERATOR),
-
-    /**
-     * Remainder {@link TypeKind#LONG long}.
-     *
-     * @jvms 6.5.lrem <em>lrem</em>
-     * @see Kind#OPERATOR
-     */
-    LREM(RawBytecodeHelper.LREM, 1, Kind.OPERATOR),
-
-    /**
-     * Remainder {@link TypeKind#FLOAT float}.
-     *
-     * @jvms 6.5.frem <em>frem</em>
-     * @see Kind#OPERATOR
-     */
-    FREM(RawBytecodeHelper.FREM, 1, Kind.OPERATOR),
-
-    /**
-     * Remainder {@link TypeKind#DOUBLE double}.
-     *
-     * @jvms 6.5.drem <em>drem</em>
-     * @see Kind#OPERATOR
-     */
-    DREM(RawBytecodeHelper.DREM, 1, Kind.OPERATOR),
-
-    /**
      * Shift left {@link TypeKind#INT int}.
      *
      * @jvms 6.5.ishl <em>ishl</em>
