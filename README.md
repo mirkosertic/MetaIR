@@ -217,6 +217,26 @@ public class Test {
 }
 ```
 
+Class-File API Debug YAML:
+```
+  - method name: staticInvocationInMember
+    flags: [PUBLIC]
+    method type: ()I
+    attributes: [Code]
+    code: 
+        max stack: 1
+        max locals: 1
+        attributes: [LineNumberTable, LocalVariableTable]
+        line numbers: 
+          - {start: 0, line number: 28}
+        local variables: 
+          - {start: 0, end: 6, slot: 0, name: this, type: Lde/mirkosertic/metair/Test;}
+        //stack map frame @0: {locals: [de/mirkosertic/metair/Test], stack: []}
+        0: {opcode: BIPUSH, constant value: 10}
+        2: {opcode: INVOKESTATIC, owner: de/mirkosertic/metair/Test, method name: compute, method type: (I)I}
+        5: {opcode: IRETURN}
+```
+
 Generated IR (raw and unoptimized):
 
 ![IRExample StaticMethodInvocation](docs/staticinvoke_1.png)
