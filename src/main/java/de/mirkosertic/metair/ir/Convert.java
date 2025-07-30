@@ -1,0 +1,20 @@
+package de.mirkosertic.metair.ir;
+
+import java.lang.constant.ClassDesc;
+
+public class Convert extends Value {
+
+    public final ClassDesc from;
+
+    Convert(final ClassDesc to, final Value arg1, final ClassDesc from) {
+        super(to);
+        use(arg1, new ArgumentUse(0));
+
+        this.from = from;
+    }
+
+    @Override
+    public String debugDescription() {
+        return "Convert : " + DebugUtils.toString(from) + " to " + DebugUtils.toString(type);
+    }
+}

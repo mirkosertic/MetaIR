@@ -381,12 +381,50 @@ public class MethodAnalyzer {
                         visitNopInstruction(nop, incoming);
                 case final NewReferenceArrayInstruction rei ->
                         visitNewObjectArray(rei, incoming);
+                case final ConvertInstruction ci ->
+                        visitConvertInstruction(ci, incoming);
                 default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
             };
         } else {
             throw new IllegalArgumentException("Not implemented yet : " + node);
         }
     }
+
+    private Status visitConvertInstruction(final ConvertInstruction ins, final Status incoming) {
+        return switch (ins.opcode()) {
+            case Opcode.I2B -> parse_CONVERT_X(ins, incoming, ConstantDescs.CD_int, ConstantDescs.CD_byte);
+            case Opcode.I2C -> parse_CONVERT_X(ins, incoming, ConstantDescs.CD_int, ConstantDescs.CD_char);
+            case Opcode.I2S -> parse_CONVERT_X(ins, incoming, ConstantDescs.CD_int, ConstantDescs.CD_short);
+            case Opcode.I2L -> parse_CONVERT_X(ins, incoming, ConstantDescs.CD_int, ConstantDescs.CD_long);
+            case Opcode.I2F -> parse_CONVERT_X(ins, incoming, ConstantDescs.CD_int, ConstantDescs.CD_float);
+            case Opcode.I2D -> parse_CONVERT_X(ins, incoming, ConstantDescs.CD_int, ConstantDescs.CD_double);
+            case Opcode.L2I -> parse_CONVERT_X(ins, incoming, ConstantDescs.CD_long, ConstantDescs.CD_int);
+            case Opcode.L2F -> parse_CONVERT_X(ins, incoming, ConstantDescs.CD_long, ConstantDescs.CD_float);
+            case Opcode.L2D -> parse_CONVERT_X(ins, incoming, ConstantDescs.CD_long, ConstantDescs.CD_double);
+            case Opcode.F2I -> parse_CONVERT_X(ins, incoming, ConstantDescs.CD_float, ConstantDescs.CD_int);
+            case Opcode.F2L -> parse_CONVERT_X(ins, incoming, ConstantDescs.CD_float, ConstantDescs.CD_long);
+            case Opcode.F2D -> parse_CONVERT_X(ins, incoming, ConstantDescs.CD_float, ConstantDescs.CD_double);
+            case Opcode.D2I -> parse_CONVERT_X(ins, incoming, ConstantDescs.CD_double, ConstantDescs.CD_int);
+            case Opcode.D2L -> parse_CONVERT_X(ins, incoming, ConstantDescs.CD_double, ConstantDescs.CD_long);
+            case Opcode.D2F -> parse_CONVERT_X(ins, incoming, ConstantDescs.CD_double, ConstantDescs.CD_float);
+            default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
+        };
+    }
+
+    private Status parse_CONVERT_X(final ConvertInstruction node, final Status incoming, final ClassDesc from, final ClassDesc to) {
+        System.out.println("  " + node + " opcode " + node.opcode());
+        if (incoming.stack.isEmpty()) {
+            throw new IllegalStateException("Expected an entry on the stack for type conversion");
+        }
+        final Status outgoing = incoming.copy();
+        final Value value = outgoing.stack.pop();
+        if (!value.type.equals(from)) {
+            throw new IllegalStateException("Expected a value of type " + from + " but got " + value.type);
+        }
+        outgoing.stack.push(new Convert(to, value, from));
+        return outgoing;
+    }
+
 
     private Status visitNopInstruction(final NopInstruction ins, final Status incoming) {
         System.out.println("  " + ins + " opcode " + ins.opcode());
@@ -573,6 +611,7 @@ public class MethodAnalyzer {
         return switch (ins.opcode()) {
             case Opcode.DUP -> parse_DUP(ins, incominmg);
             case Opcode.POP -> parse_POP(ins, incominmg);
+            case Opcode.SWAP -> parse_SWAP(ins, incominmg);
             default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
         };
     }
@@ -951,9 +990,6 @@ public class MethodAnalyzer {
         }
         final Status outgoing = incoming.copy();
         final Value v = outgoing.stack.pop();
-        if (!v.type.equals(type)) {
-            throw new IllegalStateException("Cannot return non " + type + " value " + v + " of type " + v.type);
-        }
         final ReturnValue next = new ReturnValue(type, v);
         outgoing.node = outgoing.node.controlFlowsTo(next, ControlType.FORWARD);
         return outgoing;
@@ -988,6 +1024,19 @@ public class MethodAnalyzer {
         }
         final Status outgoing = incoming.copy();
         outgoing.stack.pop();
+        return outgoing;
+    }
+
+    private Status parse_SWAP(final StackInstruction node, final Status incoming) {
+        System.out.println("  " + node + " opcode POP");
+        if (incoming.stack.size() < 2) {
+            throw new IllegalStateException("Expected at least two values on stack for swap");
+        }
+        final Status outgoing = incoming.copy();
+        final Value a = outgoing.stack.pop();
+        final Value b = outgoing.stack.pop();
+        outgoing.stack.push(a);
+        outgoing.stack.push(b);
         return outgoing;
     }
 
