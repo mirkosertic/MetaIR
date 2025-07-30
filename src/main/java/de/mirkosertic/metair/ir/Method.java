@@ -12,12 +12,14 @@ public class Method extends Node {
     private final MethodModel methodNode;
     private final Map<ClassDesc, RuntimeclassReference> runtimeclassReferences;
     private final Map<Object, Value> constants;
+    private Null nullref;
 
     Method(final MethodModel methodNode) {
         this.labelMap = new HashMap<>();
         this.methodNode = methodNode;
         this.runtimeclassReferences = new HashMap<>();
         this.constants = new HashMap<>();
+        this.nullref = null;
     }
 
     public RuntimeclassReference defineRuntimeclassReference(final ClassDesc type) {
@@ -26,6 +28,14 @@ public class Method extends Node {
             r.use(Method.this, DefinedByUse.INSTANCE);
             return r;
         });
+    }
+
+    public Null defineNullReference() {
+        if (nullref == null) {
+            nullref = new Null();
+            nullref.use(this, DefinedByUse.INSTANCE);
+        }
+        return nullref;
     }
 
     public StringConstant defineStringConstant(final String value) {

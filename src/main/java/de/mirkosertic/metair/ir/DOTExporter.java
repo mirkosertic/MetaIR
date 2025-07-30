@@ -143,7 +143,7 @@ public final class DOTExporter {
 
     private static void printNode(final int index, final Node node, final PrintStream ps, final String labelSuffex) {
         ps.print("label=\"#" + index + " " + node.debugDescription() + labelSuffex + "\"");
-        if (node instanceof Method || node instanceof LabelNode || node instanceof Return || node instanceof ReturnValue || node instanceof Goto || node instanceof If || node instanceof Copy || node instanceof Invocation || node instanceof ClassInitialization || node instanceof MonitorEnter || node instanceof MonitorExit || node instanceof Throw || node instanceof ArrayStore || node instanceof ArrayLoad) {
+        if (node instanceof Method || node instanceof LabelNode || node instanceof Return || node instanceof ReturnValue || node instanceof Goto || node instanceof If || node instanceof Copy || node instanceof Invocation || node instanceof ClassInitialization || node instanceof MonitorEnter || node instanceof MonitorExit || node instanceof Throw || node instanceof ArrayStore || node instanceof ArrayLoad || node instanceof CheckCast) {
             ps.print(",shape=box,fillcolor=lightgrey,style=filled");
         } else if (node.isConstant()) {
             ps.print(",shape=octagon,fillcolor=lightgreen,style=filled");

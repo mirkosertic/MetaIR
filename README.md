@@ -226,23 +226,6 @@ Generated IR (raw and unoptimized):
 > 🚧 Under development.
 
     /**
-     * Do nothing.
-     *
-     * @jvms 6.5.nop <em>nop</em>
-     * @see Kind#NOP
-     */
-    NOP(RawBytecodeHelper.NOP, 1, Kind.NOP),
-
-    /**
-     * Push {@code null}.
-     *
-     * @jvms 6.5.aconst_null <em>aconst_null</em>
-     * @see ConstantInstruction.IntrinsicConstantInstruction
-     * @see Kind#CONSTANT
-     */
-    ACONST_NULL(RawBytecodeHelper.ACONST_NULL, 1, Kind.CONSTANT),
-
-    /**
      * Push item from run-time constant pool (wide index).
      *
      * @jvms 6.5.ldc_w <em>ldc_w</em>
@@ -260,102 +243,6 @@ Generated IR (raw and unoptimized):
      * @see Kind#CONSTANT
      */
     LDC2_W(RawBytecodeHelper.LDC2_W, 3, Kind.CONSTANT),
-
-    /**
-     * Load {@link TypeKind#LONG long} from local variable.
-     *
-     * @jvms 6.5.lload <em>lload</em>
-     * @see Kind#LOAD
-     */
-    LLOAD(RawBytecodeHelper.LLOAD, 2, Kind.LOAD),
-
-    /**
-     * Load {@link TypeKind#FLOAT float} from local variable.
-     *
-     * @jvms 6.5.fload <em>fload</em>
-     * @see Kind#LOAD
-     */
-    FLOAD(RawBytecodeHelper.FLOAD, 2, Kind.LOAD),
-
-    /**
-     * Load {@link TypeKind#LONG long} from local variable slot {@code 0}.
-     *
-     * @jvms 6.5.lload_n <em>lload_&lt;n&gt;</em>
-     * @see Kind#LOAD
-     */
-    LLOAD_0(RawBytecodeHelper.LLOAD_0, 1, Kind.LOAD),
-
-    /**
-     * Load {@link TypeKind#LONG long} from local variable slot {@code 1}.
-     *
-     * @jvms 6.5.lload_n <em>lload_&lt;n&gt;</em>
-     * @see Kind#LOAD
-     */
-    LLOAD_1(RawBytecodeHelper.LLOAD_1, 1, Kind.LOAD),
-
-    /**
-     * Load {@link TypeKind#LONG long} from local variable slot {@code 2}.
-     *
-     * @jvms 6.5.lload_n <em>lload_&lt;n&gt;</em>
-     * @see Kind#LOAD
-     */
-    LLOAD_2(RawBytecodeHelper.LLOAD_2, 1, Kind.LOAD),
-
-    /**
-     * Load {@link TypeKind#LONG long} from local variable slot {@code 3}.
-     *
-     * @jvms 6.5.lload_n <em>lload_&lt;n&gt;</em>
-     * @see Kind#LOAD
-     */
-    LLOAD_3(RawBytecodeHelper.LLOAD_3, 1, Kind.LOAD),
-
-    /**
-     * Load {@link TypeKind#FLOAT float} from local variable slot {@code 0}.
-     *
-     * @jvms 6.5.fload_n <em>fload_&lt;n&gt;</em>
-     * @see Kind#LOAD
-     */
-    FLOAD_0(RawBytecodeHelper.FLOAD_0, 1, Kind.LOAD),
-
-    /**
-     * Load {@link TypeKind#FLOAT float} from local variable slot {@code 1}.
-     *
-     * @jvms 6.5.fload_n <em>fload_&lt;n&gt;</em>
-     * @see Kind#LOAD
-     */
-    FLOAD_1(RawBytecodeHelper.FLOAD_1, 1, Kind.LOAD),
-
-    /**
-     * Load {@link TypeKind#FLOAT float} from local variable slot {@code 2}.
-     *
-     * @jvms 6.5.fload_n <em>fload_&lt;n&gt;</em>
-     * @see Kind#LOAD
-     */
-    FLOAD_2(RawBytecodeHelper.FLOAD_2, 1, Kind.LOAD),
-
-    /**
-     * Load {@link TypeKind#FLOAT float} from local variable slot {@code 3}.
-     *
-     * @jvms 6.5.fload_n <em>fload_&lt;n&gt;</em>
-     * @see Kind#LOAD
-     */
-    FLOAD_3(RawBytecodeHelper.FLOAD_3, 1, Kind.LOAD),
-
-    /**
-     * Load {@link TypeKind#REFERENCE reference} from array.
-     *
-     * @jvms 6.5.aaload <em>aaload</em>
-     * @see Kind#ARRAY_LOAD
-     */
-    AALOAD(RawBytecodeHelper.AALOAD, 1, Kind.ARRAY_LOAD),
-
-    /**
-     * Store into {@link TypeKind#REFERENCE reference} array.
-     *
-     * @jvms 6.5.aastore <em>aastore</em>
-     * @see Kind#ARRAY_STORE
-     */
-    AASTORE(RawBytecodeHelper.AASTORE, 1, Kind.ARRAY_STORE),
 
     /**
      * Pop the top one or two operand stack values.
@@ -960,31 +847,6 @@ Generated IR (raw and unoptimized):
      * @see Kind#INVOKE_DYNAMIC
      */
     INVOKEDYNAMIC(RawBytecodeHelper.INVOKEDYNAMIC, 5, Kind.INVOKE_DYNAMIC),
-
-    /**
-     * Create new array of {@link TypeKind#REFERENCE reference}.
-     *
-     * @jvms 6.5.anewarray <em>anewarray</em>
-     * @see Kind#NEW_REF_ARRAY
-     */
-    ANEWARRAY(RawBytecodeHelper.ANEWARRAY, 3, Kind.NEW_REF_ARRAY),
-
-    /**
-     * Throw exception or error.
-     *
-     * @jvms 6.5.athrow <em>athrow</em>
-     * @see Kind#THROW_EXCEPTION
-     */
-    ATHROW(RawBytecodeHelper.ATHROW, 1, Kind.THROW_EXCEPTION),
-
-    /**
-     * Check whether object is of given type.
-     *
-     * @see Class#cast(Object)
-     * @jvms 6.5.checkcast <em>checkcast</em>
-     * @see Kind#TYPE_CHECK
-     */
-    CHECKCAST(RawBytecodeHelper.CHECKCAST, 3, Kind.TYPE_CHECK),
 
     /**
      * Determine if object is of given type.

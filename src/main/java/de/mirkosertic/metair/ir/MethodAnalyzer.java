@@ -377,11 +377,20 @@ public class MethodAnalyzer {
                         visitArrayStoreInstruction(as, incoming);
                 case final ArrayLoadInstruction al ->
                         visitArrayLoadInstruction(al, incoming);
+                case final NopInstruction nop ->
+                        visitNopInstruction(nop, incoming);
+                case final NewReferenceArrayInstruction rei ->
+                        visitNewObjectArray(rei, incoming);
                 default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
             };
         } else {
             throw new IllegalArgumentException("Not implemented yet : " + node);
         }
+    }
+
+    private Status visitNopInstruction(final NopInstruction ins, final Status incoming) {
+        System.out.println("  " + ins + " opcode " + ins.opcode());
+        return incoming;
     }
 
     private Status visitNewPrimitiveArray(final NewPrimitiveArrayInstruction ins, final Status incoming) {
@@ -406,6 +415,18 @@ public class MethodAnalyzer {
         return outgoing;
     }
 
+    private Status visitNewObjectArray(final NewReferenceArrayInstruction ins, final Status incoming) {
+        System.out.println("  " + ins + " opcode " + ins.opcode());
+        if (incoming.stack.isEmpty()) {
+            throw new IllegalStateException("Cannot throw with empty stack");
+        }
+        final Status outgoing = incoming.copy();
+        final Value length = outgoing.stack.pop();
+        final ClassDesc type = ins.componentType().asSymbol().arrayType();
+        outgoing.stack.push(new NewArray(type, length));
+        return outgoing;
+    }
+
     private Status visitArrayStoreInstruction(final ArrayStoreInstruction ins, final Status incoming) {
         return switch (ins.opcode()) {
             case Opcode.BASTORE -> parse_ASTORE_X(ins, incoming, ConstantDescs.CD_byte.arrayType());
@@ -415,6 +436,7 @@ public class MethodAnalyzer {
             case Opcode.LASTORE -> parse_ASTORE_X(ins, incoming, ConstantDescs.CD_long.arrayType());
             case Opcode.FASTORE -> parse_ASTORE_X(ins, incoming, ConstantDescs.CD_float.arrayType());
             case Opcode.DASTORE -> parse_ASTORE_X(ins, incoming, ConstantDescs.CD_double.arrayType());
+            case Opcode.AASTORE -> parse_AASTORE(ins, incoming);
             default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
         };
     }
@@ -432,6 +454,19 @@ public class MethodAnalyzer {
         return outgoing;
     }
 
+    private Status parse_AASTORE(final ArrayStoreInstruction node, final Status incoming) {
+        System.out.println("  " + node + " opcode " + node.opcode());
+        if (incoming.stack.size() < 3) {
+            throw new IllegalStateException("Three stack entries required for array store");
+        }
+        final Status outgoing = incoming.copy();
+        final Value value = outgoing.stack.pop();
+        final Value index = outgoing.stack.pop();
+        final Value array = outgoing.stack.pop();
+        outgoing.node = outgoing.node.controlFlowsTo(new ArrayStore(array.type.componentType(), array, index, value), ControlType.FORWARD);
+        return outgoing;
+    }
+
     private Status visitArrayLoadInstruction(final ArrayLoadInstruction ins, final Status incoming) {
         return switch (ins.opcode()) {
             case Opcode.BALOAD -> parse_ALOAD_X(ins, incoming, ConstantDescs.CD_byte.arrayType(), ConstantDescs.CD_int); // Sign extend!
@@ -441,6 +476,7 @@ public class MethodAnalyzer {
             case Opcode.LALOAD -> parse_ALOAD_X(ins, incoming, ConstantDescs.CD_long.arrayType(), ConstantDescs.CD_long);
             case Opcode.FALOAD -> parse_ALOAD_X(ins, incoming, ConstantDescs.CD_float.arrayType(), ConstantDescs.CD_float);
             case Opcode.DALOAD -> parse_ALOAD_X(ins, incoming, ConstantDescs.CD_double.arrayType(), ConstantDescs.CD_double);
+            case Opcode.AALOAD -> parse_AALOAD(ins, incoming);
             default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
         };
     }
@@ -454,6 +490,20 @@ public class MethodAnalyzer {
         final Value index = outgoing.stack.pop();
         final Value array = outgoing.stack.pop();
         final Value value = new ArrayLoad(elementType, arrayType, array, index);
+        outgoing.node = outgoing.node.controlFlowsTo(value, ControlType.FORWARD);
+        outgoing.stack.push(value);
+        return outgoing;
+    }
+
+    private Status parse_AALOAD(final ArrayLoadInstruction node, final Status incoming) {
+        System.out.println("  " + node + " opcode " + node.opcode());
+        if (incoming.stack.size() < 2) {
+            throw new IllegalStateException("Two stack entries required for array store");
+        }
+        final Status outgoing = incoming.copy();
+        final Value index = outgoing.stack.pop();
+        final Value array = outgoing.stack.pop();
+        final Value value = new ArrayLoad(array.type.componentType(), array.type, array, index);
         outgoing.node = outgoing.node.controlFlowsTo(value, ControlType.FORWARD);
         outgoing.stack.push(value);
         return outgoing;
@@ -564,6 +614,7 @@ public class MethodAnalyzer {
             case Opcode.DCONST_0, Opcode.DCONST_1 -> parse_DCONST(ins, incoming);
             case Opcode.BIPUSH -> parse_BIPUSH(ins, incoming);
             case Opcode.SIPUSH -> parse_SIPUSH(ins, incoming);
+            case Opcode.ACONST_NULL -> parse_ACONST_NULL(ins, incoming);
             default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
         };
     }
@@ -606,7 +657,19 @@ public class MethodAnalyzer {
 
     private Status parse_CHECKCAST(final TypeCheckInstruction node, final Status incoming) {
         System.out.println("  opcode CHECKCAST Checking for " + node.type().asSymbol());
-        return incoming;
+        if (incoming.stack.isEmpty()) {
+            throw new IllegalStateException("Checkcast requires a stack entry");
+        }
+        final Status outgoing = incoming.copy();
+        final Value objectToCheck = outgoing.stack.peek();
+        final RuntimeclassReference expectedType = ir.defineRuntimeclassReference(node.type().asSymbol());
+
+        final ClassInitialization classInit = new ClassInitialization(expectedType);
+        outgoing.node = outgoing.node.controlFlowsTo(classInit, ControlType.FORWARD);
+
+        outgoing.node = outgoing.node.controlFlowsTo(new CheckCast(objectToCheck, classInit), ControlType.FORWARD);
+
+        return outgoing;
     }
 
     private Status parse_IINC(final IncrementInstruction node, final Status incoming) {
@@ -702,6 +765,13 @@ public class MethodAnalyzer {
         System.out.println("  opcode " + node.opcode());
         final Status outgoing = incoming.copy();
         outgoing.stack.push(ir.definePrimitiveShort(((Number) node.constantValue()).shortValue()));
+        return outgoing;
+    }
+
+    private Status parse_ACONST_NULL(final ConstantInstruction node, final Status incoming) {
+        System.out.println("  opcode " + node.opcode());
+        final Status outgoing = incoming.copy();
+        outgoing.stack.push(ir.defineNullReference());
         return outgoing;
     }
 
@@ -991,6 +1061,8 @@ public class MethodAnalyzer {
             case Opcode.ALOAD, Opcode.ALOAD_3, Opcode.ALOAD_2, Opcode.ALOAD_1, Opcode.ALOAD_0 -> parse_ALOAD(node, incoming);
             case Opcode.ILOAD, Opcode.ILOAD_3, Opcode.ILOAD_2, Opcode.ILOAD_1, Opcode.ILOAD_0 -> parse_LOAD_TYPE(node, incoming, ConstantDescs.CD_int);
             case Opcode.DLOAD, Opcode.DLOAD_3, Opcode.DLOAD_2, Opcode.DLOAD_1, Opcode.DLOAD_0 -> parse_LOAD_TYPE(node, incoming, ConstantDescs.CD_double);
+            case Opcode.FLOAD, Opcode.FLOAD_3, Opcode.FLOAD_2, Opcode.FLOAD_1, Opcode.FLOAD_0 -> parse_LOAD_TYPE(node, incoming, ConstantDescs.CD_float);
+            case Opcode.LLOAD, Opcode.LLOAD_3, Opcode.LLOAD_2, Opcode.LLOAD_1, Opcode.LLOAD_0 -> parse_LOAD_TYPE(node, incoming, ConstantDescs.CD_long);
             default -> throw new IllegalArgumentException("Not implemented yet : " + node);
         };
     }
