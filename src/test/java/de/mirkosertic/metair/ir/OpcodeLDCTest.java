@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class OpcodeLDCTest {
 
     @Test
-    public void test_ldc_String() throws IOException {
+    public void test_LDC_String() throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> {
             final ConstantPoolBuilder constantPool = methodBuilder.constantPool();
             methodBuilder.withCode(codeBuilder -> {
@@ -32,7 +32,7 @@ public class OpcodeLDCTest {
     }
 
     @Test
-    public void test_ldc_int() throws IOException {
+    public void test_LDC_int() throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> {
             final ConstantPoolBuilder constantPool = methodBuilder.constantPool();
             methodBuilder.withCode(codeBuilder -> {
@@ -49,7 +49,7 @@ public class OpcodeLDCTest {
     }
 
     @Test
-    public void test_ldc_long() throws IOException {
+    public void test_LDC_long() throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> {
             final ConstantPoolBuilder constantPool = methodBuilder.constantPool();
             methodBuilder.withCode(codeBuilder -> {
@@ -66,7 +66,7 @@ public class OpcodeLDCTest {
     }
 
     @Test
-    public void test_ldc_float() throws IOException {
+    public void test_LDC_float() throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> {
             final ConstantPoolBuilder constantPool = methodBuilder.constantPool();
             methodBuilder.withCode(codeBuilder -> {
@@ -83,7 +83,7 @@ public class OpcodeLDCTest {
     }
 
     @Test
-    public void test_ldc_double() throws IOException {
+    public void test_LDC_double() throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> {
             final ConstantPoolBuilder constantPool = methodBuilder.constantPool();
             methodBuilder.withCode(codeBuilder -> {
@@ -100,7 +100,7 @@ public class OpcodeLDCTest {
     }
 
     @Test
-    public void test_ldc_ClassRef() throws IOException {
+    public void test_LDC_ClassRef() throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> {
             final ConstantPoolBuilder constantPool = methodBuilder.constantPool();
             methodBuilder.withCode(codeBuilder -> {

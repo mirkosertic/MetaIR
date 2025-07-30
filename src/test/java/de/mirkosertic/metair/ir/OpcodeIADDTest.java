@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class OpcodeIADDTest {
 
     @Test
-    public void test_iadd() throws IOException {
+    public void test_IADD() throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_int), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
             codeBuilder.iconst_1();
             codeBuilder.iconst_3();

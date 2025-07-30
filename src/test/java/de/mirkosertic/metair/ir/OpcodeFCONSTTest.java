@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class OpcodeFCONSTTest {
 
     @Test
-    public void test_fconst_0() throws IOException {
+    public void test_FCONST_0() throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
             codeBuilder.fconst_0();
             codeBuilder.pop();
@@ -29,7 +29,7 @@ public class OpcodeFCONSTTest {
     }
 
     @Test
-    public void test_fconst_1() throws IOException {
+    public void test_FCONST_1() throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
             codeBuilder.fconst_1();
             codeBuilder.pop();
@@ -43,7 +43,7 @@ public class OpcodeFCONSTTest {
     }
 
     @Test
-    public void test_fconst_2() throws IOException {
+    public void test_FCONST_2() throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
             codeBuilder.fconst_2();
             codeBuilder.pop();

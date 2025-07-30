@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class OpcodeFSUBTest {
 
     @Test
-    public void test_fsub() throws IOException {
+    public void test_FSUB() throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_float), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
             codeBuilder.fconst_0();
             codeBuilder.fconst_2();

@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class OpcodeDSUBTest {
 
     @Test
-    public void test_dsub() throws IOException {
+    public void test_DSUB() throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_double), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
             codeBuilder.dconst_0();
             codeBuilder.dconst_1();

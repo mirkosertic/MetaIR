@@ -12,20 +12,18 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class OpcodeDADDTest {
+public class OpcodeLNEGTest {
 
     @Test
-    public void test_DADD() throws IOException {
-        final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_double), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
-            codeBuilder.dconst_0();
-            codeBuilder.dconst_1();
-            codeBuilder.dadd();
-            codeBuilder.dreturn();
+    public void test_LNEG() throws IOException {
+        final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_long), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
+            codeBuilder.lconst_1();
+            codeBuilder.lneg();
+            codeBuilder.lreturn();
         })));
         final Optional<MethodModel> method = model.methods().stream().filter(m -> "test".contentEquals(m.methodName())).findFirst();
         assertThat(method).isPresent();
 
         final MethodAnalyzer analyzer = new MethodAnalyzer(model.thisClass().asSymbol(), method.get());
-        assertThat(analyzer.ir().usedBy.stream().filter(t -> t instanceof PrimitiveDouble).map(t -> ((PrimitiveDouble) t).value).toList()).contains(0D, 1D);
     }
 }

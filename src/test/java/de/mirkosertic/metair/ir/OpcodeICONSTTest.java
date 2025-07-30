@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class OpcodeICONSTTest {
 
     @Test
-    public void test_iconst_0() throws IOException {
+    public void test_ICONST_0() throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
             codeBuilder.iconst_0();
             codeBuilder.pop();
@@ -29,7 +29,7 @@ public class OpcodeICONSTTest {
     }
 
     @Test
-    public void test_iconst_1() throws IOException {
+    public void test_ICONST_1() throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> {
             methodBuilder.constantPool();
             methodBuilder.withCode(codeBuilder -> {
@@ -46,7 +46,7 @@ public class OpcodeICONSTTest {
     }
 
     @Test
-    public void test_iconst_2() throws IOException {
+    public void test_ICONST_2() throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> {
             methodBuilder.constantPool();
             methodBuilder.withCode(codeBuilder -> {
@@ -63,7 +63,7 @@ public class OpcodeICONSTTest {
     }
 
     @Test
-    public void test_iconst_3() throws IOException {
+    public void test_ICONST_3() throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> {
             methodBuilder.constantPool();
             methodBuilder.withCode(codeBuilder -> {
@@ -80,7 +80,7 @@ public class OpcodeICONSTTest {
     }
 
     @Test
-    public void test_iconst_4() throws IOException {
+    public void test_ICONST_4() throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> {
             methodBuilder.constantPool();
             methodBuilder.withCode(codeBuilder -> {
@@ -97,7 +97,7 @@ public class OpcodeICONSTTest {
     }
 
     @Test
-    public void test_iconst_5() throws IOException {
+    public void test_ICONST_5() throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> {
             methodBuilder.constantPool();
             methodBuilder.withCode(codeBuilder -> {
@@ -114,7 +114,7 @@ public class OpcodeICONSTTest {
     }
 
     @Test
-    public void test_iconst_m1() throws IOException {
+    public void test_ICONST_M1() throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> {
             methodBuilder.constantPool();
             methodBuilder.withCode(codeBuilder -> {

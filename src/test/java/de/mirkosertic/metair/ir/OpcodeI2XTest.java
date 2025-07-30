@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class OpcodeI2XTest {
 
     @Test
-    public void test_i2b() throws IOException {
+    public void test_I2B() throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_byte), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
             codeBuilder.iconst_0();
             codeBuilder.i2b();
@@ -29,7 +29,7 @@ public class OpcodeI2XTest {
     }
 
     @Test
-    public void test_i2c() throws IOException {
+    public void test_I2C() throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_char), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
             codeBuilder.iconst_0();
             codeBuilder.i2c();
@@ -43,7 +43,7 @@ public class OpcodeI2XTest {
     }
 
     @Test
-    public void test_i2s() throws IOException {
+    public void test_I2S() throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_short), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
             codeBuilder.iconst_0();
             codeBuilder.i2s();
@@ -57,7 +57,7 @@ public class OpcodeI2XTest {
     }
 
     @Test
-    public void test_i2l() throws IOException {
+    public void test_I2L() throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_long), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
             codeBuilder.iconst_0();
             codeBuilder.i2l();
@@ -71,7 +71,7 @@ public class OpcodeI2XTest {
     }
 
     @Test
-    public void test_i2f() throws IOException {
+    public void test_I2F() throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_float), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
             codeBuilder.iconst_0();
             codeBuilder.i2f();
@@ -85,7 +85,7 @@ public class OpcodeI2XTest {
     }
 
     @Test
-    public void test_i2d() throws IOException {
+    public void test_I2D() throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_double), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
             codeBuilder.iconst_0();
             codeBuilder.i2d();

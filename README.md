@@ -359,38 +359,6 @@ Generated IR (raw and unoptimized):
     DREM(RawBytecodeHelper.DREM, 1, Kind.OPERATOR),
 
     /**
-     * Negate {@link TypeKind#INT int}.
-     *
-     * @jvms 6.5.ineg <em>ineg</em>
-     * @see Kind#OPERATOR
-     */
-    INEG(RawBytecodeHelper.INEG, 1, Kind.OPERATOR),
-
-    /**
-     * Negate {@link TypeKind#LONG long}.
-     *
-     * @jvms 6.5.lneg <em>lneg</em>
-     * @see Kind#OPERATOR
-     */
-    LNEG(RawBytecodeHelper.LNEG, 1, Kind.OPERATOR),
-
-    /**
-     * Negate {@link TypeKind#FLOAT float}.
-     *
-     * @jvms 6.5.fneg <em>fneg</em>
-     * @see Kind#OPERATOR
-     */
-    FNEG(RawBytecodeHelper.FNEG, 1, Kind.OPERATOR),
-
-    /**
-     * Negate {@link TypeKind#DOUBLE double}.
-     *
-     * @jvms 6.5.dneg <em>dneg</em>
-     * @see Kind#OPERATOR
-     */
-    DNEG(RawBytecodeHelper.DNEG, 1, Kind.OPERATOR),
-
-    /**
      * Shift left {@link TypeKind#INT int}.
      *
      * @jvms 6.5.ishl <em>ishl</em>

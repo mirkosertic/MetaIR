@@ -562,6 +562,10 @@ public class MethodAnalyzer {
             case Opcode.IMUL -> parse_MUL_X(ins, incoming, ConstantDescs.CD_int);
             case Opcode.LMUL -> parse_MUL_X(ins, incoming, ConstantDescs.CD_long);
             case Opcode.ARRAYLENGTH -> parse_ARRAYLENGTH(ins, incoming);
+            case Opcode.INEG -> parse_NEG_X(ins, incoming, ConstantDescs.CD_int);
+            case Opcode.LNEG -> parse_NEG_X(ins, incoming, ConstantDescs.CD_long);
+            case Opcode.FNEG -> parse_NEG_X(ins, incoming, ConstantDescs.CD_float);
+            case Opcode.DNEG -> parse_NEG_X(ins, incoming, ConstantDescs.CD_double);
             default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
         };
     }
@@ -962,6 +966,20 @@ public class MethodAnalyzer {
         }
         final Mul mul = new Mul(desc, b, a);
         outgoing.stack.push(mul);
+        return outgoing;
+    }
+
+    private Status parse_NEG_X(final OperatorInstruction node, final Status incoming, final ClassDesc desc) {
+        System.out.println("  opcode " + node.opcode());
+        if (incoming.stack.isEmpty()) {
+            throw new IllegalStateException("Need a minium of one value on stack for negation");
+        }
+        final Status outgoing = incoming.copy();
+        final Value a = outgoing.stack.pop();
+        if (!a.type.equals(desc)) {
+            throw new IllegalStateException("Cannot negate non " + desc + " value " + a + " of type " + a.type);
+        }
+        outgoing.stack.push(new Negate(desc, a));
         return outgoing;
     }
 

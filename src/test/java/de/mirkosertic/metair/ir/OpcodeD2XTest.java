@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class OpcodeD2XTest {
 
     @Test
-    public void test_d2i() throws IOException {
+    public void test_D2I() throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_int), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
             codeBuilder.dconst_1();
             codeBuilder.d2i();
@@ -29,7 +29,7 @@ public class OpcodeD2XTest {
     }
 
     @Test
-    public void test_d2l() throws IOException {
+    public void test_D2L() throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_long), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
             codeBuilder.dconst_1();
             codeBuilder.d2l();
@@ -43,7 +43,7 @@ public class OpcodeD2XTest {
     }
 
     @Test
-    public void test_d2f() throws IOException {
+    public void test_D2F() throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_float), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
             codeBuilder.dconst_1();
             codeBuilder.d2f();
