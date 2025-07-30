@@ -295,38 +295,6 @@ Generated IR (raw and unoptimized):
     DUP2_X2(RawBytecodeHelper.DUP2_X2, 1, Kind.STACK),
 
     /**
-     * Divide {@link TypeKind#INT int}.
-     *
-     * @jvms 6.5.idiv <em>idiv</em>
-     * @see Kind#OPERATOR
-     */
-    IDIV(RawBytecodeHelper.IDIV, 1, Kind.OPERATOR),
-
-    /**
-     * Divide {@link TypeKind#LONG long}.
-     *
-     * @jvms 6.5.ldiv <em>ldiv</em>
-     * @see Kind#OPERATOR
-     */
-    LDIV(RawBytecodeHelper.LDIV, 1, Kind.OPERATOR),
-
-    /**
-     * Divide {@link TypeKind#FLOAT float}.
-     *
-     * @jvms 6.5.fdiv <em>fdiv</em>
-     * @see Kind#OPERATOR
-     */
-    FDIV(RawBytecodeHelper.FDIV, 1, Kind.OPERATOR),
-
-    /**
-     * Divide {@link TypeKind#DOUBLE double}.
-     *
-     * @jvms 6.5.ddiv <em>ddiv</em>
-     * @see Kind#OPERATOR
-     */
-    DDIV(RawBytecodeHelper.DDIV, 1, Kind.OPERATOR),
-
-    /**
      * Remainder {@link TypeKind#INT int}.
      *
      * @jvms 6.5.irem <em>irem</em>

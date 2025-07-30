@@ -566,6 +566,10 @@ public class MethodAnalyzer {
             case Opcode.LNEG -> parse_NEG_X(ins, incoming, ConstantDescs.CD_long);
             case Opcode.FNEG -> parse_NEG_X(ins, incoming, ConstantDescs.CD_float);
             case Opcode.DNEG -> parse_NEG_X(ins, incoming, ConstantDescs.CD_double);
+            case Opcode.IDIV -> parse_DIV_X(ins, incoming, ConstantDescs.CD_int);
+            case Opcode.LDIV -> parse_DIV_X(ins, incoming, ConstantDescs.CD_long);
+            case Opcode.FDIV -> parse_DIV_X(ins, incoming, ConstantDescs.CD_float);
+            case Opcode.DDIV -> parse_DIV_X(ins, incoming, ConstantDescs.CD_double);
             default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
         };
     }
@@ -928,6 +932,26 @@ public class MethodAnalyzer {
         }
         final Add add = new Add(desc, b, a);
         outgoing.stack.push(add);
+        return outgoing;
+    }
+
+    private Status parse_DIV_X(final OperatorInstruction node, final Status incoming, final ClassDesc desc) {
+        System.out.println("  opcode " + node.opcode());
+        if (incoming.stack.size() < 2) {
+            throw new IllegalStateException("Need a minium of two values on stack for division");
+        }
+        final Status outgoing = incoming.copy();
+        final Value a = outgoing.stack.pop();
+        if (!a.type.equals(desc)) {
+            throw new IllegalStateException("Cannot add non " + desc + " value " + a + " for division");
+        }
+        final Value b = outgoing.stack.pop();
+        if (!b.type.equals(desc)) {
+            throw new IllegalStateException("Cannot add non " + desc + " value " + b + " for division");
+        }
+        final Div div = new Div(desc, b, a);
+        outgoing.node = outgoing.node.controlFlowsTo(div, ControlType.FORWARD);
+        outgoing.stack.push(div);
         return outgoing;
     }
 
