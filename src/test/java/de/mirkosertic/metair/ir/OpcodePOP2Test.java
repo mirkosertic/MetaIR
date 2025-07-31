@@ -12,32 +12,34 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class OpcodeISTORETest {
+public class OpcodePOP2Test {
 
     @Test
-    public void test_ISTORE() throws IOException {
+    public void test_POP2_form1() throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
             codeBuilder.iconst_0();
-            codeBuilder.istore(0);
             codeBuilder.iconst_0();
-            codeBuilder.istore(1);
-            codeBuilder.iconst_0();
-            codeBuilder.istore(2);
-            codeBuilder.iconst_0();
-            codeBuilder.istore(3);
-            codeBuilder.iconst_0();
-            codeBuilder.istore(4);
-            codeBuilder.iconst_0();
-            codeBuilder.istore(5);
-            codeBuilder.iconst_0();
-            codeBuilder.istore(7);
-            codeBuilder.iconst_0();
-            codeBuilder.istore(7000);
+            codeBuilder.pop2();
             codeBuilder.return_();
         })));
         final Optional<MethodModel> method = model.methods().stream().filter(m -> "test".contentEquals(m.methodName())).findFirst();
         assertThat(method).isPresent();
 
         final MethodAnalyzer analyzer = new MethodAnalyzer(model.thisClass().asSymbol(), method.get());
+        // Should not fail
+    }
+
+    @Test
+    public void test_POP2_form2() throws IOException {
+        final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
+            codeBuilder.lconst_0();
+            codeBuilder.pop2();
+            codeBuilder.return_();
+        })));
+        final Optional<MethodModel> method = model.methods().stream().filter(m -> "test".contentEquals(m.methodName())).findFirst();
+        assertThat(method).isPresent();
+
+        final MethodAnalyzer analyzer = new MethodAnalyzer(model.thisClass().asSymbol(), method.get());
+        // Should not fail
     }
 }

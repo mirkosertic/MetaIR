@@ -2,15 +2,15 @@ package de.mirkosertic.metair.ir;
 
 import java.lang.constant.ConstantDescs;
 
-public class Compare extends Value {
+public class ReferenceCondition extends Value {
 
     public enum Operation {
-        EQ, NE, LT, GE, GT, LE
+        EQ, NE
     }
 
     public final Operation operation;
 
-    Compare(final Operation operation, final Value a, final Value b) {
+    ReferenceCondition(final Operation operation, final Value a, final Value b) {
         super(ConstantDescs.CD_boolean);
 
         this.operation = operation;
@@ -21,6 +21,6 @@ public class Compare extends Value {
 
     @Override
     public String debugDescription() {
-        return "Compare : " + operation;
+        return "ReferenceCondition : " + operation;
     }
 }

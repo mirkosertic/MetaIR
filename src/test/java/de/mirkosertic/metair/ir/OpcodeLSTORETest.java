@@ -31,6 +31,8 @@ public class OpcodeLSTORETest {
             codeBuilder.lstore(5);
             codeBuilder.lconst_1();
             codeBuilder.lstore(7);
+            codeBuilder.lconst_1();
+            codeBuilder.lstore(7000);
             codeBuilder.return_();
         })));
         final Optional<MethodModel> method = model.methods().stream().filter(m -> "test".contentEquals(m.methodName())).findFirst();

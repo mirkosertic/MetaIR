@@ -9,13 +9,13 @@ import java.lang.constant.ConstantDescs;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class GetInstanceFieldTest {
+public class GetFieldTest {
 
     @Test
     public void testUsage() {
         final FieldInstruction node = FieldInstruction.of(Opcode.GETFIELD, ConstantPoolBuilder.of().fieldRefEntry(ConstantDescs.CD_String, "field", ConstantDescs.CD_int));
         final Value v = new Result(ConstantDescs.CD_String);
-        final GetInstanceField get = new GetInstanceField(node, v);
+        final GetField get = new GetField(node, v);
 
         assertThat(v.usedBy).containsExactly(get);
 

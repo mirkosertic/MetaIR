@@ -1,6 +1,6 @@
 package de.mirkosertic.metair.ir;
 
-import java.util.*;
+import java.util.Optional;
 
 public class Copy extends Node {
 

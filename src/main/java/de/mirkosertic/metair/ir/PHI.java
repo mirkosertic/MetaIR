@@ -1,7 +1,10 @@
 package de.mirkosertic.metair.ir;
 
 import java.lang.constant.ClassDesc;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class PHI extends Value {
 

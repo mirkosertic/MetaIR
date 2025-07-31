@@ -12,27 +12,27 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class OpcodeISTORETest {
+public class OpcodeASTORETest {
 
     @Test
-    public void test_ISTORE() throws IOException {
+    public void test_ASTORE() throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
-            codeBuilder.iconst_0();
-            codeBuilder.istore(0);
-            codeBuilder.iconst_0();
-            codeBuilder.istore(1);
-            codeBuilder.iconst_0();
-            codeBuilder.istore(2);
-            codeBuilder.iconst_0();
-            codeBuilder.istore(3);
-            codeBuilder.iconst_0();
-            codeBuilder.istore(4);
-            codeBuilder.iconst_0();
-            codeBuilder.istore(5);
-            codeBuilder.iconst_0();
-            codeBuilder.istore(7);
-            codeBuilder.iconst_0();
-            codeBuilder.istore(7000);
+            codeBuilder.ldc("test");
+            codeBuilder.astore(0);
+            codeBuilder.ldc("test");
+            codeBuilder.astore(1);
+            codeBuilder.ldc("test");
+            codeBuilder.astore(2);
+            codeBuilder.ldc("test");
+            codeBuilder.astore(3);
+            codeBuilder.ldc("test");
+            codeBuilder.astore(4);
+            codeBuilder.ldc("test");
+            codeBuilder.astore(5);
+            codeBuilder.ldc("test");
+            codeBuilder.astore(7);
+            codeBuilder.ldc("test");
+            codeBuilder.astore(7000);
             codeBuilder.return_();
         })));
         final Optional<MethodModel> method = model.methods().stream().filter(m -> "test".contentEquals(m.methodName())).findFirst();
