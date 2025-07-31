@@ -42,7 +42,7 @@ public class DFSTest {
 
     @Test
     public void testSimpleAdd() {
-        final Method m = new Method(null);
+        final Method m = new Method();
         final MethodArgument arg = m.defineMethodArgument(ConstantDescs.CD_int, 0);
         final PrimitiveInt i = m.definePrimitiveInt(10);
         final Add add = new Add(ConstantDescs.CD_int, arg, i);

@@ -62,7 +62,7 @@ public class MethodAnalyzer {
         this.owner = owner;
         this.predecessors = new HashMap<>();
         this.method = method;
-        this.ir = new Method(method);
+        this.ir = new Method();
         this.incomingStatus = new HashMap<>();
 
         final Optional<CodeModel> optCode = method.code();
@@ -929,7 +929,6 @@ public class MethodAnalyzer {
     }
 
     private Status parse_STORE_TYPE(final StoreInstruction node, final Status incoming, final ClassDesc type) {
-        System.out.println("  opcode STORE Local " + node.slot() + " opcode " + node.opcode());
         System.out.println("  opcode STORE Local " + node.slot() + " opcode " + node.opcode());
         if (incoming.stack.isEmpty()) {
             throw new IllegalStateException("Cannot store empty stack");

@@ -10,7 +10,7 @@ public class MethodTest {
 
     @Test
     public void testSameStringConstants() {
-        final Method method = new Method(null);
+        final Method method = new Method();
 
         final StringConstant r1 = method.defineStringConstant("a");
         final StringConstant r2 = method.defineStringConstant("a");
@@ -23,7 +23,7 @@ public class MethodTest {
 
     @Test
     public void testSameClassRefs() {
-        final Method method = new Method(null);
+        final Method method = new Method();
 
         final RuntimeclassReference r1 = method.defineRuntimeclassReference(ConstantDescs.CD_String);
         final RuntimeclassReference r2 = method.defineRuntimeclassReference(ConstantDescs.CD_String);

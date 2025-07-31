@@ -2,7 +2,6 @@ package de.mirkosertic.metair.ir;
 
 
 import java.lang.classfile.Label;
-import java.lang.classfile.MethodModel;
 import java.lang.constant.ClassDesc;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,14 +14,12 @@ import java.util.Set;
 public class Method extends Node {
 
     private final Map<Label, LabelNode> labelMap;
-    private final MethodModel methodNode;
     private final Map<ClassDesc, RuntimeclassReference> runtimeclassReferences;
     private final Map<Object, Value> constants;
     private Null nullref;
 
-    Method(final MethodModel methodNode) {
+    Method() {
         this.labelMap = new HashMap<>();
-        this.methodNode = methodNode;
         this.runtimeclassReferences = new HashMap<>();
         this.constants = new HashMap<>();
         this.nullref = null;
