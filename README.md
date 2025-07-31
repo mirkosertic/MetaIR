@@ -246,55 +246,6 @@ Generated IR (raw and unoptimized):
 > 🚧 Under development.
 
     /**
-     * Compare {@link TypeKind#LONG long}.
-     *
-     * @see Long#numericCondition(long, long)
-     * @jvms 6.5.lcmp <em>lcmp</em>
-     * @see Kind#OPERATOR
-     */
-    LCMP(RawBytecodeHelper.LCMP, 1, Kind.OPERATOR),
-
-    /**
-     * Compare {@link TypeKind#FLOAT float}.
-     * Produces {@code -1} if any operand is {@link Float#isNaN(float) NaN}.
-     *
-     * @see Double##equivalenceRelation Floating-point Equality, Equivalence, and Comparison
-     * @jvms 6.5.fcmp_op <em>fcmp&lt;op&gt;</em>
-     * @see Kind#OPERATOR
-     */
-    FCMPL(RawBytecodeHelper.FCMPL, 1, Kind.OPERATOR),
-
-    /**
-     * Compare {@link TypeKind#FLOAT float}.
-     * Produces {@code 1} if any operand is {@link Float#isNaN(float) NaN}.
-     *
-     * @see Double##equivalenceRelation Floating-point Equality, Equivalence, and Comparison
-     * @jvms 6.5.fcmp_op <em>fcmp&lt;op&gt;</em>
-     * @see Kind#OPERATOR
-     */
-    FCMPG(RawBytecodeHelper.FCMPG, 1, Kind.OPERATOR),
-
-    /**
-     * Compare {@link TypeKind#DOUBLE double}.
-     * Produces {@code -1} if any operand is {@link Double#isNaN(double) NaN}.
-     *
-     * @see Double##equivalenceRelation Floating-point Equality, Equivalence, and Comparison
-     * @jvms 6.5.dcmp_op <em>dcmp&lt;op&gt;</em>
-     * @see Kind#OPERATOR
-     */
-    DCMPL(RawBytecodeHelper.DCMPL, 1, Kind.OPERATOR),
-
-    /**
-     * Compare {@link TypeKind#DOUBLE double}.
-     * Produces {@code 1} if any operand is {@link Double#isNaN(double) NaN}.
-     *
-     * @see Double##equivalenceRelation Floating-point Equality, Equivalence, and Comparison
-     * @jvms 6.5.dcmp_op <em>dcmp&lt;op&gt;</em>
-     * @see Kind#OPERATOR
-     */
-    DCMPG(RawBytecodeHelper.DCMPG, 1, Kind.OPERATOR),
-
-    /**
      * (Discontinued) Jump subroutine; last used in major version {@value
      * ClassFile#JAVA_6_VERSION}.
      *

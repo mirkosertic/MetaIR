@@ -626,6 +626,11 @@ public class MethodAnalyzer {
             case Opcode.LSHR -> parse_BITOPERATION_X(ins, incoming, ConstantDescs.CD_long, BitOperation.Operation.SHR);
             case Opcode.LUSHR ->
                     parse_BITOPERATION_X(ins, incoming, ConstantDescs.CD_long, BitOperation.Operation.USHR);
+            case Opcode.FCMPG -> parse_NUMERICCOMPARE_X(ins, incoming, NumericCompare.Mode.NAN_IS_1);
+            case Opcode.FCMPL -> parse_NUMERICCOMPARE_X(ins, incoming, NumericCompare.Mode.NAN_IS_MINUS_1);
+            case Opcode.DCMPG -> parse_NUMERICCOMPARE_X(ins, incoming, NumericCompare.Mode.NAN_IS_1);
+            case Opcode.DCMPL -> parse_NUMERICCOMPARE_X(ins, incoming, NumericCompare.Mode.NAN_IS_MINUS_1);
+            case Opcode.LCMP -> parse_NUMERICCOMPARE_X(ins, incoming, NumericCompare.Mode.NONFLOATINGPOINT);
             default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
         };
     }
@@ -1600,6 +1605,19 @@ public class MethodAnalyzer {
         }
         final BitOperation rem = new BitOperation(desc, operation, b, a);
         outgoing.stack.push(rem);
+        return outgoing;
+    }
+
+    private Status parse_NUMERICCOMPARE_X(final OperatorInstruction node, final Status incoming, final NumericCompare.Mode mode) {
+        System.out.println("  opcode " + node.opcode());
+        if (incoming.stack.size() < 2) {
+            throw new IllegalStateException("Need a minium of two values on stack for numeric comparison");
+        }
+        final Status outgoing = incoming.copy();
+        final Value a = outgoing.stack.pop();
+        final Value b = outgoing.stack.pop();
+        final NumericCompare compare = new NumericCompare(mode, b, a);
+        outgoing.stack.push(compare);
         return outgoing;
     }
 
