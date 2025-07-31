@@ -1,5 +1,7 @@
 # MetaIR
 
+[![Java CI with Maven](https://github.com/mirkosertic/MetaIR/actions/workflows/maven.yml/badge.svg?branch=main)](https://github.com/mirkosertic/MetaIR/actions/workflows/maven.yml)
+
 MetaIR is a graph-based intermediate representation (IR) for JVM bytecode, built on Cliff Click's Sea-of-Nodes concept. 
 The framework leverages the Java Class-File API introduced in Java 24 (JEP 484).
 
