@@ -23,6 +23,7 @@ import java.lang.classfile.instruction.LineNumber;
 import java.lang.classfile.instruction.LoadInstruction;
 import java.lang.classfile.instruction.LocalVariable;
 import java.lang.classfile.instruction.MonitorInstruction;
+import java.lang.classfile.instruction.NewMultiArrayInstruction;
 import java.lang.classfile.instruction.NewObjectInstruction;
 import java.lang.classfile.instruction.NewPrimitiveArrayInstruction;
 import java.lang.classfile.instruction.NewReferenceArrayInstruction;
@@ -379,6 +380,7 @@ public class MethodAnalyzer {
                 case final NopInstruction nop -> visitNopInstruction(nop, incoming);
                 case final NewReferenceArrayInstruction rei -> visitNewObjectArray(rei, incoming);
                 case final ConvertInstruction ci -> visitConvertInstruction(ci, incoming);
+                case final NewMultiArrayInstruction nm -> visitNewMultiArray(nm, incoming);
                 default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
             };
         } else {
@@ -747,6 +749,22 @@ public class MethodAnalyzer {
             case Opcode.D2F -> parse_CONVERT_X(ins, incoming, ConstantDescs.CD_double, ConstantDescs.CD_float);
             default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
         };
+    }
+
+    private Status visitNewMultiArray(final NewMultiArrayInstruction ins, final Status incoming) {
+        System.out.println("  " + ins + " opcode " + ins.opcode());
+        if (incoming.stack.isEmpty()) {
+            throw new IllegalStateException("Cannot throw with empty stack");
+        }
+        final Status outgoing = incoming.copy();
+        ClassDesc type = ins.arrayType().asSymbol();
+        final List<Value> dimensions = new ArrayList<>();
+        for (int i = 0; i < ins.dimensions(); i++) {
+            dimensions.add(outgoing.stack.pop());
+            type = type.arrayType();
+        }
+        outgoing.stack.push(new NewMultiArray(type, dimensions.reversed()));
+        return outgoing;
     }
 
     private Status parse_INVOKESPECIAL(final InvokeInstruction node, final Status incoming) {

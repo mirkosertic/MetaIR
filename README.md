@@ -292,14 +292,6 @@ Generated IR (raw and unoptimized):
     INVOKEDYNAMIC(RawBytecodeHelper.INVOKEDYNAMIC, 5, Kind.INVOKE_DYNAMIC),
 
     /**
-     * Create new multidimensional array.
-     *
-     * @jvms 6.5.multianewarray <em>multianewarray</em>
-     * @see Kind#NEW_MULTI_ARRAY
-     */
-    MULTIANEWARRAY(RawBytecodeHelper.MULTIANEWARRAY, 4, Kind.NEW_MULTI_ARRAY),
-
-    /**
      * (Discontinued) Jump subroutine (wide index); last used in major
      * version {@value ClassFile#JAVA_6_VERSION}.
      *
