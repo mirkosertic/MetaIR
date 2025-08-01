@@ -1165,6 +1165,7 @@ public class MethodAnalyzer {
         final PutField put = new PutField(target, node.name().stringValue(), node.typeSymbol(), v);
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(put);
+        outgoing.control = outgoing.control.controlFlowsTo(put, ControlType.FORWARD);
         return outgoing;
     }
 
@@ -1203,6 +1204,7 @@ public class MethodAnalyzer {
 
         final PutStatic put = new PutStatic(ri, node.name().stringValue(), node.typeSymbol(), v);
         outgoing.memory = outgoing.memory.memoryFlowsTo(put);
+        outgoing.control = outgoing.control.controlFlowsTo(put, ControlType.FORWARD);
         return outgoing;
     }
 
