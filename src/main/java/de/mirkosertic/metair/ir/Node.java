@@ -44,6 +44,11 @@ public abstract class Node {
         return target;
     }
 
+    public Node memoryFlowsTo(final Node target) {
+        target.use(this, MemoryUse.INSTANCE);
+        return target;
+    }
+
     public void kill() {
         for (final UseEdge edge : uses) {
             edge.node.usedBy.remove(this);

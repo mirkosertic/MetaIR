@@ -95,4 +95,15 @@ public class Test {
         int l = c.length;
     }
 
+    int instancmember;
+    static int staticmember;
+
+    public void memoryFlow() {
+        int a = instancmember;
+        int b = staticmember;
+
+        staticmember = a;
+        instancmember = b;
+    }
+
 }

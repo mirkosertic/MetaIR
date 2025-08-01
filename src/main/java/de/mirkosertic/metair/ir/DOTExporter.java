@@ -69,6 +69,10 @@ public final class DOTExporter {
                         ps.print("[");
                         ps.print("headlabel=\"if #" + nodeindex.indexOf(phiUse.origin) + "\", labeldistance=2, color=blue, constraint=false");
                         ps.print("]");
+                    } else if (useEdge.use instanceof final MemoryUse memoryUse) {
+                        ps.print("[");
+                        ps.print("labeldistance=2, color=green, constraint=false");
+                        ps.print("]");
                     } else if (useEdge.use instanceof DataFlowUse) {
                         ps.print("[");
                         ps.print("headlabel=\"*" + item.uses.indexOf(useEdge) + "\", labeldistance=2");
@@ -131,12 +135,15 @@ public final class DOTExporter {
                    d3 [style = invis];
                    d4 [style = invis];
                    d5 [style = invis];
+                   d6 [style = invis];
+                   d7 [style = invis];
                   }
                   c0 -> c1 [label="Control flow", style=solid, color=red]
                   c1 -> c2 [label="Control flow back edge", style=dashed, color=red]
                   d0 -> d1 [label="Data flow"]
                   d2 -> d3 [label="Declaration", style=dotted]
                   d4 -> d5 [label="PHI Data flow", color=blue]
+                  d6 -> d7 [label="Memory flow", color=green]
                  }
                 """);
 
@@ -150,7 +157,7 @@ public final class DOTExporter {
 
     private static void printNode(final int index, final Node node, final PrintStream ps, final String labelSuffex) {
         ps.print("label=\"#" + index + " " + node.debugDescription() + labelSuffex + "\"");
-        if (node instanceof Method || node instanceof LabelNode || node instanceof Return || node instanceof ReturnValue || node instanceof Goto || node instanceof If || node instanceof Copy || node instanceof Invocation || node instanceof ClassInitialization || node instanceof MonitorEnter || node instanceof MonitorExit || node instanceof Throw || node instanceof ArrayStore || node instanceof ArrayLoad || node instanceof CheckCast) {
+        if (node instanceof Method || node instanceof LabelNode || node instanceof Return || node instanceof ReturnValue || node instanceof Goto || node instanceof If || node instanceof Copy || node instanceof Invocation || node instanceof ClassInitialization || node instanceof MonitorEnter || node instanceof MonitorExit || node instanceof Throw || node instanceof ArrayStore || node instanceof ArrayLoad || node instanceof CheckCast || node instanceof PutField || node instanceof PutStatic) {
             ps.print(",shape=box,fillcolor=lightgrey,style=filled");
         } else if (node.isConstant()) {
             ps.print(",shape=octagon,fillcolor=lightgreen,style=filled");

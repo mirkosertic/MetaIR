@@ -127,7 +127,8 @@ public class MethodAnalyzer {
         final Status initStatus = new Status();
         initStatus.locals = new Value[cm.maxLocals()];
         initStatus.stack = new Stack<>();
-        initStatus.node = ir;
+        initStatus.control = ir;
+        initStatus.memory = ir;
 
         // Locals anhand der Methodensignatur vorinitialisieren
         int localIndex = 0;
@@ -186,14 +187,14 @@ public class MethodAnalyzer {
                             final Value v = newTask.status.locals[i];
                             if (v != null && v != status.locals[i]) {
                                 //final Copy next = new Copy(status.locals[i], v);
-                                v.use(status.locals[i], new PHIUse(status.node));
+                                v.use(status.locals[i], new PHIUse(status.control));
                             }
                         }
                     }
 
                     // Keep control flow
                     final LabelNode next = ir.createLabel(labelnode.label());
-                    newTask.status.node = status.node.controlFlowsTo(next, ControlType.FORWARD, task.condition);
+                    newTask.status.control = status.control.controlFlowsTo(next, ControlType.FORWARD, task.condition);
                     task.condition = ControlFlowConditionDefault.INSTANCE;
 
                     tasks.push(newTask);
@@ -203,7 +204,7 @@ public class MethodAnalyzer {
                 } else if (current instanceof final LabelTarget labelTarget && current == start) {
 
                     final LabelNode next = ir.createLabel(labelTarget.label());
-                    status.node = status.node.controlFlowsTo(next, ControlType.FORWARD);
+                    status.control = status.control.controlFlowsTo(next, ControlType.FORWARD);
 
                 }
                 System.out.print("#");
@@ -652,7 +653,9 @@ public class MethodAnalyzer {
         }
         final Status outgoing = incoming.copy();
         final Value v = outgoing.stack.pop();
-        outgoing.node = outgoing.node.controlFlowsTo(new Throw(v), ControlType.FORWARD);
+        final Throw t = new Throw(v);
+        outgoing.control = outgoing.control.controlFlowsTo(t, ControlType.FORWARD);
+        outgoing.memory = outgoing.memory.memoryFlowsTo(t);
         return outgoing;
     }
 
@@ -675,7 +678,9 @@ public class MethodAnalyzer {
             default ->
                     throw new IllegalArgumentException("Not implemented type kind for array creation " + ins.typeKind());
         }
-        outgoing.stack.push(new NewArray(type, length));
+        final NewArray newArray = new NewArray(type, length);
+        outgoing.stack.push(newArray);
+        outgoing.memory = outgoing.memory.memoryFlowsTo(newArray);
         return outgoing;
     }
 
@@ -726,7 +731,9 @@ public class MethodAnalyzer {
         final Status outgoing = incoming.copy();
         final Value length = outgoing.stack.pop();
         final ClassDesc type = ins.componentType().asSymbol().arrayType();
-        outgoing.stack.push(new NewArray(type, length));
+        final NewArray newArray = new NewArray(type, length);
+        outgoing.stack.push(newArray);
+        outgoing.memory = outgoing.memory.memoryFlowsTo(newArray);
         return outgoing;
     }
 
@@ -763,7 +770,9 @@ public class MethodAnalyzer {
             dimensions.add(outgoing.stack.pop());
             type = type.arrayType();
         }
-        outgoing.stack.push(new NewMultiArray(type, dimensions.reversed()));
+        final NewMultiArray newMultiArray = new NewMultiArray(type, dimensions);
+        outgoing.stack.push(newMultiArray);
+        outgoing.memory = outgoing.memory.memoryFlowsTo(newMultiArray);
         return outgoing;
     }
 
@@ -786,7 +795,8 @@ public class MethodAnalyzer {
         }
 
         final Value next = new Invocation(node, arguments.reversed());
-        outgoing.node = outgoing.node.controlFlowsTo(next, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
+        outgoing.memory = outgoing.memory.memoryFlowsTo(next);
 
         if (!returnType.equals(ConstantDescs.CD_void)) {
             outgoing.stack.push(next);
@@ -814,11 +824,12 @@ public class MethodAnalyzer {
             arguments.add(v);
         }
         final Invocation invocation = new Invocation(node, arguments.reversed());
+
+        outgoing.control = outgoing.control.controlFlowsTo(invocation, ControlType.FORWARD);
+        outgoing.memory = outgoing.memory.memoryFlowsTo(invocation);
+
         if (!returnType.equals(ConstantDescs.CD_void)) {
             outgoing.stack.push(invocation);
-            outgoing.node = outgoing.node.controlFlowsTo(invocation, ControlType.FORWARD);
-        } else {
-            outgoing.node = outgoing.node.controlFlowsTo(invocation, ControlType.FORWARD);
         }
         return outgoing;
     }
@@ -842,12 +853,14 @@ public class MethodAnalyzer {
             arguments.add(v);
         }
         final Invocation invocation = new Invocation(node, arguments.reversed());
+
+        outgoing.control = outgoing.control.controlFlowsTo(invocation, ControlType.FORWARD);
+        outgoing.memory = outgoing.memory.memoryFlowsTo(invocation);
+
         if (!returnType.equals(ConstantDescs.CD_void)) {
             outgoing.stack.push(invocation);
-            outgoing.node = outgoing.node.controlFlowsTo(invocation, ControlType.FORWARD);
-        } else {
-            outgoing.node = outgoing.node.controlFlowsTo(invocation, ControlType.FORWARD);
         }
+
         return outgoing;
     }
 
@@ -874,14 +887,14 @@ public class MethodAnalyzer {
         }
         arguments.add(init);
 
-        outgoing.node = outgoing.node.controlFlowsTo(init, ControlType.FORWARD);
-
         final Invocation invocation = new Invocation(node, arguments.reversed());
+
+        outgoing.memory = outgoing.memory.memoryFlowsTo(init);
+        outgoing.memory = outgoing.memory.memoryFlowsTo(invocation);
+        outgoing.control = outgoing.control.controlFlowsTo(invocation, ControlType.FORWARD);
+
         if (!returnType.equals(ConstantDescs.CD_void)) {
             outgoing.stack.push(invocation);
-            outgoing.node = outgoing.node.controlFlowsTo(invocation, ControlType.FORWARD);
-        } else {
-            outgoing.node = outgoing.node.controlFlowsTo(invocation, ControlType.FORWARD);
         }
         return outgoing;
     }
@@ -964,7 +977,7 @@ public class MethodAnalyzer {
         final If next = new If(numericCondition);
         //next.controlFlowsTo(ir.createLabel(node.label), ControlType.FORWARD, ControlFlowConditionOnTrue.INSTANCE);
 
-        outgoing.node = outgoing.node.controlFlowsTo(next, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
         // TODO: Handle jumps and copy of phi?
         return outgoing;
     }
@@ -982,7 +995,7 @@ public class MethodAnalyzer {
 
         //next.controlFlowsTo(ir.createLabel(node.label), ControlType.FORWARD, ControlFlowConditionOnTrue.INSTANCE);
 
-        outgoing.node = outgoing.node.controlFlowsTo(next, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
         return outgoing;
     }
 
@@ -999,7 +1012,7 @@ public class MethodAnalyzer {
 
         //next.controlFlowsTo(ir.createLabel(node.label), ControlType.FORWARD, ControlFlowConditionOnTrue.INSTANCE);
 
-        outgoing.node = outgoing.node.controlFlowsTo(next, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
         return outgoing;
     }
 
@@ -1018,7 +1031,7 @@ public class MethodAnalyzer {
         final If next = new If(condition);
         //next.controlFlowsTo(ir.createLabel(node.label), ControlType.FORWARD, ControlFlowConditionOnTrue.INSTANCE);
 
-        outgoing.node = outgoing.node.controlFlowsTo(next, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
         // TODO: Handle jumps and copy of phi?
         return outgoing;
     }
@@ -1033,7 +1046,7 @@ public class MethodAnalyzer {
         final Status outgoing = incoming.copy();
 
         final Goto next = new Goto();
-        outgoing.node = outgoing.node.controlFlowsTo(next, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
 
         for (int i = 0; i < incoming.locals.length; i++) {
             final Value v = incoming.locals[i];
@@ -1132,7 +1145,8 @@ public class MethodAnalyzer {
         final GetField get = new GetField(node, v);
         outgoing.stack.push(get);
 
-        outgoing.node = outgoing.node.controlFlowsTo(get, ControlType.FORWARD);
+        outgoing.memory = outgoing.memory.memoryFlowsTo(get);
+
         return outgoing;
     }
 
@@ -1149,24 +1163,25 @@ public class MethodAnalyzer {
         final Value target = outgoing.stack.pop();
 
         final PutField put = new PutField(target, node.name().stringValue(), node.typeSymbol(), v);
-        outgoing.node = outgoing.node.controlFlowsTo(put, ControlType.FORWARD);
+
+        outgoing.memory = outgoing.memory.memoryFlowsTo(put);
         return outgoing;
     }
 
     private Status parse_GETSTATIC(final FieldInstruction node, final Status incoming) {
         System.out.println("  opcode GETSTATIC Field " + node.field());
 
+        final Status outgoing = incoming.copy();
+
         final RuntimeclassReference ri = ir.defineRuntimeclassReference(node.field().owner().asSymbol());
         final ClassInitialization init = new ClassInitialization(ri);
 
-        final Status outgoing = incoming.copy();
-
-        outgoing.node = outgoing.node.controlFlowsTo(init, ControlType.FORWARD);
+        outgoing.memory = outgoing.memory.memoryFlowsTo(init);
 
         final GetStatic get = new GetStatic(ri, node.name().stringValue(), node.typeSymbol());
         outgoing.stack.push(get);
 
-        outgoing.node = outgoing.node.controlFlowsTo(get, ControlType.FORWARD);
+        outgoing.memory = outgoing.memory.memoryFlowsTo(get);
         return outgoing;
     }
 
@@ -1182,11 +1197,12 @@ public class MethodAnalyzer {
 
         final Status outgoing = incoming.copy();
 
+        outgoing.memory = outgoing.memory.memoryFlowsTo(init);
+
         final Value v = outgoing.stack.pop();
 
-        outgoing.node = outgoing.node.controlFlowsTo(init, ControlType.FORWARD);
         final PutStatic put = new PutStatic(ri, node.name().stringValue(), node.typeSymbol(), v);
-        outgoing.node = outgoing.node.controlFlowsTo(put, ControlType.FORWARD);
+        outgoing.memory = outgoing.memory.memoryFlowsTo(put);
         return outgoing;
     }
 
@@ -1199,8 +1215,12 @@ public class MethodAnalyzer {
 
         final Status outgoing = incoming.copy();
 
-        outgoing.node = outgoing.node.controlFlowsTo(init, ControlType.FORWARD);
-        outgoing.stack.push(new New(init));
+        final New n = new New(init);
+
+        outgoing.memory = outgoing.memory.memoryFlowsTo(init);
+        outgoing.memory = outgoing.memory.memoryFlowsTo(n);
+
+        outgoing.stack.push(n);
 
         return outgoing;
     }
@@ -1211,7 +1231,8 @@ public class MethodAnalyzer {
         final Return next = new Return();
 
         final Status outgoing = incoming.copy();
-        outgoing.node = outgoing.node.controlFlowsTo(next, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
+        outgoing.memory = outgoing.memory.memoryFlowsTo(next);
         return outgoing;
     }
 
@@ -1229,7 +1250,8 @@ public class MethodAnalyzer {
         }
 
         final ReturnValue next = new ReturnValue(v.type, v);
-        outgoing.node = outgoing.node.controlFlowsTo(next, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
+        outgoing.memory = outgoing.memory.memoryFlowsTo(next);
         return outgoing;
     }
 
@@ -1241,7 +1263,8 @@ public class MethodAnalyzer {
         final Status outgoing = incoming.copy();
         final Value v = outgoing.stack.pop();
         final ReturnValue next = new ReturnValue(type, v);
-        outgoing.node = outgoing.node.controlFlowsTo(next, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
+        outgoing.memory = outgoing.memory.memoryFlowsTo(next);
         return outgoing;
     }
 
@@ -1255,9 +1278,9 @@ public class MethodAnalyzer {
         final RuntimeclassReference expectedType = ir.defineRuntimeclassReference(node.type().asSymbol());
 
         final ClassInitialization classInit = new ClassInitialization(expectedType);
-        outgoing.node = outgoing.node.controlFlowsTo(classInit, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(classInit, ControlType.FORWARD);
 
-        outgoing.node = outgoing.node.controlFlowsTo(new CheckCast(objectToCheck, classInit), ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(new CheckCast(objectToCheck, classInit), ControlType.FORWARD);
 
         return outgoing;
     }
@@ -1272,7 +1295,7 @@ public class MethodAnalyzer {
         final RuntimeclassReference expectedType = ir.defineRuntimeclassReference(node.type().asSymbol());
 
         final ClassInitialization classInit = new ClassInitialization(expectedType);
-        outgoing.node = outgoing.node.controlFlowsTo(classInit, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(classInit, ControlType.FORWARD);
         outgoing.stack.push(new InstanceOf(objectToCheck, classInit));
 
         return outgoing;
@@ -1581,7 +1604,7 @@ public class MethodAnalyzer {
             throw new IllegalStateException("Cannot use non " + desc + " value " + b + " for division");
         }
         final Div div = new Div(desc, b, a);
-        outgoing.node = outgoing.node.controlFlowsTo(div, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(div, ControlType.FORWARD);
         outgoing.stack.push(div);
         return outgoing;
     }
@@ -1601,7 +1624,7 @@ public class MethodAnalyzer {
             throw new IllegalStateException("Cannot use non " + desc + " value " + b + " for remainder");
         }
         final Rem rem = new Rem(desc, b, a);
-        outgoing.node = outgoing.node.controlFlowsTo(rem, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(rem, ControlType.FORWARD);
         outgoing.stack.push(rem);
         return outgoing;
     }
@@ -1645,7 +1668,7 @@ public class MethodAnalyzer {
         }
         final Status outgoing = incoming.copy();
         final Value v = outgoing.stack.pop();
-        outgoing.node = outgoing.node.controlFlowsTo(new MonitorEnter(v), ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(new MonitorEnter(v), ControlType.FORWARD);
         return outgoing;
     }
 
@@ -1656,7 +1679,7 @@ public class MethodAnalyzer {
         }
         final Status outgoing = incoming.copy();
         final Value v = outgoing.stack.pop();
-        outgoing.node = outgoing.node.controlFlowsTo(new MonitorExit(v), ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(new MonitorExit(v), ControlType.FORWARD);
         return outgoing;
     }
 
@@ -1669,7 +1692,7 @@ public class MethodAnalyzer {
         final Value value = outgoing.stack.pop();
         final Value index = outgoing.stack.pop();
         final Value array = outgoing.stack.pop();
-        outgoing.node = outgoing.node.controlFlowsTo(new ArrayStore(arrayType, array, index, value), ControlType.FORWARD);
+        outgoing.memory = outgoing.memory.memoryFlowsTo(new ArrayStore(arrayType, array, index, value));
         return outgoing;
     }
 
@@ -1682,7 +1705,7 @@ public class MethodAnalyzer {
         final Value value = outgoing.stack.pop();
         final Value index = outgoing.stack.pop();
         final Value array = outgoing.stack.pop();
-        outgoing.node = outgoing.node.controlFlowsTo(new ArrayStore(array.type.componentType(), array, index, value), ControlType.FORWARD);
+        outgoing.control = outgoing.memory.memoryFlowsTo(new ArrayStore(array.type.componentType(), array, index, value));
         return outgoing;
     }
 
@@ -1695,7 +1718,7 @@ public class MethodAnalyzer {
         final Value index = outgoing.stack.pop();
         final Value array = outgoing.stack.pop();
         final Value value = new ArrayLoad(elementType, arrayType, array, index);
-        outgoing.node = outgoing.node.controlFlowsTo(value, ControlType.FORWARD);
+        outgoing.memory = outgoing.memory.memoryFlowsTo(value);
         outgoing.stack.push(value);
         return outgoing;
     }
@@ -1709,7 +1732,7 @@ public class MethodAnalyzer {
         final Value index = outgoing.stack.pop();
         final Value array = outgoing.stack.pop();
         final Value value = new ArrayLoad(array.type.componentType(), array.type, array, index);
-        outgoing.node = outgoing.node.controlFlowsTo(value, ControlType.FORWARD);
+        outgoing.memory = outgoing.memory.memoryFlowsTo(value);
         outgoing.stack.push(value);
         return outgoing;
     }
@@ -1744,7 +1767,8 @@ public class MethodAnalyzer {
         int lineNumber = -1;
         Value[] locals;
         Stack<Value> stack;
-        Node node;
+        Node control;
+        Node memory;
 
         Status copy() {
             final Status result = new Status();
@@ -1753,7 +1777,8 @@ public class MethodAnalyzer {
             System.arraycopy(locals, 0, result.locals, 0, locals.length);
             result.stack = new Stack<>();
             result.stack.addAll(stack);
-            result.node = node;
+            result.control = control;
+            result.memory = memory;
             return result;
         }
 
@@ -1770,7 +1795,8 @@ public class MethodAnalyzer {
             for (final Value v : stack) {
                 result.stack.add(definer.definePHI(v.type));
             }
-            result.node = node;
+            result.control = control;
+            result.memory = memory;
             return result;
         }
     }

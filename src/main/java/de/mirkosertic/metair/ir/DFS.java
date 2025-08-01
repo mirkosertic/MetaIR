@@ -30,6 +30,8 @@ public class DFS {
                         forwardNodes.add(user);
                     } else if (edge.use instanceof DataFlowUse) {
                         forwardNodes.add(user);
+                    } else if (edge.use instanceof MemoryUse) {
+                        forwardNodes.add(user);
                     }
                 }
             }

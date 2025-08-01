@@ -73,7 +73,7 @@ public class DominatorTree {
                 final Node oldIdom = getIDom(v);
                 Node newIdom = null;
                 for (final Node.UseEdge edge : v.uses) {
-                    if (edge.use instanceof ControlFlowUse || edge.use instanceof DefinedByUse || edge.use instanceof DataFlowUse) {
+                    if (edge.use instanceof ControlFlowUse || edge.use instanceof DefinedByUse || edge.use instanceof DataFlowUse || edge.use instanceof MemoryUse) {
                         if (getIDom(edge.node) == null)
                             /* not yet analyzed */ continue;
                         if (newIdom == null) {

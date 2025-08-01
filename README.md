@@ -243,6 +243,63 @@ Generated IR (raw and unoptimized):
 
 ![IRExample StaticMethodInvocation](docs/staticinvoke_1.png)
 
+## Memory access
+
+A simple example demonstrating memory access:
+```
+public class Test {
+
+    int instancmember;
+    static int staticmember;
+
+    public void memoryFlow() {
+        int a = instancmember;
+        int b = staticmember;
+
+        staticmember = a;
+        instancmember = b;
+    }
+}
+```
+
+Class-File API Debug YAML:
+```
+  - method name: memoryFlow
+    flags: [PUBLIC]
+    method type: ()V
+    attributes: [Code]
+    code: 
+        max stack: 2
+        max locals: 3
+        attributes: [LineNumberTable, LocalVariableTable]
+        line numbers: 
+          - {start: 0, line number: 102}
+          - {start: 5, line number: 103}
+          - {start: 9, line number: 105}
+          - {start: 13, line number: 106}
+          - {start: 18, line number: 107}
+        local variables: 
+          - {start: 0, end: 19, slot: 0, name: this, type: Lde/mirkosertic/metair/Test;}
+          - {start: 5, end: 19, slot: 1, name: a, type: I}
+          - {start: 9, end: 19, slot: 2, name: b, type: I}
+        //stack map frame @0: {locals: [de/mirkosertic/metair/Test], stack: []}
+        0: {opcode: ALOAD_0, slot: 0, type: Lde/mirkosertic/metair/Test;, variable name: this}
+        1: {opcode: GETFIELD, owner: de/mirkosertic/metair/Test, field name: instancmember, field type: I}
+        4: {opcode: ISTORE_1, slot: 1}
+        5: {opcode: GETSTATIC, owner: de/mirkosertic/metair/Test, field name: staticmember, field type: I}
+        8: {opcode: ISTORE_2, slot: 2}
+        9: {opcode: ILOAD_1, slot: 1, type: I, variable name: a}
+        10: {opcode: PUTSTATIC, owner: de/mirkosertic/metair/Test, field name: staticmember, field type: I}
+        13: {opcode: ALOAD_0, slot: 0, type: Lde/mirkosertic/metair/Test;, variable name: this}
+        14: {opcode: ILOAD_2, slot: 2, type: I, variable name: b}
+        15: {opcode: PUTFIELD, owner: de/mirkosertic/metair/Test, field name: instancmember, field type: I}
+        18: {opcode: RETURN}
+```
+
+Generated IR (raw and unoptimized):
+
+![IRExample MemoryFlow](docs/memoryflow_1.png)
+
 ## JVM instructions not yet implemented
 
 > 🚧 Under development.
