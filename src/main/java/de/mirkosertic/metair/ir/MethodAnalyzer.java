@@ -891,6 +891,7 @@ public class MethodAnalyzer {
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(init);
         outgoing.memory = outgoing.memory.memoryFlowsTo(invocation);
+        outgoing.control = outgoing.control.controlFlowsTo(init, ControlType.FORWARD);
         outgoing.control = outgoing.control.controlFlowsTo(invocation, ControlType.FORWARD);
 
         if (!returnType.equals(ConstantDescs.CD_void)) {
@@ -916,9 +917,6 @@ public class MethodAnalyzer {
         final Value v = incoming.locals[node.slot()];
         if (v == null) {
             throw new IllegalStateException("Cannot local is null for index " + node.slot());
-        }
-        if (!v.type.equals(type)) {
-            throw new IllegalStateException("Cannot load non " + type + " value " + v + " for index " + node.slot());
         }
         final Status outgoing = incoming.copy();
         outgoing.stack.push(v);
@@ -1182,6 +1180,7 @@ public class MethodAnalyzer {
         final GetStatic get = new GetStatic(ri, node.name().stringValue(), node.typeSymbol());
         outgoing.stack.push(get);
 
+        outgoing.control = outgoing.control.controlFlowsTo(init, ControlType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(get);
         return outgoing;
     }
@@ -1204,6 +1203,7 @@ public class MethodAnalyzer {
 
         final PutStatic put = new PutStatic(ri, node.name().stringValue(), node.typeSymbol(), v);
         outgoing.memory = outgoing.memory.memoryFlowsTo(put);
+        outgoing.control = outgoing.control.controlFlowsTo(init, ControlType.FORWARD);
         outgoing.control = outgoing.control.controlFlowsTo(put, ControlType.FORWARD);
         return outgoing;
     }
@@ -1218,6 +1218,8 @@ public class MethodAnalyzer {
         final Status outgoing = incoming.copy();
 
         final New n = new New(init);
+
+        outgoing.control = outgoing.control.controlFlowsTo(init, ControlType.FORWARD);
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(init);
         outgoing.memory = outgoing.memory.memoryFlowsTo(n);
@@ -1281,6 +1283,7 @@ public class MethodAnalyzer {
 
         final ClassInitialization classInit = new ClassInitialization(expectedType);
         outgoing.control = outgoing.control.controlFlowsTo(classInit, ControlType.FORWARD);
+        outgoing.memory = outgoing.memory.memoryFlowsTo(classInit);
 
         outgoing.control = outgoing.control.controlFlowsTo(new CheckCast(objectToCheck, classInit), ControlType.FORWARD);
 
@@ -1298,6 +1301,8 @@ public class MethodAnalyzer {
 
         final ClassInitialization classInit = new ClassInitialization(expectedType);
         outgoing.control = outgoing.control.controlFlowsTo(classInit, ControlType.FORWARD);
+        outgoing.memory = outgoing.memory.memoryFlowsTo(classInit);
+
         outgoing.stack.push(new InstanceOf(objectToCheck, classInit));
 
         return outgoing;

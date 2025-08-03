@@ -1,10 +1,10 @@
 package de.mirkosertic.metair.ir;
 
-import static org.assertj.core.api.Assertions.*;
-
 import org.junit.jupiter.api.Test;
 
 import java.lang.constant.ConstantDescs;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class AddTest {
 

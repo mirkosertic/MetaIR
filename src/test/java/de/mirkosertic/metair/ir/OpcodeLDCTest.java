@@ -3,7 +3,8 @@ package de.mirkosertic.metair.ir;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.lang.classfile.*;
+import java.lang.classfile.ClassModel;
+import java.lang.classfile.MethodModel;
 import java.lang.classfile.constantpool.ConstantPoolBuilder;
 import java.lang.constant.ConstantDescs;
 import java.lang.constant.MethodTypeDesc;

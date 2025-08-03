@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.constant.ConstantDescs;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class DefinedByUseTest {
 

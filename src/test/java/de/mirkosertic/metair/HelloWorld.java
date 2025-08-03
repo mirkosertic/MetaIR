@@ -3,6 +3,7 @@ package de.mirkosertic.metair;
 import de.mirkosertic.metair.ir.DOTExporter;
 import de.mirkosertic.metair.ir.DominatorTree;
 import de.mirkosertic.metair.ir.MethodAnalyzer;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;

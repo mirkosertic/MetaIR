@@ -24,18 +24,21 @@ public class DFS {
 
             for (final Node user : currentNode.usedBy) {
                 for (final Node.UseEdge edge : user.uses) {
-                    if (edge.use instanceof final ControlFlowUse cfu && cfu.type == ControlType.FORWARD && edge.node == currentNode) {
-                        forwardNodes.add(user);
-                    } else if (edge.use instanceof DefinedByUse) {
-                        forwardNodes.add(user);
-                    } else if (edge.use instanceof DataFlowUse) {
-                        forwardNodes.add(user);
-                    } else if (edge.use instanceof MemoryUse) {
-                        forwardNodes.add(user);
+                    if (edge.node == currentNode) {
+                        if (edge.use instanceof final ControlFlowUse cfu && cfu.type == ControlType.FORWARD) {
+                            forwardNodes.add(user);
+                        } else if (edge.use instanceof DefinedByUse) {
+                            forwardNodes.add(user);
+                        } else if (edge.use instanceof DataFlowUse) {
+                            forwardNodes.add(user);
+                        } else if (edge.use instanceof MemoryUse) {
+                            forwardNodes.add(user);
+                        }
                     }
                 }
             }
 
+            // TODO: Sort the nodes by their usage, with control flow use first, then data flow, then argflow, and then define flow
             forwardNodes.sort(Comparator.comparing(o -> o.getClass().getSimpleName()));
 
             if (!forwardNodes.isEmpty()) {

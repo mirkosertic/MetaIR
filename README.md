@@ -10,6 +10,7 @@ The framework leverages the Java Class-File API introduced in Java 24 (JEP 484).
 - **Analysis**: Transform and inspect existing JVM bytecode
 - **Visualization**: Debug functionality for graph representation
 - **Optimization**: Built-in peephole optimizations for graph reduction
+- **Integration**: Built-in integration with JUnit Platform
 - **Cross-Compilation**: Foundation framework for cross-compiler development
 
 ## Technical Details
