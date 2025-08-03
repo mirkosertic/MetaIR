@@ -9,7 +9,6 @@ import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.support.descriptor.EngineDescriptor;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -17,6 +16,7 @@ import java.lang.classfile.ClassFile;
 import java.lang.classfile.ClassModel;
 import java.lang.classfile.MethodModel;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class MetaIRTestExecutor {
@@ -63,15 +63,15 @@ public class MetaIRTestExecutor {
 
                         final Path targetDir = request.getOutputDirectoryProvider().createOutputDirectory(descriptor);
 
-                        DOTExporter.writeTo(analyzer.ir(), new PrintStream(targetDir.resolve("ir.dot").toFile()));
+                        DOTExporter.writeTo(analyzer.ir(), new PrintStream(Files.newOutputStream(targetDir.resolve("ir.dot"))));
 
-                        try (final PrintStream ps = new PrintStream(new FileOutputStream(targetDir.resolve("bytecode.yaml").toFile()))) {
+                        try (final PrintStream ps = new PrintStream(Files.newOutputStream(targetDir.resolve("bytecode.yaml")))) {
                             ps.print(method.toDebugString());
                         }
 
                         final DominatorTree dominatorTree = new DominatorTree(analyzer.ir());
 
-                        DOTExporter.writeTo(dominatorTree, new PrintStream(new FileOutputStream(targetDir.resolve("ir_dominatortree.dot").toFile())));
+                        DOTExporter.writeTo(dominatorTree, new PrintStream(Files.newOutputStream(targetDir.resolve("ir_dominatortree.dot"))));
                     }
                 }
             } catch (final IOException e) {
