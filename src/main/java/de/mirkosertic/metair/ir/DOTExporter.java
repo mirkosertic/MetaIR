@@ -1,7 +1,11 @@
 package de.mirkosertic.metair.ir;
 
-import java.io.OutputStream;
+
 import java.io.PrintStream;
+import java.lang.classfile.CodeElement;
+import java.lang.classfile.CodeModel;
+import java.lang.classfile.MethodModel;
+import java.lang.classfile.instruction.LabelTarget;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -9,6 +13,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 public final class DOTExporter {
@@ -139,7 +144,7 @@ public final class DOTExporter {
                    d7 [style = invis];
                   }
                   c0 -> c1 [label="Control flow", style=solid, color=red]
-                  c1 -> c2 [label="Control flow back edge", style=dashed, color=red]
+                  c2 -> c3 [label="Control flow back edge", style=dashed, color=red]
                   d0 -> d1 [label="Data flow"]
                   d2 -> d3 [label="Declaration", style=dotted]
                   d4 -> d5 [label="PHI Data flow", color=blue]
@@ -166,9 +171,7 @@ public final class DOTExporter {
         }
     }
 
-    public static void writeTo(final DominatorTree tree, final OutputStream fileOutputStream) {
-        final PrintStream ps = new PrintStream(fileOutputStream);
-
+    public static void writeTo(final DominatorTree tree, final PrintStream ps) {
         ps.println("digraph debugoutput {");
         for (final Node n : tree.preOrder) {
             ps.print(" node" + tree.preOrder.indexOf(n) + "[");
@@ -236,7 +239,7 @@ public final class DOTExporter {
                    d7 [style = invis];
                   }
                   c0 -> c1 [label="Control flow", style=solid, color=red]
-                  c1 -> c2 [label="Control flow back edge", style=dashed, color=red]
+                  c2 -> c3 [label="Control flow back edge", style=dashed, color=red]
                   d0 -> d1 [label="Data flow"]
                   d2 -> d3 [label="Declaration", style=dotted]
                   d4 -> d5 [label="PHI Data flow", color=blue]
@@ -245,5 +248,74 @@ public final class DOTExporter {
                 """);
         ps.println("}");
         ps.flush();
+    }
+
+    public static void writeBytecodeCFGTo(final MethodAnalyzer analyzer, final PrintStream ps) {
+        ps.println("digraph {");
+
+        final MethodModel method = analyzer.getMethod();
+        final Optional<CodeModel> optCode = method.code();
+        if (optCode.isPresent()) {
+            final CodeModel code = optCode.get();
+
+            final MethodAnalyzer.Frame[] frames = analyzer.getFrames();
+            final List<MethodAnalyzer.Frame> topologicalOrder = analyzer.getCodeModelTopologicalOrder();
+
+            final List<CodeElement> elements = code.elementList();
+            for (int i = 0; i < elements.size(); i++) {
+                if (i == elements.size() - 1 && elements.get(i) instanceof LabelTarget) {
+                    // Ignore last label
+                    continue;
+                }
+                ps.print(" node" + i);
+                ps.print("[");
+                ps.print("label=\"");
+                ps.print("#");
+                ps.print(i);
+                ps.print(" ");
+                ps.print(elements.get(i));
+                if (topologicalOrder != null && topologicalOrder.size() > i) {
+                    ps.print(" Order: " + topologicalOrder.indexOf(frames[i]));
+                }
+                ps.print("\"");
+                ps.println(", shape=box, fillcolor=lightgrey, style=filled];");
+            }
+
+            for (int elementIndex = 0; elementIndex < frames.length - 1; elementIndex++) {
+                final MethodAnalyzer.Frame frame = frames[elementIndex];
+                if (frame != null) {
+                    for (final MethodAnalyzer.CFGEdge edge : frame.predecessors) {
+                        ps.print(" node");
+                        ps.print(edge.fromIndex());
+                        ps.print(" -> node");
+                        ps.print(elementIndex);
+                        ps.print("[color=red");
+                        if (edge.controlType() == ControlType.BACKWARD) {
+                            ps.print(", style=dotted");
+                        }
+                        ps.println("];");
+                    }
+                }
+            }
+        }
+
+        ps.println("""
+                 subgraph cluster_000 {
+                  label = "Legend";
+                  node [shape=point]
+                  {
+                   rank=same;
+                   c0 [style = invis];
+                   c1 [style = invis];
+                   c2 [style = invis];
+                   c3 [style = invis];
+                  }
+                  c0 -> c1 [label="Control flow", style=solid, color=red]
+                  c2 -> c3 [label="Control flow back edge", style=dashed, color=red]
+                 }
+                """);
+
+        ps.println("}");
+
     }
 }

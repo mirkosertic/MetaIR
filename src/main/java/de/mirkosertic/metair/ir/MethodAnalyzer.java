@@ -22,6 +22,7 @@ import java.lang.classfile.instruction.LabelTarget;
 import java.lang.classfile.instruction.LineNumber;
 import java.lang.classfile.instruction.LoadInstruction;
 import java.lang.classfile.instruction.LocalVariable;
+import java.lang.classfile.instruction.LocalVariableType;
 import java.lang.classfile.instruction.MonitorInstruction;
 import java.lang.classfile.instruction.NewMultiArrayInstruction;
 import java.lang.classfile.instruction.NewObjectInstruction;
@@ -40,84 +41,245 @@ import java.lang.constant.MethodTypeDesc;
 import java.lang.reflect.AccessFlag;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.Set;
 import java.util.Stack;
 
 public class MethodAnalyzer {
 
+    record CFGEdge(int fromIndex, ControlType controlType) {
+    }
+
+    private record CFGAnalysisJob(int startIndex, List<Integer> path) {
+    }
+
+    public static class Frame {
+
+        final List<CFGEdge> predecessors;
+        final int elementIndex;
+
+        public Frame(final int elementIndex) {
+            this.predecessors = new ArrayList<>();
+            this.elementIndex = elementIndex;
+        }
+    }
+
     private final ClassDesc owner;
     private final MethodModel method;
-    private final Map<Label, List<CodeElement>> predecessors;
+    private Frame[] frames;
     private final Map<Label, Status> incomingStatus;
+    private final Map<Label, Integer> labelToIndex;
     private final Method ir;
+    private List<Frame> codeModelTopologicalOrder;
 
     public MethodAnalyzer(final ClassDesc owner, final MethodModel method) {
 
         this.owner = owner;
-        this.predecessors = new HashMap<>();
         this.method = method;
         this.ir = new Method();
         this.incomingStatus = new HashMap<>();
+        this.labelToIndex = new HashMap<>();
 
         final Optional<CodeModel> optCode = method.code();
         if (optCode.isPresent()) {
             final CodeModel code = optCode.get();
             step1AnalyzeCFG(code);
-            step2FollowCFGAndInterpret(code);
-            step3MarkBackEdges();
+            step2ComputeTopologicalOrder();
+            step3FollowCFGAndInterpret(code);
+            step4MarkBackEdges();
             //step4PeepholeOptimizations();
         }
     }
 
-    private void step1AnalyzeCFG(final CodeModel code) {
-        CodeElement prev = null;
-        for (final CodeElement elem : code.elementList()) {
+    private void illegalState(final String message) {
+        throw new IllegalParsingStateException(this, message);
+    }
 
-            if (elem instanceof final PseudoInstruction psi) {
-                if (psi instanceof final LabelTarget node) {
-                    final List<CodeElement> preds = predecessors.computeIfAbsent(node.label(), key -> new ArrayList<>());
-                    if (prev != null) {
-                        preds.add(prev);
+    MethodModel getMethod() {
+        return method;
+    }
+
+    public Frame[] getFrames() {
+        return frames;
+    }
+
+    public List<Frame> getCodeModelTopologicalOrder() {
+        return codeModelTopologicalOrder;
+    }
+
+    private void step1AnalyzeCFG(final CodeModel code) {
+
+        frames = new Frame[code.elementList().size()];
+        frames[0] = new Frame(0);
+
+        // We first need to map the labels to the instruction index
+        final List<CodeElement> codeElements = code.elementList();
+        for (int i = 0; i < codeElements.size(); i++) {
+            if (codeElements.get(i) instanceof final LabelTarget labelTarget) {
+                final Label label = labelTarget.label();
+                if (labelToIndex.containsKey(label)) {
+                    illegalState("Duplicate label " + label + ", already found at " + labelToIndex.get(label) + " and now at " + i);
+                }
+                labelToIndex.put(label, i);
+            }
+        }
+        final Queue<CFGAnalysisJob> jobs = new ArrayDeque<>();
+        final Set<Integer> visited = new HashSet<>();
+        jobs.add(new CFGAnalysisJob(0, new ArrayList<>()));
+
+        while (!jobs.isEmpty()) {
+            final CFGAnalysisJob job = jobs.poll();
+            if (visited.contains(job.startIndex)) {
+                continue;
+            }
+            final List<Integer> newPath = new ArrayList<>(job.path);
+            jobend: for (int i = job.startIndex; i < codeElements.size(); i++) {
+                visited.add(i);
+                newPath.add(i);
+                final CodeElement current = codeElements.get(i);
+                if (current instanceof final Instruction instruction) {
+                    if (instruction instanceof final BranchInstruction branch) {
+                        // This can either be a conditional or unconditional branch
+                        if (instruction.opcode() == Opcode.GOTO) {
+                            final Label target = branch.target();
+                            // Unconditional Branch
+                            if (labelToIndex.containsKey(target)) {
+                               final int newIndex = labelToIndex.get(target);
+                                if (!visited.contains(newIndex)) {
+                                    jobs.add(new CFGAnalysisJob(newIndex, newPath));
+                                }
+                                ControlType controlType = ControlType.FORWARD;
+                                if (newPath.contains(newIndex)) {
+                                    controlType = ControlType.BACKWARD;
+                                }
+                                Frame frame = frames[newIndex];
+                                if (frame == null) {
+                                    frame = new Frame(newIndex);
+                                    frames[newIndex] = frame;
+                                }
+                                frame.predecessors.add(new CFGEdge(i, controlType));
+                                // Analysis of the current task ends here
+                                break;
+                            } else {
+                                illegalState("Unconditional branch to " + branch.target() + " which is not mapped to an index");
+                            }
+                        } else {
+                            // Conditional branch
+                            // We split up in multiple analysis tasks
+                            final Label target = branch.target();
+                            // Unconditional Branch
+                            if (labelToIndex.containsKey(target)) {
+                                final int newIndex = labelToIndex.get(target);
+                                if (!visited.contains(newIndex)) {
+                                    jobs.add(new CFGAnalysisJob(newIndex, newPath));
+                                }
+                                ControlType controlType = ControlType.FORWARD;
+                                if (newPath.contains(newIndex)) {
+                                    controlType = ControlType.BACKWARD;
+                                }
+                                Frame frame = frames[newIndex];
+                                if (frame == null) {
+                                    frame = new Frame(newIndex);
+                                    frames[newIndex] = frame;
+                                }
+                                frame.predecessors.add(new CFGEdge(i, controlType));
+                            } else {
+                                illegalState("Unconditional branch to " + branch.target() + " which is not mapped to an index");
+                            }
+                        }
+                    } else {
+                        // The following opcode ends the analysis of the current job, as
+                        // controlflow terminates
+                        switch (instruction.opcode()) {
+                            case Opcode.IRETURN:
+                            case Opcode.ARETURN:
+                            case Opcode.FRETURN:
+                            case Opcode.LRETURN:
+                            case Opcode.DRETURN:
+                            case Opcode.RETURN:
+                            case Opcode.ATHROW: {
+                                break jobend;
+                            }
+                        }
                     }
                 }
-                prev = psi;
-            } else if (elem instanceof final Instruction insn) {
-                if (insn instanceof final BranchInstruction branch) {
-                    final List<CodeElement> preds = predecessors.computeIfAbsent(branch.target(), key -> new ArrayList<>());
-                    preds.add(branch);
-                    if (branch.opcode() == Opcode.GOTO || branch.opcode() == Opcode.GOTO_W) {
-                        prev = null;
-                    } else {
-                        prev = branch;
-                    }
-                } else {
-                    switch (insn.opcode()) {
-                        case Opcode.IRETURN:
-                        case Opcode.ARETURN:
-                        case Opcode.FRETURN:
-                        case Opcode.LRETURN:
-                        case Opcode.DRETURN:
-                        case Opcode.RETURN:
-                        case Opcode.ATHROW: {
-                            prev = null;
-                            break;
-                        }
-                        default: {
-                            prev = insn;
-                        }
-                    }
+
+                Frame frame = frames[i + 1];
+                if (frame == null) {
+                    frame = new Frame(i + 1);
+                    frames[i + 1] = frame;
+                }
+                // This is a regular forward flow
+                frame.predecessors.add(new CFGEdge(i, ControlType.FORWARD));
+
+                if (visited.contains(i +1)) {
+                    break;
                 }
             }
         }
     }
 
-    private void step2FollowCFGAndInterpret(final CodeModel code) {
+    private void step2ComputeTopologicalOrder() {
+        // We compute the topological order of the bytecode cfg
+        // We later iterate by this order to parse every node
+        final List<Frame> reversePostOrder = new ArrayList<>();
+        final Deque<Frame> currentPath = new ArrayDeque<>();
+        currentPath.add(frames[0]);
+        final Set<Frame> marked = new HashSet<>();
+        marked.add(frames[0]);
+        while(!currentPath.isEmpty()) {
+            final Frame currentNode = currentPath.peek();
+            final List<Frame> forwardNodes = new ArrayList<>();
+
+            // This could be improved if we have to successor list directly...
+            final Frame[] frames = getFrames();
+            for (final Frame frame : frames) {
+                // Maybe null due to unreachable statements in bytecode
+                if (frame != null) {
+                    for (final CFGEdge edge : frame.predecessors) {
+                        if (edge.fromIndex == currentNode.elementIndex && edge.controlType == ControlType.FORWARD) {
+                            forwardNodes.add(frame);
+                        }
+                    }
+                }
+            }
+
+            // We sort by index in the code model to make this reproducible...
+            forwardNodes.sort(Comparator.comparingInt(o -> o.elementIndex));
+
+            if (!forwardNodes.isEmpty()) {
+                boolean somethingFound = false;
+                for (final Frame node : forwardNodes) {
+                    if (marked.add(node)) {
+                        currentPath.push(node);
+                        somethingFound = true;
+                    }
+                }
+                if (!somethingFound) {
+                    reversePostOrder.add(currentNode);
+                    currentPath.pop();
+                }
+            } else {
+                reversePostOrder.add(currentNode);
+                currentPath.pop();
+            }
+        }
+
+        codeModelTopologicalOrder = new ArrayList<>();
+        for (int i = reversePostOrder.size() - 1; i >= 0; i--) {
+            codeModelTopologicalOrder.add(reversePostOrder.get(i));
+        }
+
+    }
+
+    private void step3FollowCFGAndInterpret(final CodeModel code) {
 
         final Deque<InterpretTask> tasks = new ArrayDeque<>();
         final CodeElement start = code.elementList().getFirst();
@@ -180,8 +342,8 @@ public class MethodAnalyzer {
                     newTask.status = incomingStatusFor(status, labelnode.label());
 
                     // Create PHI assignments / initializations here...
-                    final List<CodeElement> preds = predecessors.get(labelnode.label());
-                    if (preds != null && preds.size() > 1) {
+                    final Frame frame = frames[newTask.eleementIndex];
+                    if (frame != null && frame.predecessors.size() > 1) {
                         // TODO: What about the stack here?
                         for (int i = 0; i < newTask.status.locals.length; i++) {
                             final Value v = newTask.status.locals[i];
@@ -207,6 +369,7 @@ public class MethodAnalyzer {
                     status.control = status.control.controlFlowsTo(next, ControlType.FORWARD);
 
                 }
+
                 System.out.print("#");
                 System.out.print(allElements.indexOf(current));
                 System.out.print(" : ");
@@ -266,20 +429,21 @@ public class MethodAnalyzer {
                                 break;
                             }
                         }
+                        // TODO: Check for PHI propagation
                         tasks.push(newTask);
                     }
                     if (jumpInsnNode.opcode() == Opcode.GOTO || jumpInsnNode.opcode() == Opcode.GOTO_W) {
                         // Unconditional jump and a back edge, we stop analysis here
                         final Status target = incomingStatus.get(jumpInsnNode.target());
                         if (target == null) {
-                            throw new IllegalStateException("Unconditional jump to " + jumpInsnNode.target() + " without a target status");
+                            illegalState("Unconditional jump to " + jumpInsnNode.target() + " without a target status");
                         }
                         // Do some sanity checking here
                         for (int i = 0; i < status.locals.length; i++) {
                             final Value source = status.locals[i];
                             final Value dest = target.locals[i];
                             if (dest != null && dest != source) {
-                                throw new IllegalStateException("Missing copy for local index " + i + ", got " + source + " and expected " + dest);
+                                illegalState("Missing copy for local index " + i + ", got " + source + " and expected " + dest);
                             }
                         }
                         break;
@@ -316,7 +480,7 @@ public class MethodAnalyzer {
         }
     }
 
-    private void step3MarkBackEdges() {
+    private void step4MarkBackEdges() {
         ir.markBackEdges();
     }
 
@@ -326,11 +490,14 @@ public class MethodAnalyzer {
 
     private Status incomingStatusFor(final Status status, final Label label) {
         return incomingStatus.computeIfAbsent(label, key -> {
-            final List<CodeElement> preds = predecessors.get(key);
-            if (preds == null || preds.isEmpty()) {
-                throw new IllegalStateException("No predecessor for " + key);
+            if (!labelToIndex.containsKey(label)) {
+                throw new IllegalArgumentException("No label index for " + label);
             }
-            if (preds.size() > 1) {
+            final Frame frame = frames[labelToIndex.get(label)];
+            if (frame == null || frame.predecessors.isEmpty()) {
+                illegalState("No predecessor for " + key);
+            }
+            if (frame.predecessors.size() > 1) {
                 // PHI Values
                 return status.copyWithPHI(ir.createLabel(key));
             }
@@ -348,6 +515,7 @@ public class MethodAnalyzer {
                 case final LocalVariable localVariable ->
                     // Maybe we can use this for debugging?
                         incoming;
+                case final LocalVariableType localVariableType -> incoming;
                 case final ExceptionCatch exceptionCatch -> visitExceptionCatch(exceptionCatch, incoming);
                 default -> throw new IllegalArgumentException("Not implemented yet : " + psi);
             };
@@ -392,14 +560,14 @@ public class MethodAnalyzer {
     private Status visitLabelTarget(final LabelTarget node, final Status incoming) {
         // An AbstractInsnNode that encapsulates a Label.
         System.out.print("  Label: " + node.label());
-        final List<CodeElement> preds = predecessors.get(node.label());
-        if (preds != null) {
+        final Frame frame = frames[labelToIndex.get(node.label())];
+        if (frame != null && !frame.predecessors.isEmpty()) {
             System.out.print(" Jumped from [");
-            for (int i = 0; i < preds.size(); i++) {
+            for (int i = 0; i < frame.predecessors.size(); i++) {
                 if (i > 0) {
                     System.out.print(", ");
                 }
-                System.out.print(preds.get(i));
+                System.out.print(frame.predecessors.get(i).fromIndex);
             }
             System.out.print("]");
         }
@@ -409,7 +577,7 @@ public class MethodAnalyzer {
     }
 
     private Status visitLineNumberNode(final LineNumber node, final Status incoming) {
-        // A node that represents a line number declaration. These nodes are pseudo instruction nodes in order to be inserted in an instruction list.
+        // A node that represents a line number declaration. These nodes are pseudo-instruction nodes inorder to be inserted in an instruction list.
         final Status n = incoming.copy();
         n.lineNumber = node.line();
         System.out.println("  Line " + node.line());
@@ -552,7 +720,7 @@ public class MethodAnalyzer {
         final ClassDesc[] args = methodTypeDesc.parameterArray();
         final int expectedarguments = args.length;
         if (incoming.stack.size() < expectedarguments) {
-            throw new IllegalStateException("Not enough arguments on stack for " + node.name() + " " + methodTypeDesc + " expected " + expectedarguments + " but got " + incoming.stack.size());
+            illegalState("Not enough arguments on stack for " + node.name() + " " + methodTypeDesc + " expected " + expectedarguments + " but got " + incoming.stack.size());
         }
         final Status outgoing = incoming.copy();
         for (int i = 0; i < expectedarguments; i++) {
@@ -649,7 +817,7 @@ public class MethodAnalyzer {
     private Status visitThrowInstruction(final ThrowInstruction ins, final Status incoming) {
         System.out.println("  " + ins + " opcode " + ins.opcode());
         if (incoming.stack.isEmpty()) {
-            throw new IllegalStateException("Cannot throw with empty stack");
+            illegalState("Cannot throw with empty stack");
         }
         final Status outgoing = incoming.copy();
         final Value v = outgoing.stack.pop();
@@ -662,7 +830,7 @@ public class MethodAnalyzer {
     private Status visitNewPrimitiveArray(final NewPrimitiveArrayInstruction ins, final Status incoming) {
         System.out.println("  " + ins + " opcode " + ins.opcode());
         if (incoming.stack.isEmpty()) {
-            throw new IllegalStateException("Cannot throw with empty stack");
+            illegalState("Cannot throw with empty stack");
         }
         final Status outgoing = incoming.copy();
         final Value length = outgoing.stack.pop();
@@ -719,14 +887,13 @@ public class MethodAnalyzer {
     }
 
     private Status visitNopInstruction(final NopInstruction ins, final Status incoming) {
-        System.out.println("  " + ins + " opcode " + ins.opcode());
-        return incoming;
+        return incoming.copy();
     }
 
     private Status visitNewObjectArray(final NewReferenceArrayInstruction ins, final Status incoming) {
         System.out.println("  " + ins + " opcode " + ins.opcode());
         if (incoming.stack.isEmpty()) {
-            throw new IllegalStateException("Cannot throw with empty stack");
+            illegalState("Cannot throw with empty stack");
         }
         final Status outgoing = incoming.copy();
         final Value length = outgoing.stack.pop();
@@ -761,7 +928,7 @@ public class MethodAnalyzer {
     private Status visitNewMultiArray(final NewMultiArrayInstruction ins, final Status incoming) {
         System.out.println("  " + ins + " opcode " + ins.opcode());
         if (incoming.stack.isEmpty()) {
-            throw new IllegalStateException("Cannot throw with empty stack");
+            illegalState("Cannot throw with empty stack");
         }
         final Status outgoing = incoming.copy();
         ClassDesc type = ins.arrayType().asSymbol();
@@ -787,7 +954,7 @@ public class MethodAnalyzer {
         final ClassDesc[] args = methodTypeDesc.parameterArray();
         final int expectedarguments = 1 + args.length;
         if (outgoing.stack.size() < expectedarguments) {
-            throw new IllegalStateException("Not enough arguments on stack for " + node.name() + " " + methodTypeDesc + " expected " + expectedarguments + " but got " + incoming.stack.size());
+            illegalState("Not enough arguments on stack for " + node.name() + " " + methodTypeDesc + " expected " + expectedarguments + " but got " + incoming.stack.size());
         }
         final List<Value> arguments = new ArrayList<>();
         for (int i = 0; i < expectedarguments; i++) {
@@ -816,7 +983,7 @@ public class MethodAnalyzer {
         final ClassDesc[] args = methodTypeDesc.parameterArray();
         final int expectedarguments = 1 + args.length;
         if (outgoing.stack.size() < expectedarguments) {
-            throw new IllegalStateException("Not enough arguments on stack for " + node.name() + " " + methodTypeDesc + " expected " + expectedarguments + " but got " + incoming.stack.size());
+            illegalState("Not enough arguments on stack for " + node.name() + " " + methodTypeDesc + " expected " + expectedarguments + " but got " + incoming.stack.size());
         }
         final List<Value> arguments = new ArrayList<>();
         for (int i = 0; i < expectedarguments; i++) {
@@ -842,7 +1009,7 @@ public class MethodAnalyzer {
         final ClassDesc[] args = methodTypeDesc.parameterArray();
         final int expectedarguments = 1 + args.length;
         if (incoming.stack.size() < expectedarguments) {
-            throw new IllegalStateException("Not enough arguments on stack for " + node.name() + " " + methodTypeDesc + " expected " + expectedarguments + " but got " + incoming.stack.size());
+            illegalState("Not enough arguments on stack for " + node.name() + " " + methodTypeDesc + " expected " + expectedarguments + " but got " + incoming.stack.size());
         }
 
         final Status outgoing = incoming.copy();
@@ -872,7 +1039,7 @@ public class MethodAnalyzer {
         final ClassDesc[] args = methodTypeDesc.parameterArray();
         final int expectedarguments = args.length;
         if (incoming.stack.size() < expectedarguments) {
-            throw new IllegalStateException("Not enough arguments on stack for " + node.name() + " " + methodTypeDesc + " expected " + expectedarguments + " but got " + incoming.stack.size());
+            illegalState("Not enough arguments on stack for " + node.name() + " " + methodTypeDesc + " expected " + expectedarguments + " but got " + incoming.stack.size());
         }
 
         final Status outgoing = incoming.copy();
@@ -904,7 +1071,7 @@ public class MethodAnalyzer {
         System.out.println("  opcode ALOAD Local " + node.slot());
         final Value v = incoming.locals[node.slot()];
         if (v == null) {
-            throw new IllegalStateException("Cannot local is null for index " + node.slot());
+            illegalState("Cannot local is null for index " + node.slot());
         }
 
         final Status outgoing = incoming.copy();
@@ -916,7 +1083,7 @@ public class MethodAnalyzer {
         System.out.println("  opcode LOAD Local " + node.slot() + " opcpde " + node.opcode());
         final Value v = incoming.locals[node.slot()];
         if (v == null) {
-            throw new IllegalStateException("Cannot local is null for index " + node.slot());
+            illegalState("Cannot local is null for index " + node.slot());
         }
         final Status outgoing = incoming.copy();
         outgoing.stack.push(v);
@@ -926,7 +1093,7 @@ public class MethodAnalyzer {
     private Status parse_ASTORE(final StoreInstruction node, final Status incoming) {
         System.out.println("  opcode ASTORE Local " + node.slot());
         if (incoming.stack.isEmpty()) {
-            throw new IllegalStateException("Cannot store empty stack");
+            illegalState("Cannot store empty stack");
         }
         final Status outgoing = incoming.copy();
         outgoing.locals[node.slot()] = outgoing.stack.pop();
@@ -942,13 +1109,13 @@ public class MethodAnalyzer {
     private Status parse_STORE_TYPE(final StoreInstruction node, final Status incoming, final ClassDesc type) {
         System.out.println("  opcode STORE Local " + node.slot() + " opcode " + node.opcode());
         if (incoming.stack.isEmpty()) {
-            throw new IllegalStateException("Cannot store empty stack");
+            illegalState("Cannot store empty stack");
         }
         final Status outgoing = incoming.copy();
 
         final Value v = outgoing.stack.pop();
         if (!v.type.equals(type)) {
-            throw new IllegalStateException("Cannot store non " + type + " value " + v + " for index " + node.slot());
+            illegalState("Cannot store non " + type + " value " + v + " for index " + node.slot());
         }
         outgoing.locals[node.slot()] = v;
         if (node.slot() > 0) {
@@ -963,7 +1130,7 @@ public class MethodAnalyzer {
     private Status parse_IF_ICMP_OP(final BranchInstruction node, final Status incoming, final NumericCondition.Operation op) {
         System.out.println("  opcode IFCMP_GE Target " + node.target());
         if (incoming.stack.size() < 2) {
-            throw new IllegalStateException("Need a minium of two values on stack for comparison");
+            illegalState("Need a minium of two values on stack for comparison");
         }
 
         final Status outgoing = incoming.copy();
@@ -983,7 +1150,7 @@ public class MethodAnalyzer {
     private Status parse_IF_NUMERIC_X(final BranchInstruction node, final Status incoming, final NumericCondition.Operation op) {
         System.out.println("  opcode " + node.opcode() + " Target " + node.target());
         if (incoming.stack.isEmpty()) {
-            throw new IllegalStateException("Need a value on stack for comparison");
+            illegalState("Need a value on stack for comparison");
         }
         final Status outgoing = incoming.copy();
         final Value v = outgoing.stack.pop();
@@ -1000,7 +1167,7 @@ public class MethodAnalyzer {
     private Status parse_IF_REFERENCETEST_X(final BranchInstruction node, final Status incoming, final ReferenceTest.Operation op) {
         System.out.println("  opcode " + node.opcode() + " Target " + node.target());
         if (incoming.stack.isEmpty()) {
-            throw new IllegalStateException("Need a value on stack for comparison");
+            illegalState("Need a value on stack for comparison");
         }
         final Status outgoing = incoming.copy();
         final Value v = outgoing.stack.pop();
@@ -1017,7 +1184,7 @@ public class MethodAnalyzer {
     private Status parse_IF_ACMP_OP(final BranchInstruction node, final Status incoming, final ReferenceCondition.Operation op) {
         System.out.println("  opcode " + node.opcode() + " Target " + node.target());
         if (incoming.stack.size() < 2) {
-            throw new IllegalStateException("Need a minium of two values on stack for comparison");
+            illegalState("Need a minium of two values on stack for comparison");
         }
 
         final Status outgoing = incoming.copy();
@@ -1133,12 +1300,12 @@ public class MethodAnalyzer {
     private Status parse_GETFIELD(final FieldInstruction node, final Status incoming) {
         System.out.println("  opcode GETFIELD Field " + node.field());
         if (incoming.stack.isEmpty()) {
-            throw new IllegalStateException("Cannot load field from empty stack");
+            illegalState("Cannot load field from empty stack");
         }
         final Status outgoing = incoming.copy();
         final Value v = outgoing.stack.pop();
         if (v.type.isPrimitive() || v.type.isArray()) {
-            throw new IllegalStateException("Cannot load field from non object value " + v);
+            illegalState("Cannot load field from non object value " + v);
         }
         final GetField get = new GetField(node, v);
         outgoing.stack.push(get);
@@ -1152,7 +1319,7 @@ public class MethodAnalyzer {
         System.out.println("  opcode PUTFIELD Field " + node.field());
 
         if (incoming.stack.isEmpty()) {
-            throw new IllegalStateException("Cannot put field from empty stack");
+            illegalState("Cannot put field from empty stack");
         }
 
         final Status outgoing = incoming.copy();
@@ -1189,7 +1356,7 @@ public class MethodAnalyzer {
         System.out.println("  opcode PUTSTATIC Field " + node.field());
 
         if (incoming.stack.isEmpty()) {
-            throw new IllegalStateException("Cannot put field from empty stack");
+            illegalState("Cannot put field from empty stack");
         }
 
         final RuntimeclassReference ri = ir.defineRuntimeclassReference(node.field().owner().asSymbol());
@@ -1243,14 +1410,14 @@ public class MethodAnalyzer {
     private Status parse_ARETURN(final ReturnInstruction node, final Status incoming) {
         System.out.println("  opcode ARETURN");
         if (incoming.stack.isEmpty()) {
-            throw new IllegalStateException("Cannot return empty stack");
+            illegalState("Cannot return empty stack");
         }
         final Status outgoing = incoming.copy();
         final Value v = outgoing.stack.pop();
 
         final MethodTypeDesc methodTypeDesc = method.methodTypeSymbol();
         if (!v.type.equals(methodTypeDesc.returnType())) {
-            throw new IllegalStateException("Expecting type " + methodTypeDesc.returnType() + " on stack, got " + v.type);
+            illegalState("Expecting type " + methodTypeDesc.returnType() + " on stack, got " + v.type);
         }
 
         final ReturnValue next = new ReturnValue(v.type, v);
@@ -1262,7 +1429,7 @@ public class MethodAnalyzer {
     private Status parse_RETURN_X(final ReturnInstruction node, final Status incoming, final ClassDesc type) {
         System.out.println("  opcode RETURN");
         if (incoming.stack.isEmpty()) {
-            throw new IllegalStateException("Cannot return empty stack");
+            illegalState("Cannot return empty stack");
         }
         final Status outgoing = incoming.copy();
         final Value v = outgoing.stack.pop();
@@ -1275,7 +1442,7 @@ public class MethodAnalyzer {
     private Status parse_CHECKCAST(final TypeCheckInstruction node, final Status incoming) {
         System.out.println("  opcode CHECKCAST Checking for " + node.type().asSymbol());
         if (incoming.stack.isEmpty()) {
-            throw new IllegalStateException("Checkcast requires a stack entry");
+            illegalState("Checkcast requires a stack entry");
         }
         final Status outgoing = incoming.copy();
         final Value objectToCheck = outgoing.stack.peek();
@@ -1293,7 +1460,7 @@ public class MethodAnalyzer {
     private Status parse_INSTANCEOF(final TypeCheckInstruction node, final Status incoming) {
         System.out.println("  opcode INSTANCEOF Checking for " + node.type().asSymbol());
         if (incoming.stack.isEmpty()) {
-            throw new IllegalStateException("Instanceof requires a stack entry");
+            illegalState("Instanceof requires a stack entry");
         }
         final Status outgoing = incoming.copy();
         final Value objectToCheck = outgoing.stack.peek();
@@ -1311,7 +1478,7 @@ public class MethodAnalyzer {
     private Status parse_DUP(final StackInstruction node, final Status incoming) {
         System.out.println("  " + node + " opcode DUP");
         if (incoming.stack.isEmpty()) {
-            throw new IllegalStateException("Cannot duplicate empty stack");
+            illegalState("Cannot duplicate empty stack");
         }
         final Status outgoing = incoming.copy();
         final Value v = outgoing.stack.peek();
@@ -1322,7 +1489,7 @@ public class MethodAnalyzer {
     private Status parse_DUP_X1(final StackInstruction node, final Status incoming) {
         System.out.println("  " + node + " opcode DUP_X1");
         if (incoming.stack.size() < 2) {
-            throw new IllegalStateException("Two stack values are required for DUP_X1");
+            illegalState("Two stack values are required for DUP_X1");
         }
         final Status outgoing = incoming.copy();
         final Value v1 = outgoing.stack.peek();
@@ -1336,7 +1503,7 @@ public class MethodAnalyzer {
     private Status parse_DUP_X2(final StackInstruction node, final Status incoming) {
         System.out.println("  " + node + " opcode DUP_X2");
         if (incoming.stack.size() < 2) {
-            throw new IllegalStateException("Two stack values are required for DUP_X2");
+            illegalState("Two stack values are required for DUP_X2");
         }
         final Status outgoing = incoming.copy();
         final Value v1 = outgoing.stack.peek();
@@ -1349,11 +1516,11 @@ public class MethodAnalyzer {
         } else {
             // Form 1
             if (outgoing.stack.isEmpty()) {
-                throw new IllegalStateException("Another stack entry is required for DUP_X2");
+                illegalState("Another stack entry is required for DUP_X2");
             }
             final Value v3 = outgoing.stack.peek();
             if (isCategory2(v1.type) || isCategory2(v2.type) || isCategory2(v3.type)) {
-                throw new IllegalStateException("All values must be of category 1 type for DUP_X2");
+                illegalState("All values must be of category 1 type for DUP_X2");
             }
             outgoing.stack.push(v1);
             outgoing.stack.push(v3);
@@ -1366,7 +1533,7 @@ public class MethodAnalyzer {
     private Status parse_DUP2(final StackInstruction node, final Status incoming) {
         System.out.println("  " + node + " opcode DUP2");
         if (incoming.stack.isEmpty()) {
-            throw new IllegalStateException("Cannot duplicate empty stack");
+            illegalState("Cannot duplicate empty stack");
         }
         final Status outgoing = incoming.copy();
         final Value v1 = outgoing.stack.pop();
@@ -1376,7 +1543,7 @@ public class MethodAnalyzer {
             return outgoing;
         }
         if (incoming.stack.isEmpty()) {
-            throw new IllegalStateException("Another stack entry is required for DUP2 type 1 operation");
+            illegalState("Another stack entry is required for DUP2 type 1 operation");
         }
         final Value v2 = outgoing.stack.pop();
         outgoing.stack.push(v2);
@@ -1389,7 +1556,7 @@ public class MethodAnalyzer {
     private Status parse_DUP2_X1(final StackInstruction node, final Status incoming) {
         System.out.println("  " + node + " opcode DUP2_X1");
         if (incoming.stack.size() < 2) {
-            throw new IllegalStateException("A minium of two stack values are required for DUP2_X1");
+            illegalState("A minium of two stack values are required for DUP2_X1");
         }
         final Status outgoing = incoming.copy();
 
@@ -1403,11 +1570,11 @@ public class MethodAnalyzer {
         } else {
             // Form 1
             if (outgoing.stack.isEmpty()) {
-                throw new IllegalStateException("Another stack entry is required for DUP2_X1");
+                illegalState("Another stack entry is required for DUP2_X1");
             }
             final Value v3 = outgoing.stack.peek();
             if (isCategory2(v1.type) || isCategory2(v2.type) || isCategory2(v3.type)) {
-                throw new IllegalStateException("All values must be of category 1 type for DUP2_X1");
+                illegalState("All values must be of category 1 type for DUP2_X1");
             }
             outgoing.stack.push(v2);
             outgoing.stack.push(v1);
@@ -1422,7 +1589,7 @@ public class MethodAnalyzer {
     private Status parse_DUP2_X2(final StackInstruction node, final Status incoming) {
         System.out.println("  " + node + " opcode DUP2_X1");
         if (incoming.stack.size() < 2) {
-            throw new IllegalStateException("A minium of two stack values are required for DUP2_X1");
+            illegalState("A minium of two stack values are required for DUP2_X1");
         }
         final Status outgoing = incoming.copy();
 
@@ -1435,7 +1602,7 @@ public class MethodAnalyzer {
             outgoing.stack.push(v1);
         } else {
             if (incoming.stack.isEmpty()) {
-                throw new IllegalStateException("Another stack entry is required for DUP2_X1");
+                illegalState("Another stack entry is required for DUP2_X1");
             }
             final Value v3 = outgoing.stack.pop();
             if (!isCategory2(v1.type) && !isCategory2(v2.type) || isCategory2(v3.type)) {
@@ -1454,11 +1621,11 @@ public class MethodAnalyzer {
             } else {
                 // Form 1
                 if (outgoing.stack.isEmpty()) {
-                    throw new IllegalStateException("Another stack entry is required for DUP2_X1");
+                    illegalState("Another stack entry is required for DUP2_X1");
                 }
                 final Value v4 = outgoing.stack.peek();
                 if (isCategory2(v1.type) || isCategory2(v2.type) || isCategory2(v3.type) || isCategory2(v4.type)) {
-                    throw new IllegalStateException("All values must be of category 1 type for DUP2_X1");
+                    illegalState("All values must be of category 1 type for DUP2_X1");
                 }
                 outgoing.stack.push(v2);
                 outgoing.stack.push(v1);
@@ -1475,7 +1642,7 @@ public class MethodAnalyzer {
     private Status parse_POP(final StackInstruction node, final Status incoming) {
         System.out.println("  " + node + " opcode POP");
         if (incoming.stack.isEmpty()) {
-            throw new IllegalStateException("Cannot pop from empty stack");
+            illegalState("Cannot pop from empty stack");
         }
         final Status outgoing = incoming.copy();
         outgoing.stack.pop();
@@ -1485,7 +1652,7 @@ public class MethodAnalyzer {
     private Status parse_POP2(final StackInstruction node, final Status incoming) {
         System.out.println("  " + node + " opcode POP2");
         if (incoming.stack.isEmpty()) {
-            throw new IllegalStateException("Cannot pop from empty stack");
+            illegalState("Cannot pop from empty stack");
         }
         final Status outgoing = incoming.copy();
         final Value v = outgoing.stack.pop();
@@ -1495,7 +1662,7 @@ public class MethodAnalyzer {
         }
         // Form 1
         if (outgoing.stack.isEmpty()) {
-            throw new IllegalStateException("Another type 1 entry is required on stack to pop!");
+            illegalState("Another type 1 entry is required on stack to pop!");
         }
         outgoing.stack.pop();
         return outgoing;
@@ -1504,7 +1671,7 @@ public class MethodAnalyzer {
     private Status parse_SWAP(final StackInstruction node, final Status incoming) {
         System.out.println("  " + node + " opcode POP");
         if (incoming.stack.size() < 2) {
-            throw new IllegalStateException("Expected at least two values on stack for swap");
+            illegalState("Expected at least two values on stack for swap");
         }
         final Status outgoing = incoming.copy();
         final Value a = outgoing.stack.pop();
@@ -1517,16 +1684,16 @@ public class MethodAnalyzer {
     private Status parse_ADD_X(final OperatorInstruction node, final Status incoming, final ClassDesc desc) {
         System.out.println("  opcode " + node.opcode());
         if (incoming.stack.size() < 2) {
-            throw new IllegalStateException("Need a minium of two values on stack for addition");
+            illegalState("Need a minium of two values on stack for addition");
         }
         final Status outgoing = incoming.copy();
         final Value a = outgoing.stack.pop();
         if (!a.type.equals(desc)) {
-            throw new IllegalStateException("Cannot add non " + desc + " value " + a + " for addition");
+            illegalState("Cannot add non " + desc + " value " + a + " for addition");
         }
         final Value b = outgoing.stack.pop();
         if (!b.type.equals(desc)) {
-            throw new IllegalStateException("Cannot add non " + desc + " value " + b + " for addition");
+            illegalState("Cannot add non " + desc + " value " + b + " for addition");
         }
         final Add add = new Add(desc, b, a);
         outgoing.stack.push(add);
@@ -1536,16 +1703,16 @@ public class MethodAnalyzer {
     private Status parse_SUB_X(final OperatorInstruction node, final Status incoming, final ClassDesc desc) {
         System.out.println("  opcode " + node.opcode());
         if (incoming.stack.size() < 2) {
-            throw new IllegalStateException("Need a minium of two values on stack for substraction");
+            illegalState("Need a minium of two values on stack for substraction");
         }
         final Status outgoing = incoming.copy();
         final Value a = outgoing.stack.pop();
         if (!a.type.equals(desc)) {
-            throw new IllegalStateException("Cannot add non " + desc + " value " + a + " for substraction");
+            illegalState("Cannot add non " + desc + " value " + a + " for substraction");
         }
         final Value b = outgoing.stack.pop();
         if (!b.type.equals(desc)) {
-            throw new IllegalStateException("Cannot add non " + desc + " value " + b + " for substraction");
+            illegalState("Cannot add non " + desc + " value " + b + " for substraction");
         }
         final Sub sub = new Sub(desc, b, a);
         outgoing.stack.push(sub);
@@ -1555,16 +1722,16 @@ public class MethodAnalyzer {
     private Status parse_MUL_X(final OperatorInstruction node, final Status incoming, final ClassDesc desc) {
         System.out.println("  opcode " + node.opcode());
         if (incoming.stack.size() < 2) {
-            throw new IllegalStateException("Need a minium of two values on stack for multiplication");
+            illegalState("Need a minium of two values on stack for multiplication");
         }
         final Status outgoing = incoming.copy();
         final Value a = outgoing.stack.pop();
         if (!a.type.equals(desc)) {
-            throw new IllegalStateException("Cannot add non " + desc + " value " + a + " for multiplication");
+            illegalState("Cannot add non " + desc + " value " + a + " for multiplication");
         }
         final Value b = outgoing.stack.pop();
         if (!b.type.equals(desc)) {
-            throw new IllegalStateException("Cannot add non " + desc + " value " + b + " for multiplication");
+            illegalState("Cannot add non " + desc + " value " + b + " for multiplication");
         }
         final Mul mul = new Mul(desc, b, a);
         outgoing.stack.push(mul);
@@ -1574,7 +1741,7 @@ public class MethodAnalyzer {
     private Status parse_ARRAYLENGTH(final OperatorInstruction node, final Status incoming) {
         System.out.println("  opcode ARRAYLENGTH");
         if (incoming.stack.isEmpty()) {
-            throw new IllegalStateException("Array on stack is required!");
+            illegalState("Array on stack is required!");
         }
         final Status outgoing = incoming.copy();
         final Value array = outgoing.stack.pop();
@@ -1585,12 +1752,12 @@ public class MethodAnalyzer {
     private Status parse_NEG_X(final OperatorInstruction node, final Status incoming, final ClassDesc desc) {
         System.out.println("  opcode " + node.opcode());
         if (incoming.stack.isEmpty()) {
-            throw new IllegalStateException("Need a minium of one value on stack for negation");
+            illegalState("Need a minium of one value on stack for negation");
         }
         final Status outgoing = incoming.copy();
         final Value a = outgoing.stack.pop();
         if (!a.type.equals(desc)) {
-            throw new IllegalStateException("Cannot negate non " + desc + " value " + a + " of type " + a.type);
+            illegalState("Cannot negate non " + desc + " value " + a + " of type " + a.type);
         }
         outgoing.stack.push(new Negate(desc, a));
         return outgoing;
@@ -1599,16 +1766,16 @@ public class MethodAnalyzer {
     private Status parse_DIV_X(final OperatorInstruction node, final Status incoming, final ClassDesc desc) {
         System.out.println("  opcode " + node.opcode());
         if (incoming.stack.size() < 2) {
-            throw new IllegalStateException("Need a minium of two values on stack for division");
+            illegalState("Need a minium of two values on stack for division");
         }
         final Status outgoing = incoming.copy();
         final Value a = outgoing.stack.pop();
         if (!a.type.equals(desc)) {
-            throw new IllegalStateException("Cannot use non " + desc + " value " + a + " for division");
+            illegalState("Cannot use non " + desc + " value " + a + " for division");
         }
         final Value b = outgoing.stack.pop();
         if (!b.type.equals(desc)) {
-            throw new IllegalStateException("Cannot use non " + desc + " value " + b + " for division");
+            illegalState("Cannot use non " + desc + " value " + b + " for division");
         }
         final Div div = new Div(desc, b, a);
         outgoing.control = outgoing.control.controlFlowsTo(div, ControlType.FORWARD);
@@ -1619,16 +1786,16 @@ public class MethodAnalyzer {
     private Status parse_REM_X(final OperatorInstruction node, final Status incoming, final ClassDesc desc) {
         System.out.println("  opcode " + node.opcode());
         if (incoming.stack.size() < 2) {
-            throw new IllegalStateException("Need a minium of two values on stack for remainder");
+            illegalState("Need a minium of two values on stack for remainder");
         }
         final Status outgoing = incoming.copy();
         final Value a = outgoing.stack.pop();
         if (!a.type.equals(desc)) {
-            throw new IllegalStateException("Cannot use non " + desc + " value " + a + " for remainder");
+            illegalState("Cannot use non " + desc + " value " + a + " for remainder");
         }
         final Value b = outgoing.stack.pop();
         if (!b.type.equals(desc)) {
-            throw new IllegalStateException("Cannot use non " + desc + " value " + b + " for remainder");
+            illegalState("Cannot use non " + desc + " value " + b + " for remainder");
         }
         final Rem rem = new Rem(desc, b, a);
         outgoing.control = outgoing.control.controlFlowsTo(rem, ControlType.FORWARD);
@@ -1639,16 +1806,16 @@ public class MethodAnalyzer {
     private Status parse_BITOPERATION_X(final OperatorInstruction node, final Status incoming, final ClassDesc desc, final BitOperation.Operation operation) {
         System.out.println("  opcode " + node.opcode());
         if (incoming.stack.size() < 2) {
-            throw new IllegalStateException("Need a minium of two values on stack for bit operation");
+            illegalState("Need a minium of two values on stack for bit operation");
         }
         final Status outgoing = incoming.copy();
         final Value a = outgoing.stack.pop();
         if (!a.type.equals(desc)) {
-            throw new IllegalStateException("Cannot use non " + desc + " value " + a + " for bit operation");
+            illegalState("Cannot use non " + desc + " value " + a + " for bit operation");
         }
         final Value b = outgoing.stack.pop();
         if (!b.type.equals(desc)) {
-            throw new IllegalStateException("Cannot use non " + desc + " value " + b + " for bit operation");
+            illegalState("Cannot use non " + desc + " value " + b + " for bit operation");
         }
         final BitOperation rem = new BitOperation(desc, operation, b, a);
         outgoing.stack.push(rem);
@@ -1658,7 +1825,7 @@ public class MethodAnalyzer {
     private Status parse_NUMERICCOMPARE_X(final OperatorInstruction node, final Status incoming, final NumericCompare.Mode mode) {
         System.out.println("  opcode " + node.opcode());
         if (incoming.stack.size() < 2) {
-            throw new IllegalStateException("Need a minium of two values on stack for numeric comparison");
+            illegalState("Need a minium of two values on stack for numeric comparison");
         }
         final Status outgoing = incoming.copy();
         final Value a = outgoing.stack.pop();
@@ -1671,7 +1838,7 @@ public class MethodAnalyzer {
     private Status parse_MONITORENTER(final MonitorInstruction node, final Status incoming) {
         System.out.println("  " + node + " opcode MONITORENTER");
         if (incoming.stack.isEmpty()) {
-            throw new IllegalStateException("Cannot duplicate empty stack");
+            illegalState("Cannot duplicate empty stack");
         }
         final Status outgoing = incoming.copy();
         final Value v = outgoing.stack.pop();
@@ -1682,7 +1849,7 @@ public class MethodAnalyzer {
     private Status parse_MONITOREXIT(final MonitorInstruction node, final Status incoming) {
         System.out.println("  " + node + " opcode MONITOREXIT");
         if (incoming.stack.isEmpty()) {
-            throw new IllegalStateException("Cannot duplicate empty stack");
+            illegalState("Cannot duplicate empty stack");
         }
         final Status outgoing = incoming.copy();
         final Value v = outgoing.stack.pop();
@@ -1693,7 +1860,7 @@ public class MethodAnalyzer {
     private Status parse_ASTORE_X(final ArrayStoreInstruction node, final Status incoming, final ClassDesc arrayType) {
         System.out.println("  " + node + " opcode " + node.opcode());
         if (incoming.stack.size() < 3) {
-            throw new IllegalStateException("Three stack entries required for array store");
+            illegalState("Three stack entries required for array store");
         }
         final Status outgoing = incoming.copy();
         final Value value = outgoing.stack.pop();
@@ -1706,7 +1873,7 @@ public class MethodAnalyzer {
     private Status parse_AASTORE(final ArrayStoreInstruction node, final Status incoming) {
         System.out.println("  " + node + " opcode " + node.opcode());
         if (incoming.stack.size() < 3) {
-            throw new IllegalStateException("Three stack entries required for array store");
+            illegalState("Three stack entries required for array store");
         }
         final Status outgoing = incoming.copy();
         final Value value = outgoing.stack.pop();
@@ -1719,7 +1886,7 @@ public class MethodAnalyzer {
     private Status parse_ALOAD_X(final ArrayLoadInstruction node, final Status incoming, final ClassDesc arrayType, final ClassDesc elementType) {
         System.out.println("  " + node + " opcode " + node.opcode());
         if (incoming.stack.size() < 2) {
-            throw new IllegalStateException("Two stack entries required for array store");
+            illegalState("Two stack entries required for array store");
         }
         final Status outgoing = incoming.copy();
         final Value index = outgoing.stack.pop();
@@ -1733,7 +1900,7 @@ public class MethodAnalyzer {
     private Status parse_AALOAD(final ArrayLoadInstruction node, final Status incoming) {
         System.out.println("  " + node + " opcode " + node.opcode());
         if (incoming.stack.size() < 2) {
-            throw new IllegalStateException("Two stack entries required for array store");
+            illegalState("Two stack entries required for array store");
         }
         final Status outgoing = incoming.copy();
         final Value index = outgoing.stack.pop();
@@ -1747,12 +1914,12 @@ public class MethodAnalyzer {
     private Status parse_CONVERT_X(final ConvertInstruction node, final Status incoming, final ClassDesc from, final ClassDesc to) {
         System.out.println("  " + node + " opcode " + node.opcode());
         if (incoming.stack.isEmpty()) {
-            throw new IllegalStateException("Expected an entry on the stack for type conversion");
+            illegalState("Expected an entry on the stack for type conversion");
         }
         final Status outgoing = incoming.copy();
         final Value value = outgoing.stack.pop();
         if (!value.type.equals(from)) {
-            throw new IllegalStateException("Expected a value of type " + from + " but got " + value.type);
+            illegalState("Expected a value of type " + from + " but got " + value.type);
         }
         outgoing.stack.push(new Convert(to, value, from));
         return outgoing;

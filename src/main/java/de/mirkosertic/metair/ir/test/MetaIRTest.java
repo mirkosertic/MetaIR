@@ -11,4 +11,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Testable
 public @interface MetaIRTest {
+
+    boolean includeConstructors() default false;
 }

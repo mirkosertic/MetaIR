@@ -2,6 +2,7 @@ package de.mirkosertic.metair.ir.test;
 
 import de.mirkosertic.metair.ir.DOTExporter;
 import de.mirkosertic.metair.ir.DominatorTree;
+import de.mirkosertic.metair.ir.IllegalParsingStateException;
 import de.mirkosertic.metair.ir.MethodAnalyzer;
 import org.junit.platform.engine.ExecutionRequest;
 import org.junit.platform.engine.TestDescriptor;
@@ -48,6 +49,9 @@ public class MetaIRTestExecutor {
             final Class<?> origin = descriptor.getTestClass();
 
             final URL resource = origin.getClassLoader().getResource(origin.getName().replace('.', File.separatorChar) + ".class");
+            if (resource == null) {
+                throw new IllegalStateException("Cannot find class file for " + origin.getName());
+            }
 
             try (final InputStream inputStream = resource.openStream()) {
                 final byte[] data = inputStream.readAllBytes();
@@ -57,24 +61,38 @@ public class MetaIRTestExecutor {
 
                 for (final MethodModel method : model.methods()) {
 
-                    if (method.methodName().stringValue().equals(descriptor.getTestMethod().getName())) {
-                        // We found our candidate
-                        final MethodAnalyzer analyzer = new MethodAnalyzer(model.thisClass().asSymbol(), method);
+                    if (method.methodName().stringValue().equals(descriptor.getMethodName())) {
 
                         final Path targetDir = request.getOutputDirectoryProvider().createOutputDirectory(descriptor);
 
-                        DOTExporter.writeTo(analyzer.ir(), new PrintStream(Files.newOutputStream(targetDir.resolve("ir.dot"))));
+                        // We found our candidate
+                        try {
+                            final MethodAnalyzer analyzer = new MethodAnalyzer(model.thisClass().asSymbol(), method);
 
-                        try (final PrintStream ps = new PrintStream(Files.newOutputStream(targetDir.resolve("bytecode.yaml")))) {
-                            ps.print(method.toDebugString());
+                            DOTExporter.writeTo(analyzer.ir(), new PrintStream(Files.newOutputStream(targetDir.resolve("ir.dot"))));
+
+                            final DominatorTree dominatorTree = new DominatorTree(analyzer.ir());
+
+                            DOTExporter.writeTo(dominatorTree, new PrintStream(Files.newOutputStream(targetDir.resolve("ir_dominatortree.dot"))));
+
+                            DOTExporter.writeBytecodeCFGTo(analyzer, new PrintStream(Files.newOutputStream(targetDir.resolve("bytecodecfg.dot"))));
+
+                        } catch (final IllegalParsingStateException ex) {
+
+                            DOTExporter.writeBytecodeCFGTo(ex.getAnalyzer(), new PrintStream(Files.newOutputStream(targetDir.resolve("bytecodecfg.dot"))));
+
+                            throw ex;
+                        } finally {
+                            try (final PrintStream ps = new PrintStream(Files.newOutputStream(targetDir.resolve("bytecode.yaml")))) {
+                                ps.print(method.toDebugString());
+                            }
+
+                            request.getEngineExecutionListener().executionFinished(descriptor, TestExecutionResult.successful());
                         }
-
-                        final DominatorTree dominatorTree = new DominatorTree(analyzer.ir());
-
-                        DOTExporter.writeTo(dominatorTree, new PrintStream(Files.newOutputStream(targetDir.resolve("ir_dominatortree.dot"))));
                     }
                 }
             } catch (final IOException e) {
+
                 throw new RuntimeException("Failed to load class data for " + origin.getName(), e);
             }
 

@@ -2,6 +2,7 @@ package de.mirkosertic.metair.ir.test;
 
 import org.junit.platform.commons.support.AnnotationSupport;
 import org.junit.platform.commons.support.ReflectionSupport;
+import org.junit.platform.commons.util.AnnotationUtils;
 import org.junit.platform.commons.util.ReflectionUtils;
 import org.junit.platform.engine.EngineDiscoveryRequest;
 import org.junit.platform.engine.ExecutionRequest;
@@ -45,7 +46,7 @@ public class MetaIRTestEngine implements TestEngine {
     }
 
     private void appendMethods(final MethodSelector selector, final TestDescriptor engineDescriptor) {
-        ReflectionSupport.tryToLoadClass(selector.getClassName()).ifSuccess(clazz -> ReflectionUtils.findMethod(clazz, selector.getMethodName()).ifPresent(method -> engineDescriptor.addChild(new MethodTestDescriptor(clazz, method, engineDescriptor))));
+        ReflectionSupport.tryToLoadClass(selector.getClassName()).ifSuccess(clazz -> AnnotationUtils.findAnnotation(clazz, MetaIRTest.class).flatMap(cls -> ReflectionUtils.findMethod(clazz, selector.getMethodName())).ifPresent(method -> engineDescriptor.addChild(new MethodTestDescriptor(clazz, method.getName(), engineDescriptor))));
     }
 
     private void appendTestsInClasspathRoot(final URI uri, final TestDescriptor engineDescriptor) {

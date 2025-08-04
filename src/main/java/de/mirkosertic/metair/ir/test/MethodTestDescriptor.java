@@ -4,21 +4,19 @@ import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.support.descriptor.AbstractTestDescriptor;
 import org.junit.platform.engine.support.descriptor.MethodSource;
 
-import java.lang.reflect.Method;
-
 class MethodTestDescriptor extends AbstractTestDescriptor {
 
     private final Class<?> testClass;
-    private final Method testMethod;
+    private final String methodName;
 
-    public MethodTestDescriptor(final Class<?> testClass, final Method testMethod, final TestDescriptor parent) {
+    public MethodTestDescriptor(final Class<?> testClass, final String methodName, final TestDescriptor parent) {
         super( //
-                parent.getUniqueId().append("method", testMethod.getName()), //
-                testMethod.getName(), //
-                MethodSource.from(testMethod)
+                parent.getUniqueId().append("method", methodName), //
+                methodName, //
+                MethodSource.from(testClass.getName(), methodName)
         );
         this.testClass = testClass;
-        this.testMethod = testMethod;
+        this.methodName = methodName;
         setParent(parent);
     }
 
@@ -26,8 +24,8 @@ class MethodTestDescriptor extends AbstractTestDescriptor {
         return testClass;
     }
 
-    public Method getTestMethod() {
-        return testMethod;
+    public String getMethodName() {
+        return methodName;
     }
 
     @Override

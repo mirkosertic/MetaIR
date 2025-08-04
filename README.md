@@ -55,9 +55,9 @@ Generated IR (raw and unoptimized):
 
 ![IRExample New Instance Creation](./docs/newinstance_1.png)
 
-## Example constructor invocation
+## Example constructor implementation
 
-A simple Java example with constructor invocation:
+A simple Java example with constructor implementation:
 ```
 public class Test {
 
