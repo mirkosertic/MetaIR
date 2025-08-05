@@ -6,7 +6,6 @@ import java.lang.constant.ClassDesc;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
@@ -49,16 +48,20 @@ public class Method extends Node {
         });
     }
 
-    public ThisRef defineThisRef(final ClassDesc type) {
-        final ThisRef t = new ThisRef(type);
-        t.use(this, DefinedByUse.INSTANCE);
-        return t;
+    public ExtractThisRefProjection defineThisRef(final ClassDesc type) {
+        return (ExtractThisRefProjection) controlFlowsTo(new ExtractThisRefProjection(type), ControlType.FORWARD);
     }
 
-    public MethodArgument defineMethodArgument(final ClassDesc type, final int index) {
-        final MethodArgument a = new MethodArgument(type, index);
-        a.use(this, DefinedByUse.INSTANCE);
-        return a;
+    public ExtractMethodArgProjection defineMethodArgument(final ClassDesc type, final int index) {
+        return (ExtractMethodArgProjection) controlFlowsTo(new ExtractMethodArgProjection(type, index), ControlType.FORWARD);
+    }
+
+    public MergeNode createMergeNode(final String label) {
+        return new MergeNode(label);
+    }
+
+    public LoopHeaderNode createLoop(final String label) {
+        return new LoopHeaderNode(label);
     }
 
     public LabelNode createLabel(final Label label) {
@@ -111,30 +114,6 @@ public class Method extends Node {
             v.use(Method.this, DefinedByUse.INSTANCE);
             return v;
         });
-    }
-
-    public void markBackEdges() {
-        final Queue<Node> woringQueue = new LinkedList<>();
-        final Set<Node> visited = new HashSet<>();
-
-        woringQueue.add(this);
-        while (!woringQueue.isEmpty()) {
-            final Node node = woringQueue.poll();
-            visited.add(node);
-
-            // TODO: Special handling for switch/case constructs required?
-            final Map<Node, List<UseEdge>> controlFlows = node.outgoingControlFlows();
-
-            for (final Map.Entry<Node, List<UseEdge>> controlFlow : controlFlows.entrySet()) {
-                if (visited.contains(controlFlow.getKey())) {
-                    for (final UseEdge edge : controlFlow.getValue()) {
-                        ((ControlFlowUse) edge.use).type = ControlType.BACKWARD;
-                    }
-                } else {
-                    woringQueue.add(controlFlow.getKey());
-                }
-            }
-        }
     }
 
     public void peepholeOptimizations() {

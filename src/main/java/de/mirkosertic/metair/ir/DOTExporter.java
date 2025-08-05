@@ -40,12 +40,45 @@ public final class DOTExporter {
             if (visited.add(item)) {
                 final int index = nodeindex.indexOf(item);
 
-                ps.print(" node" + index);
-                ps.print("[");
+                if (!(item instanceof Projection)) {
 
-                printNode(nodeindex.indexOf(item), item, ps);
+                    final List<Projection> projections = item.usedBy.stream().filter(t -> t instanceof Projection).map(t -> (Projection) t).sorted().toList();
+                    if (projections.isEmpty()) {
+                        ps.print(" node" + index);
+                        ps.print("[");
 
-                ps.println("];");
+                        printNode(index, item, ps);
+
+                        ps.println("];");
+                    } else {
+
+                        final StringBuilder label = new StringBuilder("<<table border=\"0\" cellborder=\"1\" cellspacing=\"0\" cellpadding=\"5\">");
+                        label.append("<tr><td colspan=\"");
+                        label.append(projections.size());
+                        label.append("\">#");
+                        label.append(index);
+                        label.append(" ");
+                        label.append(item.debugDescription());
+                        label.append("</td></tr>");
+                        label.append("<tr>");
+                        for (final Projection projection : projections) {
+                            label.append("<td port=\"prj");
+                            label.append(nodeindex.indexOf((Node) projection));
+                            label.append("\" bgcolor=\"yellow\">");
+                            label.append(projection.debugDescription());
+                            label.append("</td>");
+                        }
+                        label.append("</tr>");
+                        label.append("</table>>");
+
+                        ps.print(" node" + index);
+                        ps.print("[margin=\"0\", ");
+
+                        printNodeWithLabel(label.toString(), "none", item, ps);
+
+                        ps.println("];");
+                    }
+                }
 
                 for (final Node usedBy : item.usedBy) {
                     if (!visited.contains(usedBy)) {
@@ -67,39 +100,40 @@ public final class DOTExporter {
                         nodeindex.add(usedNode);
                     }
 
-                    ps.print(" node" + nodeindex.indexOf(usedNode));
-                    ps.print(" -> node" + index);
-
-                    if (useEdge.use instanceof final PHIUse phiUse) {
-                        ps.print("[");
-                        ps.print("headlabel=\"if #" + nodeindex.indexOf(phiUse.origin) + "\", labeldistance=2, color=blue, constraint=false");
-                        ps.print("]");
-                    } else if (useEdge.use instanceof final MemoryUse memoryUse) {
-                        ps.print("[");
-                        ps.print("labeldistance=2, color=green, constraint=false");
-                        ps.print("]");
-                    } else if (useEdge.use instanceof DataFlowUse) {
-                        ps.print("[");
-                        ps.print("headlabel=\"*" + item.uses.indexOf(useEdge) + "\", labeldistance=2");
-                        ps.print("]");
-                    } else if (useEdge.use instanceof DefinedByUse) {
-                        ps.print("[");
-                        ps.print("style=dotted");
-                        ps.print("]");
-                    } else if (useEdge.use instanceof final ControlFlowUse cfu) {
-                        ps.print("[");
-                        if (useEdge.node instanceof ConditionalNode) {
-                            ps.print("headlabel=\"" + cfu.condition.debugDescription() + "\",labeldistance=2,color=red, fontcolor=red");
+                    if (!(item instanceof Projection)) {
+                        if (usedNode instanceof Projection) {
+                            // Projections have only one use
+                            final Node use = usedNode.uses.getFirst().node;
+                            ps.print(" node" + nodeindex.indexOf(use));
+                            ps.print(":prj");
+                            ps.print(nodeindex.indexOf(usedNode));
                         } else {
-                            ps.print("labeldistance=2,color=red, fontcolor=red");
+                            ps.print(" node" + nodeindex.indexOf(usedNode));
                         }
-                        if (cfu.type == ControlType.BACKWARD) {
-                            ps.print(", style=dashed");
-                        }
-                        ps.print("]");
-                    }
+                        ps.print(" -> node" + index);
 
-                    ps.println(";");
+                        if (useEdge.use instanceof final PHIUse phiUse) {
+                            ps.print("[");
+                            ps.print("headlabel=\"if #" + nodeindex.indexOf(phiUse.origin) + "\", labeldistance=2, color=blue, constraint=false");
+                            ps.print("]");
+                        } else if (useEdge.use instanceof MemoryUse) {
+                            ps.print("[labeldistance=2, color=green, constraint=false]");
+                        } else if (useEdge.use instanceof DataFlowUse) {
+                            ps.print("[");
+                            ps.print("headlabel=\"*" + item.uses.indexOf(useEdge) + "\", labeldistance=2");
+                            ps.print("]");
+                        } else if (useEdge.use instanceof DefinedByUse) {
+                            ps.print("[style=dotted]");
+                        } else if (useEdge.use instanceof final ControlFlowUse cfu) {
+                            ps.print("[labeldistance=2, color=red, fontcolor=red");
+                            if (cfu.type == ControlType.BACKWARD) {
+                                ps.print(", style=dashed");
+                            }
+                            ps.print("]");
+                        }
+
+                        ps.println(";");
+                    }
                 }
             }
         }
@@ -159,15 +193,29 @@ public final class DOTExporter {
         printNode(index, node, ps, "");
     }
 
-
     private static void printNode(final int index, final Node node, final PrintStream ps, final String labelSuffex) {
+        printNode("box", index, node, ps, labelSuffex);
+    }
+
+    private static void printNode(final String shape, final int index, final Node node, final PrintStream ps, final String labelSuffex) {
         ps.print("label=\"#" + index + " " + node.debugDescription() + labelSuffex + "\"");
-        if (node instanceof Method || node instanceof LabelNode || node instanceof Return || node instanceof ReturnValue || node instanceof Goto || node instanceof If || node instanceof Copy || node instanceof Invocation || node instanceof ClassInitialization || node instanceof MonitorEnter || node instanceof MonitorExit || node instanceof Throw || node instanceof ArrayStore || node instanceof ArrayLoad || node instanceof CheckCast || node instanceof PutField || node instanceof PutStatic) {
-            ps.print(",shape=box,fillcolor=lightgrey,style=filled");
+        if (node instanceof Method || node instanceof LabelNode || node instanceof Return || node instanceof ReturnValue || node instanceof Goto || node instanceof If || node instanceof Copy || node instanceof Invocation || node instanceof ClassInitialization || node instanceof MonitorEnter || node instanceof MonitorExit || node instanceof Throw || node instanceof ArrayStore || node instanceof ArrayLoad || node instanceof CheckCast || node instanceof PutField || node instanceof PutStatic || node instanceof MergeNode || node instanceof Projection || node instanceof LoopHeaderNode) {
+            ps.print(",shape=" + shape +", fillcolor=lightgrey, style=filled");
         } else if (node.isConstant()) {
-            ps.print(",shape=octagon,fillcolor=lightgreen,style=filled");
+            ps.print(",shape=octagon, fillcolor=lightgreen, style=filled");
         } else if (node instanceof Value) {
-            ps.print(",shape=octagon,fillcolor=orange,style=filled");
+            ps.print(",shape=octagon, fillcolor=orange, style=filled");
+        }
+    }
+
+    private static void printNodeWithLabel(final String label, final String shape, final Node node, final PrintStream ps) {
+        ps.print("label=" + label);
+        if (node instanceof Method || node instanceof LabelNode || node instanceof Return || node instanceof ReturnValue || node instanceof Goto || node instanceof If || node instanceof Copy || node instanceof Invocation || node instanceof ClassInitialization || node instanceof MonitorEnter || node instanceof MonitorExit || node instanceof Throw || node instanceof ArrayStore || node instanceof ArrayLoad || node instanceof CheckCast || node instanceof PutField || node instanceof PutStatic || node instanceof MergeNode || node instanceof Projection || node instanceof LoopHeaderNode) {
+            ps.print(",shape=" + shape +", fillcolor=lightgrey, style=filled");
+        } else if (node.isConstant()) {
+            ps.print(",shape=octagon, fillcolor=lightgreen, style=filled");
+        } else if (node instanceof Value) {
+            ps.print(",shape=octagon, fillcolor=orange, style=filled");
         }
     }
 
@@ -204,12 +252,7 @@ public final class DOTExporter {
                     ps.print("style=dotted");
                     ps.print("]");
                 } else if (useEdge.use instanceof final ControlFlowUse cfu) {
-                    ps.print("[");
-                    if (useEdge.node instanceof ConditionalNode) {
-                        ps.print("headlabel=\"" + cfu.condition.debugDescription() + "\",labeldistance=2,color=red, fontcolor=red");
-                    } else {
-                        ps.print("labeldistance=2,color=red, fontcolor=red");
-                    }
+                    ps.print("[labeldistance=2, color=red, fontcolor=red");
                     if (cfu.type == ControlType.BACKWARD) {
                         ps.print(", style=dashed");
                     }

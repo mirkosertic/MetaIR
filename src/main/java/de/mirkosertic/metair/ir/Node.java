@@ -36,11 +36,7 @@ public abstract class Node {
     }
 
     public Node controlFlowsTo(final Node target, final ControlType type) {
-        return controlFlowsTo(target, type, ControlFlowConditionDefault.INSTANCE);
-    }
-
-    public Node controlFlowsTo(final Node target, final ControlType type, final ControlFlowCondition condition) {
-        target.use(this, new ControlFlowUse(type, condition));
+        target.use(this, new ControlFlowUse(type));
         return target;
     }
 

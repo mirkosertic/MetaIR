@@ -8,7 +8,7 @@ public class SimpleIfTest {
     public static int simpleIf(int a, int b, int c, int d) {
         if (a > b) {
             return c;
-                } else {
+        } else {
             return d;
         }
     }

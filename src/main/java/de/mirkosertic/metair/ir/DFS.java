@@ -38,7 +38,7 @@ public class DFS {
                 }
             }
 
-            // TODO: Sort the nodes by their usage, with control flow use first, then data flow, then argflow, and then define flow
+            // TODO: Sort the nodes by their usage, with control flow use first, then data flow, then arg-flow, and then define flow
             forwardNodes.sort(Comparator.comparing(o -> o.getClass().getSimpleName()));
 
             if (!forwardNodes.isEmpty()) {

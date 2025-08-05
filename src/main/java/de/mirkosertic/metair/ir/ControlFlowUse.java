@@ -2,11 +2,9 @@ package de.mirkosertic.metair.ir;
 
 public class ControlFlowUse extends Use {
 
-    public ControlType type;
-    public final ControlFlowCondition condition;
+    public final ControlType type;
 
-    ControlFlowUse(final ControlType type, final ControlFlowCondition condition) {
+    ControlFlowUse(final ControlType type) {
         this.type = type;
-        this.condition = condition;
     }
 }
