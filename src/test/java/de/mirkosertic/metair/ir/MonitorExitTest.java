@@ -16,10 +16,9 @@ public class MonitorExitTest {
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).containsExactly(monitor);
         assertThat(monitor.uses.size()).isEqualTo(1);
-        assertThat(monitor.uses.getFirst().node).isSameAs(a);
-        assertThat(monitor.uses.getFirst().use).isEqualTo(new ArgumentUse(0));
+        assertThat(monitor.uses.getFirst().node()).isSameAs(a);
+        assertThat(monitor.uses.getFirst().use()).isEqualTo(new ArgumentUse(0));
         assertThat(monitor.isConstant()).isFalse();
 
-        assertThat(monitor.peepholeOptimization()).isEmpty();
     }
 }

@@ -21,12 +21,10 @@ public class DivTest {
         assertThat(a.usedBy).containsExactly(div);
         assertThat(b.usedBy).containsExactly(div);
         assertThat(div.uses.size()).isEqualTo(2);
-        assertThat(div.uses.get(0).node).isSameAs(a);
-        assertThat(div.uses.get(0).use).isEqualTo(new ArgumentUse(0));
-        assertThat(div.uses.get(1).node).isSameAs(b);
-        assertThat(div.uses.get(1).use).isEqualTo(new ArgumentUse(1));
+        assertThat(div.uses.get(0).node()).isSameAs(a);
+        assertThat(div.uses.get(0).use()).isEqualTo(new ArgumentUse(0));
+        assertThat(div.uses.get(1).node()).isSameAs(b);
+        assertThat(div.uses.get(1).use()).isEqualTo(new ArgumentUse(1));
         assertThat(div.isConstant()).isFalse();
-
-        assertThat(div.peepholeOptimization()).isEmpty();
     }
 }

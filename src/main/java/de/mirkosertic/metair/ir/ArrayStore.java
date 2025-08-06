@@ -15,6 +15,6 @@ public class ArrayStore extends Node {
 
     @Override
     public String debugDescription() {
-        return "ArrayStore : " + DebugUtils.toString(arrayType);
+        return "ArrayStore : " + TypeUtils.toString(arrayType);
     }
 }

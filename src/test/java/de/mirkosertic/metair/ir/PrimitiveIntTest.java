@@ -19,8 +19,6 @@ public class PrimitiveIntTest {
         assertThat(a.uses).isEmpty();
         assertThat(a.isConstant()).isTrue();
         assertThat(a.debugDescription()).isEqualTo("int 10");
-
-        assertThat(a.peepholeOptimization()).isEmpty();
     }
 
 }

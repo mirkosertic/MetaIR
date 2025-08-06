@@ -4,13 +4,13 @@ import java.lang.constant.ClassDesc;
 
 public class NewArray extends Value {
 
-    NewArray(final ClassDesc type, final Value length) {
-        super(type);
+    NewArray(final ClassDesc componentType, final Value length) {
+        super(componentType.arrayType());
         use(length, new ArgumentUse(0));
     }
 
     @Override
     public String debugDescription() {
-        return "NewArray : " + DebugUtils.toString(type);
+        return "NewArray : " + TypeUtils.toString(type);
     }
 }

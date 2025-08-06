@@ -12,6 +12,6 @@ public class Add extends Value {
 
     @Override
     public String debugDescription() {
-        return "Add : " + DebugUtils.toString(type);
+        return "Add : " + TypeUtils.toString(type);
     }
 }

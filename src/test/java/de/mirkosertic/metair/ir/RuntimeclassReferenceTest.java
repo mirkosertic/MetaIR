@@ -19,7 +19,5 @@ public class RuntimeclassReferenceTest {
         assertThat(a.uses).isEmpty();
         assertThat(a.isConstant()).isTrue();
         assertThat(a.debugDescription()).isEqualTo("Class String");
-
-        assertThat(a.peepholeOptimization()).isEmpty();
     }
 }

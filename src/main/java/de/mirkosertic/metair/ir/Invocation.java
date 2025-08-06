@@ -40,15 +40,15 @@ public class Invocation extends Value {
     @Override
     public String debugDescription() {
         if (isInvokeStatic()) {
-            return "Invoke static " + ins.name() + " : " + DebugUtils.toString(ins.typeSymbol());
+            return "Invoke static " + ins.name() + " : " + TypeUtils.toString(ins.typeSymbol());
         } else if (isInvokeSpecial()) {
-            return "Invoke special " + ins.name() + " : " + DebugUtils.toString(ins.typeSymbol());
+            return "Invoke special " + ins.name() + " : " + TypeUtils.toString(ins.typeSymbol());
         } else if (isInvokeVirtual()) {
-            return "Invoke virtual " + ins.name() + " : " + DebugUtils.toString(ins.typeSymbol());
+            return "Invoke virtual " + ins.name() + " : " + TypeUtils.toString(ins.typeSymbol());
         } else if (isInvokeInterface()) {
-            return "Invoke interface " + ins.name() + " : " + DebugUtils.toString(ins.typeSymbol());
+            return "Invoke interface " + ins.name() + " : " + TypeUtils.toString(ins.typeSymbol());
         } else if (isInvokeDynamic()) {
-            return "Invoke dynamic " + ins.name() + " : " + DebugUtils.toString(ins.typeSymbol());
+            return "Invoke dynamic " + ins.name() + " : " + TypeUtils.toString(ins.typeSymbol());
         } else {
             throw new IllegalArgumentException("Unknown opcode " + ins.opcode());
         }

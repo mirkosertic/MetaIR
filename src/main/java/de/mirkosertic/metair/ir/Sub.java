@@ -12,6 +12,6 @@ public class Sub extends Value {
 
     @Override
     public String debugDescription() {
-        return "Sub : " + DebugUtils.toString(type);
+        return "Sub : " + TypeUtils.toString(type);
     }
 }

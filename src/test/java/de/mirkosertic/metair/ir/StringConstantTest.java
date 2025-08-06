@@ -19,7 +19,5 @@ public class StringConstantTest {
         assertThat(a.isConstant()).isTrue();
         assertThat(a.debugDescription()).isEqualTo("String : hello");
         assertThat(a.value).isEqualTo("hello");
-
-        assertThat(a.peepholeOptimization()).isEmpty();
     }
 }

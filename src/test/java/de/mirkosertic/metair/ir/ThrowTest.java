@@ -16,10 +16,8 @@ public class ThrowTest {
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).containsExactly(tr);
         assertThat(tr.uses.size()).isEqualTo(1);
-        assertThat(tr.uses.getFirst().node).isSameAs(a);
-        assertThat(tr.uses.getFirst().use).isEqualTo(new ArgumentUse(0));
+        assertThat(tr.uses.getFirst().node()).isSameAs(a);
+        assertThat(tr.uses.getFirst().use()).isEqualTo(new ArgumentUse(0));
         assertThat(tr.isConstant()).isFalse();
-
-        assertThat(tr.peepholeOptimization()).isEmpty();
     }
 }

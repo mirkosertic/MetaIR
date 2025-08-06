@@ -11,7 +11,7 @@ public class ReferenceTest extends Value {
     public final Operation operation;
 
     ReferenceTest(final Operation operation, final Value a) {
-        super(ConstantDescs.CD_boolean);
+        super(ConstantDescs.CD_int);
 
         this.operation = operation;
 

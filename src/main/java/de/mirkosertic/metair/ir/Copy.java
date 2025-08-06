@@ -11,7 +11,7 @@ public class Copy extends Node {
 
     @Override
     public boolean isConstant() {
-        final Optional<Node> argument = uses.stream().filter(t -> t.use instanceof DataFlowUse).map(t -> t.node).findFirst();
+        final Optional<Node> argument = uses.stream().filter(t -> t.use() instanceof DataFlowUse).map(t -> t.node()).findFirst();
         return argument.map(Node::isConstant).orElse(false);
     }
 

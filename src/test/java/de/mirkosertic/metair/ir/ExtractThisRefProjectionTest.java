@@ -18,7 +18,5 @@ public class ExtractThisRefProjectionTest {
         assertThat(a.uses).isEmpty();
         assertThat(a.debugDescription()).isEqualTo("this : String");
         assertThat(a.name()).isEqualTo("this");
-
-        assertThat(a.peepholeOptimization()).isEmpty();
     }
 }

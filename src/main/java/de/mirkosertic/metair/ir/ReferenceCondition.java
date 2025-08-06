@@ -11,7 +11,7 @@ public class ReferenceCondition extends Value {
     public final Operation operation;
 
     ReferenceCondition(final Operation operation, final Value a, final Value b) {
-        super(ConstantDescs.CD_boolean);
+        super(ConstantDescs.CD_int);
 
         this.operation = operation;
 

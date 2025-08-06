@@ -16,7 +16,5 @@ public class ExtractControlFlowProjectionTest {
         assertThat(projection).isInstanceOf(Projection.class);
         assertThat(projection.uses).isEmpty();
         assertThat(projection.isConstant()).isFalse();
-
-        assertThat(projection.peepholeOptimization()).isEmpty();
     }
 }

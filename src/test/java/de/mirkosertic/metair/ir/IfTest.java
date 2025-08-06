@@ -16,12 +16,10 @@ public class IfTest {
         assertThat(a.usedBy).containsExactly(numericCondition);
         assertThat(b.usedBy).containsExactly(numericCondition);
         assertThat(iff.uses.size()).isEqualTo(1);
-        assertThat(iff.uses.getFirst().node).isSameAs(numericCondition);
-        assertThat(iff.uses.getFirst().use).isEqualTo(new ArgumentUse(0));
+        assertThat(iff.uses.getFirst().node()).isSameAs(numericCondition);
+        assertThat(iff.uses.getFirst().use()).isEqualTo(new ArgumentUse(0));
         assertThat(iff.usedBy).hasSize(2);
         assertThat(numericCondition.isConstant()).isFalse();
-
-        assertThat(iff.peepholeOptimization()).isEmpty();
 
         assertThat(iff.debugDescription()).isEqualTo("If");
     }

@@ -16,12 +16,11 @@ public class GetStaticTest {
         assertThat(v.usedBy).containsExactly(get);
 
         assertThat(get.uses).hasSize(1);
-        assertThat(get.uses.getFirst().node).isSameAs(v);
-        assertThat(get.uses.getFirst().use).isEqualTo(new ArgumentUse(0));
+        assertThat(get.uses.getFirst().node()).isSameAs(v);
+        assertThat(get.uses.getFirst().use()).isEqualTo(new ArgumentUse(0));
 
         assertThat(get.type).isEqualTo(ConstantDescs.CD_int);
         assertThat(get).isInstanceOf(Value.class);
-        assertThat(get.peepholeOptimization()).isEmpty();
         assertThat(get.debugDescription()).isEqualTo("GetStaticField : fieldname : int");
         assertThat(get.fieldName).isEqualTo("fieldname");
         assertThat(get.isConstant()).isFalse();

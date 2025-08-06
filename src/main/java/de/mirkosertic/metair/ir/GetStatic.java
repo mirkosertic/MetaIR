@@ -14,6 +14,6 @@ public class GetStatic extends Value {
 
     @Override
     public String debugDescription() {
-        return "GetStaticField : " + fieldName + " : " + DebugUtils.toString(type);
+        return "GetStaticField : " + fieldName + " : " + TypeUtils.toString(type);
     }
 }

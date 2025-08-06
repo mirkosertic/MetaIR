@@ -24,14 +24,14 @@ public class DFS {
 
             for (final Node user : currentNode.usedBy) {
                 for (final Node.UseEdge edge : user.uses) {
-                    if (edge.node == currentNode) {
-                        if (edge.use instanceof final ControlFlowUse cfu && cfu.type == ControlType.FORWARD) {
+                    if (edge.node() == currentNode) {
+                        if (edge.use() instanceof final ControlFlowUse cfu && cfu.type == ControlType.FORWARD) {
                             forwardNodes.add(user);
-                        } else if (edge.use instanceof DefinedByUse) {
+                        } else if (edge.use() instanceof DefinedByUse) {
                             forwardNodes.add(user);
-                        } else if (edge.use instanceof DataFlowUse) {
+                        } else if (edge.use() instanceof DataFlowUse) {
                             forwardNodes.add(user);
-                        } else if (edge.use instanceof MemoryUse) {
+                        } else if (edge.use() instanceof MemoryUse) {
                             forwardNodes.add(user);
                         }
                     }

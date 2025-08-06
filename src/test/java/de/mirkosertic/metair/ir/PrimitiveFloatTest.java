@@ -19,8 +19,6 @@ public class PrimitiveFloatTest {
         assertThat(a.uses).isEmpty();
         assertThat(a.isConstant()).isTrue();
         assertThat(a.debugDescription()).isEqualTo("float 10.0");
-
-        assertThat(a.peepholeOptimization()).isEmpty();
     }
 
 }

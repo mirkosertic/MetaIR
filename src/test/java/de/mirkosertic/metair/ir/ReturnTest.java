@@ -14,8 +14,6 @@ public class ReturnTest {
         assertThat(ret.usedBy).isEmpty();
         assertThat(ret.isConstant()).isFalse();
 
-        assertThat(ret.peepholeOptimization()).isEmpty();
-
         assertThat(ret.debugDescription()).isEqualTo("Return");
     }
 }

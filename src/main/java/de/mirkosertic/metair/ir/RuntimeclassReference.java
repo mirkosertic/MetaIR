@@ -15,6 +15,6 @@ public class RuntimeclassReference extends Value {
 
     @Override
     public String debugDescription() {
-        return "Class " + DebugUtils.toString(type);
+        return "Class " + TypeUtils.toString(type);
     }
 }

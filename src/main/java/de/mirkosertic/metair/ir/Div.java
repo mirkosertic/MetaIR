@@ -12,6 +12,6 @@ public class Div extends Value {
 
     @Override
     public String debugDescription() {
-        return "Div : " + DebugUtils.toString(type);
+        return "Div : " + TypeUtils.toString(type);
     }
 }

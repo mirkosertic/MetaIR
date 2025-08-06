@@ -12,12 +12,12 @@ public class ReturnValue extends Value {
 
     @Override
     public boolean isConstant() {
-        final Optional<Node> argument = uses.stream().filter(t -> t.use instanceof DataFlowUse).map(t -> t.node).findFirst();
+        final Optional<Node> argument = uses.stream().filter(t -> t.use() instanceof DataFlowUse).map(UseEdge::node).findFirst();
         return argument.map(Node::isConstant).orElse(false);
     }
 
     @Override
     public String debugDescription() {
-        return "ReturnValue : " + DebugUtils.toString(type);
+        return "ReturnValue : " + TypeUtils.toString(type);
     }
 }

@@ -22,6 +22,6 @@ public class ExtractMethodArgProjection extends Value implements Projection {
 
     @Override
     public String debugDescription() {
-        return "arg" + index + " : " + DebugUtils.toString(type);
+        return "arg" + index + " : " + TypeUtils.toString(type);
     }
 }

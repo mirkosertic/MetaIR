@@ -91,7 +91,7 @@ public final class DOTExporter {
                 }
 
                 for (final Node.UseEdge useEdge : item.uses) {
-                    final Node usedNode = useEdge.node;
+                    final Node usedNode = useEdge.node();
                     if (!visited.contains(usedNode)) {
                         workingQueue.push(usedNode);
                     }
@@ -103,7 +103,7 @@ public final class DOTExporter {
                     if (!(item instanceof Projection)) {
                         if (usedNode instanceof Projection) {
                             // Projections have only one use
-                            final Node use = usedNode.uses.getFirst().node;
+                            final Node use = usedNode.uses.getFirst().node();
                             ps.print(" node" + nodeindex.indexOf(use));
                             ps.print(":prj");
                             ps.print(nodeindex.indexOf(usedNode));
@@ -112,19 +112,19 @@ public final class DOTExporter {
                         }
                         ps.print(" -> node" + index);
 
-                        if (useEdge.use instanceof final PHIUse phiUse) {
+                        if (useEdge.use() instanceof final PHIUse phiUse) {
                             ps.print("[");
                             ps.print("headlabel=\"if #" + nodeindex.indexOf(phiUse.origin) + "\", labeldistance=2, color=blue, constraint=false");
                             ps.print("]");
-                        } else if (useEdge.use instanceof MemoryUse) {
+                        } else if (useEdge.use() instanceof MemoryUse) {
                             ps.print("[labeldistance=2, color=green, constraint=false]");
-                        } else if (useEdge.use instanceof DataFlowUse) {
+                        } else if (useEdge.use() instanceof DataFlowUse) {
                             ps.print("[");
                             ps.print("headlabel=\"*" + item.uses.indexOf(useEdge) + "\", labeldistance=2");
                             ps.print("]");
-                        } else if (useEdge.use instanceof DefinedByUse) {
+                        } else if (useEdge.use() instanceof DefinedByUse) {
                             ps.print("[style=dotted]");
-                        } else if (useEdge.use instanceof final ControlFlowUse cfu) {
+                        } else if (useEdge.use() instanceof final ControlFlowUse cfu) {
                             ps.print("[labeldistance=2, color=red, fontcolor=red");
                             if (cfu.type == ControlType.BACKWARD) {
                                 ps.print(", style=dashed");
@@ -141,9 +141,9 @@ public final class DOTExporter {
         final Map<Node, List<Node>> defines = new HashMap<>();
 
         for (final Node node : nodeindex) {
-            final List<Node.UseEdge> edges = node.uses.stream().filter(t -> t.use instanceof DefinedByUse).toList();
+            final List<Node.UseEdge> edges = node.uses.stream().filter(t -> t.use() instanceof DefinedByUse).toList();
             for (final Node.UseEdge edge : edges) {
-                defines.computeIfAbsent(edge.node, k -> new ArrayList<>()).add(node);
+                defines.computeIfAbsent(edge.node(), k -> new ArrayList<>()).add(node);
             }
         }
 
@@ -234,24 +234,24 @@ public final class DOTExporter {
             }
 
             for (final Node.UseEdge useEdge : n.uses) {
-                final Node usedNode = useEdge.node;
+                final Node usedNode = useEdge.node();
 
                 ps.print(" node" + tree.preOrder.indexOf(usedNode));
                 ps.print(" -> node" + tree.preOrder.indexOf(n));
 
-                if (useEdge.use instanceof final PHIUse phiUse) {
+                if (useEdge.use() instanceof final PHIUse phiUse) {
                     ps.print("[");
                     ps.print("headlabel=\"if #" + tree.preOrder.indexOf(phiUse.origin) + "\", labeldistance=2, color=blue, constraint=false");
                     ps.print("]");
-                } else if (useEdge.use instanceof DataFlowUse) {
+                } else if (useEdge.use() instanceof DataFlowUse) {
                     ps.print("[");
                     ps.print("headlabel=\"*" + n.uses.indexOf(useEdge) + "\", labeldistance=2");
                     ps.print("]");
-                } else if (useEdge.use instanceof DefinedByUse) {
+                } else if (useEdge.use() instanceof DefinedByUse) {
                     ps.print("[");
                     ps.print("style=dotted");
                     ps.print("]");
-                } else if (useEdge.use instanceof final ControlFlowUse cfu) {
+                } else if (useEdge.use() instanceof final ControlFlowUse cfu) {
                     ps.print("[labeldistance=2, color=red, fontcolor=red");
                     if (cfu.type == ControlType.BACKWARD) {
                         ps.print(", style=dashed");

@@ -21,12 +21,10 @@ public class AddTest {
         assertThat(a.usedBy).containsExactly(add);
         assertThat(b.usedBy).containsExactly(add);
         assertThat(add.uses.size()).isEqualTo(2);
-        assertThat(add.uses.get(0).node).isSameAs(a);
-        assertThat(add.uses.get(0).use).isEqualTo(new ArgumentUse(0));
-        assertThat(add.uses.get(1).node).isSameAs(b);
-        assertThat(add.uses.get(1).use).isEqualTo(new ArgumentUse(1));
+        assertThat(add.uses.get(0).node()).isSameAs(a);
+        assertThat(add.uses.get(0).use()).isEqualTo(new ArgumentUse(0));
+        assertThat(add.uses.get(1).node()).isSameAs(b);
+        assertThat(add.uses.get(1).use()).isEqualTo(new ArgumentUse(1));
         assertThat(add.isConstant()).isFalse();
-
-        assertThat(add.peepholeOptimization()).isEmpty();
     }
 }

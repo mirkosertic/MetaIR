@@ -25,8 +25,8 @@ public class LabelNodeTest {
 
         final PHI p = a.definePHI(ConstantDescs.CD_int);
         assertThat(p.type).isEqualTo(ConstantDescs.CD_int);
-        assertThat(p.uses.getFirst().node).isSameAs(a);
-        assertThat(p.uses.getFirst().use).isSameAs(DefinedByUse.INSTANCE);
+        assertThat(p.uses.getFirst().node()).isSameAs(a);
+        assertThat(p.uses.getFirst().use()).isSameAs(DefinedByUse.INSTANCE);
         assertThat(p.usedBy).isEmpty();
         assertThat(p.isConstant()).isFalse();
         assertThat(p.debugDescription()).isEqualTo("Φ int");

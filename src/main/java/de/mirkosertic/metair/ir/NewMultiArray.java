@@ -14,6 +14,6 @@ public class NewMultiArray extends Value {
 
     @Override
     public String debugDescription() {
-        return "NewMultiArray : " + DebugUtils.toString(type);
+        return "NewMultiArray : " + TypeUtils.toString(type);
     }
 }

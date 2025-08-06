@@ -21,12 +21,10 @@ public class BitOperationTest {
         assertThat(a.usedBy).containsExactly(bit);
         assertThat(b.usedBy).containsExactly(bit);
         assertThat(bit.uses.size()).isEqualTo(2);
-        assertThat(bit.uses.get(0).node).isSameAs(a);
-        assertThat(bit.uses.get(0).use).isEqualTo(new ArgumentUse(0));
-        assertThat(bit.uses.get(1).node).isSameAs(b);
-        assertThat(bit.uses.get(1).use).isEqualTo(new ArgumentUse(1));
+        assertThat(bit.uses.get(0).node()).isSameAs(a);
+        assertThat(bit.uses.get(0).use()).isEqualTo(new ArgumentUse(0));
+        assertThat(bit.uses.get(1).node()).isSameAs(b);
+        assertThat(bit.uses.get(1).use()).isEqualTo(new ArgumentUse(1));
         assertThat(bit.isConstant()).isFalse();
-
-        assertThat(bit.peepholeOptimization()).isEmpty();
     }
 }

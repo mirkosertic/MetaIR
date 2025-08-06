@@ -11,6 +11,6 @@ public class Negate extends Value {
 
     @Override
     public String debugDescription() {
-        return "Negate : " + DebugUtils.toString(type);
+        return "Negate : " + TypeUtils.toString(type);
     }
 }

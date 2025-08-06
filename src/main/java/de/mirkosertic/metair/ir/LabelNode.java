@@ -1,11 +1,6 @@
 package de.mirkosertic.metair.ir;
 
 import java.lang.constant.ClassDesc;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class LabelNode extends Node {
 
@@ -19,48 +14,6 @@ public class LabelNode extends Node {
         final PHI p = new PHI(type);
         p.use(this, DefinedByUse.INSTANCE);
         return p;
-    }
-
-    @Override
-    public Set<Node> peepholeOptimization() {
-        final List<UseEdge> incomingControlFlows = uses.stream().filter(t -> t.use instanceof ControlFlowUse).toList();
-        final Map<Node, List<UseEdge>> controlflowsTo = outgoingControlFlows();
-
-        for (final Map.Entry<Node, List<UseEdge>> e : controlflowsTo.entrySet()) {
-            for (final UseEdge u : e.getValue()) {
-                if (((ControlFlowUse) u.use).type == ControlType.BACKWARD) {
-                    // We do not support optimization of labels with back edges for now...
-                    return Collections.emptySet();
-                }
-            }
-        }
-
-        if (incomingControlFlows.size() == 1 && controlflowsTo.size() == 1) {
-
-            final Node incoming = incomingControlFlows.getFirst().node;
-            final Node outgoing = controlflowsTo.keySet().iterator().next();
-
-            incoming.usedBy.remove(this);
-            incoming.usedBy.add(outgoing);
-
-            for (final UseEdge o : outgoing.uses) {
-                if (o.node == this) {
-                    o.node = incoming;
-                }
-            }
-
-            uses.clear();
-            usedBy.clear();
-
-            final Set<Node> result = new HashSet<>();
-            result.addAll(incomingControlFlows.stream().map(t -> t.node).toList());
-            result.addAll(controlflowsTo.keySet());
-            return result;
-
-            //kill();
-        }
-
-        return Collections.emptySet();
     }
 
     @Override

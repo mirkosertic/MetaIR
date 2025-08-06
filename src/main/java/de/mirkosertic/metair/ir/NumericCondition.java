@@ -11,7 +11,7 @@ public class NumericCondition extends Value {
     public final Operation operation;
 
     NumericCondition(final Operation operation, final Value a, final Value b) {
-        super(ConstantDescs.CD_boolean);
+        super(ConstantDescs.CD_int);
 
         this.operation = operation;
 

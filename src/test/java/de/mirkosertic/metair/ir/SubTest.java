@@ -21,12 +21,10 @@ public class SubTest {
         assertThat(a.usedBy).containsExactly(sub);
         assertThat(b.usedBy).containsExactly(sub);
         assertThat(sub.uses.size()).isEqualTo(2);
-        assertThat(sub.uses.get(0).node).isSameAs(a);
-        assertThat(sub.uses.get(0).use).isEqualTo(new ArgumentUse(0));
-        assertThat(sub.uses.get(1).node).isSameAs(b);
-        assertThat(sub.uses.get(1).use).isEqualTo(new ArgumentUse(1));
+        assertThat(sub.uses.get(0).node()).isSameAs(a);
+        assertThat(sub.uses.get(0).use()).isEqualTo(new ArgumentUse(0));
+        assertThat(sub.uses.get(1).node()).isSameAs(b);
+        assertThat(sub.uses.get(1).use()).isEqualTo(new ArgumentUse(1));
         assertThat(sub.isConstant()).isFalse();
-
-        assertThat(sub.peepholeOptimization()).isEmpty();
     }
 }

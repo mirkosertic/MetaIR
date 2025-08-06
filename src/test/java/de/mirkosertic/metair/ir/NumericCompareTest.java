@@ -22,13 +22,11 @@ public class NumericCompareTest {
         assertThat(a.usedBy).containsExactly(compare);
         assertThat(b.usedBy).containsExactly(compare);
         assertThat(compare.uses.size()).isEqualTo(2);
-        assertThat(compare.uses.get(0).node).isSameAs(a);
-        assertThat(compare.uses.get(0).use).isEqualTo(new ArgumentUse(0));
-        assertThat(compare.uses.get(1).node).isSameAs(b);
-        assertThat(compare.uses.get(1).use).isEqualTo(new ArgumentUse(1));
+        assertThat(compare.uses.get(0).node()).isSameAs(a);
+        assertThat(compare.uses.get(0).use()).isEqualTo(new ArgumentUse(0));
+        assertThat(compare.uses.get(1).node()).isSameAs(b);
+        assertThat(compare.uses.get(1).use()).isEqualTo(new ArgumentUse(1));
         assertThat(compare.isConstant()).isFalse();
-
-        assertThat(compare.peepholeOptimization()).isEmpty();
     }
 
 }

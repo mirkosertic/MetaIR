@@ -19,8 +19,6 @@ public class PrimitiveLongTest {
         assertThat(a.uses).isEmpty();
         assertThat(a.isConstant()).isTrue();
         assertThat(a.debugDescription()).isEqualTo("long 10");
-
-        assertThat(a.peepholeOptimization()).isEmpty();
     }
 
 }

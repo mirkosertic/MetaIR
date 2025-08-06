@@ -16,7 +16,5 @@ public class MergeNodeTest {
         assertThat(node.usedBy).isEmpty();
         assertThat(node).isInstanceOf(MultiInputNode.class);
         assertThat(node.isConstant()).isFalse();
-
-        assertThat(node.peepholeOptimization()).isEmpty();
     }
 }

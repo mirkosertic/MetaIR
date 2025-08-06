@@ -36,6 +36,7 @@ import java.lang.classfile.instruction.StoreInstruction;
 import java.lang.classfile.instruction.ThrowInstruction;
 import java.lang.classfile.instruction.TypeCheckInstruction;
 import java.lang.constant.ClassDesc;
+import java.lang.constant.ConstantDesc;
 import java.lang.constant.ConstantDescs;
 import java.lang.constant.MethodTypeDesc;
 import java.lang.reflect.AccessFlag;
@@ -54,73 +55,22 @@ import java.util.Stack;
 
 public class MethodAnalyzer {
 
-    enum CFGProjection {
-        DEFAULT, TRUE, FALSE
-    }
-
-    record CFGEdge(int fromIndex, CFGProjection projection, ControlType controlType) {
-    }
-
-    private record CFGAnalysisJob(int startIndex, List<Integer> path) {
-    }
-
-    static class Frame {
-
-        final CodeElement codeElement;
-        final List<CFGEdge> predecessors;
-        final int elementIndex;
-        int indexInTopologicalOrder;
-        Node entryPoint;
-        Status incoming;
-        Status outgoing;
-
-        public Frame(final int elementIndex, final CodeElement codeElement) {
-            this.predecessors = new ArrayList<>();
-            this.elementIndex = elementIndex;
-            this.indexInTopologicalOrder = -1;
-            this.codeElement = codeElement;
-        }
-
-        public Status copyIncomingToOutgoing() {
-            outgoing = incoming.copy();
-            return outgoing;
-        }
-
-        public Value getLocal(final int index) {
-            return outgoing.locals[index];
-        }
-
-        public void setLocal(final int index, final Value value) {
-            outgoing.locals[index] = value;
-        }
-
-        public Value pop() {
-            return outgoing.stack.pop();
-        }
-
-        public Value peek() {
-            return outgoing.stack.peek();
-        }
-
-        public void push(final Value value) {
-            outgoing.stack.push(value);
-        }
-
-    }
-
-    private final ClassDesc owner;
-    private final MethodModel method;
-    private Frame[] frames;
+    private ClassDesc owner;
+    private MethodModel method;
     private final Map<Label, Integer> labelToIndex;
     private final Method ir;
+    private Frame[] frames;
     private List<Frame> codeModelTopologicalOrder;
 
-    public MethodAnalyzer(final ClassDesc owner, final MethodModel method) {
-
-        this.owner = owner;
-        this.method = method;
+    MethodAnalyzer() {
         this.ir = new Method();
         this.labelToIndex = new HashMap<>();
+    }
+
+    public MethodAnalyzer(final ClassDesc owner, final MethodModel method) {
+        this();
+        this.owner = owner;
+        this.method = method;
 
         final Optional<CodeModel> optCode = method.code();
         if (optCode.isPresent()) {
@@ -129,7 +79,7 @@ public class MethodAnalyzer {
                 step1AnalyzeCFG(code);
                 step2ComputeTopologicalOrder();
                 step3FollowCFGAndInterpret(code);
-                //step4PeepholeOptimizations();
+                step4PeepholeOptimizations();
             } catch (final IllegalParsingStateException ex) {
                 throw ex;
             } catch (final RuntimeException ex) {
@@ -138,13 +88,36 @@ public class MethodAnalyzer {
         }
     }
 
-    private void illegalState(final String message) {
+    protected void illegalState(final String message) {
         final IllegalParsingStateException ex = new IllegalParsingStateException(this, message);
         final StackTraceElement[] old = ex.getStackTrace();
         final StackTraceElement[] newTrace = new StackTraceElement[old.length - 1];
         System.arraycopy(old, 1, newTrace, 0, old.length - 1);
         ex.setStackTrace(newTrace);
         throw ex;
+    }
+
+    protected void assertMinimumStackSize(final Status status, final int minStackSize) {
+        final int stackSize = status.stack.size();
+        if (stackSize < minStackSize) {
+            final IllegalParsingStateException ex = new IllegalParsingStateException(this, "A minimum stack size of " + minStackSize + " is required, but only " + stackSize + " is available!");
+            final StackTraceElement[] old = ex.getStackTrace();
+            final StackTraceElement[] newTrace = new StackTraceElement[old.length - 1];
+            System.arraycopy(old, 1, newTrace, 0, old.length - 1);
+            ex.setStackTrace(newTrace);
+            throw ex;
+        }
+    }
+
+    protected void assertEmptyStack(final Status status) {
+        if (!status.stack.isEmpty()) {
+            final IllegalParsingStateException ex = new IllegalParsingStateException(this, "The stack should be empty, but it is not! It still has " + status.stack.size() + " element(s).");
+            final StackTraceElement[] old = ex.getStackTrace();
+            final StackTraceElement[] newTrace = new StackTraceElement[old.length - 1];
+            System.arraycopy(old, 1, newTrace, 0, old.length - 1);
+            ex.setStackTrace(newTrace);
+            throw ex;
+        }
     }
 
     MethodModel getMethod() {
@@ -335,9 +308,7 @@ public class MethodAnalyzer {
 
         final CodeAttribute cm = (CodeAttribute) code;
 
-        final Status initStatus = new Status();
-        initStatus.locals = new Value[cm.maxLocals()];
-        initStatus.stack = new Stack<>();
+        final Status initStatus = new Status(cm.maxLocals());
         initStatus.control = ir;
         initStatus.memory = ir;
 
@@ -356,16 +327,16 @@ public class MethodAnalyzer {
             if (!method.flags().flags().contains(AccessFlag.STATIC)) {
                 final PHI p = loop.definePHI(owner);
                 p.use(ir.defineThisRef(owner), new PHIUse(ir));
-                initStatus.locals[localIndex++] = p;
+                initStatus.setLocal(localIndex++, p);
             }
             final MethodTypeDesc methodTypeDesc = method.methodTypeSymbol();
             final ClassDesc[] argumentTypes = methodTypeDesc.parameterArray();
             for (int i = 0; i < argumentTypes.length; i++) {
                 final PHI p = loop.definePHI(argumentTypes[i]);
                 p.use(ir.defineMethodArgument(argumentTypes[i], i), new PHIUse(ir));
-                initStatus.locals[localIndex++] = p;
-                if (needsTwoSlots(argumentTypes[i])) {
-                    initStatus.locals[localIndex++] = null;
+                initStatus.setLocal(localIndex++, p);
+                if (TypeUtils.isCategory2(argumentTypes[i])) {
+                    initStatus.setLocal(localIndex++, null);
                 }
             }
 
@@ -373,19 +344,19 @@ public class MethodAnalyzer {
             // We start directly
             int localIndex = 0;
             if (!method.flags().flags().contains(AccessFlag.STATIC)) {
-                initStatus.locals[localIndex++] = ir.defineThisRef(owner);
+                initStatus.setLocal(localIndex++, ir.defineThisRef(owner));
             }
             final MethodTypeDesc methodTypeDesc = method.methodTypeSymbol();
             final ClassDesc[] argumentTypes = methodTypeDesc.parameterArray();
             for (int i = 0; i < argumentTypes.length; i++) {
-                initStatus.locals[localIndex++] = ir.defineMethodArgument(argumentTypes[i], i);
-                if (needsTwoSlots(argumentTypes[i])) {
-                    initStatus.locals[localIndex++] = null;
+                initStatus.setLocal(localIndex++, ir.defineMethodArgument(argumentTypes[i], i));
+                if (TypeUtils.isCategory2(argumentTypes[i])) {
+                    initStatus.setLocal(localIndex++, null);
                 }
             }
         }
 
-        topologicalOrder.getFirst().incoming = initStatus;
+        topologicalOrder.getFirst().in = initStatus;
 
         final Map<Integer, Frame> posToFrame = new HashMap<>();
         for (final Frame frame : topologicalOrder) {
@@ -395,7 +366,7 @@ public class MethodAnalyzer {
         for (int i = 0; i < topologicalOrder.size(); i++) {
             final Frame frame = topologicalOrder.get(i);
 
-            Status incomingStatus = frame.incoming;
+            Status incomingStatus = frame.in;
             if (incomingStatus == null) {
                 // We need to compute the incoming status from the predecessors
                 if (frame.predecessors.isEmpty()) {
@@ -406,25 +377,19 @@ public class MethodAnalyzer {
                     if (outgoing == null) {
                         illegalState("No outgoing frame for " + frame.elementIndex);
                     }
-                    if (outgoing.outgoing == null) {
+                    if (outgoing.out == null) {
                         illegalState("No outgoing status for " + frame.elementIndex);
                     }
-                    incomingStatus = outgoing.outgoing.copy();
+                    incomingStatus = outgoing.out.copy();
                     switch (edge.projection) {
                         case DEFAULT -> {
                             // No nothing in this case, we just keep the incoming control node
                         }
-                        case TRUE -> {
-                            incomingStatus.control = (Node) ((If) incomingStatus.control).trueCase;
-                        }
-                        case FALSE -> {
-                            incomingStatus.control = (Node) ((If) incomingStatus.control).falseCase;
-                        }
-                        default -> {
-                            illegalState("Unknown projection type " + edge.projection);
-                        }
+                        case TRUE -> incomingStatus.control = (Node) ((If) incomingStatus.control).trueCase;
+                        case FALSE -> incomingStatus.control = (Node) ((If) incomingStatus.control).falseCase;
+                        default -> illegalState("Unknown projection type " + edge.projection);
                     }
-                    frame.incoming = incomingStatus;
+                    frame.in = incomingStatus;
                 } else {
                     // Eager PHI creation and memory-edge merging
                     final List<Frame> incomingFrames = new ArrayList<>();
@@ -436,10 +401,10 @@ public class MethodAnalyzer {
                         // the outgoing status for this node is not computed yet.
                         if (edge.controlType == ControlType.FORWARD) {
                             final Frame incomingFrame = posToFrame.get(edge.fromIndex);
-                            if (incomingFrame.outgoing == null) {
+                            if (incomingFrame.out == null) {
                                 illegalState("No outgoing status for " + incomingFrame.elementIndex);
                             }
-                            final Node memory = incomingFrame.outgoing.memory;
+                            final Node memory = incomingFrame.out.memory;
                             if (!incomingMemories.contains(memory)) {
                                 incomingMemories.add(memory);
                             }
@@ -462,21 +427,19 @@ public class MethodAnalyzer {
                         // the outgoing status for this node is not computed yet.
                         if (edge.controlType == ControlType.FORWARD) {
                             final Frame incomingFrame = posToFrame.get(edge.fromIndex);
-                            incomingFrame.outgoing.control.controlFlowsTo(target, ControlType.FORWARD);
+                            incomingFrame.out.control.controlFlowsTo(target, ControlType.FORWARD);
                         }
                     }
 
-                    incomingStatus = new Status();
-                    incomingStatus.stack = new Stack<>();
-                    incomingStatus.locals = new Value[cm.maxLocals()];
+                    incomingStatus = new Status(cm.maxLocals());
 
                     for (int mergeLocalIndex = 0; mergeLocalIndex < cm.maxLocals(); mergeLocalIndex++) {
-                        final Value source = incomingFrames.getFirst().outgoing.locals[mergeLocalIndex];
+                        final Value source = incomingFrames.getFirst().out.getLocal(mergeLocalIndex);
                         if (source != null) {
                             final List<Value> allValues = new ArrayList<>();
                             allValues.add(source);
                             for (int incomingIndex = 1; incomingIndex < incomingFrames.size(); incomingIndex++) {
-                                final Value otherValue = incomingFrames.get(incomingIndex).outgoing.locals[mergeLocalIndex];
+                                final Value otherValue = incomingFrames.get(incomingIndex).out.getLocal(mergeLocalIndex);
                                 if (otherValue != null && !allValues.contains(otherValue)) {
                                     allValues.add(otherValue);
                                 }
@@ -484,15 +447,15 @@ public class MethodAnalyzer {
                             if (allValues.size() > 1 || hasBackEdges) {
                                 final PHI p = target.definePHI(source.type);
                                 for (final Frame incomingFrame : incomingFrames) {
-                                    final Value sv = incomingFrame.outgoing.locals[mergeLocalIndex];
+                                    final Value sv = incomingFrame.out.getLocal(mergeLocalIndex);
                                     if (sv == null) {
                                         illegalState("No source value for local " + i + " from " + incomingFrame.elementIndex);
                                     }
-                                    p.use(sv, new PHIUse(incomingFrame.outgoing.control));
+                                    p.use(sv, new PHIUse(incomingFrame.out.control));
                                 }
-                                incomingStatus.locals[mergeLocalIndex] = p;
+                                incomingStatus.setLocal(mergeLocalIndex, p);
                             } else {
-                                incomingStatus.locals[mergeLocalIndex] = allValues.getFirst();
+                                incomingStatus.setLocal(mergeLocalIndex, allValues.getFirst());
                             }
                         }
                     }
@@ -507,7 +470,7 @@ public class MethodAnalyzer {
                     }
                     incomingStatus.control = target;
 
-                    frame.incoming = incomingStatus;
+                    frame.in = incomingStatus;
                     frame.entryPoint = target;
 
 //                    illegalState("Multi-Join or phi not supported yed!");
@@ -521,17 +484,13 @@ public class MethodAnalyzer {
                 // Interpret the node
                 visitNode(element, frame);
 
-                if (frame.outgoing == null || frame.outgoing == incomingStatus) {
+                if (frame.out == null || frame.out == incomingStatus) {
                     illegalState("No outgoing or same same as incoming status for " + element);
                 }
             } else {
                 frame.copyIncomingToOutgoing();
             }
         }
-    }
-
-    boolean needsTwoSlots(final ClassDesc type) {
-        return type.equals(ConstantDescs.CD_long) || type.equals(ConstantDescs.CD_double);
     }
 
     private void visitNode(final CodeElement node, final Frame frame) {
@@ -543,8 +502,8 @@ public class MethodAnalyzer {
                 case final LineNumber lineNumber -> visitLineNumberNode(lineNumber, frame);
                 case final LocalVariable localVariable ->
                     // Maybe we can use this for debugging?
-                        frame.outgoing = frame.incoming.copy();
-                case final LocalVariableType localVariableType -> frame.incoming.copy();
+                        frame.out = frame.in.copy();
+                case final LocalVariableType localVariableType -> frame.in.copy();
                 case final ExceptionCatch exceptionCatch -> visitExceptionCatch(exceptionCatch, frame);
                 default -> throw new IllegalArgumentException("Not implemented yet : " + psi);
             }
@@ -557,15 +516,15 @@ public class MethodAnalyzer {
                 case final StoreInstruction store -> visitStoreInstruction(store, frame);
                 case final BranchInstruction branchInstruction -> visitBranchInstruction(branchInstruction, frame);
                 case final ConstantInstruction constantInstruction ->
-                        visitConstantInstruction(constantInstruction, frame);
+                        visitConstantInstruction(constantInstruction.opcode(), constantInstruction.constantValue(), frame);
                 case final FieldInstruction fieldInstruction -> visitFieldInstruction(fieldInstruction, frame);
                 case final NewObjectInstruction newObjectInstruction ->
                         visitNewObjectInstruction(newObjectInstruction, frame);
-                case final ReturnInstruction returnInstruction -> visitReturnInstruction(returnInstruction, frame);
+                case final ReturnInstruction returnInstruction -> visitReturnInstruction(returnInstruction.opcode(), frame);
                 case final InvokeDynamicInstruction invokeDynamicInstruction ->
                         parse_INVOKEDYNAMIC(invokeDynamicInstruction, frame);
                 case final TypeCheckInstruction typeCheckInstruction ->
-                        visitTypeCheckInstruction(typeCheckInstruction, frame);
+                        visitTypeCheckInstruction(typeCheckInstruction.opcode(), typeCheckInstruction.type().asSymbol(), frame);
                 case final StackInstruction stackInstruction -> visitStackInstruction(stackInstruction, frame);
                 case final OperatorInstruction operatorInstruction ->
                         visitOperatorInstruction(operatorInstruction, frame);
@@ -577,7 +536,7 @@ public class MethodAnalyzer {
                 case final ArrayLoadInstruction al -> visitArrayLoadInstruction(al, frame);
                 case final NopInstruction nop -> visitNopInstruction(nop, frame);
                 case final NewReferenceArrayInstruction rei -> visitNewObjectArray(rei, frame);
-                case final ConvertInstruction ci -> visitConvertInstruction(ci, frame);
+                case final ConvertInstruction ci -> visitConvertInstruction(ci.opcode(), frame);
                 case final NewMultiArrayInstruction nm -> visitNewMultiArray(nm, frame);
                 default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
             }
@@ -586,27 +545,31 @@ public class MethodAnalyzer {
         }
     }
 
-    private void visitLabelTarget(final LabelTarget node, final Frame frame) {
+    @Testbacklog
+    protected void visitLabelTarget(final LabelTarget node, final Frame frame) {
         final LabelNode label = ir.createLabel(node.label());
         final Status outgoing = frame.copyIncomingToOutgoing();
         outgoing.control = outgoing.control.controlFlowsTo(label, ControlType.FORWARD);
         frame.entryPoint = label;
     }
 
-    private void visitLineNumberNode(final LineNumber node, final Frame frame) {
+    @Testbacklog
+    protected void visitLineNumberNode(final LineNumber node, final Frame frame) {
         // A node that represents a line number declaration. These nodes are pseudo-instruction nodes inorder to be inserted in an instruction list.
         final Status outgoing = frame.copyIncomingToOutgoing();
         outgoing.lineNumber = node.line();
     }
 
-    private void visitExceptionCatch(final ExceptionCatch node, final Frame frame) {
+    @Testbacklog
+    protected void visitExceptionCatch(final ExceptionCatch node, final Frame frame) {
         frame.copyIncomingToOutgoing();
     }
 
-    private void parse_IINC(final IncrementInstruction node, final Frame frame) {
+    @Testbacklog
+    protected void parse_IINC(final IncrementInstruction node, final Frame frame) {
         // A node that represents an IINC instruction.
         frame.copyIncomingToOutgoing();
-        frame.setLocal(node.slot(), new Add(ConstantDescs.CD_int, frame.incoming.locals[node.slot()], ir.definePrimitiveInt(node.constant())));
+        frame.out.setLocal(node.slot(), new Add(ConstantDescs.CD_int, frame.in.getLocal(node.slot()), ir.definePrimitiveInt(node.constant())));
     }
 
     private void visitInvokeInstruction(final InvokeInstruction node, final Frame frame) {
@@ -673,26 +636,23 @@ public class MethodAnalyzer {
             case Opcode.IFNONNULL -> parse_IF_REFERENCETEST_X(node, frame, ReferenceTest.Operation.NONNULL);
             case Opcode.IF_ACMPEQ -> parse_IF_ACMP_OP(node, frame, ReferenceCondition.Operation.EQ);
             case Opcode.IF_ACMPNE -> parse_IF_ACMP_OP(node, frame, ReferenceCondition.Operation.NE);
-            case Opcode.GOTO -> parse_GOTO(node, frame);
-            case Opcode.GOTO_W -> parse_GOTO(node, frame);
+            case Opcode.GOTO, Opcode.GOTO_W -> parse_GOTO(node, frame);
             default -> throw new IllegalArgumentException("Not implemented yet : " + node);
         }
     }
 
-    private void visitConstantInstruction(final ConstantInstruction ins, final Frame frame) {
-        switch (ins.opcode()) {
-            case Opcode.LDC -> parse_LDC(ins, frame);
-            case Opcode.LDC_W -> parse_LDC(ins, frame);
-            case Opcode.LDC2_W -> parse_LDC(ins, frame);
+    protected void visitConstantInstruction(final Opcode opcode, final ConstantDesc constantValue, final Frame frame) {
+        switch (opcode) {
+            case Opcode.LDC, Opcode.LDC_W, Opcode.LDC2_W -> parse_LDC(constantValue, frame);
             case Opcode.ICONST_M1, Opcode.ICONST_0, Opcode.ICONST_5, Opcode.ICONST_4, Opcode.ICONST_3, Opcode.ICONST_2,
-                 Opcode.ICONST_1 -> parse_ICONST(ins, frame);
-            case Opcode.LCONST_0, Opcode.LCONST_1 -> parse_LCONST(ins, frame);
-            case Opcode.FCONST_0, Opcode.FCONST_1, Opcode.FCONST_2 -> parse_FCONST(ins, frame);
-            case Opcode.DCONST_0, Opcode.DCONST_1 -> parse_DCONST(ins, frame);
-            case Opcode.BIPUSH -> parse_BIPUSH(ins, frame);
-            case Opcode.SIPUSH -> parse_SIPUSH(ins, frame);
-            case Opcode.ACONST_NULL -> parse_ACONST_NULL(ins, frame);
-            default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
+                 Opcode.ICONST_1 -> parse_ICONST(constantValue, frame);
+            case Opcode.LCONST_0, Opcode.LCONST_1 -> parse_LCONST(constantValue, frame);
+            case Opcode.FCONST_0, Opcode.FCONST_1, Opcode.FCONST_2 -> parse_FCONST(constantValue, frame);
+            case Opcode.DCONST_0, Opcode.DCONST_1 -> parse_DCONST(constantValue, frame);
+            case Opcode.BIPUSH -> parse_BIPUSH(constantValue, frame);
+            case Opcode.SIPUSH -> parse_SIPUSH(constantValue, frame);
+            case Opcode.ACONST_NULL -> parse_ACONST_NULL(frame);
+            default -> throw new IllegalArgumentException("Not implemented yet : " + opcode);
         }
     }
 
@@ -713,42 +673,44 @@ public class MethodAnalyzer {
         }
     }
 
-    private void visitReturnInstruction(final ReturnInstruction ins, final Frame frame) {
-        switch (ins.opcode()) {
-            case Opcode.RETURN -> parse_RETURN(ins, frame);
-            case Opcode.ARETURN -> parse_ARETURN(ins, frame);
-            case Opcode.IRETURN -> parse_RETURN_X(ins, frame, ConstantDescs.CD_int);
-            case Opcode.DRETURN -> parse_RETURN_X(ins, frame, ConstantDescs.CD_double);
-            case Opcode.FRETURN -> parse_RETURN_X(ins, frame, ConstantDescs.CD_float);
-            case Opcode.LRETURN -> parse_RETURN_X(ins, frame, ConstantDescs.CD_long);
-            default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
+    protected void visitReturnInstruction(final Opcode opcode, final Frame frame) {
+        switch (opcode) {
+            case Opcode.RETURN -> parse_RETURN(frame);
+            case Opcode.ARETURN -> parse_ARETURN(frame);
+            case Opcode.IRETURN -> parse_RETURN_X(frame, ConstantDescs.CD_int);
+            case Opcode.DRETURN -> parse_RETURN_X(frame, ConstantDescs.CD_double);
+            case Opcode.FRETURN -> parse_RETURN_X(frame, ConstantDescs.CD_float);
+            case Opcode.LRETURN -> parse_RETURN_X(frame, ConstantDescs.CD_long);
+            default -> throw new IllegalArgumentException("Not implemented yet : " + opcode);
         }
     }
 
-    private void parse_INVOKEDYNAMIC(final InvokeDynamicInstruction node, final Frame frame) {
+    @Testbacklog
+    protected void parse_INVOKEDYNAMIC(final InvokeDynamicInstruction node, final Frame frame) {
         final MethodTypeDesc methodTypeDesc = node.typeSymbol();
         final ClassDesc returnType = methodTypeDesc.returnType();
         final ClassDesc[] args = methodTypeDesc.parameterArray();
         final int expectedarguments = args.length;
-        if (frame.incoming.stack.size() < expectedarguments) {
-            illegalState("Not enough arguments on stack for " + node.name() + " " + methodTypeDesc + " expected " + expectedarguments + " but got " + frame.incoming.stack.size());
-        }
-        frame.copyIncomingToOutgoing();
+
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        assertMinimumStackSize(outgoing, expectedarguments);
+
         for (int i = 0; i < expectedarguments; i++) {
-            final Value v = frame.pop();
+            final Value v = frame.out.pop();
         }
         if (!returnType.equals(ConstantDescs.CD_void)) {
-            final Result r = new Result(returnType);
             // TODO: Create invocation here
-            frame.push(new Result(returnType));
+            frame.out.push(new Null());
         }
     }
 
-    private void visitTypeCheckInstruction(final TypeCheckInstruction ins, final Frame frame) {
-        switch (ins.opcode()) {
-            case CHECKCAST -> parse_CHECKCAST(ins, frame);
-            case INSTANCEOF -> parse_INSTANCEOF(ins, frame);
-            default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
+    protected void visitTypeCheckInstruction(final Opcode opcode, final ClassDesc typeToCheck, final Frame frame) {
+        assertMinimumStackSize(frame.in, 1);
+
+        switch (opcode) {
+            case CHECKCAST -> parse_CHECKCAST(typeToCheck, frame);
+            case INSTANCEOF -> parse_INSTANCEOF(typeToCheck, frame);
+            default -> throw new IllegalArgumentException("Not implemented yet : " + opcode);
         }
     }
 
@@ -781,11 +743,7 @@ public class MethodAnalyzer {
             case Opcode.FMUL -> parse_MUL_X(ins, frame, ConstantDescs.CD_float);
             case Opcode.IMUL -> parse_MUL_X(ins, frame, ConstantDescs.CD_int);
             case Opcode.LMUL -> parse_MUL_X(ins, frame, ConstantDescs.CD_long);
-            case Opcode.ARRAYLENGTH -> parse_ARRAYLENGTH(ins, frame);
-            case Opcode.INEG -> parse_NEG_X(ins, frame, ConstantDescs.CD_int);
-            case Opcode.LNEG -> parse_NEG_X(ins, frame, ConstantDescs.CD_long);
-            case Opcode.FNEG -> parse_NEG_X(ins, frame, ConstantDescs.CD_float);
-            case Opcode.DNEG -> parse_NEG_X(ins, frame, ConstantDescs.CD_double);
+            case Opcode.ARRAYLENGTH, Opcode.INEG, Opcode.LNEG, Opcode.FNEG, Opcode.DNEG -> visitUnaryOperatorInstruction(ins.opcode(), frame);
             case Opcode.IDIV -> parse_DIV_X(ins, frame, ConstantDescs.CD_int);
             case Opcode.LDIV -> parse_DIV_X(ins, frame, ConstantDescs.CD_long);
             case Opcode.FDIV -> parse_DIV_X(ins, frame, ConstantDescs.CD_float);
@@ -816,6 +774,19 @@ public class MethodAnalyzer {
         }
     }
 
+    protected void visitUnaryOperatorInstruction(final Opcode opcode, final Frame frame) {
+        assertMinimumStackSize(frame.in, 1);
+
+        switch (opcode) {
+            case Opcode.ARRAYLENGTH -> parse_ARRAYLENGTH(frame);
+            case Opcode.INEG -> parse_NEG_X(frame, ConstantDescs.CD_int);
+            case Opcode.LNEG -> parse_NEG_X(frame, ConstantDescs.CD_long);
+            case Opcode.FNEG -> parse_NEG_X(frame, ConstantDescs.CD_float);
+            case Opcode.DNEG -> parse_NEG_X(frame, ConstantDescs.CD_double);
+            default -> throw new IllegalArgumentException("Not implemented yet : " + opcode);
+        }
+    }
+
     private void visitMonitorInstruction(final MonitorInstruction ins, final Frame frame) {
         switch (ins.opcode()) {
             case Opcode.MONITORENTER -> parse_MONITORENTER(ins, frame);
@@ -824,25 +795,24 @@ public class MethodAnalyzer {
         }
     }
 
-    private void visitThrowInstruction(final ThrowInstruction ins, final Frame frame) {
-        if (frame.incoming.stack.isEmpty()) {
-            illegalState("Cannot throw with empty stack");
-        }
+    @Testbacklog
+    protected void visitThrowInstruction(final ThrowInstruction ins, final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
-        final Value v = frame.pop();
+        assertMinimumStackSize(outgoing, 1);
+
+        final Value v = outgoing.pop();
         final Throw t = new Throw(v);
         outgoing.control = outgoing.control.controlFlowsTo(t, ControlType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(t);
         frame.entryPoint = t;
     }
 
-    private void visitNewPrimitiveArray(final NewPrimitiveArrayInstruction ins, final Frame frame) {
-        if (frame.incoming.stack.isEmpty()) {
-            illegalState("Cannot throw with empty stack");
-        }
-        frame.copyIncomingToOutgoing();
-        final Status outgoing = frame.outgoing;
-        final Value length = frame.pop();
+    @Testbacklog
+    protected void visitNewPrimitiveArray(final NewPrimitiveArrayInstruction ins, final Frame frame) {
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        assertMinimumStackSize(outgoing, 1);
+
+        final Value length = frame.out.pop();
         final ClassDesc type;
         switch (ins.typeKind()) {
             case BYTE -> type = ConstantDescs.CD_byte.arrayType();
@@ -855,8 +825,8 @@ public class MethodAnalyzer {
             default ->
                     throw new IllegalArgumentException("Not implemented type kind for array creation " + ins.typeKind());
         }
-        final NewArray newArray = new NewArray(type, length);
-        frame.push(newArray);
+        final NewArray newArray = new NewArray(type.componentType(), length);
+        frame.out.push(newArray);
         outgoing.memory = outgoing.memory.memoryFlowsTo(newArray);
         frame.entryPoint = newArray;
     }
@@ -895,79 +865,80 @@ public class MethodAnalyzer {
         }
     }
 
-    private void visitNopInstruction(final NopInstruction ins, final Frame frame) {
+    @Testbacklog
+    protected void visitNopInstruction(final NopInstruction ins, final Frame frame) {
         frame.copyIncomingToOutgoing();
     }
 
-    private void visitNewObjectArray(final NewReferenceArrayInstruction ins, final Frame frame) {
-        if (frame.incoming.stack.isEmpty()) {
-            illegalState("Cannot throw with empty stack");
-        }
-        frame.copyIncomingToOutgoing();
-        final Status outgoing = frame.outgoing;
-        final Value length = frame.pop();
-        final ClassDesc type = ins.componentType().asSymbol().arrayType();
+    @Testbacklog
+    protected void visitNewObjectArray(final NewReferenceArrayInstruction ins, final Frame frame) {
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        assertMinimumStackSize(outgoing, 1);
+
+        final Value length = outgoing.pop();
+        final ClassDesc type = ins.componentType().asSymbol();
         final NewArray newArray = new NewArray(type, length);
-        frame.push(newArray);
+        outgoing.push(newArray);
         outgoing.memory = outgoing.memory.memoryFlowsTo(newArray);
         frame.entryPoint = newArray;
     }
 
-    private void visitConvertInstruction(final ConvertInstruction ins, final Frame frame) {
-        switch (ins.opcode()) {
-            case Opcode.I2B -> parse_CONVERT_X(ins, frame, ConstantDescs.CD_int, ConstantDescs.CD_byte);
-            case Opcode.I2C -> parse_CONVERT_X(ins, frame, ConstantDescs.CD_int, ConstantDescs.CD_char);
-            case Opcode.I2S -> parse_CONVERT_X(ins, frame, ConstantDescs.CD_int, ConstantDescs.CD_short);
-            case Opcode.I2L -> parse_CONVERT_X(ins, frame, ConstantDescs.CD_int, ConstantDescs.CD_long);
-            case Opcode.I2F -> parse_CONVERT_X(ins, frame, ConstantDescs.CD_int, ConstantDescs.CD_float);
-            case Opcode.I2D -> parse_CONVERT_X(ins, frame, ConstantDescs.CD_int, ConstantDescs.CD_double);
-            case Opcode.L2I -> parse_CONVERT_X(ins, frame, ConstantDescs.CD_long, ConstantDescs.CD_int);
-            case Opcode.L2F -> parse_CONVERT_X(ins, frame, ConstantDescs.CD_long, ConstantDescs.CD_float);
-            case Opcode.L2D -> parse_CONVERT_X(ins, frame, ConstantDescs.CD_long, ConstantDescs.CD_double);
-            case Opcode.F2I -> parse_CONVERT_X(ins, frame, ConstantDescs.CD_float, ConstantDescs.CD_int);
-            case Opcode.F2L -> parse_CONVERT_X(ins, frame, ConstantDescs.CD_float, ConstantDescs.CD_long);
-            case Opcode.F2D -> parse_CONVERT_X(ins, frame, ConstantDescs.CD_float, ConstantDescs.CD_double);
-            case Opcode.D2I -> parse_CONVERT_X(ins, frame, ConstantDescs.CD_double, ConstantDescs.CD_int);
-            case Opcode.D2L -> parse_CONVERT_X(ins, frame, ConstantDescs.CD_double, ConstantDescs.CD_long);
-            case Opcode.D2F -> parse_CONVERT_X(ins, frame, ConstantDescs.CD_double, ConstantDescs.CD_float);
-            default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
+    protected void visitConvertInstruction(final Opcode opcode, final Frame frame) {
+        assertMinimumStackSize(frame.in, 1);
+
+        switch (opcode) {
+            case Opcode.I2B -> parse_CONVERT_X(frame, ConstantDescs.CD_int, ConstantDescs.CD_int);
+            case Opcode.I2C -> parse_CONVERT_X(frame, ConstantDescs.CD_int, ConstantDescs.CD_int);
+            case Opcode.I2S -> parse_CONVERT_X(frame, ConstantDescs.CD_int, ConstantDescs.CD_int);
+            case Opcode.I2L -> parse_CONVERT_X(frame, ConstantDescs.CD_int, ConstantDescs.CD_long);
+            case Opcode.I2F -> parse_CONVERT_X(frame, ConstantDescs.CD_int, ConstantDescs.CD_float);
+            case Opcode.I2D -> parse_CONVERT_X(frame, ConstantDescs.CD_int, ConstantDescs.CD_double);
+            case Opcode.L2I -> parse_CONVERT_X(frame, ConstantDescs.CD_long, ConstantDescs.CD_int);
+            case Opcode.L2F -> parse_CONVERT_X(frame, ConstantDescs.CD_long, ConstantDescs.CD_float);
+            case Opcode.L2D -> parse_CONVERT_X(frame, ConstantDescs.CD_long, ConstantDescs.CD_double);
+            case Opcode.F2I -> parse_CONVERT_X(frame, ConstantDescs.CD_float, ConstantDescs.CD_int);
+            case Opcode.F2L -> parse_CONVERT_X(frame, ConstantDescs.CD_float, ConstantDescs.CD_long);
+            case Opcode.F2D -> parse_CONVERT_X(frame, ConstantDescs.CD_float, ConstantDescs.CD_double);
+            case Opcode.D2I -> parse_CONVERT_X(frame, ConstantDescs.CD_double, ConstantDescs.CD_int);
+            case Opcode.D2L -> parse_CONVERT_X(frame, ConstantDescs.CD_double, ConstantDescs.CD_long);
+            case Opcode.D2F -> parse_CONVERT_X(frame, ConstantDescs.CD_double, ConstantDescs.CD_float);
+            default -> throw new IllegalArgumentException("Not implemented yet : " + opcode);
         }
     }
 
-    private void visitNewMultiArray(final NewMultiArrayInstruction ins, final Frame frame) {
-        if (frame.incoming.stack.isEmpty()) {
-            illegalState("Cannot throw with empty stack");
-        }
-        frame.copyIncomingToOutgoing();
-        final Status outgoing = frame.outgoing;
+    @Testbacklog
+    protected void visitNewMultiArray(final NewMultiArrayInstruction ins, final Frame frame) {
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        assertMinimumStackSize(outgoing, ins.dimensions());
+
         ClassDesc type = ins.arrayType().asSymbol();
         final List<Value> dimensions = new ArrayList<>();
         for (int i = 0; i < ins.dimensions(); i++) {
-            dimensions.add(frame.pop());
+            dimensions.add(outgoing.pop());
             type = type.arrayType();
         }
         final NewMultiArray newMultiArray = new NewMultiArray(type, dimensions);
-        frame.push(newMultiArray);
+        outgoing.push(newMultiArray);
         outgoing.memory = outgoing.memory.memoryFlowsTo(newMultiArray);
         frame.entryPoint = newMultiArray;
     }
 
-    private void parse_INVOKESPECIAL(final InvokeInstruction node, final Frame frame) {
+    @Testbacklog
+    protected void parse_INVOKESPECIAL(final InvokeInstruction node, final Frame frame) {
 
         final MethodTypeDesc methodTypeDesc = node.typeSymbol();
 
-        frame.copyIncomingToOutgoing();
-        final Status outgoing = frame.outgoing;
+        final Status outgoing = frame.copyIncomingToOutgoing();
 
         final ClassDesc returnType = methodTypeDesc.returnType();
         final ClassDesc[] args = methodTypeDesc.parameterArray();
         final int expectedarguments = 1 + args.length;
-        if (outgoing.stack.size() < expectedarguments) {
-            illegalState("Not enough arguments on stack for " + node.name() + " " + methodTypeDesc + " expected " + expectedarguments + " but got " + frame.incoming.stack.size());
-        }
+
+        assertMinimumStackSize(outgoing, expectedarguments);
+
         final List<Value> arguments = new ArrayList<>();
         for (int i = 0; i < expectedarguments; i++) {
-            arguments.add(frame.pop());
+            arguments.add(outgoing.pop());
         }
 
         final Value next = new Invocation(node, arguments.reversed());
@@ -975,57 +946,28 @@ public class MethodAnalyzer {
         outgoing.memory = outgoing.memory.memoryFlowsTo(next);
 
         if (!returnType.equals(ConstantDescs.CD_void)) {
-            frame.push(next);
+            outgoing.push(next);
         }
 
         frame.entryPoint = next;
     }
 
-    private void parse_INVOKEVIRTUAL(final InvokeInstruction node, final Frame frame) {
+    @Testbacklog
+    protected void parse_INVOKEVIRTUAL(final InvokeInstruction node, final Frame frame) {
 
         final MethodTypeDesc methodTypeDesc = node.typeSymbol();
-
-        frame.copyIncomingToOutgoing();
-        final Status outgoing = frame.outgoing;
-
-        final ClassDesc returnType = methodTypeDesc.returnType();
-        final ClassDesc[] args = methodTypeDesc.parameterArray();
-        final int expectedarguments = 1 + args.length;
-        if (outgoing.stack.size() < expectedarguments) {
-            illegalState("Not enough arguments on stack for " + node.name() + " " + methodTypeDesc + " expected " + expectedarguments + " but got " + frame.incoming.stack.size());
-        }
-        final List<Value> arguments = new ArrayList<>();
-        for (int i = 0; i < expectedarguments; i++) {
-            final Value v = frame.pop();
-            arguments.add(v);
-        }
-        final Invocation invocation = new Invocation(node, arguments.reversed());
-
-        outgoing.control = outgoing.control.controlFlowsTo(invocation, ControlType.FORWARD);
-        outgoing.memory = outgoing.memory.memoryFlowsTo(invocation);
-
-        if (!returnType.equals(ConstantDescs.CD_void)) {
-            frame.push(invocation);
-        }
-
-        frame.entryPoint = invocation;
-    }
-
-    private void parse_INVOKEINTERFACE(final InvokeInstruction node, final Frame frame) {
-        final MethodTypeDesc methodTypeDesc = node.typeSymbol();
-
-        final ClassDesc returnType = methodTypeDesc.returnType();
-        final ClassDesc[] args = methodTypeDesc.parameterArray();
-        final int expectedarguments = 1 + args.length;
-        if (frame.incoming.stack.size() < expectedarguments) {
-            illegalState("Not enough arguments on stack for " + node.name() + " " + methodTypeDesc + " expected " + expectedarguments + " but got " + frame.incoming.stack.size());
-        }
 
         final Status outgoing = frame.copyIncomingToOutgoing();
 
+        final ClassDesc returnType = methodTypeDesc.returnType();
+        final ClassDesc[] args = methodTypeDesc.parameterArray();
+        final int expectedarguments = 1 + args.length;
+
+        assertMinimumStackSize(outgoing, expectedarguments);
+
         final List<Value> arguments = new ArrayList<>();
         for (int i = 0; i < expectedarguments; i++) {
-            final Value v = frame.pop();
+            final Value v = outgoing.pop();
             arguments.add(v);
         }
         final Invocation invocation = new Invocation(node, arguments.reversed());
@@ -1034,30 +976,57 @@ public class MethodAnalyzer {
         outgoing.memory = outgoing.memory.memoryFlowsTo(invocation);
 
         if (!returnType.equals(ConstantDescs.CD_void)) {
-            frame.push(invocation);
+            outgoing.push(invocation);
         }
 
         frame.entryPoint = invocation;
     }
 
-    private void parse_INVOKESTATIC(final InvokeInstruction node, final Frame frame) {
+    @Testbacklog
+    protected void parse_INVOKEINTERFACE(final InvokeInstruction node, final Frame frame) {
+        final MethodTypeDesc methodTypeDesc = node.typeSymbol();
+
+        final ClassDesc returnType = methodTypeDesc.returnType();
+        final ClassDesc[] args = methodTypeDesc.parameterArray();
+        final int expectedarguments = 1 + args.length;
+
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        assertMinimumStackSize(outgoing, expectedarguments);
+
+        final List<Value> arguments = new ArrayList<>();
+        for (int i = 0; i < expectedarguments; i++) {
+            final Value v = outgoing.pop();
+            arguments.add(v);
+        }
+        final Invocation invocation = new Invocation(node, arguments.reversed());
+
+        outgoing.control = outgoing.control.controlFlowsTo(invocation, ControlType.FORWARD);
+        outgoing.memory = outgoing.memory.memoryFlowsTo(invocation);
+
+        if (!returnType.equals(ConstantDescs.CD_void)) {
+            outgoing.push(invocation);
+        }
+
+        frame.entryPoint = invocation;
+    }
+
+    @Testbacklog
+    protected void parse_INVOKESTATIC(final InvokeInstruction node, final Frame frame) {
         final MethodTypeDesc methodTypeDesc = node.typeSymbol();
 
         final ClassDesc returnType = methodTypeDesc.returnType();
         final ClassDesc[] args = methodTypeDesc.parameterArray();
         final int expectedarguments = args.length;
-        if (frame.incoming.stack.size() < expectedarguments) {
-            illegalState("Not enough arguments on stack for " + node.name() + " " + methodTypeDesc + " expected " + expectedarguments + " but got " + frame.incoming.stack.size());
-        }
 
         final Status outgoing = frame.copyIncomingToOutgoing();
+        assertMinimumStackSize(outgoing, expectedarguments);
 
         final RuntimeclassReference runtimeClass = ir.defineRuntimeclassReference(node.method().owner().asSymbol());
         final ClassInitialization init = new ClassInitialization(runtimeClass);
 
         final List<Value> arguments = new ArrayList<>();
         for (int i = 0; i < expectedarguments; i++) {
-            final Value v = frame.pop();
+            final Value v = outgoing.pop();
             arguments.add(v);
         }
         arguments.add(init);
@@ -1070,128 +1039,67 @@ public class MethodAnalyzer {
         outgoing.control = outgoing.control.controlFlowsTo(invocation, ControlType.FORWARD);
 
         if (!returnType.equals(ConstantDescs.CD_void)) {
-            frame.push(invocation);
+            outgoing.push(invocation);
         }
 
         frame.entryPoint = init;
     }
 
-    private void parse_ALOAD(final LoadInstruction node, final Frame frame) {
-        final Value v = frame.incoming.locals[node.slot()];
+    @Testbacklog
+    protected void parse_ALOAD(final LoadInstruction node, final Frame frame) {
+        final Value v = frame.in.getLocal(node.slot());
         if (v == null) {
             illegalState("Cannot local is null for index " + node.slot());
         }
 
-        frame.copyIncomingToOutgoing();
-        frame.push(v);
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        outgoing.push(v);
     }
 
-    private void parse_LOAD_TYPE(final LoadInstruction node, final Frame frame, final ClassDesc type) {
-        final Value v = frame.incoming.locals[node.slot()];
+    @Testbacklog
+    protected void parse_LOAD_TYPE(final LoadInstruction node, final Frame frame, final ClassDesc type) {
+        final Value v = frame.in.getLocal(node.slot());
         if (v == null) {
             illegalState("Cannot local is null for index " + node.slot());
         }
-        frame.copyIncomingToOutgoing();
-        frame.push(v);
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        outgoing.push(v);
     }
 
-    private void parse_ASTORE(final StoreInstruction node, final Frame frame) {
-        if (frame.incoming.stack.isEmpty()) {
-            illegalState("Cannot store empty stack");
-        }
+    @Testbacklog
+    protected void parse_ASTORE(final StoreInstruction node, final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
-        frame.setLocal(node.slot(), frame.pop());
-        if (node.slot() > 0) {
-            if (outgoing.locals[node.slot() - 1] != null && needsTwoSlots(outgoing.locals[node.slot() - 1].type)) {
-                // Remove potential illegal values
-                outgoing.locals[node.slot() - 1] = null;
-            }
-        }
+        assertMinimumStackSize(outgoing, 1);
+
+        frame.out.setLocal(node.slot(), outgoing.pop());
     }
 
-    private void parse_STORE_TYPE(final StoreInstruction node, final Frame frame, final ClassDesc type) {
-        if (frame.incoming.stack.isEmpty()) {
-            illegalState("Cannot store empty stack");
-        }
+    @Testbacklog
+    protected void parse_STORE_TYPE(final StoreInstruction node, final Frame frame, final ClassDesc type) {
         final Status outgoing = frame.copyIncomingToOutgoing();
+        assertMinimumStackSize(outgoing, 1);
 
-        final Value v = frame.pop();
+        final Value v = outgoing.pop();
         if (!v.type.equals(type)) {
             illegalState("Cannot store non " + type + " value " + v + " for index " + node.slot());
         }
-        frame.setLocal(node.slot(), v);
-        if (node.slot() > 0) {
-            if (outgoing.locals[node.slot() - 1] != null && needsTwoSlots(outgoing.locals[node.slot() - 1].type)) {
-                // Remove potential illegal values
-                outgoing.locals[node.slot() - 1] = null;
-            }
-        }
+        frame.out.setLocal(node.slot(), v);
     }
 
-    private void parse_IF_ICMP_OP(final BranchInstruction node, final Frame frame, final NumericCondition.Operation op) {
-        if (frame.incoming.stack.size() < 2) {
-            illegalState("Need a minium of two values on stack for comparison");
-        }
-
+    @Testbacklog
+    protected void parse_IF_ICMP_OP(final BranchInstruction node, final Frame frame, final NumericCondition.Operation op) {
         final Status outgoing = frame.copyIncomingToOutgoing();
+        assertMinimumStackSize(outgoing, 2);
 
-        final Value v1 = frame.pop();
-        final Value v2 = frame.pop();
+        final Value v1 = outgoing.pop();
+        final Value v2 = outgoing.pop();
 
         final NumericCondition numericCondition = new NumericCondition(op, v1, v2);
         final If next = new If(numericCondition);
 
         outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
         frame.entryPoint = next;
-    }
 
-    private void parse_IF_NUMERIC_X(final BranchInstruction node, final Frame frame, final NumericCondition.Operation op) {
-        if (frame.incoming.stack.isEmpty()) {
-            illegalState("Need a value on stack for comparison");
-        }
-        final Status outgoing = frame.copyIncomingToOutgoing();
-        final Value v = frame.pop();
-
-        final NumericCondition numericCondition = new NumericCondition(op, v, ir.definePrimitiveInt(0));
-        final If next = new If(numericCondition);
-
-        outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
-        frame.entryPoint = next;
-    }
-
-    private void parse_IF_REFERENCETEST_X(final BranchInstruction node, final Frame frame, final ReferenceTest.Operation op) {
-        if (frame.incoming.stack.isEmpty()) {
-            illegalState("Need a value on stack for comparison");
-        }
-        final Status outgoing = frame.copyIncomingToOutgoing();
-        final Value v = frame.pop();
-
-        final ReferenceTest referenceCondition = new ReferenceTest(op, v);
-        final If next = new If(referenceCondition);
-
-        outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
-        frame.entryPoint = next;
-    }
-
-    private void parse_IF_ACMP_OP(final BranchInstruction node, final Frame frame, final ReferenceCondition.Operation op) {
-        if (frame.incoming.stack.size() < 2) {
-            illegalState("Need a minium of two values on stack for comparison");
-        }
-
-        final Status outgoing = frame.copyIncomingToOutgoing();
-
-        final Value v1 = frame.pop();
-        final Value v2 = frame.pop();
-
-        final ReferenceCondition condition = new ReferenceCondition(op, v1, v2);
-        final If next = new If(condition);
-
-        outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
-        frame.entryPoint = next;
-    }
-
-    private void parse_GOTO(final BranchInstruction node, final Frame frame) {
-        // Check if we are doing a back edge
         final int codeElementIndex = labelToIndex.get(node.target());
         final Frame targetFrame = frames[codeElementIndex];
 
@@ -1199,109 +1107,185 @@ public class MethodAnalyzer {
             illegalState("Cannot jump to unvisited frame at index " + targetFrame.elementIndex);
         }
 
+        handlePotentialBackedgeFor(next, frame, targetFrame);
+    }
+
+    @Testbacklog
+    protected void parse_IF_NUMERIC_X(final BranchInstruction node, final Frame frame, final NumericCondition.Operation op) {
         final Status outgoing = frame.copyIncomingToOutgoing();
+        assertMinimumStackSize(outgoing, 1);
 
-        final Goto next = new Goto();
+        final Value v = outgoing.pop();
+
+        final NumericCondition numericCondition = new NumericCondition(op, v, ir.definePrimitiveInt(0));
+        final If next = new If(numericCondition);
+
         outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
+        frame.entryPoint = next;
 
+        final int codeElementIndex = labelToIndex.get(node.target());
+        final Frame targetFrame = frames[codeElementIndex];
+
+        if (targetFrame.indexInTopologicalOrder == -1) {
+            illegalState("Cannot jump to unvisited frame at index " + targetFrame.elementIndex);
+        }
+
+        handlePotentialBackedgeFor(next, frame, targetFrame);
+    }
+
+    @Testbacklog
+    protected void parse_IF_REFERENCETEST_X(final BranchInstruction node, final Frame frame, final ReferenceTest.Operation op) {
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        assertMinimumStackSize(outgoing, 1);
+
+        final Value v = outgoing.pop();
+
+        final ReferenceTest referenceCondition = new ReferenceTest(op, v);
+        final If next = new If(referenceCondition);
+
+        outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
+        frame.entryPoint = next;
+
+        final int codeElementIndex = labelToIndex.get(node.target());
+        final Frame targetFrame = frames[codeElementIndex];
+
+        if (targetFrame.indexInTopologicalOrder == -1) {
+            illegalState("Cannot jump to unvisited frame at index " + targetFrame.elementIndex);
+        }
+
+        handlePotentialBackedgeFor(next, frame, targetFrame);
+    }
+
+    @Testbacklog
+    protected void parse_IF_ACMP_OP(final BranchInstruction node, final Frame frame, final ReferenceCondition.Operation op) {
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        assertMinimumStackSize(outgoing, 2);
+
+        final Value v1 = outgoing.pop();
+        final Value v2 = outgoing.pop();
+
+        final ReferenceCondition condition = new ReferenceCondition(op, v1, v2);
+        final If next = new If(condition);
+
+        outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
+        frame.entryPoint = next;
+
+        final int codeElementIndex = labelToIndex.get(node.target());
+        final Frame targetFrame = frames[codeElementIndex];
+
+        if (targetFrame.indexInTopologicalOrder == -1) {
+            illegalState("Cannot jump to unvisited frame at index " + targetFrame.elementIndex);
+        }
+        handlePotentialBackedgeFor(next, frame, targetFrame);
+    }
+
+    private void handlePotentialBackedgeFor(final Node jumpSource, final Frame frame, final Frame targetFrame) {
+        final Status outgoing = frame.out;
         if (targetFrame.indexInTopologicalOrder < frame.indexInTopologicalOrder) {
             // We are doing a back edge here!
-            for (int i = 0; i < outgoing.locals.length; i++) {
-                final Value v = frame.getLocal(i);
-                final Value target = targetFrame.incoming.locals[i];
+            for (int i = 0; i < outgoing.numberOfLocals(); i++) {
+                final Value v = frame.out.getLocal(i);
+                final Value target = targetFrame.in.getLocal(i);
                 if (!(target instanceof PHI)) {
                     illegalState("Local at index " + i + " is not a PHI value but " + v);
                 }
                 if (v != null && v != target) {
-                    target.use(v, new PHIUse(next));
-                    frame.setLocal(i, target);
+                    target.use(v, new PHIUse(jumpSource));
                 }
             }
             outgoing.control = outgoing.control.controlFlowsTo(targetFrame.entryPoint, ControlType.BACKWARD);
         }
-
-        frame.entryPoint = next;
     }
 
-    private void parse_LDC(final ConstantInstruction node, final Frame frame) {
-        // A node that represents an LDC instruction.
-        frame.copyIncomingToOutgoing();
-        if (node.constantValue() instanceof final String str) {
-            frame.push(ir.defineStringConstant(str));
-        } else if (node.constantValue() instanceof final Integer i) {
-            frame.push(ir.definePrimitiveInt(i));
-        } else if (node.constantValue() instanceof final Long l) {
-            frame.push(ir.definePrimitiveLong(l));
-        } else if (node.constantValue() instanceof final Float f) {
-            frame.push(ir.definePrimitiveFloat(f));
-        } else if (node.constantValue() instanceof final Double d) {
-            frame.push(ir.definePrimitiveDouble(d));
-        } else if (node.constantValue() instanceof final ClassDesc classDesc) {
-            frame.push(ir.defineRuntimeclassReference(classDesc));
-        } else {
-            throw new IllegalArgumentException("Not implemented yet : " + node);
-        }
-    }
-
-    private void parse_ICONST(final ConstantInstruction node, final Frame frame) {
-        frame.copyIncomingToOutgoing();
-        frame.push(ir.definePrimitiveInt((Integer) node.constantValue()));
-    }
-
-    private void parse_LCONST(final ConstantInstruction node, final Frame frame) {
-        frame.copyIncomingToOutgoing();
-        frame.push(ir.definePrimitiveLong((Long) node.constantValue()));
-    }
-
-    private void parse_FCONST(final ConstantInstruction node, final Frame frame) {
-        frame.copyIncomingToOutgoing();
-        frame.push(ir.definePrimitiveFloat((Float) node.constantValue()));
-    }
-
-    private void parse_DCONST(final ConstantInstruction node, final Frame frame) {
-        frame.copyIncomingToOutgoing();
-        frame.push(ir.definePrimitiveDouble((Double) node.constantValue()));
-    }
-
-    private void parse_BIPUSH(final ConstantInstruction node, final Frame frame) {
-        frame.copyIncomingToOutgoing();
-        frame.push(ir.definePrimitiveInt((Integer) node.constantValue()));
-    }
-
-    private void parse_SIPUSH(final ConstantInstruction node, final Frame frame) {
-        frame.copyIncomingToOutgoing();
-        frame.push(ir.definePrimitiveShort(((Number) node.constantValue()).shortValue()));
-    }
-
-    private void parse_ACONST_NULL(final ConstantInstruction node, final Frame frame) {
-        frame.copyIncomingToOutgoing();
-        frame.push(ir.defineNullReference());
-    }
-
-    private void parse_GETFIELD(final FieldInstruction node, final Frame frame) {
-        if (frame.incoming.stack.isEmpty()) {
-            illegalState("Cannot load field from empty stack");
-        }
+    @Testbacklog
+    protected void parse_GOTO(final BranchInstruction node, final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
-        final Value v = frame.pop();
+
+        final Goto next = new Goto();
+        outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
+        frame.entryPoint = next;
+
+        final int codeElementIndex = labelToIndex.get(node.target());
+        final Frame targetFrame = frames[codeElementIndex];
+
+        if (targetFrame.indexInTopologicalOrder == -1) {
+            illegalState("Cannot jump to unvisited frame at index " + targetFrame.elementIndex);
+        }
+
+        handlePotentialBackedgeFor(next, frame, targetFrame);
+    }
+
+    protected void parse_LDC(final ConstantDesc value, final Frame frame) {
+        // A node that represents an LDC instruction.
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        switch (value) {
+            case final String str -> outgoing.push(ir.defineStringConstant(str));
+            case final Integer i -> outgoing.push(ir.definePrimitiveInt(i));
+            case final Long l -> outgoing.push(ir.definePrimitiveLong(l));
+            case final Float f -> outgoing.push(ir.definePrimitiveFloat(f));
+            case final Double d -> outgoing.push(ir.definePrimitiveDouble(d));
+            case final ClassDesc classDesc -> outgoing.push(ir.defineRuntimeclassReference(classDesc));
+            case null, default -> illegalState("Cannot parse LDC instruction with value " + value);
+        }
+    }
+
+    private void parse_ICONST(final ConstantDesc node, final Frame frame) {
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        outgoing.push(ir.definePrimitiveInt((Integer) node));
+    }
+
+    private void parse_LCONST(final ConstantDesc node, final Frame frame) {
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        outgoing.push(ir.definePrimitiveLong((Long) node));
+    }
+
+    private void parse_FCONST(final ConstantDesc node, final Frame frame) {
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        outgoing.push(ir.definePrimitiveFloat((Float) node));
+    }
+
+    private void parse_DCONST(final ConstantDesc node, final Frame frame) {
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        outgoing.push(ir.definePrimitiveDouble((Double) node));
+    }
+
+    private void parse_BIPUSH(final ConstantDesc node, final Frame frame) {
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        outgoing.push(ir.definePrimitiveInt((Integer) node));
+    }
+
+    private void parse_SIPUSH(final ConstantDesc node, final Frame frame) {
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        outgoing.push(ir.definePrimitiveInt(((Number) node).shortValue()));
+    }
+
+    private void parse_ACONST_NULL(final Frame frame) {
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        outgoing.push(ir.defineNullReference());
+    }
+
+    @Testbacklog
+    protected void parse_GETFIELD(final FieldInstruction node, final Frame frame) {
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        assertMinimumStackSize(outgoing, 1);
+
+        final Value v = outgoing.pop();
         if (v.type.isPrimitive() || v.type.isArray()) {
             illegalState("Cannot load field from non object value " + v);
         }
         final GetField get = new GetField(node, v);
-        frame.push(get);
+        outgoing.push(get);
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(get);
     }
 
-    private void parse_PUTFIELD(final FieldInstruction node, final Frame frame) {
-        if (frame.incoming.stack.isEmpty()) {
-            illegalState("Cannot put field from empty stack");
-        }
-
+    @Testbacklog
+    protected void parse_PUTFIELD(final FieldInstruction node, final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
+        assertMinimumStackSize(outgoing, 2);
 
-        final Value v = frame.pop();
-        final Value target = frame.pop();
+        final Value v = outgoing.pop();
+        final Value target = outgoing.pop();
 
         final PutField put = new PutField(target, node.name().stringValue(), node.typeSymbol(), v);
 
@@ -1309,7 +1293,8 @@ public class MethodAnalyzer {
         outgoing.control = outgoing.control.controlFlowsTo(put, ControlType.FORWARD);
     }
 
-    private void parse_GETSTATIC(final FieldInstruction node, final Frame frame) {
+    @Testbacklog
+    protected void parse_GETSTATIC(final FieldInstruction node, final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
 
         final RuntimeclassReference ri = ir.defineRuntimeclassReference(node.field().owner().asSymbol());
@@ -1318,25 +1303,23 @@ public class MethodAnalyzer {
         outgoing.memory = outgoing.memory.memoryFlowsTo(init);
 
         final GetStatic get = new GetStatic(ri, node.name().stringValue(), node.typeSymbol());
-        frame.push(get);
+        outgoing.push(get);
 
         outgoing.control = outgoing.control.controlFlowsTo(init, ControlType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(get);
     }
 
-    private void parse_PUTSTATIC(final FieldInstruction node, final Frame frame) {
-        if (frame.incoming.stack.isEmpty()) {
-            illegalState("Cannot put field from empty stack");
-        }
-
+    @Testbacklog
+    protected void parse_PUTSTATIC(final FieldInstruction node, final Frame frame) {
         final RuntimeclassReference ri = ir.defineRuntimeclassReference(node.field().owner().asSymbol());
         final ClassInitialization init = new ClassInitialization(ri);
 
         final Status outgoing = frame.copyIncomingToOutgoing();
+        assertMinimumStackSize(outgoing, 1);
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(init);
 
-        final Value v = frame.pop();
+        final Value v = outgoing.pop();
 
         final PutStatic put = new PutStatic(ri, node.name().stringValue(), node.typeSymbol(), v);
         outgoing.memory = outgoing.memory.memoryFlowsTo(put);
@@ -1344,7 +1327,8 @@ public class MethodAnalyzer {
         outgoing.control = outgoing.control.controlFlowsTo(put, ControlType.FORWARD);
     }
 
-    private void parse_NEW(final NewObjectInstruction node, final Frame frame) {
+    @Testbacklog
+    protected void parse_NEW(final NewObjectInstruction node, final Frame frame) {
         final ClassDesc type = node.className().asSymbol();
 
         final RuntimeclassReference ri = ir.defineRuntimeclassReference(type);
@@ -1359,23 +1343,24 @@ public class MethodAnalyzer {
         outgoing.memory = outgoing.memory.memoryFlowsTo(init);
         outgoing.memory = outgoing.memory.memoryFlowsTo(n);
 
-        frame.push(n);
+        outgoing.push(n);
     }
 
-    private void parse_RETURN(final ReturnInstruction node, final Frame frame) {
-        final Return next = new Return();
-
+    private void parse_RETURN(final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
+        assertEmptyStack(outgoing);
+
+        final Return next = new Return();
         outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(next);
     }
 
-    private void parse_ARETURN(final ReturnInstruction node, final Frame frame) {
-        if (frame.incoming.stack.isEmpty()) {
-            illegalState("Cannot return empty stack");
-        }
+    @Testbacklog
+    protected void parse_ARETURN(final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
-        final Value v = frame.pop();
+        assertMinimumStackSize(outgoing, 1);
+
+        final Value v = outgoing.pop();
 
         final MethodTypeDesc methodTypeDesc = method.methodTypeSymbol();
         if (!v.type.equals(methodTypeDesc.returnType())) {
@@ -1387,24 +1372,25 @@ public class MethodAnalyzer {
         outgoing.memory = outgoing.memory.memoryFlowsTo(next);
     }
 
-    private void parse_RETURN_X(final ReturnInstruction node, final Frame frame, final ClassDesc type) {
-        if (frame.incoming.stack.isEmpty()) {
-            illegalState("Cannot return empty stack");
-        }
+    private void parse_RETURN_X(final Frame frame, final ClassDesc type) {
         final Status outgoing = frame.copyIncomingToOutgoing();
-        final Value v = frame.pop();
+        assertMinimumStackSize(outgoing, 1);
+
+        final Value v = outgoing.pop();
+        if (!v.type.equals(type)) {
+            illegalState("Expecting type " + TypeUtils.toString(type) + " on stack, got " + TypeUtils.toString(v.type));
+        }
+
         final ReturnValue next = new ReturnValue(type, v);
         outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(next);
     }
 
-    private void parse_CHECKCAST(final TypeCheckInstruction node, final Frame frame) {
-        if (frame.incoming.stack.isEmpty()) {
-            illegalState("Checkcast requires a stack entry");
-        }
+    private void parse_CHECKCAST(final ClassDesc typeToCheck, final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
-        final Value objectToCheck = frame.peek();
-        final RuntimeclassReference expectedType = ir.defineRuntimeclassReference(node.type().asSymbol());
+
+        final Value objectToCheck = outgoing.peek();
+        final RuntimeclassReference expectedType = ir.defineRuntimeclassReference(typeToCheck);
 
         final ClassInitialization classInit = new ClassInitialization(expectedType);
         outgoing.control = outgoing.control.controlFlowsTo(classInit, ControlType.FORWARD);
@@ -1413,370 +1399,361 @@ public class MethodAnalyzer {
         outgoing.control = outgoing.control.controlFlowsTo(new CheckCast(objectToCheck, classInit), ControlType.FORWARD);
     }
 
-    private void parse_INSTANCEOF(final TypeCheckInstruction node, final Frame frame) {
-        if (frame.incoming.stack.isEmpty()) {
-            illegalState("Instanceof requires a stack entry");
-        }
+    private void parse_INSTANCEOF(final ClassDesc typeToCheck, final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
-        final Value objectToCheck = frame.pop();
-        final RuntimeclassReference expectedType = ir.defineRuntimeclassReference(node.type().asSymbol());
+        assertMinimumStackSize(outgoing, 1);
+
+        final Value objectToCheck = outgoing.pop();
+        final RuntimeclassReference expectedType = ir.defineRuntimeclassReference(typeToCheck);
 
         final ClassInitialization classInit = new ClassInitialization(expectedType);
         outgoing.control = outgoing.control.controlFlowsTo(classInit, ControlType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(classInit);
 
-        frame.push(new InstanceOf(objectToCheck, classInit));
+        outgoing.push(new InstanceOf(objectToCheck, classInit));
     }
 
-    private void parse_DUP(final StackInstruction node, final Frame frame) {
-        if (frame.incoming.stack.isEmpty()) {
-            illegalState("Cannot duplicate empty stack");
-        }
-        frame.copyIncomingToOutgoing();
-        final Value v = frame.peek();
-        frame.push(v);
-    }
-
-    private void parse_DUP_X1(final StackInstruction node, final Frame frame) {
-        if (frame.incoming.stack.size() < 2) {
-            illegalState("Two stack values are required for DUP_X1");
-        }
-        frame.copyIncomingToOutgoing();
-        final Value v1 = frame.peek();
-        final Value v2 = frame.peek();
-        frame.push(v1);
-        frame.push(v2);
-        frame.push(v1);
-    }
-
-    private void parse_DUP_X2(final StackInstruction node, final Frame frame) {
-        if (frame.incoming.stack.size() < 2) {
-            illegalState("Two stack values are required for DUP_X2");
-        }
+    @Testbacklog
+    protected void parse_DUP(final StackInstruction node, final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
-        final Value v1 = frame.pop();
-        final Value v2 = frame.pop();
-        if (isCategory2(v2.type) && !isCategory2(v1.type)) {
+        assertMinimumStackSize(outgoing, 1);
+
+        final Value v = outgoing.peek();
+        outgoing.push(v);
+    }
+
+    @Testbacklog
+    protected void parse_DUP_X1(final StackInstruction node, final Frame frame) {
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        assertMinimumStackSize(outgoing, 2);
+
+        final Value v1 = outgoing.pop();
+        final Value v2 = outgoing.pop();
+        outgoing.push(v1);
+        outgoing.push(v2);
+        outgoing.push(v1);
+    }
+
+    @Testbacklog
+    protected void parse_DUP_X2(final StackInstruction node, final Frame frame) {
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        assertMinimumStackSize(outgoing, 2);
+
+        final Value v1 = outgoing.pop();
+        final Value v2 = outgoing.pop();
+        if (TypeUtils.isCategory2(v2.type) && !TypeUtils.isCategory2(v1.type)) {
             // Form 2
-            frame.push(v1);
-            frame.push(v2);
-            frame.push(v1);
+            outgoing.push(v1);
+            outgoing.push(v2);
+            outgoing.push(v1);
         } else {
             // Form 1
-            if (outgoing.stack.isEmpty()) {
-                illegalState("Another stack entry is required for DUP_X2");
-            }
-            final Value v3 = frame.pop();
-            if (isCategory2(v1.type) || isCategory2(v2.type) || isCategory2(v3.type)) {
+            assertMinimumStackSize(outgoing, 1);
+
+            final Value v3 = outgoing.pop();
+            if (TypeUtils.isCategory2(v1.type) || TypeUtils.isCategory2(v2.type) || TypeUtils.isCategory2(v3.type)) {
                 illegalState("All values must be of category 1 type for DUP_X2");
             }
-            frame.push(v1);
-            frame.push(v3);
-            frame.push(v2);
-            frame.push(v1);
+            outgoing.push(v1);
+            outgoing.push(v3);
+            outgoing.push(v2);
+            outgoing.push(v1);
         }
     }
 
-    private void parse_DUP2(final StackInstruction node, final Frame frame) {
-        if (frame.incoming.stack.isEmpty()) {
-            illegalState("Cannot duplicate empty stack");
-        }
+    @Testbacklog
+    protected void parse_DUP2(final StackInstruction node, final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
-        final Value v1 = frame.pop();
-        if (isCategory2(v1.type)) {
-            frame.push(v1);
-            frame.push(v1);
+        assertMinimumStackSize(outgoing, 1);
+
+        final Value v1 = outgoing.pop();
+        if (TypeUtils.isCategory2(v1.type)) {
+            outgoing.push(v1);
+            outgoing.push(v1);
             return;
         }
-        if (outgoing.stack.isEmpty()) {
-            illegalState("Another stack entry is required for DUP2 type 1 operation");
-        }
-        final Value v2 = frame.pop();
-        frame.push(v2);
-        frame.push(v1);
-        frame.push(v2);
-        frame.push(v1);
+
+        assertMinimumStackSize(outgoing, 1);
+
+        final Value v2 = outgoing.pop();
+        outgoing.push(v2);
+        outgoing.push(v1);
+        outgoing.push(v2);
+        outgoing.push(v1);
     }
 
-    private void parse_DUP2_X1(final StackInstruction node, final Frame frame) {
-        if (frame.incoming.stack.size() < 2) {
-            illegalState("A minium of two stack values are required for DUP2_X1");
-        }
+    @Testbacklog
+    protected void parse_DUP2_X1(final StackInstruction node, final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
+        assertMinimumStackSize(outgoing, 2);
 
-        final Value v1 = frame.pop();
-        final Value v2 = frame.pop();
-        if (isCategory2(v1.type) && !isCategory2(v2.type)) {
+        final Value v1 = outgoing.pop();
+        final Value v2 = outgoing.pop();
+        if (TypeUtils.isCategory2(v1.type) && !TypeUtils.isCategory2(v2.type)) {
             // Form 2
-            frame.push(v1);
-            frame.push(v2);
-            frame.push(v1);
+            outgoing.push(v1);
+            outgoing.push(v2);
+            outgoing.push(v1);
         } else {
             // Form 1
-            if (outgoing.stack.isEmpty()) {
-                illegalState("Another stack entry is required for DUP2_X1");
-            }
-            final Value v3 = frame.pop();
-            if (isCategory2(v1.type) || isCategory2(v2.type) || isCategory2(v3.type)) {
+            assertMinimumStackSize(outgoing, 1);
+
+            final Value v3 = outgoing.pop();
+            if (TypeUtils.isCategory2(v1.type) || TypeUtils.isCategory2(v2.type) || TypeUtils.isCategory2(v3.type)) {
                 illegalState("All values must be of category 1 type for DUP2_X1");
             }
-            frame.push(v2);
-            frame.push(v1);
-            frame.push(v3);
-            frame.push(v2);
-            frame.push(v1);
+            outgoing.push(v2);
+            outgoing.push(v1);
+            outgoing.push(v3);
+            outgoing.push(v2);
+            outgoing.push(v1);
         }
     }
 
-    private void parse_DUP2_X2(final StackInstruction node, final Frame frame) {
-        if (frame.incoming.stack.size() < 2) {
-            illegalState("A minium of two stack values are required for DUP2_X1");
-        }
+    @Testbacklog
+    protected void parse_DUP2_X2(final StackInstruction node, final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
+        assertMinimumStackSize(outgoing, 2);
 
-        final Value v1 = frame.pop();
-        final Value v2 = frame.pop();
-        if (isCategory2(v1.type) && isCategory2(v2.type)) {
+        final Value v1 = outgoing.pop();
+        final Value v2 = outgoing.pop();
+        if (TypeUtils.isCategory2(v1.type) && TypeUtils.isCategory2(v2.type)) {
             // Form 4
-            frame.push(v1);
-            frame.push(v2);
-            frame.push(v1);
+            outgoing.push(v1);
+            outgoing.push(v2);
+            outgoing.push(v1);
         } else {
-            if (outgoing.stack.isEmpty()) {
-                illegalState("Another stack entry is required for DUP2_X1");
-            }
-            final Value v3 = frame.pop();
-            if (!isCategory2(v1.type) && !isCategory2(v2.type) || isCategory2(v3.type)) {
+            assertMinimumStackSize(outgoing, 1);
+
+            final Value v3 = outgoing.pop();
+            if (!TypeUtils.isCategory2(v1.type) && !TypeUtils.isCategory2(v2.type) || TypeUtils.isCategory2(v3.type)) {
                 // Form 3
-                frame.push(v2);
-                frame.push(v1);
-                frame.push(v3);
-                frame.push(v2);
-                frame.push(v1);
-            } else if (isCategory2(v1.type) || !isCategory2(v2.type) && (!isCategory2(v3.type))) {
+                outgoing.push(v2);
+                outgoing.push(v1);
+                outgoing.push(v3);
+                outgoing.push(v2);
+                outgoing.push(v1);
+            } else if (TypeUtils.isCategory2(v1.type) || !TypeUtils.isCategory2(v2.type) && (!TypeUtils.isCategory2(v3.type))) {
                 // Form 2
-                frame.push(v1);
-                frame.push(v3);
-                frame.push(v2);
-                frame.push(v1);
+                outgoing.push(v1);
+                outgoing.push(v3);
+                outgoing.push(v2);
+                outgoing.push(v1);
             } else {
                 // Form 1
-                if (outgoing.stack.isEmpty()) {
-                    illegalState("Another stack entry is required for DUP2_X1");
-                }
-                final Value v4 = outgoing.stack.pop();
-                if (isCategory2(v1.type) || isCategory2(v2.type) || isCategory2(v3.type) || isCategory2(v4.type)) {
+                assertMinimumStackSize(outgoing, 1);
+
+                final Value v4 = outgoing.pop();
+                if (TypeUtils.isCategory2(v1.type) || TypeUtils.isCategory2(v2.type) || TypeUtils.isCategory2(v3.type) || TypeUtils.isCategory2(v4.type)) {
                     illegalState("All values must be of category 1 type for DUP2_X1");
                 }
-                frame.push(v2);
-                frame.push(v1);
-                frame.push(v4);
-                frame.push(v3);
-                frame.push(v2);
-                frame.push(v1);
+                outgoing.push(v2);
+                outgoing.push(v1);
+                outgoing.push(v4);
+                outgoing.push(v3);
+                outgoing.push(v2);
+                outgoing.push(v1);
             }
         }
     }
 
-    private void parse_POP(final StackInstruction node, final Frame frame) {
-        if (frame.incoming.stack.isEmpty()) {
-            illegalState("Cannot pop from empty stack");
-        }
-        frame.copyIncomingToOutgoing();
-        frame.pop();
+    @Testbacklog
+    protected void parse_POP(final StackInstruction node, final Frame frame) {
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        assertMinimumStackSize(outgoing, 1);
+
+        outgoing.pop();
     }
 
-    private void parse_POP2(final StackInstruction node, final Frame frame) {
-        if (frame.incoming.stack.isEmpty()) {
-            illegalState("Cannot pop from empty stack");
-        }
+    @Testbacklog
+    protected void parse_POP2(final StackInstruction node, final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
-        final Value v = frame.pop();
-        if (isCategory2(v.type)) {
+        assertMinimumStackSize(outgoing, 1);
+
+        final Value v = outgoing.pop();
+        if (TypeUtils.isCategory2(v.type)) {
             // Form 2
             return;
         }
         // Form 1
-        if (outgoing.stack.isEmpty()) {
-            illegalState("Another type 1 entry is required on stack to pop!");
-        }
-        frame.pop();
+        assertMinimumStackSize(outgoing, 1);
+
+        outgoing.pop();
     }
 
-    private void parse_SWAP(final StackInstruction node, final Frame frame) {
-        if (frame.incoming.stack.size() < 2) {
-            illegalState("Expected at least two values on stack for swap");
-        }
-        frame.copyIncomingToOutgoing();
-        final Value a = frame.pop();
-        final Value b = frame.pop();
-        frame.push(a);
-        frame.push(b);
+    @Testbacklog
+    protected void parse_SWAP(final StackInstruction node, final Frame frame) {
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        assertMinimumStackSize(outgoing, 2);
+
+        final Value a = outgoing.pop();
+        final Value b = outgoing.pop();
+        outgoing.push(a);
+        outgoing.push(b);
     }
 
-    private void parse_ADD_X(final OperatorInstruction node, final Frame frame, final ClassDesc desc) {
-        if (frame.incoming.stack.size() < 2) {
-            illegalState("Need a minium of two values on stack for addition");
-        }
-        frame.copyIncomingToOutgoing();
-        final Value a = frame.pop();
+    @Testbacklog
+    protected void parse_ADD_X(final OperatorInstruction node, final Frame frame, final ClassDesc desc) {
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        assertMinimumStackSize(outgoing, 2);
+
+        final Value a = outgoing.pop();
         if (!a.type.equals(desc)) {
             illegalState("Cannot add non " + desc + " value " + a + " for addition");
         }
-        final Value b = frame.pop();
+        final Value b = outgoing.pop();
         if (!b.type.equals(desc)) {
             illegalState("Cannot add non " + desc + " value " + b + " for addition");
         }
         final Add add = new Add(desc, b, a);
-        frame.push(add);
+        outgoing.push(add);
     }
 
-    private void parse_SUB_X(final OperatorInstruction node, final Frame frame, final ClassDesc desc) {
-        if (frame.incoming.stack.size() < 2) {
-            illegalState("Need a minium of two values on stack for substraction");
-        }
-        frame.copyIncomingToOutgoing();
-        final Value a = frame.pop();
+    @Testbacklog
+    protected void parse_SUB_X(final OperatorInstruction node, final Frame frame, final ClassDesc desc) {
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        assertMinimumStackSize(outgoing, 2);
+
+        final Value a = outgoing.pop();
         if (!a.type.equals(desc)) {
             illegalState("Cannot add non " + desc + " value " + a + " for substraction");
         }
-        final Value b = frame.pop();
+        final Value b = outgoing.pop();
         if (!b.type.equals(desc)) {
             illegalState("Cannot add non " + desc + " value " + b + " for substraction");
         }
         final Sub sub = new Sub(desc, b, a);
-        frame.push(sub);
+        outgoing.push(sub);
     }
 
-    private void parse_MUL_X(final OperatorInstruction node, final Frame frame, final ClassDesc desc) {
-        if (frame.incoming.stack.size() < 2) {
-            illegalState("Need a minium of two values on stack for multiplication");
-        }
-        frame.copyIncomingToOutgoing();
-        final Value a = frame.pop();
+    @Testbacklog
+    protected void parse_MUL_X(final OperatorInstruction node, final Frame frame, final ClassDesc desc) {
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        assertMinimumStackSize(outgoing, 2);
+
+        final Value a = outgoing.pop();
         if (!a.type.equals(desc)) {
             illegalState("Cannot add non " + desc + " value " + a + " for multiplication");
         }
-        final Value b = frame.pop();
+        final Value b = outgoing.pop();
         if (!b.type.equals(desc)) {
             illegalState("Cannot add non " + desc + " value " + b + " for multiplication");
         }
         final Mul mul = new Mul(desc, b, a);
-        frame.push(mul);
+        outgoing.push(mul);
     }
 
-    private void parse_ARRAYLENGTH(final OperatorInstruction node, final Frame frame) {
-        if (frame.incoming.stack.isEmpty()) {
-            illegalState("Array on stack is required!");
-        }
-        frame.copyIncomingToOutgoing();
-        final Value array = frame.pop();
-        frame.push(new ArrayLength(array));
-    }
-
-    private void parse_NEG_X(final OperatorInstruction node, final Frame frame, final ClassDesc desc) {
-        if (frame.incoming.stack.isEmpty()) {
-            illegalState("Need a minium of one value on stack for negation");
-        }
-        frame.copyIncomingToOutgoing();
-        final Value a = frame.pop();
-        if (!a.type.equals(desc)) {
-            illegalState("Cannot negate non " + desc + " value " + a + " of type " + a.type);
-        }
-        frame.push(new Negate(desc, a));
-    }
-
-    private void parse_DIV_X(final OperatorInstruction node, final Frame frame, final ClassDesc desc) {
-        if (frame.incoming.stack.size() < 2) {
-            illegalState("Need a minium of two values on stack for division");
-        }
+    private void parse_ARRAYLENGTH(final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
-        final Value a = frame.pop();
+
+        final Value array = outgoing.pop();
+        if (!array.type.isArray()) {
+            illegalState("Cannot get array length of non array value " + array);
+        }
+        outgoing.push(new ArrayLength(array));
+    }
+
+    private void parse_NEG_X(final Frame frame, final ClassDesc desc) {
+        final Status outgoing = frame.copyIncomingToOutgoing();
+
+        final Value a = outgoing.pop();
+        if (!a.type.equals(desc)) {
+            illegalState("Cannot negate non " + TypeUtils.toString(desc) + " value " + a + " of type " + TypeUtils.toString(a.type));
+        }
+        outgoing.push(new Negate(desc, a));
+    }
+
+    @Testbacklog
+    protected void parse_DIV_X(final OperatorInstruction node, final Frame frame, final ClassDesc desc) {
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        assertMinimumStackSize(outgoing, 2);
+
+        final Value a = outgoing.pop();
         if (!a.type.equals(desc)) {
             illegalState("Cannot use non " + desc + " value " + a + " for division");
         }
-        final Value b = frame.pop();
+        final Value b = outgoing.pop();
         if (!b.type.equals(desc)) {
             illegalState("Cannot use non " + desc + " value " + b + " for division");
         }
         final Div div = new Div(desc, b, a);
         outgoing.control = outgoing.control.controlFlowsTo(div, ControlType.FORWARD);
-        frame.push(div);
+        outgoing.push(div);
         frame.entryPoint = div;
     }
 
-    private void parse_REM_X(final OperatorInstruction node, final Frame frame, final ClassDesc desc) {
-        if (frame.incoming.stack.size() < 2) {
-            illegalState("Need a minium of two values on stack for remainder");
-        }
+    @Testbacklog
+    protected void parse_REM_X(final OperatorInstruction node, final Frame frame, final ClassDesc desc) {
         final Status outgoing = frame.copyIncomingToOutgoing();
-        final Value a = frame.pop();
+        assertMinimumStackSize(outgoing, 2);
+
+        final Value a = outgoing.pop();
         if (!a.type.equals(desc)) {
             illegalState("Cannot use non " + desc + " value " + a + " for remainder");
         }
-        final Value b = frame.pop();
+        final Value b = outgoing.pop();
         if (!b.type.equals(desc)) {
             illegalState("Cannot use non " + desc + " value " + b + " for remainder");
         }
         final Rem rem = new Rem(desc, b, a);
         outgoing.control = outgoing.control.controlFlowsTo(rem, ControlType.FORWARD);
-        frame.push(rem);
+        outgoing.push(rem);
     }
 
-    private void parse_BITOPERATION_X(final OperatorInstruction node, final Frame frame, final ClassDesc desc, final BitOperation.Operation operation) {
-        if (frame.incoming.stack.size() < 2) {
-            illegalState("Need a minium of two values on stack for bit operation");
-        }
-        frame.copyIncomingToOutgoing();
-        final Value a = frame.pop();
+    @Testbacklog
+    protected void parse_BITOPERATION_X(final OperatorInstruction node, final Frame frame, final ClassDesc desc, final BitOperation.Operation operation) {
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        assertMinimumStackSize(outgoing, 2);
+
+        final Value a = outgoing.pop();
         if (!a.type.equals(desc)) {
             illegalState("Cannot use non " + desc + " value " + a + " for bit operation");
         }
-        final Value b = frame.pop();
+        final Value b = outgoing.pop();
         if (!b.type.equals(desc)) {
             illegalState("Cannot use non " + desc + " value " + b + " for bit operation");
         }
         final BitOperation rem = new BitOperation(desc, operation, b, a);
-        frame.push(rem);
+        outgoing.push(rem);
     }
 
-    private void parse_NUMERICCOMPARE_X(final OperatorInstruction node, final Frame frame, final NumericCompare.Mode mode) {
-        if (frame.incoming.stack.size() < 2) {
-            illegalState("Need a minium of two values on stack for numeric comparison");
-        }
-        frame.copyIncomingToOutgoing();
-        final Value a = frame.pop();
-        final Value b = frame.pop();
-        final NumericCompare compare = new NumericCompare(mode, b, a);
-        frame.push(compare);
-    }
-
-    private void parse_MONITORENTER(final MonitorInstruction node, final Frame frame) {
-        if (frame.incoming.stack.isEmpty()) {
-            illegalState("Cannot duplicate empty stack");
-        }
+    @Testbacklog
+    protected void parse_NUMERICCOMPARE_X(final OperatorInstruction node, final Frame frame, final NumericCompare.Mode mode) {
         final Status outgoing = frame.copyIncomingToOutgoing();
-        final Value v = frame.pop();
+        assertMinimumStackSize(outgoing, 2);
+
+        final Value a = outgoing.pop();
+        final Value b = outgoing.pop();
+        final NumericCompare compare = new NumericCompare(mode, b, a);
+        outgoing.push(compare);
+    }
+
+    @Testbacklog
+    protected void parse_MONITORENTER(final MonitorInstruction node, final Frame frame) {
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        assertMinimumStackSize(outgoing, 1);
+
+        final Value v = outgoing.pop();
         outgoing.control = outgoing.control.controlFlowsTo(new MonitorEnter(v), ControlType.FORWARD);
     }
 
-    private void parse_MONITOREXIT(final MonitorInstruction node, final Frame frame) {
-        if (frame.incoming.stack.isEmpty()) {
-            illegalState("Cannot duplicate empty stack");
-        }
+    @Testbacklog
+    protected void parse_MONITOREXIT(final MonitorInstruction node, final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
-        final Value v = frame.pop();
+        assertMinimumStackSize(outgoing, 1);
+
+        final Value v = outgoing.pop();
         outgoing.control = outgoing.control.controlFlowsTo(new MonitorExit(v), ControlType.FORWARD);
     }
 
-    private void parse_ASTORE_X(final ArrayStoreInstruction node, final Frame frame, final ClassDesc arrayType) {
-        if (frame.incoming.stack.size() < 3) {
-            illegalState("Three stack entries required for array store");
-        }
+    @Testbacklog
+    protected void parse_ASTORE_X(final ArrayStoreInstruction node, final Frame frame, final ClassDesc arrayType) {
         final Status outgoing = frame.copyIncomingToOutgoing();
-        final Value value = frame.pop();
-        final Value index = frame.pop();
-        final Value array = frame.pop();
+        assertMinimumStackSize(outgoing, 3);
+
+        final Value value = outgoing.pop();
+        final Value index = outgoing.pop();
+        final Value array = outgoing.pop();
 
         final ArrayStore store = new ArrayStore(arrayType, array, index, value);
 
@@ -1784,14 +1761,14 @@ public class MethodAnalyzer {
         outgoing.control = outgoing.control.controlFlowsTo(store, ControlType.FORWARD);
     }
 
-    private void parse_AASTORE(final ArrayStoreInstruction node, final Frame frame) {
-        if (frame.incoming.stack.size() < 3) {
-            illegalState("Three stack entries required for array store");
-        }
+    @Testbacklog
+    protected void parse_AASTORE(final ArrayStoreInstruction node, final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
-        final Value value = frame.pop();
-        final Value index = frame.pop();
-        final Value array = frame.pop();
+        assertMinimumStackSize(outgoing, 3);
+
+        final Value value = outgoing.pop();
+        final Value index = outgoing.pop();
+        final Value array = outgoing.pop();
 
         final ArrayStore store = new ArrayStore(array.type.componentType(), array, index, value);
 
@@ -1799,46 +1776,40 @@ public class MethodAnalyzer {
         outgoing.control = outgoing.control.controlFlowsTo(store, ControlType.FORWARD);
     }
 
-    private void parse_ALOAD_X(final ArrayLoadInstruction node, final Frame frame, final ClassDesc arrayType, final ClassDesc elementType) {
-        if (frame.incoming.stack.size() < 2) {
-            illegalState("Two stack entries required for array store");
-        }
+    @Testbacklog
+    protected void parse_ALOAD_X(final ArrayLoadInstruction node, final Frame frame, final ClassDesc arrayType, final ClassDesc elementType) {
         final Status outgoing = frame.copyIncomingToOutgoing();
-        final Value index = frame.pop();
-        final Value array = frame.pop();
+        assertMinimumStackSize(outgoing, 2);
+
+        final Value index = outgoing.pop();
+        final Value array = outgoing.pop();
         final Value value = new ArrayLoad(elementType, arrayType, array, index);
         outgoing.memory = outgoing.memory.memoryFlowsTo(value);
         outgoing.control = outgoing.control.controlFlowsTo(value, ControlType.FORWARD);
-        frame.push(value);
+        outgoing.push(value);
     }
 
-    private void parse_AALOAD(final ArrayLoadInstruction node, final Frame frame) {
-        if (frame.incoming.stack.size() < 2) {
-            illegalState("Two stack entries required for array store");
-        }
+    @Testbacklog
+    protected void parse_AALOAD(final ArrayLoadInstruction node, final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
-        final Value index = frame.pop();
-        final Value array = frame.pop();
+        assertMinimumStackSize(outgoing, 2);
+
+        final Value index = outgoing.pop();
+        final Value array = outgoing.pop();
         final Value value = new ArrayLoad(array.type.componentType(), array.type, array, index);
         outgoing.memory = outgoing.memory.memoryFlowsTo(value);
         outgoing.control = outgoing.control.controlFlowsTo(value, ControlType.FORWARD);
-        frame.push(value);
+        outgoing.push(value);
     }
 
-    private void parse_CONVERT_X(final ConvertInstruction node, final Frame frame, final ClassDesc from, final ClassDesc to) {
-        if (frame.incoming.stack.isEmpty()) {
-            illegalState("Expected an entry on the stack for type conversion");
-        }
-        frame.copyIncomingToOutgoing();
-        final Value value = frame.pop();
+    private void parse_CONVERT_X(final Frame frame, final ClassDesc from, final ClassDesc to) {
+        final Status outgoing = frame.copyIncomingToOutgoing();
+
+        final Value value = outgoing.pop();
         if (!value.type.equals(from)) {
             illegalState("Expected a value of type " + from + " but got " + value.type);
         }
-        frame.push(new Convert(to, value, from));
-    }
-
-    private static boolean isCategory2(final ClassDesc desc) {
-        return ConstantDescs.CD_long.equals(desc) || ConstantDescs.CD_double.equals(desc);
+        outgoing.push(new Convert(to, value, from));
     }
 
     public Method ir() {
@@ -1846,26 +1817,101 @@ public class MethodAnalyzer {
     }
 
     private void step4PeepholeOptimizations() {
-        ir.peepholeOptimizations();
     }
 
-    static class Status {
-        int lineNumber = -1;
-        Value[] locals;
-        Stack<Value> stack;
-        Node control;
-        Node memory;
+    protected enum CFGProjection {
+        DEFAULT, TRUE, FALSE
+    }
 
-        Status copy() {
-            final Status result = new Status();
+    protected record CFGEdge(int fromIndex, CFGProjection projection, ControlType controlType) {
+    }
+
+    private record CFGAnalysisJob(int startIndex, List<Integer> path) {
+    }
+
+    protected static class Frame {
+
+        protected final CodeElement codeElement;
+        protected final List<CFGEdge> predecessors;
+        protected final int elementIndex;
+        protected int indexInTopologicalOrder;
+        protected Node entryPoint;
+        protected Status in;
+        protected Status out;
+
+        public Frame(final int elementIndex, final CodeElement codeElement) {
+            this.predecessors = new ArrayList<>();
+            this.elementIndex = elementIndex;
+            this.indexInTopologicalOrder = -1;
+            this.codeElement = codeElement;
+        }
+
+        public Status copyIncomingToOutgoing() {
+            out = in.copy();
+            return out;
+        }
+    }
+
+    protected static class Status {
+
+        protected final static int UNDEFINED_LINE_NUMBER = -1;
+
+        protected int lineNumber;
+        private final Value[] locals;
+        protected final Stack<Value> stack;
+        protected Node control;
+        protected Node memory;
+
+        protected Status(final int maxLocals) {
+            this.locals = new Value[maxLocals];
+            this.stack = new Stack<>();
+            this.lineNumber = UNDEFINED_LINE_NUMBER;
+        }
+
+        protected int numberOfLocals() {
+            return locals.length;
+        }
+
+        protected Value getLocal(final int slot) {
+            if (slot > 0) {
+                if (locals[slot - 1] != null && TypeUtils.isCategory2(locals[slot - 1].type)) {
+                    // This is an illegal state!
+                    throw new IllegalStateException("Slot " + (slot - 1) + " is already set to a category 2 value, so cannot read slot " + slot);
+                }
+            }
+            return locals[slot];
+        }
+
+        protected void setLocal(final int slot, final Value value) {
+            locals[slot] = value;
+            if (slot > 0) {
+                if (locals[slot - 1] != null && TypeUtils.isCategory2(locals[slot - 1].type)) {
+                    // This is an illegal state!
+                    throw new IllegalStateException("Slot " + (slot - 1) + " is already set to a category 2 value, so cannot set slot " + slot);
+                }
+            }
+        }
+
+        protected Status copy() {
+            final Status result = new Status(locals.length);
             result.lineNumber = lineNumber;
-            result.locals = new Value[locals.length];
             System.arraycopy(locals, 0, result.locals, 0, locals.length);
-            result.stack = new Stack<>();
             result.stack.addAll(stack);
             result.control = control;
             result.memory = memory;
             return result;
+        }
+
+        protected Value pop() {
+            return stack.pop();
+        }
+
+        protected Value peek() {
+            return stack.peek();
+        }
+
+        protected void push(final Value value) {
+            stack.push(value);
         }
     }
 }

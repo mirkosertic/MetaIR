@@ -15,6 +15,6 @@ public class GetField extends Value {
 
     @Override
     public String debugDescription() {
-        return "GetField : " + node.name() + " : " + DebugUtils.toString(type);
+        return "GetField : " + node.name() + " : " + TypeUtils.toString(type);
     }
 }

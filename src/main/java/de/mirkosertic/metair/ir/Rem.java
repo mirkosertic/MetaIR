@@ -12,6 +12,6 @@ public class Rem extends Value {
 
     @Override
     public String debugDescription() {
-        return "Rem : " + DebugUtils.toString(type);
+        return "Rem : " + TypeUtils.toString(type);
     }
 }

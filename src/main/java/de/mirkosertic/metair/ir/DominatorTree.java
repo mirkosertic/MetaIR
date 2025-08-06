@@ -37,8 +37,8 @@ public class DominatorTree {
         if (visited.add(current)) {
             for (final Node user : current.usedBy.stream().sorted(Comparator.comparing((Node o) -> o.getClass().getSimpleName())).toList()) {
                 for (final Node.UseEdge edge : user.uses) {
-                    if (edge.node == current) {
-                        if (edge.use instanceof final ControlFlowUse cfu) {
+                    if (edge.node() == current) {
+                        if (edge.use() instanceof final ControlFlowUse cfu) {
                             if (cfu.type == ControlType.FORWARD) {
                                 computeRPO(user, finished, visited);
                             }
@@ -73,15 +73,15 @@ public class DominatorTree {
                 final Node oldIdom = getIDom(v);
                 Node newIdom = null;
                 for (final Node.UseEdge edge : v.uses) {
-                    if (edge.use instanceof ControlFlowUse || edge.use instanceof DefinedByUse || edge.use instanceof DataFlowUse || edge.use instanceof MemoryUse) {
-                        if (getIDom(edge.node) == null)
+                    if (edge.use() instanceof ControlFlowUse || edge.use() instanceof DefinedByUse || edge.use() instanceof DataFlowUse || edge.use() instanceof MemoryUse) {
+                        if (getIDom(edge.node()) == null)
                             /* not yet analyzed */ continue;
                         if (newIdom == null) {
                             /* If we only have one (defined) predecessor pre, IDom(v) = pre */
-                            newIdom = edge.node;
+                            newIdom = edge.node();
                         } else {
                             /* compute the intersection of all defined predecessors of v */
-                            newIdom = intersectIDoms(edge.node, newIdom);
+                            newIdom = intersectIDoms(edge.node(), newIdom);
                         }
                     }
                 }

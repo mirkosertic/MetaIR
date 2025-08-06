@@ -16,19 +16,17 @@ public class ReferenceConditionTest {
 
         assertThat(referenceCondition.debugDescription()).isEqualTo("ReferenceCondition : EQ");
 
-        assertThat(referenceCondition.type).isEqualTo(ConstantDescs.CD_boolean);
+        assertThat(referenceCondition.type).isEqualTo(ConstantDescs.CD_int);
         assertThat(referenceCondition.operation).isEqualTo(ReferenceCondition.Operation.EQ);
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).containsExactly(referenceCondition);
         assertThat(b.usedBy).containsExactly(referenceCondition);
         assertThat(referenceCondition.uses.size()).isEqualTo(2);
-        assertThat(referenceCondition.uses.get(0).node).isSameAs(a);
-        assertThat(referenceCondition.uses.get(0).use).isEqualTo(new ArgumentUse(0));
-        assertThat(referenceCondition.uses.get(1).node).isSameAs(b);
-        assertThat(referenceCondition.uses.get(1).use).isEqualTo(new ArgumentUse(1));
+        assertThat(referenceCondition.uses.get(0).node()).isSameAs(a);
+        assertThat(referenceCondition.uses.get(0).use()).isEqualTo(new ArgumentUse(0));
+        assertThat(referenceCondition.uses.get(1).node()).isSameAs(b);
+        assertThat(referenceCondition.uses.get(1).use()).isEqualTo(new ArgumentUse(1));
         assertThat(referenceCondition.isConstant()).isFalse();
-
-        assertThat(referenceCondition.peepholeOptimization()).isEmpty();
     }
 
 }

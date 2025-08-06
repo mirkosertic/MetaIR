@@ -15,6 +15,6 @@ public class ExtractThisRefProjection extends Value implements Projection {
 
     @Override
     public String debugDescription() {
-        return "this : " + DebugUtils.toString(type);
+        return "this : " + TypeUtils.toString(type);
     }
 }

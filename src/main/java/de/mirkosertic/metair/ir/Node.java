@@ -1,28 +1,14 @@
 package de.mirkosertic.metair.ir;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public abstract class Node {
 
-    public static class UseEdge {
-        public Node node;
-        public final Use use;
-
-        UseEdge(final Node node, final Use use) {
-            this.node = node;
-            this.use = use;
-        }
-    }
-
     // Incoming uses
     protected final List<UseEdge> uses;
-
     protected final Set<Node> usedBy;
 
     protected Node() {
@@ -30,14 +16,14 @@ public abstract class Node {
         this.usedBy = new HashSet<>();
     }
 
-    protected void use(final Node v, final Use use) {
-        uses.add(new UseEdge(v, use));
-        v.usedBy.add(this);
-    }
-
     public Node controlFlowsTo(final Node target, final ControlType type) {
         target.use(this, new ControlFlowUse(type));
         return target;
+    }
+
+    protected void use(final Node v, final Use use) {
+        uses.add(new UseEdge(v, use));
+        v.usedBy.add(this);
     }
 
     public Node memoryFlowsTo(final Node target) {
@@ -45,36 +31,18 @@ public abstract class Node {
         return target;
     }
 
-    public void kill() {
-        for (final UseEdge edge : uses) {
-            edge.node.usedBy.remove(this);
-        }
-        uses.clear();
-    }
-
-    public abstract String debugDescription();
-
     @Override
     public String toString() {
         return debugDescription();
     }
 
-    public Map<Node, List<UseEdge>> outgoingControlFlows() {
-        final Map<Node, List<UseEdge>> controlFlows = new HashMap<>();
-        for (final Node usedBy : usedBy) {
-            for (final UseEdge edge : usedBy.uses.stream().filter(t -> t.node == this && t.use instanceof ControlFlowUse).toList()) {
-                controlFlows.computeIfAbsent(usedBy, k -> new ArrayList<>()).add(edge);
-            }
-        }
-        return controlFlows;
-    }
-
-    public Set<Node> peepholeOptimization() {
-        return Collections.emptySet();
-    }
+    public abstract String debugDescription();
 
     public boolean isConstant() {
         return false;
+    }
+
+    public record UseEdge(Node node, Use use) {
     }
 
 }

@@ -31,6 +31,7 @@ public class OpcodeNEWARRAYTest {
             codeBuilder.aload(1);
             codeBuilder.iconst_1(); // Index
             codeBuilder.baload();
+            codeBuilder.pop();
             // Array length
             codeBuilder.aload(1);
             codeBuilder.arraylength();
@@ -62,6 +63,7 @@ public class OpcodeNEWARRAYTest {
             codeBuilder.aload(1);
             codeBuilder.iconst_1(); // Index
             codeBuilder.caload();
+            codeBuilder.pop();
             // Array length
             codeBuilder.aload(1);
             codeBuilder.arraylength();
@@ -93,6 +95,7 @@ public class OpcodeNEWARRAYTest {
             codeBuilder.aload(1);
             codeBuilder.sipush(2); // Index
             codeBuilder.saload();
+            codeBuilder.pop();
             // Array length
             codeBuilder.aload(1);
             codeBuilder.arraylength();
@@ -124,6 +127,7 @@ public class OpcodeNEWARRAYTest {
             codeBuilder.aload(1);
             codeBuilder.sipush(2); // Index
             codeBuilder.iaload();
+            codeBuilder.pop();
             // Array length
             codeBuilder.aload(1);
             codeBuilder.arraylength();
@@ -155,6 +159,7 @@ public class OpcodeNEWARRAYTest {
             codeBuilder.aload(1);
             codeBuilder.sipush(2); // Index
             codeBuilder.laload();
+            codeBuilder.pop();
             // Array length
             codeBuilder.aload(1);
             codeBuilder.arraylength();
@@ -186,6 +191,7 @@ public class OpcodeNEWARRAYTest {
             codeBuilder.aload(1);
             codeBuilder.sipush(2); // Index
             codeBuilder.faload();
+            codeBuilder.pop();
             // Array length
             codeBuilder.aload(1);
             codeBuilder.arraylength();
@@ -217,6 +223,7 @@ public class OpcodeNEWARRAYTest {
             codeBuilder.aload(1);
             codeBuilder.sipush(2); // Index
             codeBuilder.daload();
+            codeBuilder.pop();
             // Array length
             codeBuilder.aload(1);
             codeBuilder.arraylength();

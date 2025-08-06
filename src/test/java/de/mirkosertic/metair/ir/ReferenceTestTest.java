@@ -15,16 +15,14 @@ public class ReferenceTestTest {
 
         assertThat(referenceCondition.debugDescription()).isEqualTo("ReferenceTest : NONNULL");
 
-        assertThat(referenceCondition.type).isEqualTo(ConstantDescs.CD_boolean);
+        assertThat(referenceCondition.type).isEqualTo(ConstantDescs.CD_int);
         assertThat(referenceCondition.operation).isEqualTo(ReferenceTest.Operation.NONNULL);
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).containsExactly(referenceCondition);
         assertThat(referenceCondition.uses.size()).isEqualTo(1);
-        assertThat(referenceCondition.uses.getFirst().node).isSameAs(a);
-        assertThat(referenceCondition.uses.getFirst().use).isEqualTo(new ArgumentUse(0));
+        assertThat(referenceCondition.uses.getFirst().node()).isSameAs(a);
+        assertThat(referenceCondition.uses.getFirst().use()).isEqualTo(new ArgumentUse(0));
         assertThat(referenceCondition.isConstant()).isFalse();
-
-        assertThat(referenceCondition.peepholeOptimization()).isEmpty();
     }
 
 }

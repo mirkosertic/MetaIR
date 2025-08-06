@@ -11,7 +11,7 @@ public class NewArrayTest {
     @Test
     public void testUsage() {
         final Value size = new PrimitiveInt(10);
-        final Value a = new NewArray(ConstantDescs.CD_byte.arrayType(), size);
+        final Value a = new NewArray(ConstantDescs.CD_byte, size);
 
         assertThat(a.debugDescription()).isEqualTo("NewArray : byte[]");
 
@@ -21,9 +21,7 @@ public class NewArrayTest {
         assertThat(a.usedBy).isEmpty();
         assertThat(size.usedBy).containsExactly(a);
         assertThat(a.uses.size()).isEqualTo(1);
-        assertThat(a.uses.getFirst().node).isSameAs(size);
-        assertThat(a.uses.getFirst().use).isEqualTo(new ArgumentUse(0));
-
-        assertThat(a.peepholeOptimization()).isEmpty();
+        assertThat(a.uses.getFirst().node()).isSameAs(size);
+        assertThat(a.uses.getFirst().use()).isEqualTo(new ArgumentUse(0));
     }
 }

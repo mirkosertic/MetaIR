@@ -16,6 +16,6 @@ public class ArrayLoad extends Value {
 
     @Override
     public String debugDescription() {
-        return "ArrayLoad : " + DebugUtils.toString(type);
+        return "ArrayLoad : " + TypeUtils.toString(type);
     }
 }

@@ -16,9 +16,7 @@ public class DefinedByUseTest {
         assertThat(p.type).isEqualTo(ConstantDescs.CD_int);
 
         assertThat(p.uses).hasSize(1);
-        assertThat(p.uses.getFirst().node).isSameAs(label);
-        assertThat(p.uses.getFirst().use).isInstanceOf(DefinedByUse.class);
-
-        assertThat(p.peepholeOptimization()).isEmpty();
+        assertThat(p.uses.getFirst().node()).isSameAs(label);
+        assertThat(p.uses.getFirst().use()).isInstanceOf(DefinedByUse.class);
     }
 }

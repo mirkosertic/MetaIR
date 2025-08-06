@@ -19,6 +19,6 @@ public class BitOperation extends Value {
 
     @Override
     public String debugDescription() {
-        return "BitOperation : " + operation + "(" + DebugUtils.toString(type) + ")";
+        return "BitOperation : " + operation + "(" + TypeUtils.toString(type) + ")";
     }
 }

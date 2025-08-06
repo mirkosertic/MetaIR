@@ -19,8 +19,6 @@ public class PrimitiveDoubleTest {
         assertThat(a.uses).isEmpty();
         assertThat(a.isConstant()).isTrue();
         assertThat(a.debugDescription()).isEqualTo("double 10.0");
-
-        assertThat(a.peepholeOptimization()).isEmpty();
     }
 
 }

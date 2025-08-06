@@ -23,8 +23,6 @@ public class InvocationTest {
         assertThat(a.usedBy).isEmpty();
         assertThat(a.uses).isEmpty();
         assertThat(a.isConstant()).isFalse();
-
-        assertThat(a.peepholeOptimization()).isEmpty();
     }
 
     @Test

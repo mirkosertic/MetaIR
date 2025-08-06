@@ -16,6 +16,6 @@ public class PutStatic extends Node {
 
     @Override
     public String debugDescription() {
-        return "PutStaticField : " + fieldName + " : " + DebugUtils.toString(fieldType);
+        return "PutStaticField : " + fieldName + " : " + TypeUtils.toString(fieldType);
     }
 }

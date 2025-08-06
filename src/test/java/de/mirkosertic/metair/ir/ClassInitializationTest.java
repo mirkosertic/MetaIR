@@ -16,11 +16,9 @@ public class ClassInitializationTest {
         assertThat(ci.debugDescription()).isEqualTo("ClassInit");
 
         assertThat(ci.uses.size()).isEqualTo(1);
-        assertThat(ci.uses.getFirst().node).isSameAs(cr);
-        assertThat(ci.uses.getFirst().use).isEqualTo(new ArgumentUse(0));
+        assertThat(ci.uses.getFirst().node()).isSameAs(cr);
+        assertThat(ci.uses.getFirst().use()).isEqualTo(new ArgumentUse(0));
         assertThat(ci.usedBy).isEmpty();
         assertThat(ci.isConstant()).isFalse();
-
-        assertThat(ci.peepholeOptimization()).isEmpty();
     }
 }

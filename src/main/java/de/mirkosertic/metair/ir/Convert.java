@@ -15,6 +15,6 @@ public class Convert extends Value {
 
     @Override
     public String debugDescription() {
-        return "Convert : " + DebugUtils.toString(from) + " to " + DebugUtils.toString(type);
+        return "Convert : " + TypeUtils.toString(from) + " to " + TypeUtils.toString(type);
     }
 }

@@ -19,7 +19,5 @@ public class ExtractMethodArgProjectionTest {
         assertThat(a.uses).isEmpty();
         assertThat(a.debugDescription()).isEqualTo("arg1 : String");
         assertThat(a.name()).isEqualTo("arg1");
-
-        assertThat(a.peepholeOptimization()).isEmpty();
     }
 }

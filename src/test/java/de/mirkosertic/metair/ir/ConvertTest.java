@@ -19,9 +19,7 @@ public class ConvertTest {
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).containsExactly(convert);
         assertThat(convert.uses.size()).isEqualTo(1);
-        assertThat(convert.uses.getFirst().node).isSameAs(a);
-        assertThat(convert.uses.getFirst().use).isEqualTo(new ArgumentUse(0));
-
-        assertThat(convert.peepholeOptimization()).isEmpty();
+        assertThat(convert.uses.getFirst().node()).isSameAs(a);
+        assertThat(convert.uses.getFirst().use()).isEqualTo(new ArgumentUse(0));
     }
 }

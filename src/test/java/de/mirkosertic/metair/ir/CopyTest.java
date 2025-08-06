@@ -17,12 +17,10 @@ public class CopyTest {
         assertThat(a.usedBy).containsExactly(copy);
         assertThat(b.usedBy).isEmpty();
         assertThat(copy.uses.size()).isEqualTo(1);
-        assertThat(copy.uses.getFirst().node).isSameAs(a);
-        assertThat(copy.uses.getFirst().use).isInstanceOf(DataFlowUse.class);
+        assertThat(copy.uses.getFirst().node()).isSameAs(a);
+        assertThat(copy.uses.getFirst().use()).isInstanceOf(DataFlowUse.class);
 
         assertThat(b.isConstant()).isTrue();
-
-        assertThat(copy.peepholeOptimization()).isEmpty();
 
         assertThat(copy.debugDescription()).isEqualTo("Copy");
     }

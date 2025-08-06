@@ -12,6 +12,6 @@ public class Mul extends Value {
 
     @Override
     public String debugDescription() {
-        return "Mul : " + DebugUtils.toString(type);
+        return "Mul : " + TypeUtils.toString(type);
     }
 }

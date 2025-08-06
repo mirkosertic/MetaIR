@@ -30,6 +30,7 @@ public class OpcodeANEWARRAYTest {
             codeBuilder.aload(1);
             codeBuilder.iconst_1(); // Index
             codeBuilder.aaload();
+            codeBuilder.pop();
             // Array length
             codeBuilder.aload(1);
             codeBuilder.arraylength();

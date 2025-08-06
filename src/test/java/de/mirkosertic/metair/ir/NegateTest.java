@@ -19,9 +19,7 @@ public class NegateTest {
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).containsExactly(negate);
         assertThat(negate.uses.size()).isEqualTo(1);
-        assertThat(negate.uses.getFirst().node).isSameAs(a);
-        assertThat(negate.uses.getFirst().use).isEqualTo(new ArgumentUse(0));
-
-        assertThat(negate.peepholeOptimization()).isEmpty();
+        assertThat(negate.uses.getFirst().node()).isSameAs(a);
+        assertThat(negate.uses.getFirst().use()).isEqualTo(new ArgumentUse(0));
     }
 }

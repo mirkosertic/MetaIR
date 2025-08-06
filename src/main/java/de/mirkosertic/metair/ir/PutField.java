@@ -16,6 +16,6 @@ public class PutField extends Node {
 
     @Override
     public String debugDescription() {
-        return "PutField : " + fieldName + " : " + DebugUtils.toString(fieldType);
+        return "PutField : " + fieldName + " : " + TypeUtils.toString(fieldType);
     }
 }

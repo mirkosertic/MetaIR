@@ -17,11 +17,9 @@ public class NewTest {
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).isEmpty();
         assertThat(a.uses).hasSize(1);
-        assertThat(a.uses.getFirst().node).isSameAs(ri);
-        assertThat(a.uses.getFirst().use).isEqualTo(new ArgumentUse(0));
+        assertThat(a.uses.getFirst().node()).isSameAs(ri);
+        assertThat(a.uses.getFirst().use()).isEqualTo(new ArgumentUse(0));
         assertThat(a.isConstant()).isFalse();
         assertThat(a.debugDescription()).isEqualTo("New");
-
-        assertThat(a.peepholeOptimization()).isEmpty();
     }
 }

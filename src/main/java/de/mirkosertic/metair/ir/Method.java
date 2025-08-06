@@ -4,11 +4,7 @@ package de.mirkosertic.metair.ir;
 import java.lang.classfile.Label;
 import java.lang.constant.ClassDesc;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
 
 public class Method extends Node {
 
@@ -84,22 +80,6 @@ public class Method extends Node {
         });
     }
 
-    public PrimitiveByte definePrimitiveByte(final byte value) {
-        return (PrimitiveByte) constants.computeIfAbsent(value, key -> {
-            final PrimitiveByte v = new PrimitiveByte(value);
-            v.use(Method.this, DefinedByUse.INSTANCE);
-            return v;
-        });
-    }
-
-    public PrimitiveShort definePrimitiveShort(final short value) {
-        return (PrimitiveShort) constants.computeIfAbsent(value, key -> {
-            final PrimitiveShort v = new PrimitiveShort(value);
-            v.use(Method.this, DefinedByUse.INSTANCE);
-            return v;
-        });
-    }
-
     public PrimitiveFloat definePrimitiveFloat(final float value) {
         return (PrimitiveFloat) constants.computeIfAbsent(value, key -> {
             final PrimitiveFloat v = new PrimitiveFloat(value);
@@ -114,25 +94,6 @@ public class Method extends Node {
             v.use(Method.this, DefinedByUse.INSTANCE);
             return v;
         });
-    }
-
-    public void peepholeOptimizations() {
-        final Queue<Node> workingQueue = new LinkedList<>();
-        workingQueue.add(this);
-
-        final Set<Node> visited = new HashSet<>();
-
-        while (!workingQueue.isEmpty()) {
-            final Node n = workingQueue.poll();
-            workingQueue.addAll(n.peepholeOptimization());
-            visited.add(n);
-
-            for (final Node user : n.usedBy) {
-                if (!visited.contains(user)) {
-                    workingQueue.add(user);
-                }
-            }
-        }
     }
 
     @Override
