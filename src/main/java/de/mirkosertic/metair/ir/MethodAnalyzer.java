@@ -61,16 +61,23 @@ public class MethodAnalyzer {
     private final Method ir;
     private Frame[] frames;
     private List<Frame> codeModelTopologicalOrder;
+    private MethodTypeDesc methodTypeDesc;
 
     MethodAnalyzer() {
         this.ir = new Method();
         this.labelToIndex = new HashMap<>();
     }
 
+    MethodAnalyzer(final MethodTypeDesc methodTypeDesc) {
+        this();
+        this.methodTypeDesc = methodTypeDesc;
+    }
+
     public MethodAnalyzer(final ClassDesc owner, final MethodModel method) {
         this();
         this.owner = owner;
         this.method = method;
+        this.methodTypeDesc = method.methodTypeSymbol();
 
         final Optional<CodeModel> optCode = method.code();
         if (optCode.isPresent()) {
@@ -527,7 +534,7 @@ public class MethodAnalyzer {
                         visitTypeCheckInstruction(typeCheckInstruction.opcode(), typeCheckInstruction.type().asSymbol(), frame);
                 case final StackInstruction stackInstruction -> visitStackInstruction(stackInstruction, frame);
                 case final OperatorInstruction operatorInstruction ->
-                        visitOperatorInstruction(operatorInstruction, frame);
+                        visitOperatorInstruction(operatorInstruction.opcode(), frame);
                 case final MonitorInstruction monitorInstruction ->
                         visitMonitorInstruction(monitorInstruction, frame);
                 case final ThrowInstruction thr -> visitThrowInstruction(thr, frame);
@@ -729,48 +736,63 @@ public class MethodAnalyzer {
         }
     }
 
-    private void visitOperatorInstruction(final OperatorInstruction ins, final Frame frame) {
-        switch (ins.opcode()) {
-            case Opcode.IADD -> parse_ADD_X(ins, frame, ConstantDescs.CD_int);
-            case Opcode.DADD -> parse_ADD_X(ins, frame, ConstantDescs.CD_double);
-            case Opcode.FADD -> parse_ADD_X(ins, frame, ConstantDescs.CD_float);
-            case Opcode.LADD -> parse_ADD_X(ins, frame, ConstantDescs.CD_long);
-            case Opcode.DSUB -> parse_SUB_X(ins, frame, ConstantDescs.CD_double);
-            case Opcode.FSUB -> parse_SUB_X(ins, frame, ConstantDescs.CD_float);
-            case Opcode.ISUB -> parse_SUB_X(ins, frame, ConstantDescs.CD_int);
-            case Opcode.LSUB -> parse_SUB_X(ins, frame, ConstantDescs.CD_long);
-            case Opcode.DMUL -> parse_MUL_X(ins, frame, ConstantDescs.CD_double);
-            case Opcode.FMUL -> parse_MUL_X(ins, frame, ConstantDescs.CD_float);
-            case Opcode.IMUL -> parse_MUL_X(ins, frame, ConstantDescs.CD_int);
-            case Opcode.LMUL -> parse_MUL_X(ins, frame, ConstantDescs.CD_long);
-            case Opcode.ARRAYLENGTH, Opcode.INEG, Opcode.LNEG, Opcode.FNEG, Opcode.DNEG -> visitUnaryOperatorInstruction(ins.opcode(), frame);
-            case Opcode.IDIV -> parse_DIV_X(ins, frame, ConstantDescs.CD_int);
-            case Opcode.LDIV -> parse_DIV_X(ins, frame, ConstantDescs.CD_long);
-            case Opcode.FDIV -> parse_DIV_X(ins, frame, ConstantDescs.CD_float);
-            case Opcode.DDIV -> parse_DIV_X(ins, frame, ConstantDescs.CD_double);
-            case Opcode.IREM -> parse_REM_X(ins, frame, ConstantDescs.CD_int);
-            case Opcode.LREM -> parse_REM_X(ins, frame, ConstantDescs.CD_long);
-            case Opcode.FREM -> parse_REM_X(ins, frame, ConstantDescs.CD_float);
-            case Opcode.DREM -> parse_REM_X(ins, frame, ConstantDescs.CD_double);
-            case Opcode.IAND -> parse_BITOPERATION_X(ins, frame, ConstantDescs.CD_int, BitOperation.Operation.AND);
-            case Opcode.IOR -> parse_BITOPERATION_X(ins, frame, ConstantDescs.CD_int, BitOperation.Operation.OR);
-            case Opcode.IXOR -> parse_BITOPERATION_X(ins, frame, ConstantDescs.CD_int, BitOperation.Operation.XOR);
-            case Opcode.ISHL -> parse_BITOPERATION_X(ins, frame, ConstantDescs.CD_int, BitOperation.Operation.SHL);
-            case Opcode.ISHR -> parse_BITOPERATION_X(ins, frame, ConstantDescs.CD_int, BitOperation.Operation.SHR);
-            case Opcode.IUSHR -> parse_BITOPERATION_X(ins, frame, ConstantDescs.CD_int, BitOperation.Operation.USHR);
-            case Opcode.LAND -> parse_BITOPERATION_X(ins, frame, ConstantDescs.CD_long, BitOperation.Operation.AND);
-            case Opcode.LOR -> parse_BITOPERATION_X(ins, frame, ConstantDescs.CD_long, BitOperation.Operation.OR);
-            case Opcode.LXOR -> parse_BITOPERATION_X(ins, frame, ConstantDescs.CD_long, BitOperation.Operation.XOR);
-            case Opcode.LSHL -> parse_BITOPERATION_X(ins, frame, ConstantDescs.CD_long, BitOperation.Operation.SHL);
-            case Opcode.LSHR -> parse_BITOPERATION_X(ins, frame, ConstantDescs.CD_long, BitOperation.Operation.SHR);
+    protected void visitOperatorInstruction(final Opcode opcode, final Frame frame) {
+        switch (opcode) {
+            case Opcode.IADD, Opcode.DADD, Opcode.FADD, Opcode.LADD, Opcode.FSUB, Opcode.ISUB, Opcode.DSUB,
+                 Opcode.LSUB -> visitBinaryOperatorInstruction(opcode, frame);
+            case Opcode.DMUL -> parse_MUL_X(frame, ConstantDescs.CD_double);
+            case Opcode.FMUL -> parse_MUL_X(frame, ConstantDescs.CD_float);
+            case Opcode.IMUL -> parse_MUL_X(frame, ConstantDescs.CD_int);
+            case Opcode.LMUL -> parse_MUL_X(frame, ConstantDescs.CD_long);
+            case Opcode.ARRAYLENGTH, Opcode.INEG, Opcode.LNEG, Opcode.FNEG, Opcode.DNEG -> visitUnaryOperatorInstruction(opcode, frame);
+            case Opcode.IDIV -> parse_DIV_X(frame, ConstantDescs.CD_int);
+            case Opcode.LDIV -> parse_DIV_X(frame, ConstantDescs.CD_long);
+            case Opcode.FDIV -> parse_DIV_X(frame, ConstantDescs.CD_float);
+            case Opcode.DDIV -> parse_DIV_X(frame, ConstantDescs.CD_double);
+            case Opcode.IREM -> parse_REM_X(frame, ConstantDescs.CD_int);
+            case Opcode.LREM -> parse_REM_X(frame, ConstantDescs.CD_long);
+            case Opcode.FREM -> parse_REM_X(frame, ConstantDescs.CD_float);
+            case Opcode.DREM -> parse_REM_X(frame, ConstantDescs.CD_double);
+            case Opcode.IAND -> parse_BITOPERATION_X(frame, ConstantDescs.CD_int, BitOperation.Operation.AND);
+            case Opcode.IOR -> parse_BITOPERATION_X(frame, ConstantDescs.CD_int, BitOperation.Operation.OR);
+            case Opcode.IXOR -> parse_BITOPERATION_X(frame, ConstantDescs.CD_int, BitOperation.Operation.XOR);
+            case Opcode.ISHL -> parse_BITOPERATION_X(frame, ConstantDescs.CD_int, BitOperation.Operation.SHL);
+            case Opcode.ISHR -> parse_BITOPERATION_X(frame, ConstantDescs.CD_int, BitOperation.Operation.SHR);
+            case Opcode.IUSHR -> parse_BITOPERATION_X(frame, ConstantDescs.CD_int, BitOperation.Operation.USHR);
+            case Opcode.LAND -> parse_BITOPERATION_X(frame, ConstantDescs.CD_long, BitOperation.Operation.AND);
+            case Opcode.LOR -> parse_BITOPERATION_X(frame, ConstantDescs.CD_long, BitOperation.Operation.OR);
+            case Opcode.LXOR -> parse_BITOPERATION_X(frame, ConstantDescs.CD_long, BitOperation.Operation.XOR);
+            case Opcode.LSHL -> parse_BITOPERATION_X(frame, ConstantDescs.CD_long, BitOperation.Operation.SHL);
+            case Opcode.LSHR -> parse_BITOPERATION_X(frame, ConstantDescs.CD_long, BitOperation.Operation.SHR);
             case Opcode.LUSHR ->
-                    parse_BITOPERATION_X(ins, frame, ConstantDescs.CD_long, BitOperation.Operation.USHR);
-            case Opcode.FCMPG -> parse_NUMERICCOMPARE_X(ins, frame, NumericCompare.Mode.NAN_IS_1);
-            case Opcode.FCMPL -> parse_NUMERICCOMPARE_X(ins, frame, NumericCompare.Mode.NAN_IS_MINUS_1);
-            case Opcode.DCMPG -> parse_NUMERICCOMPARE_X(ins, frame, NumericCompare.Mode.NAN_IS_1);
-            case Opcode.DCMPL -> parse_NUMERICCOMPARE_X(ins, frame, NumericCompare.Mode.NAN_IS_MINUS_1);
-            case Opcode.LCMP -> parse_NUMERICCOMPARE_X(ins, frame, NumericCompare.Mode.NONFLOATINGPOINT);
-            default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
+                    parse_BITOPERATION_X(frame, ConstantDescs.CD_long, BitOperation.Operation.USHR);
+            case Opcode.FCMPG -> parse_NUMERICCOMPARE_X(frame, NumericCompare.Mode.NAN_IS_1);
+            case Opcode.FCMPL -> parse_NUMERICCOMPARE_X(frame, NumericCompare.Mode.NAN_IS_MINUS_1);
+            case Opcode.DCMPG -> parse_NUMERICCOMPARE_X(frame, NumericCompare.Mode.NAN_IS_1);
+            case Opcode.DCMPL -> parse_NUMERICCOMPARE_X(frame, NumericCompare.Mode.NAN_IS_MINUS_1);
+            case Opcode.LCMP -> parse_NUMERICCOMPARE_X(frame, NumericCompare.Mode.NONFLOATINGPOINT);
+            default -> throw new IllegalArgumentException("Not implemented yet : " + opcode);
+        }
+    }
+
+    protected void visitBinaryOperatorInstruction(final Opcode opcode, final Frame frame) {
+        assertMinimumStackSize(frame.in, 2);
+
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        final Value value2 = outgoing.pop();
+        final Value value1 = outgoing.pop();
+
+        switch (opcode) {
+            case Opcode.IADD -> parse_ADD_X(frame, value1, value2, ConstantDescs.CD_int);
+            case Opcode.DADD -> parse_ADD_X(frame, value1, value2, ConstantDescs.CD_double);
+            case Opcode.FADD -> parse_ADD_X(frame, value1, value2, ConstantDescs.CD_float);
+            case Opcode.LADD -> parse_ADD_X(frame, value1, value2, ConstantDescs.CD_long);
+            case Opcode.DSUB -> parse_SUB_X(frame, value1, value2, ConstantDescs.CD_double);
+            case Opcode.FSUB -> parse_SUB_X(frame, value1, value2, ConstantDescs.CD_float);
+            case Opcode.ISUB -> parse_SUB_X(frame, value1, value2, ConstantDescs.CD_int);
+            case Opcode.LSUB -> parse_SUB_X(frame, value1, value2, ConstantDescs.CD_long);
+
+            default -> throw new IllegalArgumentException("Not implemented yet : " + opcode);
         }
     }
 
@@ -1355,17 +1377,17 @@ public class MethodAnalyzer {
         outgoing.memory = outgoing.memory.memoryFlowsTo(next);
     }
 
-    @Testbacklog
-    protected void parse_ARETURN(final Frame frame) {
+    private void parse_ARETURN(final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, 1);
 
         final Value v = outgoing.pop();
 
-        final MethodTypeDesc methodTypeDesc = method.methodTypeSymbol();
-        if (!v.type.equals(methodTypeDesc.returnType())) {
-            illegalState("Expecting type " + methodTypeDesc.returnType() + " on stack, got " + v.type);
+        if (TypeUtils.isPrimitive(v.type)) {
+            illegalState("Expecting type " + TypeUtils.toString(methodTypeDesc.returnType()) + " on stack, got " + TypeUtils.toString(v.type));
         }
+
+        // TODO: Maybe we should check downcastability according to the type hierarchy
 
         final ReturnValue next = new ReturnValue(v.type, v);
         outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
@@ -1592,42 +1614,30 @@ public class MethodAnalyzer {
         outgoing.push(b);
     }
 
-    @Testbacklog
-    protected void parse_ADD_X(final OperatorInstruction node, final Frame frame, final ClassDesc desc) {
-        final Status outgoing = frame.copyIncomingToOutgoing();
-        assertMinimumStackSize(outgoing, 2);
+    private void parse_ADD_X(final Frame frame, final Value value1, final Value value2, final ClassDesc desc) {
+        if (!value1.type.equals(desc)) {
+            illegalState("Cannot add non " + TypeUtils.toString(desc) + " value " + TypeUtils.toString(value1.type) + " as value1");
+        }
+        if (!value2.type.equals(desc)) {
+            illegalState("Cannot add non " + TypeUtils.toString(desc) + " value " + TypeUtils.toString(value2.type) + " as value2");
+        }
+        final Add add = new Add(desc, value1, value2);
+        frame.out.push(add);
+    }
 
-        final Value a = outgoing.pop();
-        if (!a.type.equals(desc)) {
-            illegalState("Cannot add non " + desc + " value " + a + " for addition");
+    private void parse_SUB_X(final Frame frame, final Value value1, final Value value2, final ClassDesc desc) {
+        if (!value1.type.equals(desc)) {
+            illegalState("Cannot subtract non " + TypeUtils.toString(desc) + " value " + TypeUtils.toString(value1.type) + " as value1");
         }
-        final Value b = outgoing.pop();
-        if (!b.type.equals(desc)) {
-            illegalState("Cannot add non " + desc + " value " + b + " for addition");
+        if (!value2.type.equals(desc)) {
+            illegalState("Cannot subtract non " + TypeUtils.toString(desc) + " value " + TypeUtils.toString(value2.type) + " as value2");
         }
-        final Add add = new Add(desc, b, a);
-        outgoing.push(add);
+        final Sub sub = new Sub(desc, value1, value2);
+        frame.out.push(sub);
     }
 
     @Testbacklog
-    protected void parse_SUB_X(final OperatorInstruction node, final Frame frame, final ClassDesc desc) {
-        final Status outgoing = frame.copyIncomingToOutgoing();
-        assertMinimumStackSize(outgoing, 2);
-
-        final Value a = outgoing.pop();
-        if (!a.type.equals(desc)) {
-            illegalState("Cannot add non " + desc + " value " + a + " for substraction");
-        }
-        final Value b = outgoing.pop();
-        if (!b.type.equals(desc)) {
-            illegalState("Cannot add non " + desc + " value " + b + " for substraction");
-        }
-        final Sub sub = new Sub(desc, b, a);
-        outgoing.push(sub);
-    }
-
-    @Testbacklog
-    protected void parse_MUL_X(final OperatorInstruction node, final Frame frame, final ClassDesc desc) {
+    protected void parse_MUL_X(final Frame frame, final ClassDesc desc) {
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, 2);
 
@@ -1664,7 +1674,7 @@ public class MethodAnalyzer {
     }
 
     @Testbacklog
-    protected void parse_DIV_X(final OperatorInstruction node, final Frame frame, final ClassDesc desc) {
+    protected void parse_DIV_X(final Frame frame, final ClassDesc desc) {
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, 2);
 
@@ -1683,7 +1693,7 @@ public class MethodAnalyzer {
     }
 
     @Testbacklog
-    protected void parse_REM_X(final OperatorInstruction node, final Frame frame, final ClassDesc desc) {
+    protected void parse_REM_X(final Frame frame, final ClassDesc desc) {
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, 2);
 
@@ -1701,7 +1711,7 @@ public class MethodAnalyzer {
     }
 
     @Testbacklog
-    protected void parse_BITOPERATION_X(final OperatorInstruction node, final Frame frame, final ClassDesc desc, final BitOperation.Operation operation) {
+    protected void parse_BITOPERATION_X(final Frame frame, final ClassDesc desc, final BitOperation.Operation operation) {
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, 2);
 
@@ -1718,7 +1728,7 @@ public class MethodAnalyzer {
     }
 
     @Testbacklog
-    protected void parse_NUMERICCOMPARE_X(final OperatorInstruction node, final Frame frame, final NumericCompare.Mode mode) {
+    protected void parse_NUMERICCOMPARE_X(final Frame frame, final NumericCompare.Mode mode) {
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, 2);
 

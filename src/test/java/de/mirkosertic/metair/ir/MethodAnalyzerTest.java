@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.lang.classfile.Opcode;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.ConstantDescs;
+import java.lang.constant.MethodTypeDesc;
 import java.util.EmptyStackException;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -1023,7 +1024,366 @@ public class MethodAnalyzerTest {
         }
 
         @Nested
+        public class OPERATOR {
+
+            @Test
+            public void isub() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value1 = new PrimitiveInt(10);
+                final Value value2 = new PrimitiveInt(10);
+
+                frame.in.stack.push(value1); // Value 1
+                frame.in.stack.push(value2); // Value 2
+
+                analyzer.visitOperatorInstruction(Opcode.ISUB, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Sub.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
+
+                final Sub sub = (Sub) frame.out.stack.getFirst();
+                assertThat(sub.uses).hasSize(2);
+                assertThat(sub.uses.get(0).node()).isEqualTo(value1);
+                assertThat(sub.uses.get(0).use()).isEqualTo(new ArgumentUse(0));
+                assertThat(sub.uses.get(1).node()).isEqualTo(value2);
+                assertThat(sub.uses.get(1).use()).isEqualTo(new ArgumentUse(1));
+            }
+
+            @Test
+            public void isub_fail_emptystack() {
+                assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(0);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    analyzer.visitOperatorInstruction(Opcode.ISUB, frame);
+                    fail("Exception expected");
+                }).withMessage("A minimum stack size of 2 is required, but only 0 is available!");
+            }
+
+            @Test
+            public void isub_fail_wrong_value1() {
+                assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(0);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    final Value value1 = new PrimitiveLong(10L);
+                    final Value value2 = new PrimitiveInt(10);
+
+                    frame.in.stack.push(value1); // Value 1
+                    frame.in.stack.push(value2); // Value 2
+
+                    analyzer.visitOperatorInstruction(Opcode.ISUB, frame);
+                    fail("Exception expected");
+                }).withMessage("Cannot subtract non int value long as value1");
+            }
+
+            @Test
+            public void isub_fail_wrong_value2() {
+                assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(0);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    final Value value1 = new PrimitiveInt(10);
+                    final Value value2 = new PrimitiveLong(10L);
+
+                    frame.in.stack.push(value1); // Value 1
+                    frame.in.stack.push(value2); // Value 2
+
+                    analyzer.visitOperatorInstruction(Opcode.ISUB, frame);
+                    fail("Exception expected");
+                }).withMessage("Cannot subtract non int value long as value2");
+            }
+
+            @Test
+            public void lsub() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value1 = new PrimitiveLong(10L);
+                final Value value2 = new PrimitiveLong(10L);
+
+                frame.in.stack.push(value1); // Value 1
+                frame.in.stack.push(value2); // Value 2
+
+                analyzer.visitOperatorInstruction(Opcode.LSUB, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Sub.class).matches(t -> t.type.equals(ConstantDescs.CD_long));
+
+                final Sub sub = (Sub) frame.out.stack.getFirst();
+                assertThat(sub.uses).hasSize(2);
+                assertThat(sub.uses.get(0).node()).isEqualTo(value1);
+                assertThat(sub.uses.get(0).use()).isEqualTo(new ArgumentUse(0));
+                assertThat(sub.uses.get(1).node()).isEqualTo(value2);
+                assertThat(sub.uses.get(1).use()).isEqualTo(new ArgumentUse(1));
+            }
+
+            @Test
+            public void fsub() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value1 = new PrimitiveFloat(10.0F);
+                final Value value2 = new PrimitiveFloat(10.0F);
+
+                frame.in.stack.push(value1); // Value 1
+                frame.in.stack.push(value2); // Value 2
+
+                analyzer.visitOperatorInstruction(Opcode.FSUB, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Sub.class).matches(t -> t.type.equals(ConstantDescs.CD_float));
+
+                final Sub sub = (Sub) frame.out.stack.getFirst();
+                assertThat(sub.uses).hasSize(2);
+                assertThat(sub.uses.get(0).node()).isEqualTo(value1);
+                assertThat(sub.uses.get(0).use()).isEqualTo(new ArgumentUse(0));
+                assertThat(sub.uses.get(1).node()).isEqualTo(value2);
+                assertThat(sub.uses.get(1).use()).isEqualTo(new ArgumentUse(1));
+            }
+
+            @Test
+            public void dsub() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value1 = new PrimitiveDouble(10.0D);
+                final Value value2 = new PrimitiveDouble(10.0D);
+
+                frame.in.stack.push(value1); // Value 1
+                frame.in.stack.push(value2); // Value 2
+
+                analyzer.visitOperatorInstruction(Opcode.DSUB, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Sub.class).matches(t -> t.type.equals(ConstantDescs.CD_double));
+
+                final Sub sub = (Sub) frame.out.stack.getFirst();
+                assertThat(sub.uses).hasSize(2);
+                assertThat(sub.uses.get(0).node()).isEqualTo(value1);
+                assertThat(sub.uses.get(0).use()).isEqualTo(new ArgumentUse(0));
+                assertThat(sub.uses.get(1).node()).isEqualTo(value2);
+                assertThat(sub.uses.get(1).use()).isEqualTo(new ArgumentUse(1));
+            }
+
+            @Test
+            public void iadd() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value1 = new PrimitiveInt(10);
+                final Value value2 = new PrimitiveInt(10);
+
+                frame.in.stack.push(value1); // Value 1
+                frame.in.stack.push(value2); // Value 2
+
+                analyzer.visitOperatorInstruction(Opcode.IADD, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Add.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
+
+                final Add add = (Add) frame.out.stack.getFirst();
+                assertThat(add.uses).hasSize(2);
+                assertThat(add.uses.get(0).node()).isEqualTo(value1);
+                assertThat(add.uses.get(0).use()).isEqualTo(new ArgumentUse(0));
+                assertThat(add.uses.get(1).node()).isEqualTo(value2);
+                assertThat(add.uses.get(1).use()).isEqualTo(new ArgumentUse(1));
+            }
+
+            @Test
+            public void iadd_fail_emptystack() {
+                assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(0);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    analyzer.visitOperatorInstruction(Opcode.IADD, frame);
+                    fail("Exception expected");
+                }).withMessage("A minimum stack size of 2 is required, but only 0 is available!");
+            }
+
+            @Test
+            public void iadd_fail_value1_wrong() {
+                assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(0);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    frame.in.stack.push(new PrimitiveLong(10L));
+                    frame.in.stack.push(new PrimitiveInt(10));
+
+                    analyzer.visitOperatorInstruction(Opcode.IADD, frame);
+                    fail("Exception expected");
+                }).withMessage("Cannot add non int value long as value1");
+            }
+
+            @Test
+            public void iadd_fail_value2_wrong() {
+                assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(0);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    frame.in.stack.push(new PrimitiveInt(10));
+                    frame.in.stack.push(new PrimitiveLong(10L));
+
+                    analyzer.visitOperatorInstruction(Opcode.IADD, frame);
+                    fail("Exception expected");
+                }).withMessage("Cannot add non int value long as value2");
+            }
+
+            @Test
+            public void ladd() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value1 = new PrimitiveLong(10L);
+                final Value value2 = new PrimitiveLong(10L);
+
+                frame.in.stack.push(value1); // Value 1
+                frame.in.stack.push(value2); // Value 2
+
+                analyzer.visitOperatorInstruction(Opcode.LADD, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Add.class).matches(t -> t.type.equals(ConstantDescs.CD_long));
+
+                final Add add = (Add) frame.out.stack.getFirst();
+                assertThat(add.uses).hasSize(2);
+                assertThat(add.uses.get(0).node()).isEqualTo(value1);
+                assertThat(add.uses.get(0).use()).isEqualTo(new ArgumentUse(0));
+                assertThat(add.uses.get(1).node()).isEqualTo(value2);
+                assertThat(add.uses.get(1).use()).isEqualTo(new ArgumentUse(1));
+            }
+
+            @Test
+            public void fadd() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value1 = new PrimitiveFloat(10.0F);
+                final Value value2 = new PrimitiveFloat(10.0F);
+
+                frame.in.stack.push(value1); // Value 1
+                frame.in.stack.push(value2); // Value 2
+
+                analyzer.visitOperatorInstruction(Opcode.FADD, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Add.class).matches(t -> t.type.equals(ConstantDescs.CD_float));
+
+                final Add add = (Add) frame.out.stack.getFirst();
+                assertThat(add.uses).hasSize(2);
+                assertThat(add.uses.get(0).node()).isEqualTo(value1);
+                assertThat(add.uses.get(0).use()).isEqualTo(new ArgumentUse(0));
+                assertThat(add.uses.get(1).node()).isEqualTo(value2);
+                assertThat(add.uses.get(1).use()).isEqualTo(new ArgumentUse(1));
+            }
+
+            @Test
+            public void dadd() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value1 = new PrimitiveDouble(10.0D);
+                final Value value2 = new PrimitiveDouble(10.0D);
+
+                frame.in.stack.push(value1); // Value 1
+                frame.in.stack.push(value2); // Value 2
+
+                analyzer.visitOperatorInstruction(Opcode.DADD, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Add.class).matches(t -> t.type.equals(ConstantDescs.CD_double));
+
+                final Add add = (Add) frame.out.stack.getFirst();
+                assertThat(add.uses).hasSize(2);
+                assertThat(add.uses.get(0).node()).isEqualTo(value1);
+                assertThat(add.uses.get(0).use()).isEqualTo(new ArgumentUse(0));
+                assertThat(add.uses.get(1).node()).isEqualTo(value2);
+                assertThat(add.uses.get(1).use()).isEqualTo(new ArgumentUse(1));
+            }
+        }
+
+        @Nested
         public class RETURN {
+
+            @Test
+            public void correctareturn() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.stack.push(new StringConstant("hello"));
+                new MethodAnalyzer(MethodTypeDesc.of(ConstantDescs.CD_String)).visitReturnInstruction(Opcode.ARETURN, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.control).isInstanceOf(ReturnValue.class);
+                assertThat(frame.in.control.usedBy).containsExactly(frame.out.control);
+            }
+
+            @Test
+            public void areturn_fail_empty_stack() {
+                assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(0);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    new MethodAnalyzer(MethodTypeDesc.of(ConstantDescs.CD_String)).visitReturnInstruction(Opcode.ARETURN, frame);
+                    fail("Exception expected");
+                }).withMessage("A minimum stack size of 1 is required, but only 0 is available!");
+            }
+
+            @Test
+            public void areturn_fail_wrong_type() {
+                assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(0);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    frame.in.stack.push(new PrimitiveInt(1));
+                    new MethodAnalyzer(MethodTypeDesc.of(ConstantDescs.CD_String)).visitReturnInstruction(Opcode.ARETURN, frame);
+                    fail("Exception expected");
+                }).withMessage("Expecting type String on stack, got int");
+            }
 
             @Test
             public void correctReturn() {

@@ -10,6 +10,17 @@ public final class TypeUtils {
         return ConstantDescs.CD_long.equals(desc) || ConstantDescs.CD_double.equals(desc);
     }
 
+    public static boolean isPrimitive(final ClassDesc desc) {
+        return ConstantDescs.CD_byte.equals(desc) ||
+               ConstantDescs.CD_char.equals(desc) ||
+               ConstantDescs.CD_short.equals(desc) ||
+               ConstantDescs.CD_int.equals(desc) ||
+               ConstantDescs.CD_long.equals(desc) ||
+               ConstantDescs.CD_boolean.equals(desc) ||
+               ConstantDescs.CD_float.equals(desc) ||
+               ConstantDescs.CD_double.equals(desc);
+    }
+
     public static String toString(final ClassDesc classDesc) {
         return classDesc.displayName();
     }
