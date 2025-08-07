@@ -1506,8 +1506,7 @@ public class MethodAnalyzer {
         }
     }
 
-    @Testbacklog
-    protected void parse_DUP2(final Frame frame) {
+    private void parse_DUP2(final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, 1);
 
