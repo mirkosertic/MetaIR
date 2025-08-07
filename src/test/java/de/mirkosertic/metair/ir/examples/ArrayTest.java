@@ -6,51 +6,72 @@ import de.mirkosertic.metair.ir.test.MetaIRTest;
 public class ArrayTest {
 
     public void newByteArray()  {
-        byte[] c = new byte[10];
+        final byte[] c = new byte[10];
         c[0] = 10;
-        byte c2 = c[1];
-        int l = c.length;
+        final byte c2 = c[1];
+        final int l = c.length;
     }
 
     public void newCharArray()  {
-        char[] c = new char[10];
+        final char[] c = new char[10];
         c[0] = 10;
-        char c2 = c[1];
-        int l = c.length;
+        final char c2 = c[1];
+        final int l = c.length;
     }
 
     public void newShortArray()  {
-        short[] c = new short[10];
+        final short[] c = new short[10];
         c[0] = 10;
-        short c2 = c[1];
-        int l = c.length;
+        final short c2 = c[1];
+        final int l = c.length;
     }
 
     public void newIntArray()  {
-        int[] c = new int[10];
+        final int[] c = new int[10];
         c[0] = 10;
-        int c2 = c[1];
-        int l = c.length;
+        final int c2 = c[1];
+        final int l = c.length;
     }
 
     public void newLongArray()  {
-        long[] c = new long[10];
+        final long[] c = new long[10];
         c[0] = 10L;
-        long c2 = c[1];
-        int l = c.length;
+        final long c2 = c[1];
+        final int l = c.length;
     }
 
     public void newFloatArray()  {
-        float[] c = new float[10];
+        final float[] c = new float[10];
         c[0] = 10f;
-        float c2 = c[1];
-        int l = c.length;
+        final float c2 = c[1];
+        final int l = c.length;
     }
 
     public void newDoubleArray()  {
-        double[] c = new double[10];
+        final double[] c = new double[10];
         c[0] = 10d;
-        double c2 = c[1];
-        int l = c.length;
+        final double c2 = c[1];
+        final int l = c.length;
+    }
+
+    public void newBooleanArray()  {
+        final boolean[] c = new boolean[10];
+        c[0] = true;
+        final boolean c2 = c[1];
+        final int l = c.length;
+    }
+
+    public void newObjectArray()  {
+        final Object[] c = new Object[10];
+        c[0] = this;
+        final Object c2 = c[1];
+        final int l = c.length;
+    }
+
+    public void newMultiObjectArray()  {
+        final Object[] c = new Object[10][20];
+        c[0] = new Object[5];
+        final Object c2 = c[1];
+        final int l = c.length;
     }
 }

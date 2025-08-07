@@ -4,10 +4,12 @@ import java.lang.constant.ClassDesc;
 
 public class PutField extends Node {
 
+    public final ClassDesc owner;
     public final String fieldName;
     public final ClassDesc fieldType;
 
-    PutField(final Value target, final String fieldName, final ClassDesc fieldType, final Value value) {
+    PutField(final ClassDesc owner, final ClassDesc fieldType, final String fieldName, final Value target, final Value value) {
+        this.owner = owner;
         this.fieldName = fieldName;
         this.fieldType = fieldType;
         use(target, new ArgumentUse(0));

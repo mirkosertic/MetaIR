@@ -12,7 +12,7 @@ public class PutFieldTest {
     public void testUsage() {
         final Value target = new StringConstant("str");
         final PrimitiveInt value = new PrimitiveInt(10);
-        final PutField put = new PutField(target, "fieldname", ConstantDescs.CD_int, value);
+        final PutField put = new PutField(ConstantDescs.CD_String, ConstantDescs.CD_int, "fieldname", target, value);
 
         assertThat(target.usedBy).containsExactly(put);
 

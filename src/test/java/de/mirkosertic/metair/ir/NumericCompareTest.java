@@ -12,11 +12,12 @@ public class NumericCompareTest {
     public void testUsage() {
         final PrimitiveFloat a = new PrimitiveFloat(10);
         final PrimitiveFloat b = new PrimitiveFloat(20);
-        final NumericCompare compare = new NumericCompare(NumericCompare.Mode.NAN_IS_MINUS_1, a, b);
+        final NumericCompare compare = new NumericCompare(NumericCompare.Mode.NAN_IS_MINUS_1, ConstantDescs.CD_float, a, b);
 
-        assertThat(compare.debugDescription()).isEqualTo("NumericCompare : NAN_IS_MINUS_1");
+        assertThat(compare.debugDescription()).isEqualTo("NumericCompare : NAN_IS_MINUS_1 for float");
 
         assertThat(compare.type).isEqualTo(ConstantDescs.CD_int);
+        assertThat(compare.compareType).isEqualTo(ConstantDescs.CD_float);
         assertThat(compare.mode).isEqualTo(NumericCompare.Mode.NAN_IS_MINUS_1);
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).containsExactly(compare);

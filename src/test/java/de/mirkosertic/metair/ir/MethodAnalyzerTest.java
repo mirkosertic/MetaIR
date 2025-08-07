@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.lang.classfile.Opcode;
+import java.lang.classfile.TypeKind;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.ConstantDescs;
 import java.lang.constant.MethodTypeDesc;
@@ -166,131 +167,2025 @@ public class MethodAnalyzerTest {
         }
 
         @Nested
-        public class UNARYOPTERATOR {
+        public class FIELD {
 
             @Test
-            public void failOnEmptyStack() {
+            public void getfield() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.push(new StringConstant("hello"));
+                analyzer.visitFieldInstruction(Opcode.GETFIELD, ConstantDescs.CD_String, ConstantDescs.CD_int, "fieldname", frame);
+
+                final Value node = frame.out.stack.getFirst();
+                assertThat(node.type).isEqualTo(ConstantDescs.CD_int);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(node);
+
+                assertThat(node).isInstanceOf(GetField.class).matches(t -> ((GetField) t).fieldName.equals("fieldname"));
+                assertThat(node.uses.size()).isEqualTo(2);
+            }
+
+            @Test
+            public void getfield_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
                     final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
+                    frame.in = new MethodAnalyzer.Status(10);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
-                    assertThat(frame.in.stack).isEmpty();
-
-                    analyzer.visitUnaryOperatorInstruction(Opcode.ARRAYLENGTH, frame);
+                    analyzer.visitFieldInstruction(Opcode.GETFIELD, ConstantDescs.CD_String, ConstantDescs.CD_int, "fieldname", frame);
                     fail("Exception expected");
                 }).withMessage("A minimum stack size of 1 is required, but only 0 is available!");
             }
 
             @Test
-            public void arrayLength() {
+            public void getfield_fail_wrongtype() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(10);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    frame.in.push(new PrimitiveInt(10));
+                    analyzer.visitFieldInstruction(Opcode.GETFIELD, ConstantDescs.CD_String, ConstantDescs.CD_int, "fieldname", frame);
+                    fail("Exception expected");
+                }).withMessage("Cannot load field fieldname from non object value int");
+            }
+
+            @Test
+            public void getstatic() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                analyzer.visitFieldInstruction(Opcode.GETSTATIC, ConstantDescs.CD_String, ConstantDescs.CD_int, "fieldname", frame);
+
+                final Value node = frame.out.stack.getFirst();
+                assertThat(node.type).isEqualTo(ConstantDescs.CD_int);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+                assertThat(frame.out.control).isInstanceOf(ClassInitialization.class);
+                assertThat(frame.out.memory).isSameAs(node);
+
+                assertThat(node).isInstanceOf(GetStatic.class).matches(t -> ((GetStatic) t).fieldName.equals("fieldname"));
+                assertThat(node.uses.size()).isEqualTo(2);
+            }
+        }
+
+        @Nested
+        public class THROW {
+
+            @Test
+            public void athrow() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.push(new StringConstant("hello"));
+                analyzer.visitThrowInstruction(frame);
+
+                final Node node = frame.out.control;
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.control).isSameAs(node);
+                assertThat(frame.out.memory).isSameAs(node);
+
+                assertThat(node).isInstanceOf(Throw.class);
+                assertThat(node.uses.size()).isEqualTo(3);
+            }
+
+            @Test
+            public void athrow_fail_emptystack() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(10);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    analyzer.visitThrowInstruction(frame);
+                    fail("Exception expected");
+                }).withMessage("A minimum stack size of 1 is required, but only 0 is available!");
+            }
+
+            @Test
+            public void athrow_fail_wrongtype() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(10);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    frame.in.push(new PrimitiveInt(10));
+
+                    analyzer.visitThrowInstruction(frame);
+                    fail("Exception expected");
+                }).withMessage("Cannot throw a primitive value of type int");
+            }
+        }
+
+        @Nested
+        public class MULTIARRAY {
+
+            @Test
+            public void multiarray_dim1() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.push(new PrimitiveInt(10));
+                analyzer.visitNewMultiArray(ConstantDescs.CD_Object.arrayType(), 1, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                final Value node = frame.out.stack.getFirst();
+                assertThat(node.type).isEqualTo(ConstantDescs.CD_Object.arrayType());
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(node);
+            }
+
+            @Test
+            public void multiarray_dim2() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.push(new PrimitiveInt(10));
+                frame.in.push(new PrimitiveInt(10));
+                analyzer.visitNewMultiArray(ConstantDescs.CD_Object.arrayType().arrayType(), 2, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                final Value node = frame.out.stack.getFirst();
+                assertThat(node.type).isEqualTo(ConstantDescs.CD_Object.arrayType().arrayType());
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(node);
+            }
+
+            @Test
+            public void multiarray_fail_emptystack() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(10);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    analyzer.visitNewMultiArray(ConstantDescs.CD_Object, 1, frame);
+                    fail("Exception expected");
+                }).withMessage("A minimum stack size of 1 is required, but only 0 is available!");
+            }
+
+            @Test
+            public void multiarray_wrong_length() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(10);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    frame.in.push(new PrimitiveDouble(10));
+                    analyzer.visitNewMultiArray(ConstantDescs.CD_Object, 1, frame);
+                    fail("Exception expected");
+                }).withMessage("Array dimension must be int, but was double for dimension 1");
+            }
+        }
+
+        @Nested
+        public class ARRAY {
+
+            @Test
+            public void newObjectArray() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.push(new PrimitiveInt(10));
+                analyzer.visitNewObjectArray(ConstantDescs.CD_Object, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                final Value node = frame.out.stack.getFirst();
+                assertThat(node.type).isEqualTo(ConstantDescs.CD_Object.arrayType());
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(node);
+            }
+
+            @Test
+            public void newObjectArray_fail_enmptystack() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(10);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    analyzer.visitNewObjectArray(ConstantDescs.CD_Object, frame);
+                    fail("Exception expected");
+                }).withMessage("A minimum stack size of 1 is required, but only 0 is available!");
+            }
+
+            @Test
+            public void newObjectArray_fail_invalidlength() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(10);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    frame.in.push(new PrimitiveDouble(10));
+                    analyzer.visitNewObjectArray(ConstantDescs.CD_Object, frame);
+                    fail("Exception expected");
+                }).withMessage("Array length must be int, but was double");
+            }
+
+            @Test
+            public void newByteArray() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.push(new PrimitiveInt(10));
+                analyzer.visitNewPrimitiveArray(TypeKind.BYTE, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                final Value node = frame.out.stack.getFirst();
+                assertThat(node.type).isEqualTo(ConstantDescs.CD_byte.arrayType());
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(node);
+            }
+
+            @Test
+            public void newByteArray_fail_emptystack() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(10);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    analyzer.visitNewPrimitiveArray(TypeKind.BYTE, frame);
+                    fail("Exception expected");
+                }).withMessage("A minimum stack size of 1 is required, but only 0 is available!");
+            }
+
+            @Test
+            public void newByteArray_fail_invalidlength() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(10);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    frame.in.push(new PrimitiveDouble(10));
+
+                    analyzer.visitNewPrimitiveArray(TypeKind.BYTE, frame);
+                    fail("Exception expected");
+                }).withMessage("Array length must be int, but was double");
+            }
+
+            @Test
+            public void newCharArray() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.push(new PrimitiveInt(10));
+                analyzer.visitNewPrimitiveArray(TypeKind.CHAR, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                final Value node = frame.out.stack.getFirst();
+                assertThat(node.type).isEqualTo(ConstantDescs.CD_char.arrayType());
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(node);
+            }
+
+            @Test
+            public void newShortArray() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.push(new PrimitiveInt(10));
+                analyzer.visitNewPrimitiveArray(TypeKind.SHORT, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                final Value node = frame.out.stack.getFirst();
+                assertThat(node.type).isEqualTo(ConstantDescs.CD_short.arrayType());
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(node);
+            }
+
+            @Test
+            public void newBooleanArray() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.push(new PrimitiveInt(10));
+                analyzer.visitNewPrimitiveArray(TypeKind.BOOLEAN, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                final Value node = frame.out.stack.getFirst();
+                assertThat(node.type).isEqualTo(ConstantDescs.CD_boolean.arrayType());
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(node);
+            }
+
+            @Test
+            public void newIntArray() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.push(new PrimitiveInt(10));
+                analyzer.visitNewPrimitiveArray(TypeKind.INT, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                final Value node = frame.out.stack.getFirst();
+                assertThat(node.type).isEqualTo(ConstantDescs.CD_int.arrayType());
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(node);
+            }
+
+            @Test
+            public void newLongArray() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.push(new PrimitiveInt(10));
+                analyzer.visitNewPrimitiveArray(TypeKind.LONG, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                final Value node = frame.out.stack.getFirst();
+                assertThat(node.type).isEqualTo(ConstantDescs.CD_long.arrayType());
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(node);
+            }
+
+            @Test
+            public void newFloatArray() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.push(new PrimitiveInt(10));
+                analyzer.visitNewPrimitiveArray(TypeKind.FLOAT, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                final Value node = frame.out.stack.getFirst();
+                assertThat(node.type).isEqualTo(ConstantDescs.CD_float.arrayType());
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(node);
+            }
+
+            @Test
+            public void newDoubleArray() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.push(new PrimitiveInt(10));
+                analyzer.visitNewPrimitiveArray(TypeKind.DOUBLE, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                final Value node = frame.out.stack.getFirst();
+                assertThat(node.type).isEqualTo(ConstantDescs.CD_double.arrayType());
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(node);
+            }
+
+        }
+
+        @Nested
+        public class NOP {
+
+            @Test
+            public void nop() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                analyzer.visitNopInstruction(frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+        }
+
+        @Nested
+        public class STORE {
+
+            @Test
+            public void astore() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value = new StringConstant("helloe");
+
+                frame.in.push(value);
+                analyzer.visitStoreInstruction(Opcode.ASTORE, 0, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.getLocal(0)).isSameAs(value);
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void astore_fail_emptystack() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(10);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    analyzer.visitStoreInstruction(Opcode.ASTORE, 0, frame);
+                    fail("Exception expected");
+                }).withMessage("A minimum stack size of 1 is required, but only 0 is available!");
+            }
+
+            @Test
+            public void astore_fail_wrongtype() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(10);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    frame.in.push(new PrimitiveLong(10L));
+
+                    analyzer.visitStoreInstruction(Opcode.ASTORE, 0, frame);
+                    fail("Exception expected");
+                }).withMessage("Cannot store primitive value long");
+            }
+
+            @Test
+            public void astore_0() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value = new StringConstant("hello");
+
+                frame.in.push(value);
+                analyzer.visitStoreInstruction(Opcode.ASTORE_0, 0, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.getLocal(0)).isSameAs(value);
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void astore_1() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value = new StringConstant("hello");
+
+                frame.in.push(value);
+                analyzer.visitStoreInstruction(Opcode.ASTORE_1, 1, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.getLocal(1)).isSameAs(value);
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void astore_2() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value = new StringConstant("hello");
+
+                frame.in.push(value);
+                analyzer.visitStoreInstruction(Opcode.ASTORE_2, 2, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.getLocal(2)).isSameAs(value);
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void astore_3() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value = new StringConstant("hello");
+
+                frame.in.push(value);
+                analyzer.visitStoreInstruction(Opcode.ASTORE_3, 3, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.getLocal(3)).isSameAs(value);
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void istore() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value = new PrimitiveInt(10);
+
+                frame.in.push(value);
+                analyzer.visitStoreInstruction(Opcode.ISTORE, 0, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.getLocal(0)).isSameAs(value);
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void istore_w() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value = new PrimitiveInt(10);
+
+                frame.in.push(value);
+                analyzer.visitStoreInstruction(Opcode.ISTORE_W, 0, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.getLocal(0)).isSameAs(value);
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void istore_fail_emptystack() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(10);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    analyzer.visitStoreInstruction(Opcode.ISTORE, 0, frame);
+                    fail("Exception expected");
+                }).withMessage("A minimum stack size of 1 is required, but only 0 is available!");
+            }
+
+            @Test
+            public void istore_fail_wrongtype() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(10);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    frame.in.push(new PrimitiveLong(10L));
+
+                    analyzer.visitStoreInstruction(Opcode.ISTORE, 0, frame);
+                    fail("Exception expected");
+                }).withMessage("Cannot store non int value long for slot 0");
+            }
+
+            @Test
+            public void istore_0() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value = new PrimitiveInt(10);
+
+                frame.in.push(value);
+                analyzer.visitStoreInstruction(Opcode.ISTORE_0, 0, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.getLocal(0)).isSameAs(value);
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void istore_1() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value = new PrimitiveInt(10);
+
+                frame.in.push(value);
+                analyzer.visitStoreInstruction(Opcode.ISTORE_1, 1, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.getLocal(1)).isSameAs(value);
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void istore_2() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value = new PrimitiveInt(10);
+
+                frame.in.push(value);
+                analyzer.visitStoreInstruction(Opcode.ISTORE_2, 2, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.getLocal(2)).isSameAs(value);
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void istore_3() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value = new PrimitiveInt(10);
+
+                frame.in.push(value);
+                analyzer.visitStoreInstruction(Opcode.ISTORE_3, 3, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.getLocal(3)).isSameAs(value);
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void lstore() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value = new PrimitiveLong(10L);
+
+                frame.in.push(value);
+                analyzer.visitStoreInstruction(Opcode.LSTORE, 0, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.getLocal(0)).isSameAs(value);
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void lstore_w() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value = new PrimitiveLong(10L);
+
+                frame.in.push(value);
+                analyzer.visitStoreInstruction(Opcode.LSTORE_W, 0, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.getLocal(0)).isSameAs(value);
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void lstore_0() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value = new PrimitiveLong(10L);
+
+                frame.in.push(value);
+                analyzer.visitStoreInstruction(Opcode.LSTORE_0, 0, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.getLocal(0)).isSameAs(value);
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void lstore_1() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value = new PrimitiveLong(10L);
+
+                frame.in.push(value);
+                analyzer.visitStoreInstruction(Opcode.LSTORE_1, 1, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.getLocal(1)).isSameAs(value);
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void lstore_2() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value = new PrimitiveLong(10L);
+
+                frame.in.push(value);
+                analyzer.visitStoreInstruction(Opcode.LSTORE_2, 2, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.getLocal(2)).isSameAs(value);
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void lstore_3() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value = new PrimitiveLong(10);
+
+                frame.in.push(value);
+                analyzer.visitStoreInstruction(Opcode.LSTORE_3, 3, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.getLocal(3)).isSameAs(value);
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void fstore() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value = new PrimitiveFloat(10.0f);
+
+                frame.in.push(value);
+                analyzer.visitStoreInstruction(Opcode.FSTORE, 0, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.getLocal(0)).isSameAs(value);
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void fstore_w() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value = new PrimitiveFloat(10.0f);
+
+                frame.in.push(value);
+                analyzer.visitStoreInstruction(Opcode.FSTORE_W, 0, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.getLocal(0)).isSameAs(value);
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void fstore_0() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value = new PrimitiveFloat(10.0F);
+
+                frame.in.push(value);
+                analyzer.visitStoreInstruction(Opcode.FSTORE_0, 0, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.getLocal(0)).isSameAs(value);
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void fstore_1() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value = new PrimitiveFloat(10.0F);
+
+                frame.in.push(value);
+                analyzer.visitStoreInstruction(Opcode.FSTORE_1, 1, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.getLocal(1)).isSameAs(value);
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void fstore_2() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value = new PrimitiveFloat(10.0F);
+
+                frame.in.push(value);
+                analyzer.visitStoreInstruction(Opcode.FSTORE_2, 2, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.getLocal(2)).isSameAs(value);
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void fstore_3() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value = new PrimitiveFloat(10);
+
+                frame.in.push(value);
+                analyzer.visitStoreInstruction(Opcode.FSTORE_3, 3, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.getLocal(3)).isSameAs(value);
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void dstore() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value = new PrimitiveDouble(10.0d);
+
+                frame.in.push(value);
+                analyzer.visitStoreInstruction(Opcode.DSTORE, 0, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.getLocal(0)).isSameAs(value);
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void dstore_w() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value = new PrimitiveDouble(10.0d);
+
+                frame.in.push(value);
+                analyzer.visitStoreInstruction(Opcode.DSTORE_W, 0, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.getLocal(0)).isSameAs(value);
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void dstore_0() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value = new PrimitiveDouble(10.0D);
+
+                frame.in.push(value);
+                analyzer.visitStoreInstruction(Opcode.DSTORE_0, 0, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.getLocal(0)).isSameAs(value);
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void dstore_1() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value = new PrimitiveDouble(10.0D);
+
+                frame.in.push(value);
+                analyzer.visitStoreInstruction(Opcode.DSTORE_1, 1, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.getLocal(1)).isSameAs(value);
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void dstore_2() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value = new PrimitiveDouble(10.0D);
+
+                frame.in.push(value);
+                analyzer.visitStoreInstruction(Opcode.DSTORE_2, 2, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.getLocal(2)).isSameAs(value);
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void dstore_3() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value = new PrimitiveDouble(10.0D);
+
+                frame.in.push(value);
+                analyzer.visitStoreInstruction(Opcode.DSTORE_3, 3, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.getLocal(3)).isSameAs(value);
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+        }
+
+        @Nested
+        public class LOAD {
+
+            @Test
+            public void iload() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.setLocal(0, new PrimitiveInt(10));
+
+                analyzer.visitLoadInstruction(Opcode.ILOAD, 0, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                assertThat(frame.out.stack.getFirst()).isSameAs(frame.in.getLocal(0));
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void iload_fail_wrong_type() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(10);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    frame.in.setLocal(0, new PrimitiveInt(10));
+
+                    analyzer.visitLoadInstruction(Opcode.FLOAD, 0, frame);
+                    fail("Exception expected");
+                }).withMessage("Cannot load int from slot 0 as float is expected!");
+            }
+
+            @Test
+            public void iload_fail_null() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(10);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    analyzer.visitLoadInstruction(Opcode.FLOAD, 0, frame);
+                    fail("Exception expected");
+                }).withMessage("Slot 0 is null");
+            }
+
+            @Test
+            public void iload_0() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.setLocal(0, new PrimitiveInt(10));
+
+                analyzer.visitLoadInstruction(Opcode.ILOAD_0, 0, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                assertThat(frame.out.stack.getFirst()).isSameAs(frame.in.getLocal(0));
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void iload_w() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.setLocal(0, new PrimitiveInt(10));
+
+                analyzer.visitLoadInstruction(Opcode.ILOAD_W, 0, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                assertThat(frame.out.stack.getFirst()).isSameAs(frame.in.getLocal(0));
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void iload_1() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.setLocal(1, new PrimitiveInt(10));
+
+                analyzer.visitLoadInstruction(Opcode.ILOAD_1, 1, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                assertThat(frame.out.stack.getFirst()).isSameAs(frame.in.getLocal(1));
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void iload_2() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.setLocal(2, new PrimitiveInt(10));
+
+                analyzer.visitLoadInstruction(Opcode.ILOAD_2, 2, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                assertThat(frame.out.stack.getFirst()).isSameAs(frame.in.getLocal(2));
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void iload_3() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.setLocal(3, new PrimitiveInt(10));
+
+                analyzer.visitLoadInstruction(Opcode.ILOAD_3, 3, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                assertThat(frame.out.stack.getFirst()).isSameAs(frame.in.getLocal(3));
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void lload() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.setLocal(0, new PrimitiveLong(10L));
+
+                analyzer.visitLoadInstruction(Opcode.LLOAD, 0, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                assertThat(frame.out.stack.getFirst()).isSameAs(frame.in.getLocal(0));
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void lload_w() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.setLocal(0, new PrimitiveLong(10L));
+
+                analyzer.visitLoadInstruction(Opcode.LLOAD_W, 0, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                assertThat(frame.out.stack.getFirst()).isSameAs(frame.in.getLocal(0));
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void lload_0() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.setLocal(0, new PrimitiveLong(10L));
+
+                analyzer.visitLoadInstruction(Opcode.LLOAD_0, 0, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                assertThat(frame.out.stack.getFirst()).isSameAs(frame.in.getLocal(0));
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void lload_1() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.setLocal(1, new PrimitiveLong(10L));
+
+                analyzer.visitLoadInstruction(Opcode.LLOAD_1, 1, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                assertThat(frame.out.stack.getFirst()).isSameAs(frame.in.getLocal(1));
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void lload_2() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.setLocal(2, new PrimitiveLong(10L));
+
+                analyzer.visitLoadInstruction(Opcode.LLOAD_2, 2, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                assertThat(frame.out.stack.getFirst()).isSameAs(frame.in.getLocal(2));
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void lload_3() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.setLocal(3, new PrimitiveLong(10));
+
+                analyzer.visitLoadInstruction(Opcode.LLOAD_3, 3, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                assertThat(frame.out.stack.getFirst()).isSameAs(frame.in.getLocal(3));
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void fload() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.setLocal(0, new PrimitiveFloat(10.0f));
+
+                analyzer.visitLoadInstruction(Opcode.FLOAD, 0, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                assertThat(frame.out.stack.getFirst()).isSameAs(frame.in.getLocal(0));
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void fload_w() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.setLocal(0, new PrimitiveFloat(10.0f));
+
+                analyzer.visitLoadInstruction(Opcode.FLOAD_W, 0, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                assertThat(frame.out.stack.getFirst()).isSameAs(frame.in.getLocal(0));
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void fload_0() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.setLocal(0, new PrimitiveFloat(10.0f));
+
+                analyzer.visitLoadInstruction(Opcode.FLOAD_0, 0, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                assertThat(frame.out.stack.getFirst()).isSameAs(frame.in.getLocal(0));
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void fload_1() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.setLocal(1, new PrimitiveFloat(10.0f));
+
+                analyzer.visitLoadInstruction(Opcode.FLOAD_1, 1, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                assertThat(frame.out.stack.getFirst()).isSameAs(frame.in.getLocal(1));
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void fload_2() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.setLocal(2, new PrimitiveFloat(10.0f));
+
+                analyzer.visitLoadInstruction(Opcode.FLOAD_2, 2, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                assertThat(frame.out.stack.getFirst()).isSameAs(frame.in.getLocal(2));
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void fload_3() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.setLocal(3, new PrimitiveFloat(10.0f));
+
+                analyzer.visitLoadInstruction(Opcode.FLOAD_3, 3, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                assertThat(frame.out.stack.getFirst()).isSameAs(frame.in.getLocal(3));
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void dload() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.setLocal(0, new PrimitiveDouble(10.0d));
+
+                analyzer.visitLoadInstruction(Opcode.DLOAD, 0, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                assertThat(frame.out.stack.getFirst()).isSameAs(frame.in.getLocal(0));
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void dload_w() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.setLocal(0, new PrimitiveDouble(10.0d));
+
+                analyzer.visitLoadInstruction(Opcode.DLOAD_W, 0, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                assertThat(frame.out.stack.getFirst()).isSameAs(frame.in.getLocal(0));
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void dload_0() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.setLocal(0, new PrimitiveDouble(10.0d));
+
+                analyzer.visitLoadInstruction(Opcode.DLOAD_0, 0, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                assertThat(frame.out.stack.getFirst()).isSameAs(frame.in.getLocal(0));
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void dload_1() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.setLocal(1, new PrimitiveDouble(10.0d));
+
+                analyzer.visitLoadInstruction(Opcode.DLOAD_1, 1, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                assertThat(frame.out.stack.getFirst()).isSameAs(frame.in.getLocal(1));
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void dload_2() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.setLocal(2, new PrimitiveDouble(10.0d));
+
+                analyzer.visitLoadInstruction(Opcode.DLOAD_2, 2, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                assertThat(frame.out.stack.getFirst()).isSameAs(frame.in.getLocal(2));
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void dload_3() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.setLocal(3, new PrimitiveDouble(10.0d));
+
+                analyzer.visitLoadInstruction(Opcode.DLOAD_3, 3, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                assertThat(frame.out.stack.getFirst()).isSameAs(frame.in.getLocal(3));
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void aload() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.setLocal(0, new StringConstant("hello"));
+
+                analyzer.visitLoadInstruction(Opcode.ALOAD, 0, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                assertThat(frame.out.stack.getFirst()).isSameAs(frame.in.getLocal(0));
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void aload_fail_primitive() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(10);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    frame.in.setLocal(0, new PrimitiveInt(10));
+
+                    analyzer.visitLoadInstruction(Opcode.ALOAD, 0, frame);
+                    fail("Exception expected");
+                }).withMessage("Cannot load primitive value int for slot 0");
+            }
+
+            @Test
+            public void aload_fail_null() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(10);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    analyzer.visitLoadInstruction(Opcode.ALOAD, 0, frame);
+                    fail("Exception expected");
+                }).withMessage("Slot 0 is null");
+            }
+
+            @Test
+            public void aload_0() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.setLocal(0, new StringConstant("hello"));
+
+                analyzer.visitLoadInstruction(Opcode.ALOAD_0, 0, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                assertThat(frame.out.stack.getFirst()).isSameAs(frame.in.getLocal(0));
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void aload_1() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.setLocal(1, new StringConstant("hello"));
+
+                analyzer.visitLoadInstruction(Opcode.ALOAD_1, 1, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                assertThat(frame.out.stack.getFirst()).isSameAs(frame.in.getLocal(1));
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void aload_2() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.setLocal(2, new StringConstant("hello"));
+
+                analyzer.visitLoadInstruction(Opcode.ALOAD_2, 2, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                assertThat(frame.out.stack.getFirst()).isSameAs(frame.in.getLocal(2));
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+            @Test
+            public void aload_3() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.setLocal(3, new StringConstant("hello"));
+
+                analyzer.visitLoadInstruction(Opcode.ALOAD_3, 3, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+
+                assertThat(frame.out.stack.getFirst()).isSameAs(frame.in.getLocal(3));
+
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+            }
+
+        }
+
+        @Nested
+        public class NEWOBJECT {
+
+            @Test
+            public void new_() {
                 final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
                 frame.in = new MethodAnalyzer.Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
-                frame.in.stack.push(new NewArray(ConstantDescs.CD_int, new PrimitiveInt(10)));
-
-                analyzer.visitUnaryOperatorInstruction(Opcode.ARRAYLENGTH, frame);
+                analyzer.visitNewObjectInstruction(Opcode.NEW, ConstantDescs.CD_Object, frame);
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(ArrayLength.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
+
+                final New n = (New) frame.out.stack.getFirst();
+                assertThat(n.type).isEqualTo(ConstantDescs.CD_Object);
+                assertThat(n.uses).hasSize(2);
+
+                assertThat(frame.out.control).isInstanceOf(ClassInitialization.class);
+                assertThat(frame.out.memory).isSameAs(n);
+            }
+        }
+
+        @Nested
+        public class STACK {
+
+            @Test
+            public void swap() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.stack.push(new StringConstant("hello"));
+                frame.in.stack.push(new StringConstant("hello"));
+                analyzer.visitStackInstruction(Opcode.SWAP, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+
+                assertThat(frame.out.stack).hasSize(2);
+                assertThat(frame.out.stack.get(0)).isSameAs(frame.in.stack.get(1));
+                assertThat(frame.out.stack.get(1)).isSameAs(frame.in.stack.get(0));
             }
 
             @Test
-            public void arrayLength_fail() {
+            public void swap_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
                     final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
                     frame.in = new MethodAnalyzer.Status(0);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
-                    frame.in.stack.push(new StringConstant("hello"));
-
-                    analyzer.visitUnaryOperatorInstruction(Opcode.ARRAYLENGTH, frame);
+                    analyzer.visitStackInstruction(Opcode.SWAP, frame);
                     fail("Exception expected");
-                }).withMessage("Cannot get array length of non array value String : hello");
+                }).withMessage("A minimum stack size of 2 is required, but only 0 is available!");
             }
 
             @Test
-            public void neg_fail() {
+            public void dup() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.stack.push(new StringConstant("hello"));
+                analyzer.visitStackInstruction(Opcode.DUP, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+
+                assertThat(frame.out.stack).hasSize(2);
+                assertThat(frame.out.stack.get(0)).isSameAs(frame.in.stack.getFirst());
+                assertThat(frame.out.stack.get(1)).isSameAs(frame.in.stack.getFirst());
+            }
+
+            @Test
+            public void dup_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
                     final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
                     frame.in = new MethodAnalyzer.Status(0);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
-                    frame.in.stack.push(new StringConstant("hello"));
-
-                    analyzer.visitUnaryOperatorInstruction(Opcode.INEG, frame);
+                    analyzer.visitStackInstruction(Opcode.DUP, frame);
                     fail("Exception expected");
-                }).withMessage("Cannot negate non int value String : hello of type String");
+                }).withMessage("A minimum stack size of 1 is required, but only 0 is available!");
             }
 
             @Test
-            public void ineg() {
+            public void pop() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.stack.push(new StringConstant("hello"));
+                analyzer.visitStackInstruction(Opcode.POP, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+
+                assertThat(frame.out.stack).isEmpty();
+            }
+
+            @Test
+            public void pop_fail_emptystack() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(0);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    analyzer.visitStackInstruction(Opcode.POP, frame);
+                }).withMessage("A minimum stack size of 1 is required, but only 0 is available!");
+            }
+
+            @Test
+            public void pop2_fail_emptystack() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(0);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    analyzer.visitStackInstruction(Opcode.POP2, frame);
+                    fail("Exception expected");
+                }).withMessage("A minimum stack size of 1 is required, but only 0 is available!");
+            }
+
+            @Test
+            public void pop2_long() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.stack.push(new PrimitiveLong(10L));
+                analyzer.visitStackInstruction(Opcode.POP2, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+
+                assertThat(frame.out.stack).isEmpty();
+            }
+
+            @Test
+            public void pop2_int() {
                 final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
                 frame.in = new MethodAnalyzer.Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
                 frame.in.stack.push(new PrimitiveInt(10));
-
-                analyzer.visitUnaryOperatorInstruction(Opcode.INEG, frame);
+                frame.in.stack.push(new PrimitiveInt(10));
+                analyzer.visitStackInstruction(Opcode.POP2, frame);
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
-                assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Negate.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+
+                assertThat(frame.out.stack).isEmpty();
             }
 
             @Test
-            public void lneg() {
+            public void pop2_int_fail() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(0);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    frame.in.stack.push(new PrimitiveInt(10));
+                    analyzer.visitStackInstruction(Opcode.POP2, frame);
+                    fail("Exception expected");
+                }).withMessage("A minimum stack size of 1 is required, but only 0 is available!");
+            }
+        }
+
+
+        @Nested
+        public class MONITOR {
+
+            @Test
+            public void monitorEnter() {
                 final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
                 frame.in = new MethodAnalyzer.Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
-                frame.in.stack.push(new PrimitiveLong(10));
-
-                analyzer.visitUnaryOperatorInstruction(Opcode.LNEG, frame);
+                frame.in.stack.push(new StringConstant("hello"));
+                analyzer.visitMonitorInstruction(Opcode.MONITORENTER, frame);
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
-                assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Negate.class).matches(t -> t.type.equals(ConstantDescs.CD_long));
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.control).isInstanceOf(MonitorEnter.class);
+
+                final Node node = frame.out.control;
+                assertThat(node.uses).hasSize(2);
+                assertThat(node.uses.get(0).node()).isSameAs(frame.in.stack.getFirst());
+                assertThat(node.uses.get(0).use()).isEqualTo(new ArgumentUse(0));
+                assertThat(node.uses.get(1).node()).isSameAs(frame.in.control);
             }
 
             @Test
-            public void fneg() {
+            public void monitorEnter_fail_emptystack() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(0);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    analyzer.visitMonitorInstruction(Opcode.MONITORENTER, frame);
+                }).withMessage("A minimum stack size of 1 is required, but only 0 is available!");
+            }
+
+            @Test
+            public void monitorEnter_fail_wrong_type() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(0);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    frame.in.stack.push(new PrimitiveInt(10));
+
+                    analyzer.visitMonitorInstruction(Opcode.MONITORENTER, frame);
+                }).withMessage("Expecting non primitive type for monitorenter on stack, got int");
+            }
+
+            @Test
+            public void monitoExit() {
                 final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
                 frame.in = new MethodAnalyzer.Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
-                frame.in.stack.push(new PrimitiveFloat(10.0f));
-
-                analyzer.visitUnaryOperatorInstruction(Opcode.FNEG, frame);
+                frame.in.stack.push(new StringConstant("hello"));
+                analyzer.visitMonitorInstruction(Opcode.MONITOREXIT, frame);
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
-                assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Negate.class).matches(t -> t.type.equals(ConstantDescs.CD_float));
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.control).isInstanceOf(MonitorExit.class);
+
+                final Node node = frame.out.control;
+                assertThat(node.uses).hasSize(2);
+                assertThat(node.uses.get(0).node()).isSameAs(frame.in.stack.getFirst());
+                assertThat(node.uses.get(0).use()).isEqualTo(new ArgumentUse(0));
+                assertThat(node.uses.get(1).node()).isSameAs(frame.in.control);
             }
 
             @Test
-            public void dneg() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
-                frame.in.control = new LabelNode("control");
-                frame.in.memory = new LabelNode("memory");
+            public void monitorExit_fail_emptystack() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(0);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
 
-                frame.in.stack.push(new PrimitiveDouble(10.0d));
+                    analyzer.visitMonitorInstruction(Opcode.MONITOREXIT, frame);
+                }).withMessage("A minimum stack size of 1 is required, but only 0 is available!");
+            }
 
-                analyzer.visitUnaryOperatorInstruction(Opcode.DNEG, frame);
+            @Test
+            public void monitorExit_fail_wrong_type() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(0);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
 
-                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
-                assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Negate.class).matches(t -> t.type.equals(ConstantDescs.CD_double));
+                    frame.in.stack.push(new PrimitiveInt(10));
+
+                    analyzer.visitMonitorInstruction(Opcode.MONITOREXIT, frame);
+                }).withMessage("Expecting non primitive type for monitorexit on stack, got int");
             }
         }
 
@@ -298,7 +2193,7 @@ public class MethodAnalyzerTest {
         public class TYPECHECK {
 
             @Test
-            public void failOnEmptyStack() {
+            public void checkcast_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
                     final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
                     frame.in = new MethodAnalyzer.Status(0);
@@ -349,7 +2244,7 @@ public class MethodAnalyzerTest {
         public class CONVERT {
 
             @Test
-            public void failOnEmptyStack() {
+            public void i2c_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
                     final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
                     frame.in = new MethodAnalyzer.Status(0);
@@ -638,7 +2533,7 @@ public class MethodAnalyzerTest {
         public class CONSTANT {
 
             @Test
-            public void nullConst() {
+            public void aconst_null() {
                 final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
                 frame.in = new MethodAnalyzer.Status(0);
                 frame.in.control = new LabelNode("control");
@@ -914,7 +2809,7 @@ public class MethodAnalyzerTest {
         public class LDC {
 
             @Test
-            public void ldcString() {
+            public void ldc_String() {
                 final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
                 frame.in = new MethodAnalyzer.Status(0);
                 frame.in.control = new LabelNode("control");
@@ -930,7 +2825,7 @@ public class MethodAnalyzerTest {
             }
 
             @Test
-            public void ldcInt() {
+            public void ldc_int() {
                 final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
                 frame.in = new MethodAnalyzer.Status(0);
                 frame.in.control = new LabelNode("control");
@@ -946,7 +2841,7 @@ public class MethodAnalyzerTest {
             }
 
             @Test
-            public void ldcLong() {
+            public void ldc_long() {
                 final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
                 frame.in = new MethodAnalyzer.Status(0);
                 frame.in.control = new LabelNode("control");
@@ -962,7 +2857,7 @@ public class MethodAnalyzerTest {
             }
 
             @Test
-            public void ldcFloat() {
+            public void ldc_float() {
                 final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
                 frame.in = new MethodAnalyzer.Status(0);
                 frame.in.control = new LabelNode("control");
@@ -978,7 +2873,7 @@ public class MethodAnalyzerTest {
             }
 
             @Test
-            public void ldcDouble() {
+            public void ldc_double() {
                 final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
                 frame.in = new MethodAnalyzer.Status(0);
                 frame.in.control = new LabelNode("control");
@@ -994,7 +2889,7 @@ public class MethodAnalyzerTest {
             }
 
             @Test
-            public void ldcClass() {
+            public void ldc_Class() {
                 final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
                 frame.in = new MethodAnalyzer.Status(0);
                 frame.in.control = new LabelNode("control");
@@ -1025,6 +2920,321 @@ public class MethodAnalyzerTest {
 
         @Nested
         public class OPERATOR {
+
+            @Test
+            public void fcmpg() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value1 = new PrimitiveFloat(10.0f);
+                final Value value2 = new PrimitiveFloat(10.0f);
+
+                frame.in.stack.push(value1); // Value 1
+                frame.in.stack.push(value2); // Value 2
+
+                analyzer.visitOperatorInstruction(Opcode.FCMPG, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(NumericCompare.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
+
+                final NumericCompare op = (NumericCompare) frame.out.stack.getFirst();
+                assertThat(op.compareType).isEqualTo(ConstantDescs.CD_float);
+                assertThat(op.mode).isEqualTo(NumericCompare.Mode.NAN_IS_1);
+                assertThat(op.uses).hasSize(2);
+                assertThat(op.uses.get(0).node()).isEqualTo(value1);
+                assertThat(op.uses.get(0).use()).isEqualTo(new ArgumentUse(0));
+                assertThat(op.uses.get(1).node()).isEqualTo(value2);
+                assertThat(op.uses.get(1).use()).isEqualTo(new ArgumentUse(1));
+            }
+
+            @Test
+            public void fcmpg_fail_emmptystack() {
+                assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(0);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    analyzer.visitOperatorInstruction(Opcode.FCMPG, frame);
+                    fail("Exception expected");
+                }).withMessage("A minimum stack size of 2 is required, but only 0 is available!");
+            }
+
+            @Test
+            public void fcmpg_fail_value1() {
+                assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(0);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    frame.in.stack.push(new PrimitiveInt(10));
+                    frame.in.stack.push(new PrimitiveFloat(10.0f));
+
+                    analyzer.visitOperatorInstruction(Opcode.FCMPG, frame);
+                    fail("Exception expected");
+                }).withMessage("Cannot compare non float value int for value1");
+            }
+
+            @Test
+            public void fcmpg_fail_value2() {
+                assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(0);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    frame.in.stack.push(new PrimitiveFloat(10.0f));
+                    frame.in.stack.push(new PrimitiveInt(10));
+
+                    analyzer.visitOperatorInstruction(Opcode.FCMPG, frame);
+                    fail("Exception expected");
+                }).withMessage("Cannot compare non float value int for value2");
+            }
+
+            @Test
+            public void fcmpl() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value1 = new PrimitiveFloat(10.0f);
+                final Value value2 = new PrimitiveFloat(10.0f);
+
+                frame.in.stack.push(value1); // Value 1
+                frame.in.stack.push(value2); // Value 2
+
+                analyzer.visitOperatorInstruction(Opcode.FCMPL, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(NumericCompare.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
+
+                final NumericCompare op = (NumericCompare) frame.out.stack.getFirst();
+                assertThat(op.compareType).isEqualTo(ConstantDescs.CD_float);
+                assertThat(op.mode).isEqualTo(NumericCompare.Mode.NAN_IS_MINUS_1);
+                assertThat(op.uses).hasSize(2);
+                assertThat(op.uses.get(0).node()).isEqualTo(value1);
+                assertThat(op.uses.get(0).use()).isEqualTo(new ArgumentUse(0));
+                assertThat(op.uses.get(1).node()).isEqualTo(value2);
+                assertThat(op.uses.get(1).use()).isEqualTo(new ArgumentUse(1));
+            }
+
+            @Test
+            public void dcmpg() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value1 = new PrimitiveDouble(10.0d);
+                final Value value2 = new PrimitiveDouble(10.0d);
+
+                frame.in.stack.push(value1); // Value 1
+                frame.in.stack.push(value2); // Value 2
+
+                analyzer.visitOperatorInstruction(Opcode.DCMPG, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(NumericCompare.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
+
+                final NumericCompare op = (NumericCompare) frame.out.stack.getFirst();
+                assertThat(op.compareType).isEqualTo(ConstantDescs.CD_double);
+                assertThat(op.mode).isEqualTo(NumericCompare.Mode.NAN_IS_1);
+                assertThat(op.uses).hasSize(2);
+                assertThat(op.uses.get(0).node()).isEqualTo(value1);
+                assertThat(op.uses.get(0).use()).isEqualTo(new ArgumentUse(0));
+                assertThat(op.uses.get(1).node()).isEqualTo(value2);
+                assertThat(op.uses.get(1).use()).isEqualTo(new ArgumentUse(1));
+            }
+
+            @Test
+            public void dcmpl() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value1 = new PrimitiveDouble(10.0d);
+                final Value value2 = new PrimitiveDouble(10.0d);
+
+                frame.in.stack.push(value1); // Value 1
+                frame.in.stack.push(value2); // Value 2
+
+                analyzer.visitOperatorInstruction(Opcode.DCMPL, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(NumericCompare.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
+
+                final NumericCompare op = (NumericCompare) frame.out.stack.getFirst();
+                assertThat(op.compareType).isEqualTo(ConstantDescs.CD_double);
+                assertThat(op.mode).isEqualTo(NumericCompare.Mode.NAN_IS_MINUS_1);
+                assertThat(op.uses).hasSize(2);
+                assertThat(op.uses.get(0).node()).isEqualTo(value1);
+                assertThat(op.uses.get(0).use()).isEqualTo(new ArgumentUse(0));
+                assertThat(op.uses.get(1).node()).isEqualTo(value2);
+                assertThat(op.uses.get(1).use()).isEqualTo(new ArgumentUse(1));
+            }
+
+            @Test
+            public void lcmp() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value1 = new PrimitiveLong(10L);
+                final Value value2 = new PrimitiveLong(10L);
+
+                frame.in.stack.push(value1); // Value 1
+                frame.in.stack.push(value2); // Value 2
+
+                analyzer.visitOperatorInstruction(Opcode.LCMP, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(NumericCompare.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
+
+                final NumericCompare op = (NumericCompare) frame.out.stack.getFirst();
+                assertThat(op.compareType).isEqualTo(ConstantDescs.CD_long);
+                assertThat(op.mode).isEqualTo(NumericCompare.Mode.NONFLOATINGPOINT);
+                assertThat(op.uses).hasSize(2);
+                assertThat(op.uses.get(0).node()).isEqualTo(value1);
+                assertThat(op.uses.get(0).use()).isEqualTo(new ArgumentUse(0));
+                assertThat(op.uses.get(1).node()).isEqualTo(value2);
+                assertThat(op.uses.get(1).use()).isEqualTo(new ArgumentUse(1));
+            }
+
+            @Test
+            public void arraylength_fail_emptystack() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(0);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    assertThat(frame.in.stack).isEmpty();
+
+                    analyzer.visitOperatorInstruction(Opcode.ARRAYLENGTH, frame);
+                    fail("Exception expected");
+                }).withMessage("A minimum stack size of 1 is required, but only 0 is available!");
+            }
+
+            @Test
+            public void arrayLength() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.stack.push(new NewArray(ConstantDescs.CD_int, new PrimitiveInt(10)));
+
+                analyzer.visitOperatorInstruction(Opcode.ARRAYLENGTH, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(ArrayLength.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
+            }
+
+            @Test
+            public void arrayLength_fail_wrong_type() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(0);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    frame.in.stack.push(new StringConstant("hello"));
+
+                    analyzer.visitOperatorInstruction(Opcode.ARRAYLENGTH, frame);
+                    fail("Exception expected");
+                }).withMessage("Cannot get array length of non array value String : hello");
+            }
+
+            @Test
+            public void ineg_fail() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(0);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    frame.in.stack.push(new StringConstant("hello"));
+
+                    analyzer.visitOperatorInstruction(Opcode.INEG, frame);
+                    fail("Exception expected");
+                }).withMessage("Cannot negate non int value String : hello of type String");
+            }
+
+            @Test
+            public void ineg() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.stack.push(new PrimitiveInt(10));
+
+                analyzer.visitOperatorInstruction(Opcode.INEG, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Negate.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
+            }
+
+            @Test
+            public void lneg() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.stack.push(new PrimitiveLong(10));
+
+                analyzer.visitOperatorInstruction(Opcode.LNEG, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Negate.class).matches(t -> t.type.equals(ConstantDescs.CD_long));
+            }
+
+            @Test
+            public void fneg() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.stack.push(new PrimitiveFloat(10.0f));
+
+                analyzer.visitOperatorInstruction(Opcode.FNEG, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Negate.class).matches(t -> t.type.equals(ConstantDescs.CD_float));
+            }
+
+            @Test
+            public void dneg() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.stack.push(new PrimitiveDouble(10.0d));
+
+                analyzer.visitOperatorInstruction(Opcode.DNEG, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Negate.class).matches(t -> t.type.equals(ConstantDescs.CD_double));
+            }
 
             @Test
             public void isub() {
@@ -1343,7 +3553,7 @@ public class MethodAnalyzerTest {
         public class RETURN {
 
             @Test
-            public void correctareturn() {
+            public void areturn() {
                 final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
                 frame.in = new MethodAnalyzer.Status(0);
                 frame.in.control = new LabelNode("control");
@@ -1386,7 +3596,7 @@ public class MethodAnalyzerTest {
             }
 
             @Test
-            public void correctReturn() {
+            public void return_() {
                 final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
                 frame.in = new MethodAnalyzer.Status(0);
                 frame.in.control = new LabelNode("control");
@@ -1401,7 +3611,7 @@ public class MethodAnalyzerTest {
             }
 
             @Test
-            public void failWithEntryOnStack() {
+            public void return_fail_emptystack() {
                 Assertions.assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
                     final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
                     frame.in = new MethodAnalyzer.Status(0);
@@ -1415,7 +3625,7 @@ public class MethodAnalyzerTest {
             }
 
             @Test
-            public void ireturn_fail() {
+            public void ireturn_fail_wrong_value() {
                 Assertions.assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
                     final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
                     frame.in = new MethodAnalyzer.Status(0);
@@ -1426,6 +3636,19 @@ public class MethodAnalyzerTest {
                     analyzer.visitReturnInstruction(Opcode.IRETURN, frame);
                     fail("Exception expected");
                 }).withMessage("Expecting type int on stack, got long");
+            }
+
+            @Test
+            public void ireturn_fail_emptystack() {
+                Assertions.assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(0);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    analyzer.visitReturnInstruction(Opcode.IRETURN, frame);
+                    fail("Exception expected");
+                }).withMessage("A minimum stack size of 1 is required, but only 0 is available!");
             }
 
             @Test

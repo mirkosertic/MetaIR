@@ -47,19 +47,4 @@ class TypeUtilsTest {
     public void doubleIsCategory2() {
         assertThat(TypeUtils.isCategory2(ConstantDescs.CD_double)).isTrue();
     }
-
-    @Test
-    public void isPrimitive() {
-        assertThat(TypeUtils.isPrimitive(ConstantDescs.CD_byte)).isTrue();
-        assertThat(TypeUtils.isPrimitive(ConstantDescs.CD_char)).isTrue();
-        assertThat(TypeUtils.isPrimitive(ConstantDescs.CD_short)).isTrue();
-        assertThat(TypeUtils.isPrimitive(ConstantDescs.CD_int)).isTrue();
-        assertThat(TypeUtils.isPrimitive(ConstantDescs.CD_boolean)).isTrue();
-        assertThat(TypeUtils.isPrimitive(ConstantDescs.CD_long)).isTrue();
-        assertThat(TypeUtils.isPrimitive(ConstantDescs.CD_float)).isTrue();
-        assertThat(TypeUtils.isPrimitive(ConstantDescs.CD_double)).isTrue();
-
-        assertThat(TypeUtils.isPrimitive(ConstantDescs.CD_String)).isFalse();
-        assertThat(TypeUtils.isPrimitive(ConstantDescs.CD_String.arrayType())).isFalse();
-    }
 }

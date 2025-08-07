@@ -2,9 +2,6 @@ package de.mirkosertic.metair.ir;
 
 import org.junit.jupiter.api.Test;
 
-import java.lang.classfile.Opcode;
-import java.lang.classfile.constantpool.ConstantPoolBuilder;
-import java.lang.classfile.instruction.FieldInstruction;
 import java.lang.constant.ConstantDescs;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -13,9 +10,8 @@ public class GetFieldTest {
 
     @Test
     public void testUsage() {
-        final FieldInstruction node = FieldInstruction.of(Opcode.GETFIELD, ConstantPoolBuilder.of().fieldRefEntry(ConstantDescs.CD_String, "field", ConstantDescs.CD_int));
         final Value v = new StringConstant("Hello");
-        final GetField get = new GetField(node, v);
+        final GetField get = new GetField(ConstantDescs.CD_String, ConstantDescs.CD_int, "field", v);
 
         assertThat(v.usedBy).containsExactly(get);
 

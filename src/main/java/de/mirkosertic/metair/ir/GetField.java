@@ -1,20 +1,22 @@
 package de.mirkosertic.metair.ir;
 
-import java.lang.classfile.instruction.FieldInstruction;
+import java.lang.constant.ClassDesc;
 
 public class GetField extends Value {
 
-    public final FieldInstruction node;
+    public final ClassDesc owner;
+    public final String fieldName;
 
-    GetField(final FieldInstruction node, final Value source) {
-        super(node.typeSymbol());
-        this.node = node;
+    GetField(final ClassDesc owner, final ClassDesc fieldType, final String fieldName, final Value source) {
+        super(fieldType);
+        this.owner = owner;
+        this.fieldName = fieldName;
 
         use(source, new ArgumentUse(0));
     }
 
     @Override
     public String debugDescription() {
-        return "GetField : " + node.name() + " : " + TypeUtils.toString(type);
+        return "GetField : " + fieldName + " : " + TypeUtils.toString(type);
     }
 }
