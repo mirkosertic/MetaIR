@@ -91,7 +91,7 @@ public class MethodAnalyzer {
             } catch (final IllegalParsingStateException ex) {
                 throw ex;
             } catch (final RuntimeException ex) {
-                throw new IllegalParsingStateException(this, "Unexpected exception", ex);
+                throw new IllegalParsingStateException(this, ex.getMessage(), ex);
             }
         }
     }
@@ -522,7 +522,7 @@ public class MethodAnalyzer {
         } else if (node instanceof final Instruction ins) {
             // Real bytecode instructions
             switch (ins) {
-                case final IncrementInstruction incrementInstruction -> parse_IINC(incrementInstruction, frame);
+                case final IncrementInstruction incrementInstruction -> parse_IINC(incrementInstruction.slot(), incrementInstruction.constant(), frame);
                 case final InvokeInstruction invokeInstruction -> visitInvokeInstruction(invokeInstruction, frame);
                 case final LoadInstruction load -> visitLoadInstruction(load.opcode(), load.slot(), frame);
                 case final StoreInstruction store -> visitStoreInstruction(store.opcode(), store.slot(), frame);
@@ -577,11 +577,17 @@ public class MethodAnalyzer {
         frame.copyIncomingToOutgoing();
     }
 
-    @Testbacklog
-    protected void parse_IINC(final IncrementInstruction node, final Frame frame) {
+    protected void parse_IINC(final int slot, final int constant, final Frame frame) {
         // A node that represents an IINC instruction.
         frame.copyIncomingToOutgoing();
-        frame.out.setLocal(node.slot(), new Add(ConstantDescs.CD_int, frame.in.getLocal(node.slot()), ir.definePrimitiveInt(node.constant())));
+        final Value value = frame.in.getLocal(slot);
+        if (value == null) {
+            illegalState("No local value for slot " + slot);
+        }
+        if (!ConstantDescs.CD_int.equals(value.type)) {
+            illegalState("IINC expects an int value for slot " + slot + ", got " + TypeUtils.toString(value.type));
+        }
+        frame.out.setLocal(slot, new Add(ConstantDescs.CD_int, value, ir.definePrimitiveInt(constant)));
     }
 
     private void visitInvokeInstruction(final InvokeInstruction node, final Frame frame) {
@@ -1322,13 +1328,15 @@ public class MethodAnalyzer {
         outgoing.memory = outgoing.memory.memoryFlowsTo(get);
     }
 
-    @Testbacklog
     private void parse_PUTFIELD(final ClassDesc owner, final ClassDesc fieldType, final String fieldName, final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, 2);
 
         final Value v = outgoing.pop();
         final Value target = outgoing.pop();
+        if (target.type.isPrimitive() || target.type.isArray()) {
+            illegalState("Cannot put field " + fieldName + " on non object value " + TypeUtils.toString(v.type));
+        }
 
         final PutField put = new PutField(owner, fieldType, fieldName, target, v);
 
@@ -1351,7 +1359,6 @@ public class MethodAnalyzer {
         outgoing.memory = outgoing.memory.memoryFlowsTo(get);
     }
 
-    @Testbacklog
     private void parse_PUTSTATIC(final ClassDesc owner, final ClassDesc fieldType, final String fieldName, final Frame frame) {
         final RuntimeclassReference ri = ir.defineRuntimeclassReference(owner);
         final ClassInitialization init = new ClassInitialization(ri);

@@ -167,7 +167,153 @@ public class MethodAnalyzerTest {
         }
 
         @Nested
+        public class IINC {
+
+            @Test
+            public void iinc() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.setLocal(1, new PrimitiveInt(10));
+
+                analyzer.parse_IINC(1, 10, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+
+                assertThat(frame.out.getLocal(1)).isInstanceOf(Add.class);
+            }
+
+            @Test
+            public void iinc_fail_null() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(10);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    analyzer.parse_IINC(1, 10, frame);
+                    fail("Exception expected");
+                }).withMessage("No local value for slot 1");
+            }
+
+            @Test
+            public void iinc_fail_wrongtype() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(10);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    frame.in.setLocal(1, new PrimitiveDouble(10.0d));
+
+                    analyzer.parse_IINC(1, 10, frame);
+                    fail("Exception expected");
+                }).withMessage("IINC expects an int value for slot 1, got double");
+            }
+
+        }
+
+        @Nested
         public class FIELD {
+
+            @Test
+            public void putstatic() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value value = new PrimitiveInt(10);
+
+                frame.in.push(value);
+
+                analyzer.visitFieldInstruction(Opcode.PUTSTATIC, ConstantDescs.CD_String, ConstantDescs.CD_int, "fieldname", frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.control).isInstanceOf(PutStatic.class);
+                assertThat(frame.out.memory).isInstanceOf(PutStatic.class);
+
+                final PutStatic put = (PutStatic) frame.out.memory;
+                assertThat(put.uses).hasSize(4);
+                assertThat(put.uses.get(1).node()).isSameAs(value);
+                assertThat(put.uses.get(1).use()).isEqualTo(new ArgumentUse(1));
+            }
+
+            @Test
+            public void putstatic_fail_emptystack() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(10);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    analyzer.visitFieldInstruction(Opcode.PUTSTATIC, ConstantDescs.CD_String, ConstantDescs.CD_int, "fieldname", frame);
+                    fail("Exception expected");
+                }).withMessage("A minimum stack size of 1 is required, but only 0 is available!");
+            }
+
+            @Test
+            public void putfield() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value target = new StringConstant("target");
+                final Value value = new PrimitiveInt(10);
+
+                frame.in.push(target);
+                frame.in.push(value);
+
+                analyzer.visitFieldInstruction(Opcode.PUTFIELD, ConstantDescs.CD_String, ConstantDescs.CD_int, "fieldname", frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.control).isInstanceOf(PutField.class);
+                assertThat(frame.out.memory).isInstanceOf(PutField.class);
+
+                final PutField put = (PutField) frame.out.memory;
+                assertThat(put.uses).hasSize(4);
+                assertThat(put.uses.get(0).node()).isSameAs(target);
+                assertThat(put.uses.get(0).use()).isEqualTo(new ArgumentUse(0));
+                assertThat(put.uses.get(1).node()).isSameAs(value);
+                assertThat(put.uses.get(1).use()).isEqualTo(new ArgumentUse(1));
+            }
+
+            @Test
+            public void putfield_fail_stacksize() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(10);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    analyzer.visitFieldInstruction(Opcode.PUTFIELD, ConstantDescs.CD_String, ConstantDescs.CD_int, "fieldname", frame);
+                    fail("Exception expected");
+                }).withMessage("A minimum stack size of 2 is required, but only 0 is available!");
+            }
+
+            @Test
+            public void putfield_fail_wrongtype() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(10);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    frame.in.push(new PrimitiveInt(10));
+                    frame.in.push(new PrimitiveInt(10));
+
+                    analyzer.visitFieldInstruction(Opcode.PUTFIELD, ConstantDescs.CD_String, ConstantDescs.CD_int, "fieldname", frame);
+                    fail("Exception expected");
+                }).withMessage("Cannot put field fieldname on non object value int");
+            }
 
             @Test
             public void getfield() {
