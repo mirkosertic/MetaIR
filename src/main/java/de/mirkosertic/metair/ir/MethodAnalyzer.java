@@ -584,9 +584,6 @@ public class MethodAnalyzer {
         if (value == null) {
             illegalState("No local value for slot " + slot);
         }
-        if (!ConstantDescs.CD_int.equals(value.type)) {
-            illegalState("IINC expects an int value for slot " + slot + ", got " + TypeUtils.toString(value.type));
-        }
         frame.out.setLocal(slot, new Add(ConstantDescs.CD_int, value, ir.definePrimitiveInt(constant)));
     }
 
@@ -836,9 +833,6 @@ public class MethodAnalyzer {
         assertMinimumStackSize(outgoing, 1);
 
         final Value v = outgoing.pop();
-        if (v.type.isPrimitive()) {
-            illegalState("Cannot throw a primitive value of type " + TypeUtils.toString(v.type));
-        }
         final Throw t = new Throw(v);
         outgoing.control = outgoing.control.controlFlowsTo(t, ControlType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(t);
@@ -850,10 +844,6 @@ public class MethodAnalyzer {
         assertMinimumStackSize(outgoing, 1);
 
         final Value length = frame.out.pop();
-        if (!ConstantDescs.CD_int.equals(length.type)) {
-            illegalState("Array length must be int, but was " + TypeUtils.toString(length.type));
-        }
-
         final ClassDesc type;
         switch (kind) {
             case BYTE -> type = ConstantDescs.CD_byte.arrayType();
@@ -915,11 +905,7 @@ public class MethodAnalyzer {
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, 1);
 
-        final Value length = outgoing.pop();
-        if (!length.type.equals(ConstantDescs.CD_int)) {
-            illegalState("Array length must be int, but was " + TypeUtils.toString(length.type));
-        }
-        final NewArray newArray = new NewArray(componentType, length);
+        final NewArray newArray = new NewArray(componentType, outgoing.pop());
         outgoing.push(newArray);
         outgoing.memory = outgoing.memory.memoryFlowsTo(newArray);
         frame.entryPoint = newArray;
@@ -954,11 +940,7 @@ public class MethodAnalyzer {
 
         final List<Value> dimensions = new ArrayList<>();
         for (int i = 0; i < dimensionSize; i++) {
-            final Value v = outgoing.pop();
-            if (!v.type.equals(ConstantDescs.CD_int)) {
-                illegalState("Array dimension must be int, but was " + TypeUtils.toString(v.type) + " for dimension " + (i + 1));
-            }
-            dimensions.add(v);
+            dimensions.add(outgoing.stack.pop());
         }
         final NewMultiArray newMultiArray = new NewMultiArray(arrayType, dimensions);
         outgoing.push(newMultiArray);
@@ -1319,9 +1301,6 @@ public class MethodAnalyzer {
         assertMinimumStackSize(outgoing, 1);
 
         final Value v = outgoing.pop();
-        if (v.type.isPrimitive() || v.type.isArray()) {
-            illegalState("Cannot load field " + fieldName + " from non object value " + TypeUtils.toString(v.type));
-        }
         final GetField get = new GetField(owner, fieldType, fieldName, v);
         outgoing.push(get);
 
@@ -1334,9 +1313,6 @@ public class MethodAnalyzer {
 
         final Value v = outgoing.pop();
         final Value target = outgoing.pop();
-        if (target.type.isPrimitive() || target.type.isArray()) {
-            illegalState("Cannot put field " + fieldName + " on non object value " + TypeUtils.toString(v.type));
-        }
 
         final PutField put = new PutField(owner, fieldType, fieldName, target, v);
 
@@ -1407,12 +1383,6 @@ public class MethodAnalyzer {
 
         final Value v = outgoing.pop();
 
-        if (v.type.isPrimitive()) {
-            illegalState("Expecting type " + TypeUtils.toString(methodTypeDesc.returnType()) + " on stack, got " + TypeUtils.toString(v.type));
-        }
-
-        // TODO: Maybe we should check downcastability according to the type hierarchy
-
         final ReturnValue next = new ReturnValue(v.type, v);
         outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(next);
@@ -1423,9 +1393,6 @@ public class MethodAnalyzer {
         assertMinimumStackSize(outgoing, 1);
 
         final Value v = outgoing.pop();
-        if (!v.type.equals(type)) {
-            illegalState("Expecting type " + TypeUtils.toString(type) + " on stack, got " + TypeUtils.toString(v.type));
-        }
 
         final ReturnValue next = new ReturnValue(type, v);
         outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
@@ -1630,34 +1597,16 @@ public class MethodAnalyzer {
     }
 
     private void parse_ADD_X(final Frame frame, final Value value1, final Value value2, final ClassDesc desc) {
-        if (!value1.type.equals(desc)) {
-            illegalState("Cannot add non " + TypeUtils.toString(desc) + " value " + TypeUtils.toString(value1.type) + " as value1");
-        }
-        if (!value2.type.equals(desc)) {
-            illegalState("Cannot add non " + TypeUtils.toString(desc) + " value " + TypeUtils.toString(value2.type) + " as value2");
-        }
         final Add add = new Add(desc, value1, value2);
         frame.out.push(add);
     }
 
     private void parse_SUB_X(final Frame frame, final Value value1, final Value value2, final ClassDesc desc) {
-        if (!value1.type.equals(desc)) {
-            illegalState("Cannot subtract non " + TypeUtils.toString(desc) + " value " + TypeUtils.toString(value1.type) + " as value1");
-        }
-        if (!value2.type.equals(desc)) {
-            illegalState("Cannot subtract non " + TypeUtils.toString(desc) + " value " + TypeUtils.toString(value2.type) + " as value2");
-        }
         final Sub sub = new Sub(desc, value1, value2);
         frame.out.push(sub);
     }
 
     private void parse_MUL_X(final Frame frame, final Value value1, final Value value2, final ClassDesc desc) {
-        if (!value1.type.equals(desc)) {
-            illegalState("Cannot multiplicate non " + TypeUtils.toString(desc) + " value " + TypeUtils.toString(value1.type) + " for value1");
-        }
-        if (!value2.type.equals(desc)) {
-            illegalState("Cannot multiplicate non " + TypeUtils.toString(desc) + " value " + TypeUtils.toString(value2.type) + " for value2");
-        }
         final Mul mul = new Mul(desc, value1, value2);
         frame.out.push(mul);
     }
@@ -1666,9 +1615,6 @@ public class MethodAnalyzer {
         final Status outgoing = frame.copyIncomingToOutgoing();
 
         final Value array = outgoing.pop();
-        if (!array.type.isArray()) {
-            illegalState("Cannot get array length of non array value " + array);
-        }
         outgoing.push(new ArrayLength(array));
     }
 
@@ -1676,19 +1622,10 @@ public class MethodAnalyzer {
         final Status outgoing = frame.copyIncomingToOutgoing();
 
         final Value a = outgoing.pop();
-        if (!a.type.equals(desc)) {
-            illegalState("Cannot negate non " + TypeUtils.toString(desc) + " value " + a + " of type " + TypeUtils.toString(a.type));
-        }
         outgoing.push(new Negate(desc, a));
     }
 
     private void parse_DIV_X(final Frame frame, final Value value1, final Value value2, final ClassDesc desc) {
-        if (!value1.type.equals(desc)) {
-            illegalState("Cannot divide non " + TypeUtils.toString(desc) + " value " + TypeUtils.toString(value1.type) + " for value1");
-        }
-        if (!value2.type.equals(desc)) {
-            illegalState("Cannot divide non " + TypeUtils.toString(desc) + " value " + TypeUtils.toString(value2.type) + " for value2");
-        }
         final Div div = new Div(desc, value1, value2);
 
         final Status outgoing = frame.out;
@@ -1698,12 +1635,6 @@ public class MethodAnalyzer {
     }
 
     private void parse_REM_X(final Frame frame, final Value value1, final Value value2, final ClassDesc desc) {
-        if (!value1.type.equals(desc)) {
-            illegalState("Cannot make remainder on non " + TypeUtils.toString(desc) + " value " + TypeUtils.toString(value1.type) + " for value1");
-        }
-        if (!value2.type.equals(desc)) {
-            illegalState("Cannot make remainder on non " + TypeUtils.toString(desc) + " value " + TypeUtils.toString(value2.type) + " for value2");
-        }
         final Rem rem = new Rem(desc, value1, value2);
         final Status outgoing = frame.out;
         outgoing.control = outgoing.control.controlFlowsTo(rem, ControlType.FORWARD);
@@ -1711,26 +1642,11 @@ public class MethodAnalyzer {
     }
 
     private void parse_BITOPERATION_X(final Frame frame, final Value value1, final Value value2, final ClassDesc desc, final BitOperation.Operation operation) {
-        if (!value1.type.equals(desc)) {
-            illegalState("Cannot use non " + TypeUtils.toString(desc) + " value " + TypeUtils.toString(value1.type) + " for bit operation " + operation + " on value1");
-        }
-        if (!value2.type.equals(desc)) {
-            illegalState("Cannot use non " + TypeUtils.toString(desc) + " value " + TypeUtils.toString(value1.type) + " for bit operation " + operation + " on value2");
-        }
         final BitOperation rem = new BitOperation(desc, operation, value1, value2);
         frame.out.push(rem);
     }
 
     protected void parse_NUMERICCOMPARE_X(final Frame frame, final Value value1, final Value value2, final ClassDesc compareType, final NumericCompare.Mode mode) {
-
-        if (!value1.type.equals(compareType)) {
-            illegalState("Cannot compare non " + TypeUtils.toString(compareType) + " value " + TypeUtils.toString(value1.type) + " for value1");
-        }
-
-        if (!value2.type.equals(compareType)) {
-            illegalState("Cannot compare non " + TypeUtils.toString(compareType) + " value " + TypeUtils.toString(value2.type) + " for value2");
-        }
-
         final NumericCompare compare = new NumericCompare(mode, compareType, value1, value2);
         frame.out.push(compare);
     }
@@ -1740,9 +1656,6 @@ public class MethodAnalyzer {
         assertMinimumStackSize(outgoing, 1);
 
         final Value v = outgoing.pop();
-        if (v.type.isPrimitive()) {
-            illegalState("Expecting non primitive type for monitorenter on stack, got " + TypeUtils.toString(v.type));
-        }
         outgoing.control = outgoing.control.controlFlowsTo(new MonitorEnter(v), ControlType.FORWARD);
     }
 
@@ -1751,9 +1664,6 @@ public class MethodAnalyzer {
         assertMinimumStackSize(outgoing, 1);
 
         final Value v = outgoing.pop();
-        if (v.type.isPrimitive()) {
-            illegalState("Expecting non primitive type for monitorexit on stack, got " + TypeUtils.toString(v.type));
-        }
         outgoing.control = outgoing.control.controlFlowsTo(new MonitorExit(v), ControlType.FORWARD);
     }
 
@@ -1816,11 +1726,7 @@ public class MethodAnalyzer {
     private void parse_CONVERT_X(final Frame frame, final ClassDesc from, final ClassDesc to) {
         final Status outgoing = frame.copyIncomingToOutgoing();
 
-        final Value value = outgoing.pop();
-        if (!value.type.equals(from)) {
-            illegalState("Expected a value of type " + from + " but got " + value.type);
-        }
-        outgoing.push(new Convert(to, value, from));
+        outgoing.push(new Convert(to, outgoing.pop(), from));
     }
 
     public Method ir() {

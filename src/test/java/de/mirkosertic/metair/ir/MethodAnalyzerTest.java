@@ -203,7 +203,7 @@ public class MethodAnalyzerTest {
 
             @Test
             public void iinc_fail_wrongtype() {
-                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
                     final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
                     frame.in = new MethodAnalyzer.Status(10);
                     frame.in.control = new LabelNode("control");
@@ -213,7 +213,7 @@ public class MethodAnalyzerTest {
 
                     analyzer.parse_IINC(1, 10, frame);
                     fail("Exception expected");
-                }).withMessage("IINC expects an int value for slot 1, got double");
+                }).withMessage("Cannot add non int value double for arg1");
             }
 
         }
@@ -300,22 +300,6 @@ public class MethodAnalyzerTest {
             }
 
             @Test
-            public void putfield_fail_wrongtype() {
-                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
-                    frame.in.control = new LabelNode("control");
-                    frame.in.memory = new LabelNode("memory");
-
-                    frame.in.push(new PrimitiveInt(10));
-                    frame.in.push(new PrimitiveInt(10));
-
-                    analyzer.visitFieldInstruction(Opcode.PUTFIELD, ConstantDescs.CD_String, ConstantDescs.CD_int, "fieldname", frame);
-                    fail("Exception expected");
-                }).withMessage("Cannot put field fieldname on non object value int");
-            }
-
-            @Test
             public void getfield() {
                 final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
                 frame.in = new MethodAnalyzer.Status(10);
@@ -348,20 +332,6 @@ public class MethodAnalyzerTest {
                     analyzer.visitFieldInstruction(Opcode.GETFIELD, ConstantDescs.CD_String, ConstantDescs.CD_int, "fieldname", frame);
                     fail("Exception expected");
                 }).withMessage("A minimum stack size of 1 is required, but only 0 is available!");
-            }
-
-            @Test
-            public void getfield_fail_wrongtype() {
-                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
-                    frame.in.control = new LabelNode("control");
-                    frame.in.memory = new LabelNode("memory");
-
-                    frame.in.push(new PrimitiveInt(10));
-                    analyzer.visitFieldInstruction(Opcode.GETFIELD, ConstantDescs.CD_String, ConstantDescs.CD_int, "fieldname", frame);
-                    fail("Exception expected");
-                }).withMessage("Cannot load field fieldname from non object value int");
             }
 
             @Test
@@ -422,21 +392,6 @@ public class MethodAnalyzerTest {
                     fail("Exception expected");
                 }).withMessage("A minimum stack size of 1 is required, but only 0 is available!");
             }
-
-            @Test
-            public void athrow_fail_wrongtype() {
-                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
-                    frame.in.control = new LabelNode("control");
-                    frame.in.memory = new LabelNode("memory");
-
-                    frame.in.push(new PrimitiveInt(10));
-
-                    analyzer.visitThrowInstruction(frame);
-                    fail("Exception expected");
-                }).withMessage("Cannot throw a primitive value of type int");
-            }
         }
 
         @Nested
@@ -495,20 +450,6 @@ public class MethodAnalyzerTest {
                     fail("Exception expected");
                 }).withMessage("A minimum stack size of 1 is required, but only 0 is available!");
             }
-
-            @Test
-            public void multiarray_wrong_length() {
-                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
-                    frame.in.control = new LabelNode("control");
-                    frame.in.memory = new LabelNode("memory");
-
-                    frame.in.push(new PrimitiveDouble(10));
-                    analyzer.visitNewMultiArray(ConstantDescs.CD_Object, 1, frame);
-                    fail("Exception expected");
-                }).withMessage("Array dimension must be int, but was double for dimension 1");
-            }
         }
 
         @Nested
@@ -535,7 +476,7 @@ public class MethodAnalyzerTest {
             }
 
             @Test
-            public void newObjectArray_fail_enmptystack() {
+            public void newObjectArray_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
                     final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
                     frame.in = new MethodAnalyzer.Status(10);
@@ -545,20 +486,6 @@ public class MethodAnalyzerTest {
                     analyzer.visitNewObjectArray(ConstantDescs.CD_Object, frame);
                     fail("Exception expected");
                 }).withMessage("A minimum stack size of 1 is required, but only 0 is available!");
-            }
-
-            @Test
-            public void newObjectArray_fail_invalidlength() {
-                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
-                    frame.in.control = new LabelNode("control");
-                    frame.in.memory = new LabelNode("memory");
-
-                    frame.in.push(new PrimitiveDouble(10));
-                    analyzer.visitNewObjectArray(ConstantDescs.CD_Object, frame);
-                    fail("Exception expected");
-                }).withMessage("Array length must be int, but was double");
             }
 
             @Test
@@ -592,21 +519,6 @@ public class MethodAnalyzerTest {
                     analyzer.visitNewPrimitiveArray(TypeKind.BYTE, frame);
                     fail("Exception expected");
                 }).withMessage("A minimum stack size of 1 is required, but only 0 is available!");
-            }
-
-            @Test
-            public void newByteArray_fail_invalidlength() {
-                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
-                    frame.in.control = new LabelNode("control");
-                    frame.in.memory = new LabelNode("memory");
-
-                    frame.in.push(new PrimitiveDouble(10));
-
-                    analyzer.visitNewPrimitiveArray(TypeKind.BYTE, frame);
-                    fail("Exception expected");
-                }).withMessage("Array length must be int, but was double");
             }
 
             @Test
@@ -2622,21 +2534,7 @@ public class MethodAnalyzerTest {
             }
 
             @Test
-            public void monitorEnter_fail_wrong_type() {
-                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
-                    frame.in.control = new LabelNode("control");
-                    frame.in.memory = new LabelNode("memory");
-
-                    frame.in.stack.push(new PrimitiveInt(10));
-
-                    analyzer.visitMonitorInstruction(Opcode.MONITORENTER, frame);
-                }).withMessage("Expecting non primitive type for monitorenter on stack, got int");
-            }
-
-            @Test
-            public void monitoExit() {
+            public void monitorExit() {
                 final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
                 frame.in = new MethodAnalyzer.Status(0);
                 frame.in.control = new LabelNode("control");
@@ -2666,20 +2564,6 @@ public class MethodAnalyzerTest {
 
                     analyzer.visitMonitorInstruction(Opcode.MONITOREXIT, frame);
                 }).withMessage("A minimum stack size of 1 is required, but only 0 is available!");
-            }
-
-            @Test
-            public void monitorExit_fail_wrong_type() {
-                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
-                    frame.in.control = new LabelNode("control");
-                    frame.in.memory = new LabelNode("memory");
-
-                    frame.in.stack.push(new PrimitiveInt(10));
-
-                    analyzer.visitMonitorInstruction(Opcode.MONITOREXIT, frame);
-                }).withMessage("Expecting non primitive type for monitorexit on stack, got int");
             }
         }
 
@@ -3458,38 +3342,6 @@ public class MethodAnalyzerTest {
             }
 
             @Test
-            public void fcmpg_fail_value1() {
-                assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
-                    frame.in.control = new LabelNode("control");
-                    frame.in.memory = new LabelNode("memory");
-
-                    frame.in.stack.push(new PrimitiveInt(10));
-                    frame.in.stack.push(new PrimitiveFloat(10.0f));
-
-                    analyzer.visitOperatorInstruction(Opcode.FCMPG, frame);
-                    fail("Exception expected");
-                }).withMessage("Cannot compare non float value int for value1");
-            }
-
-            @Test
-            public void fcmpg_fail_value2() {
-                assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
-                    frame.in.control = new LabelNode("control");
-                    frame.in.memory = new LabelNode("memory");
-
-                    frame.in.stack.push(new PrimitiveFloat(10.0f));
-                    frame.in.stack.push(new PrimitiveInt(10));
-
-                    analyzer.visitOperatorInstruction(Opcode.FCMPG, frame);
-                    fail("Exception expected");
-                }).withMessage("Cannot compare non float value int for value2");
-            }
-
-            @Test
             public void fcmpl() {
                 final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
                 frame.in = new MethodAnalyzer.Status(0);
@@ -3637,36 +3489,6 @@ public class MethodAnalyzerTest {
             }
 
             @Test
-            public void arrayLength_fail_wrong_type() {
-                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
-                    frame.in.control = new LabelNode("control");
-                    frame.in.memory = new LabelNode("memory");
-
-                    frame.in.stack.push(new StringConstant("hello"));
-
-                    analyzer.visitOperatorInstruction(Opcode.ARRAYLENGTH, frame);
-                    fail("Exception expected");
-                }).withMessage("Cannot get array length of non array value String : hello");
-            }
-
-            @Test
-            public void ineg_fail() {
-                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
-                    frame.in.control = new LabelNode("control");
-                    frame.in.memory = new LabelNode("memory");
-
-                    frame.in.stack.push(new StringConstant("hello"));
-
-                    analyzer.visitOperatorInstruction(Opcode.INEG, frame);
-                    fail("Exception expected");
-                }).withMessage("Cannot negate non int value String : hello of type String");
-            }
-
-            @Test
             public void ineg() {
                 final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
                 frame.in = new MethodAnalyzer.Status(0);
@@ -3768,44 +3590,6 @@ public class MethodAnalyzerTest {
                     analyzer.visitOperatorInstruction(Opcode.ISUB, frame);
                     fail("Exception expected");
                 }).withMessage("A minimum stack size of 2 is required, but only 0 is available!");
-            }
-
-            @Test
-            public void isub_fail_wrong_value1() {
-                assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
-                    frame.in.control = new LabelNode("control");
-                    frame.in.memory = new LabelNode("memory");
-
-                    final Value value1 = new PrimitiveLong(10L);
-                    final Value value2 = new PrimitiveInt(10);
-
-                    frame.in.stack.push(value1); // Value 1
-                    frame.in.stack.push(value2); // Value 2
-
-                    analyzer.visitOperatorInstruction(Opcode.ISUB, frame);
-                    fail("Exception expected");
-                }).withMessage("Cannot subtract non int value long as value1");
-            }
-
-            @Test
-            public void isub_fail_wrong_value2() {
-                assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
-                    frame.in.control = new LabelNode("control");
-                    frame.in.memory = new LabelNode("memory");
-
-                    final Value value1 = new PrimitiveInt(10);
-                    final Value value2 = new PrimitiveLong(10L);
-
-                    frame.in.stack.push(value1); // Value 1
-                    frame.in.stack.push(value2); // Value 2
-
-                    analyzer.visitOperatorInstruction(Opcode.ISUB, frame);
-                    fail("Exception expected");
-                }).withMessage("Cannot subtract non int value long as value2");
             }
 
             @Test
@@ -3930,38 +3714,6 @@ public class MethodAnalyzerTest {
             }
 
             @Test
-            public void iadd_fail_value1_wrong() {
-                assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
-                    frame.in.control = new LabelNode("control");
-                    frame.in.memory = new LabelNode("memory");
-
-                    frame.in.stack.push(new PrimitiveLong(10L));
-                    frame.in.stack.push(new PrimitiveInt(10));
-
-                    analyzer.visitOperatorInstruction(Opcode.IADD, frame);
-                    fail("Exception expected");
-                }).withMessage("Cannot add non int value long as value1");
-            }
-
-            @Test
-            public void iadd_fail_value2_wrong() {
-                assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
-                    frame.in.control = new LabelNode("control");
-                    frame.in.memory = new LabelNode("memory");
-
-                    frame.in.stack.push(new PrimitiveInt(10));
-                    frame.in.stack.push(new PrimitiveLong(10L));
-
-                    analyzer.visitOperatorInstruction(Opcode.IADD, frame);
-                    fail("Exception expected");
-                }).withMessage("Cannot add non int value long as value2");
-            }
-
-            @Test
             public void ladd() {
                 final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
                 frame.in = new MethodAnalyzer.Status(0);
@@ -4076,20 +3828,6 @@ public class MethodAnalyzerTest {
             }
 
             @Test
-            public void areturn_fail_wrong_type() {
-                assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
-                    frame.in.control = new LabelNode("control");
-                    frame.in.memory = new LabelNode("memory");
-
-                    frame.in.stack.push(new PrimitiveInt(1));
-                    new MethodAnalyzer(MethodTypeDesc.of(ConstantDescs.CD_String)).visitReturnInstruction(Opcode.ARETURN, frame);
-                    fail("Exception expected");
-                }).withMessage("Expecting type String on stack, got int");
-            }
-
-            @Test
             public void return_() {
                 final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
                 frame.in = new MethodAnalyzer.Status(0);
@@ -4116,20 +3854,6 @@ public class MethodAnalyzerTest {
                     analyzer.visitReturnInstruction(Opcode.RETURN, frame);
                     fail("Exception expected");
                 }).withMessage("The stack should be empty, but it is not! It still has 1 element(s).");
-            }
-
-            @Test
-            public void ireturn_fail_wrong_value() {
-                Assertions.assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
-                    frame.in.control = new LabelNode("control");
-                    frame.in.memory = new LabelNode("memory");
-
-                    frame.in.push(new PrimitiveLong(10L));
-                    analyzer.visitReturnInstruction(Opcode.IRETURN, frame);
-                    fail("Exception expected");
-                }).withMessage("Expecting type int on stack, got long");
             }
 
             @Test

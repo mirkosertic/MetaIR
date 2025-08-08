@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import java.lang.constant.ConstantDescs;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.fail;
 
 public class GetFieldTest {
 
@@ -21,5 +23,13 @@ public class GetFieldTest {
 
         assertThat(get.debugDescription()).isEqualTo("GetField : field : int");
         assertThat(get.isConstant()).isFalse();
+    }
+
+    @Test
+    public void fail_get_on_primitive() {
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+            new GetField(ConstantDescs.CD_String, ConstantDescs.CD_int, "fieldname", new PrimitiveInt(10));
+            fail("Exception expected");
+        }).withMessage("Cannot get field fieldname from non object source int");
     }
 }

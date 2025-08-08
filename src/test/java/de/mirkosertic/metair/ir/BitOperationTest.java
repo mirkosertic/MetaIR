@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import java.lang.constant.ConstantDescs;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.fail;
 
 public class BitOperationTest {
 
@@ -26,5 +28,21 @@ public class BitOperationTest {
         assertThat(bit.uses.get(1).node()).isSameAs(b);
         assertThat(bit.uses.get(1).use()).isEqualTo(new ArgumentUse(1));
         assertThat(bit.isConstant()).isFalse();
+    }
+
+    @Test
+    public void fail_arg1_wrongtype() {
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+            new BitOperation(ConstantDescs.CD_int, BitOperation.Operation.OR, new PrimitiveLong(10L), new PrimitiveInt(10));
+            fail("Exception expected");
+        }).withMessage("Cannot use non int value long for bit operation OR on arg1");
+    }
+
+    @Test
+    public void fail_arg2_wrongtype() {
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+            new BitOperation(ConstantDescs.CD_int, BitOperation.Operation.OR, new PrimitiveInt(10), new PrimitiveLong(10L));
+            fail("Exception expected");
+        }).withMessage("Cannot use non int value long for bit operation OR on arg2");
     }
 }

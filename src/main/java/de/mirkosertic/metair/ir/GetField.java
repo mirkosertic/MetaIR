@@ -9,6 +9,11 @@ public class GetField extends Value {
 
     GetField(final ClassDesc owner, final ClassDesc fieldType, final String fieldName, final Value source) {
         super(fieldType);
+
+        if (source.type.isPrimitive() || source.type.isArray()) {
+            illegalArgument("Cannot get field " + fieldName + " from non object source " + TypeUtils.toString(source.type));
+        }
+
         this.owner = owner;
         this.fieldName = fieldName;
 

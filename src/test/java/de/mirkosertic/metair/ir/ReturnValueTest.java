@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import java.lang.constant.ConstantDescs;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.fail;
 
 public class ReturnValueTest {
 
@@ -20,5 +22,21 @@ public class ReturnValueTest {
         assertThat(ret.uses.getFirst().use()).isEqualTo(new ArgumentUse(0));
         assertThat(ret.usedBy).isEmpty();
         assertThat(ret.isConstant()).isTrue();
+    }
+
+    @Test
+    public void fail_wrong_type_object() {
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+            new ReturnValue(ConstantDescs.CD_Object, new PrimitiveInt(1));
+            fail("Exception expected");
+        }).withMessage("Expecting type Object as value, got int");
+    }
+
+    @Test
+    public void fail_wrong_type_primitive() {
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+            new ReturnValue(ConstantDescs.CD_int, new StringConstant("Hello"));
+            fail("Exception expected");
+        }).withMessage("Expecting type int as value, got String");
     }
 }

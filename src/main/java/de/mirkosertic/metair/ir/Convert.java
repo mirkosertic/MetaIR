@@ -8,6 +8,11 @@ public class Convert extends Value {
 
     Convert(final ClassDesc to, final Value arg1, final ClassDesc from) {
         super(to);
+
+        if (!arg1.type.equals(from)) {
+            illegalArgument("Expected a value of type " + TypeUtils.toString(from) + " but got " + TypeUtils.toString(arg1.type));
+        }
+
         use(arg1, new ArgumentUse(0));
 
         this.from = from;

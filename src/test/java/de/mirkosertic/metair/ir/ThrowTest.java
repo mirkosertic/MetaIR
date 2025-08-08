@@ -3,6 +3,8 @@ package de.mirkosertic.metair.ir;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.fail;
 
 public class ThrowTest {
 
@@ -19,5 +21,13 @@ public class ThrowTest {
         assertThat(tr.uses.getFirst().node()).isSameAs(a);
         assertThat(tr.uses.getFirst().use()).isEqualTo(new ArgumentUse(0));
         assertThat(tr.isConstant()).isFalse();
+    }
+
+    @Test
+    public void fail_wrongtype() {
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+            new Throw(new PrimitiveInt(10));
+            fail("Exception expected");
+        }).withMessage("Cannot throw a primitive value of type int");
     }
 }

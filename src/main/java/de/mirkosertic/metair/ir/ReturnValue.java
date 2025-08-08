@@ -7,6 +7,12 @@ public class ReturnValue extends Value {
 
     ReturnValue(final ClassDesc type, final Value value) {
         super(type);
+        if (type.isPrimitive() && !value.type.isPrimitive()) {
+            illegalArgument("Expecting type " + TypeUtils.toString(type) + " as value, got " + TypeUtils.toString(value.type));
+        }
+        if (!type.isPrimitive() && value.type.isPrimitive()) {
+            illegalArgument("Expecting type " + TypeUtils.toString(type) + " as value, got " + TypeUtils.toString(value.type));
+        }
         use(value, new ArgumentUse(0));
     }
 

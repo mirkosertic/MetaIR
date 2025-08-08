@@ -6,6 +6,8 @@ import java.lang.constant.ConstantDescs;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.fail;
 
 public class NewMultiArrayTest {
 
@@ -24,5 +26,13 @@ public class NewMultiArrayTest {
         assertThat(a.uses.size()).isEqualTo(1);
         assertThat(a.uses.getFirst().node()).isSameAs(size);
         assertThat(a.uses.getFirst().use()).isEqualTo(new ArgumentUse(0));
+    }
+
+    @Test
+    public void fail_wrong_length() {
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+            new NewMultiArray(ConstantDescs.CD_int.arrayType(), List.of(new PrimitiveLong(10)));
+            fail("Exception expected");
+        }).withMessage("Array dimension must be int, but was long for dimension 1");
     }
 }

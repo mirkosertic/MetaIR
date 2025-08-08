@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import java.lang.constant.ConstantDescs;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.fail;
 
 public class ArrayLengthTest {
 
@@ -21,5 +23,13 @@ public class ArrayLengthTest {
         assertThat(len.uses.getFirst().node()).isSameAs(a);
         assertThat(len.uses.getFirst().use()).isEqualTo(new ArgumentUse(0));
         assertThat(len.isConstant()).isFalse();
+    }
+
+    @Test
+    public void fail_wrong_type() {
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+            new ArrayLength(new PrimitiveInt(10));
+            fail("Exception expected");
+        }).withMessage("Cannot get array length of non array of type int");
     }
 }

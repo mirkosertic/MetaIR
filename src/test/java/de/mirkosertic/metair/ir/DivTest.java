@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import java.lang.constant.ConstantDescs;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.fail;
 
 public class DivTest {
 
@@ -26,5 +28,21 @@ public class DivTest {
         assertThat(div.uses.get(1).node()).isSameAs(b);
         assertThat(div.uses.get(1).use()).isEqualTo(new ArgumentUse(1));
         assertThat(div.isConstant()).isFalse();
+    }
+
+    @Test
+    public void fail_arg1_wrongtype() {
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+            new Div(ConstantDescs.CD_int, new PrimitiveLong(10L), new PrimitiveInt(10));
+            fail("Exception expected");
+        }).withMessage("Cannot divide non int value long for arg1");
+    }
+
+    @Test
+    public void fail_arg2_wrongtype() {
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+            new Div(ConstantDescs.CD_int, new PrimitiveInt(10), new PrimitiveLong(10L));
+            fail("Exception expected");
+        }).withMessage("Cannot divide non int value long for arg2");
     }
 }

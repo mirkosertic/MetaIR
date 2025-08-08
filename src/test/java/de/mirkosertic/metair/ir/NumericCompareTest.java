@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import java.lang.constant.ConstantDescs;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.fail;
 
 public class NumericCompareTest {
 
@@ -30,4 +32,19 @@ public class NumericCompareTest {
         assertThat(compare.isConstant()).isFalse();
     }
 
+    @Test
+    public void fail_wrongtype_arg1() {
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+            new NumericCompare(NumericCompare.Mode.NAN_IS_1, ConstantDescs.CD_int, new PrimitiveLong(10L), new PrimitiveInt(10));
+            fail("Exception expected");
+        }).withMessage("Cannot compare non int value long for arg1");
+    }
+
+    @Test
+    public void fcmpg_fail_value2() {
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+            new NumericCompare(NumericCompare.Mode.NAN_IS_1, ConstantDescs.CD_int, new PrimitiveInt(10), new PrimitiveLong(10L));
+            fail("Exception expected");
+        }).withMessage("Cannot compare non int value long for arg2");
+    }
 }

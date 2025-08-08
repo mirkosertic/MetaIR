@@ -3,6 +3,8 @@ package de.mirkosertic.metair.ir;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.fail;
 
 public class MonitorExitTest {
 
@@ -19,6 +21,13 @@ public class MonitorExitTest {
         assertThat(monitor.uses.getFirst().node()).isSameAs(a);
         assertThat(monitor.uses.getFirst().use()).isEqualTo(new ArgumentUse(0));
         assertThat(monitor.isConstant()).isFalse();
+    }
 
+    @Test
+    public void fail_wrong_type() {
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+            new MonitorExit(new PrimitiveInt(10));
+            fail("Exception expected");
+        }).withMessage("Expecting non primitive type for monitorexit on stack, got int");
     }
 }

@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import java.lang.constant.ConstantDescs;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.fail;
 
 public class NegateTest {
 
@@ -21,5 +23,13 @@ public class NegateTest {
         assertThat(negate.uses.size()).isEqualTo(1);
         assertThat(negate.uses.getFirst().node()).isSameAs(a);
         assertThat(negate.uses.getFirst().use()).isEqualTo(new ArgumentUse(0));
+    }
+
+    @Test
+    public void fail_wrongtype() {
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+            new Negate(ConstantDescs.CD_int, new StringConstant("hello"));
+            fail("Exception expected");
+        }).withMessage("Cannot negate non int of type String");
     }
 }

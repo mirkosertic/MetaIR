@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import java.lang.constant.ConstantDescs;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.fail;
 
 public class NewArrayTest {
 
@@ -23,5 +25,13 @@ public class NewArrayTest {
         assertThat(a.uses.size()).isEqualTo(1);
         assertThat(a.uses.getFirst().node()).isSameAs(size);
         assertThat(a.uses.getFirst().use()).isEqualTo(new ArgumentUse(0));
+    }
+
+    @Test
+    public void fail_invalidlength() {
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+            new NewArray(ConstantDescs.CD_byte, new PrimitiveDouble(10));
+            fail("Exception expected");
+        }).withMessage("Array length must be int, but was double");
     }
 }

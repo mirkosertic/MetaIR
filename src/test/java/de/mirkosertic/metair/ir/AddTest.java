@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import java.lang.constant.ConstantDescs;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.fail;
 
 public class AddTest {
 
@@ -27,4 +29,21 @@ public class AddTest {
         assertThat(add.uses.get(1).use()).isEqualTo(new ArgumentUse(1));
         assertThat(add.isConstant()).isFalse();
     }
+
+    @Test
+    public void fail_arg1_wrong() {
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+            new Add(ConstantDescs.CD_int, new PrimitiveLong(10L), new PrimitiveInt(10));
+            fail("Exception expected");
+        }).withMessage("Cannot add non int value long for arg1");
+    }
+
+    @Test
+    public void fail_arg2_wrong() {
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+            new Add(ConstantDescs.CD_int, new PrimitiveInt(10), new PrimitiveLong(10L));
+            fail("Exception expected");
+        }).withMessage("Cannot add non int value long for arg2");
+    }
+
 }

@@ -12,14 +12,22 @@ public class NumericCompare extends Value {
     public final ClassDesc compareType;
     public final Mode mode;
 
-    NumericCompare(final Mode mode, final ClassDesc compareType, final Value a, final Value b) {
+    NumericCompare(final Mode mode, final ClassDesc compareType, final Value arg1, final Value arg2) {
         super(ConstantDescs.CD_int);
+
+        if (!arg1.type.equals(compareType)) {
+            illegalArgument("Cannot compare non " + TypeUtils.toString(compareType) + " value " + TypeUtils.toString(arg1.type) + " for arg1");
+        }
+
+        if (!arg2.type.equals(compareType)) {
+            illegalArgument("Cannot compare non " + TypeUtils.toString(compareType) + " value " + TypeUtils.toString(arg2.type) + " for arg2");
+        }
 
         this.mode = mode;
         this.compareType = compareType;
 
-        use(a, new ArgumentUse(0));
-        use(b, new ArgumentUse(1));
+        use(arg1, new ArgumentUse(0));
+        use(arg2, new ArgumentUse(1));
     }
 
     @Override

@@ -7,6 +7,15 @@ import java.util.Set;
 
 public abstract class Node {
 
+    protected static void illegalArgument(final String message) {
+        final RuntimeException ex = new IllegalArgumentException(message);
+        final StackTraceElement[] old = ex.getStackTrace();
+        final StackTraceElement[] newTrace = new StackTraceElement[old.length - 1];
+        System.arraycopy(old, 1, newTrace, 0, old.length - 1);
+        ex.setStackTrace(newTrace);
+        throw ex;
+    }
+
     // Incoming uses
     protected final List<UseEdge> uses;
     protected final Set<Node> usedBy;
