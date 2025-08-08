@@ -1467,8 +1467,7 @@ public class MethodAnalyzer {
         outgoing.push(v);
     }
 
-    @Testbacklog
-    protected void parse_DUP_X1(final Frame frame) {
+    private void parse_DUP_X1(final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, 2);
 
@@ -1479,8 +1478,7 @@ public class MethodAnalyzer {
         outgoing.push(v1);
     }
 
-    @Testbacklog
-    protected void parse_DUP_X2(final Frame frame) {
+    private void parse_DUP_X2(final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, 2);
 
@@ -1526,8 +1524,7 @@ public class MethodAnalyzer {
         outgoing.push(v1);
     }
 
-    @Testbacklog
-    protected void parse_DUP2_X1(final Frame frame) {
+    private void parse_DUP2_X1(final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, 2);
 
@@ -1554,8 +1551,7 @@ public class MethodAnalyzer {
         }
     }
 
-    @Testbacklog
-    protected void parse_DUP2_X2(final Frame frame) {
+    private void parse_DUP2_X2(final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, 2);
 
@@ -1570,14 +1566,14 @@ public class MethodAnalyzer {
             assertMinimumStackSize(outgoing, 1);
 
             final Value v3 = outgoing.pop();
-            if (!TypeUtils.isCategory2(v1.type) && !TypeUtils.isCategory2(v2.type) || TypeUtils.isCategory2(v3.type)) {
+            if (!TypeUtils.isCategory2(v1.type) && !TypeUtils.isCategory2(v2.type) && TypeUtils.isCategory2(v3.type)) {
                 // Form 3
                 outgoing.push(v2);
                 outgoing.push(v1);
                 outgoing.push(v3);
                 outgoing.push(v2);
                 outgoing.push(v1);
-            } else if (TypeUtils.isCategory2(v1.type) || !TypeUtils.isCategory2(v2.type) && (!TypeUtils.isCategory2(v3.type))) {
+            } else if (TypeUtils.isCategory2(v1.type) && !TypeUtils.isCategory2(v2.type) && (!TypeUtils.isCategory2(v3.type))) {
                 // Form 2
                 outgoing.push(v1);
                 outgoing.push(v3);

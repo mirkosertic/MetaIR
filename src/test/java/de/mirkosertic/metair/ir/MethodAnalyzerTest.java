@@ -2080,6 +2080,296 @@ public class MethodAnalyzerTest {
         public class STACK {
 
             @Test
+            public void dup2_x2_form4() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.stack.push(new PrimitiveLong(10));
+                frame.in.stack.push(new PrimitiveLong(20L));
+
+                analyzer.visitStackInstruction(Opcode.DUP2_X2, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+
+                assertThat(frame.out.stack).hasSize(3);
+                assertThat(frame.out.stack.get(0)).isSameAs(frame.in.stack.get(1));
+                assertThat(frame.out.stack.get(1)).isSameAs(frame.in.stack.get(0));
+                assertThat(frame.out.stack.get(2)).isSameAs(frame.in.stack.get(1));
+            }
+
+            @Test
+            public void dup2_x2_form3() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.stack.push(new PrimitiveLong(10L));
+                frame.in.stack.push(new PrimitiveInt(20));
+                frame.in.stack.push(new PrimitiveInt(30));
+
+                analyzer.visitStackInstruction(Opcode.DUP2_X2, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+
+                assertThat(frame.out.stack).hasSize(5);
+                assertThat(frame.out.stack.get(0)).isSameAs(frame.in.stack.get(1));
+                assertThat(frame.out.stack.get(1)).isSameAs(frame.in.stack.get(2));
+                assertThat(frame.out.stack.get(2)).isSameAs(frame.in.stack.get(0));
+                assertThat(frame.out.stack.get(3)).isSameAs(frame.in.stack.get(1));
+                assertThat(frame.out.stack.get(4)).isSameAs(frame.in.stack.get(2));
+            }
+
+            @Test
+            public void dup2_x2_form2() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.stack.push(new PrimitiveInt(10));
+                frame.in.stack.push(new PrimitiveInt(20));
+                frame.in.stack.push(new PrimitiveLong(30L));
+
+                analyzer.visitStackInstruction(Opcode.DUP2_X2, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+
+                assertThat(frame.out.stack).hasSize(4);
+                assertThat(frame.out.stack.get(0)).isSameAs(frame.in.stack.get(2));
+                assertThat(frame.out.stack.get(1)).isSameAs(frame.in.stack.get(0));
+                assertThat(frame.out.stack.get(2)).isSameAs(frame.in.stack.get(1));
+                assertThat(frame.out.stack.get(3)).isSameAs(frame.in.stack.get(2));
+            }
+
+            @Test
+            public void dup2_x2_form1() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.stack.push(new PrimitiveInt(10));
+                frame.in.stack.push(new PrimitiveInt(20));
+                frame.in.stack.push(new PrimitiveInt(30));
+                frame.in.stack.push(new PrimitiveInt(40));
+
+                analyzer.visitStackInstruction(Opcode.DUP2_X2, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+
+                assertThat(frame.out.stack).hasSize(6);
+                assertThat(frame.out.stack.get(0)).isSameAs(frame.in.stack.get(2));
+                assertThat(frame.out.stack.get(1)).isSameAs(frame.in.stack.get(3));
+                assertThat(frame.out.stack.get(2)).isSameAs(frame.in.stack.get(0));
+                assertThat(frame.out.stack.get(3)).isSameAs(frame.in.stack.get(1));
+                assertThat(frame.out.stack.get(4)).isSameAs(frame.in.stack.get(2));
+                assertThat(frame.out.stack.get(5)).isSameAs(frame.in.stack.get(3));
+            }
+
+            @Test
+            public void dup2_x1_form2() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.stack.push(new PrimitiveInt(10));
+                frame.in.stack.push(new PrimitiveLong(20L));
+
+                analyzer.visitStackInstruction(Opcode.DUP2_X1, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+
+                assertThat(frame.out.stack).hasSize(3);
+                assertThat(frame.out.stack.get(0)).isSameAs(frame.in.stack.get(1));
+                assertThat(frame.out.stack.get(1)).isSameAs(frame.in.stack.get(0));
+                assertThat(frame.out.stack.get(2)).isSameAs(frame.in.stack.get(1));
+            }
+
+            @Test
+            public void dup2_x1_form2_fail_wrongstack() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(0);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    frame.in.stack.push(new PrimitiveInt(10));
+
+                    analyzer.visitStackInstruction(Opcode.DUP2_X1, frame);
+                    fail("Exception expected");
+                }).withMessage("A minimum stack size of 2 is required, but only 1 is available!");
+            }
+
+            @Test
+            public void dup2_x1_form1() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.stack.push(new PrimitiveInt(10));
+                frame.in.stack.push(new PrimitiveInt(20));
+                frame.in.stack.push(new PrimitiveInt(30));
+
+                analyzer.visitStackInstruction(Opcode.DUP2_X1, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+
+                assertThat(frame.out.stack).hasSize(5);
+                assertThat(frame.out.stack.get(0)).isSameAs(frame.in.stack.get(1));
+                assertThat(frame.out.stack.get(1)).isSameAs(frame.in.stack.get(2));
+                assertThat(frame.out.stack.get(2)).isSameAs(frame.in.stack.get(0));
+                assertThat(frame.out.stack.get(2)).isSameAs(frame.in.stack.get(0));
+                assertThat(frame.out.stack.get(2)).isSameAs(frame.in.stack.get(0));
+            }
+
+            @Test
+            public void dup2_x1_form1_fail_wrongstack() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(0);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    frame.in.stack.push(new PrimitiveInt(10));
+                    frame.in.stack.push(new PrimitiveInt(20));
+
+                    analyzer.visitStackInstruction(Opcode.DUP2_X1, frame);
+                    fail("Exception expected");
+                }).withMessage("A minimum stack size of 1 is required, but only 0 is available!");
+            }
+
+            @Test
+            public void dup_x2_form2() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.stack.push(new PrimitiveLong(20L));
+                frame.in.stack.push(new PrimitiveInt(10));
+
+                analyzer.visitStackInstruction(Opcode.DUP_X2, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+
+                assertThat(frame.out.stack).hasSize(3);
+                assertThat(frame.out.stack.get(0)).isSameAs(frame.in.stack.get(1));
+                assertThat(frame.out.stack.get(1)).isSameAs(frame.in.stack.get(0));
+                assertThat(frame.out.stack.get(2)).isSameAs(frame.in.stack.get(1));
+            }
+
+            @Test
+            public void dup_x2_form2_fail_wrongstack() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(0);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    frame.in.stack.push(new PrimitiveLong(20L));
+
+                    analyzer.visitStackInstruction(Opcode.DUP_X2, frame);
+                    fail("Exception expected");
+                }).withMessage("A minimum stack size of 2 is required, but only 1 is available!");
+            }
+
+            @Test
+            public void dup_x2_form1() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.stack.push(new PrimitiveInt(10));
+                frame.in.stack.push(new PrimitiveInt(20));
+                frame.in.stack.push(new PrimitiveInt(30));
+
+                analyzer.visitStackInstruction(Opcode.DUP_X2, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+
+                assertThat(frame.out.stack).hasSize(4);
+                assertThat(frame.out.stack.get(0)).isSameAs(frame.in.stack.get(2));
+                assertThat(frame.out.stack.get(1)).isSameAs(frame.in.stack.get(0));
+                assertThat(frame.out.stack.get(2)).isSameAs(frame.in.stack.get(1));
+                assertThat(frame.out.stack.get(3)).isSameAs(frame.in.stack.get(2));
+            }
+
+            @Test
+            public void dup_x2_form1_fail_wrongstack() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(0);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    frame.in.stack.push(new PrimitiveInt(10));
+                    frame.in.stack.push(new PrimitiveInt(20));
+
+                    analyzer.visitStackInstruction(Opcode.DUP_X2, frame);
+                    fail("Exception expected");
+                }).withMessage("A minimum stack size of 1 is required, but only 0 is available!");
+            }
+
+            @Test
+            public void dup_x1() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.stack.push(new PrimitiveLong(10L));
+                frame.in.stack.push(new PrimitiveLong(10L));
+
+                analyzer.visitStackInstruction(Opcode.DUP_X1, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.control).isSameAs(frame.in.control);
+                assertThat(frame.out.memory).isSameAs(frame.in.memory);
+
+                assertThat(frame.out.stack).hasSize(3);
+                assertThat(frame.out.stack.get(0)).isSameAs(frame.in.stack.get(1));
+                assertThat(frame.out.stack.get(1)).isSameAs(frame.in.stack.get(0));
+                assertThat(frame.out.stack.get(2)).isSameAs(frame.in.stack.get(1));
+            }
+
+            @Test
+            public void dup_x1_fail_stacksize() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(0);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    frame.in.stack.push(new PrimitiveLong(10L));
+
+                    analyzer.visitStackInstruction(Opcode.DUP_X1, frame);
+                    fail("Exception expected");
+                }).withMessage("A minimum stack size of 2 is required, but only 1 is available!");
+            }
+
+            @Test
             public void dup2_form2() {
                 final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
                 frame.in = new MethodAnalyzer.Status(0);
@@ -2095,8 +2385,8 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out.memory).isSameAs(frame.in.memory);
 
                 assertThat(frame.out.stack).hasSize(2);
-                assertThat(frame.out.stack.get(0)).isSameAs(frame.in.stack.get(0));
-                assertThat(frame.out.stack.get(1)).isSameAs(frame.in.stack.get(0));
+                assertThat(frame.out.stack.get(0)).isSameAs(frame.in.stack.getFirst());
+                assertThat(frame.out.stack.get(1)).isSameAs(frame.in.stack.getFirst());
             }
 
             @Test
