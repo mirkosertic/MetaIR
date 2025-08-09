@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import java.lang.constant.ConstantDescs;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.fail;
 
 public class ArrayStoreTest {
 
@@ -28,5 +30,23 @@ public class ArrayStoreTest {
         assertThat(store.uses.get(2).node()).isSameAs(value);
         assertThat(store.uses.get(2).use()).isEqualTo(new ArgumentUse(2));
         assertThat(store.isConstant()).isFalse();
+
+        assertThat(store.debugDescription()).isEqualTo("ArrayStore : byte[]");
+    }
+
+    @Test
+    public void fail_wrong_array() {
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+            new ArrayStore(ConstantDescs.CD_byte.arrayType(), new PrimitiveInt(10), new PrimitiveInt(10), new PrimitiveInt(10));
+            fail("Exception expected");
+        }).withMessage("Cannot store to non array of type int");
+    }
+
+    @Test
+    public void fail_wrong_index() {
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+            new ArrayStore(ConstantDescs.CD_byte.arrayType(), new NewArray(ConstantDescs.CD_int, new PrimitiveInt(10)), new PrimitiveLong(10L), new PrimitiveInt(10));
+            fail("Exception expected");
+        }).withMessage("Cannot store to non int index of type long");
     }
 }

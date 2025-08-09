@@ -167,7 +167,8 @@ public class MethodAnalyzer {
                 continue;
             }
             final List<Integer> newPath = new ArrayList<>(job.path);
-            jobend: for (int i = job.startIndex; i < codeElements.size(); i++) {
+            jobend:
+            for (int i = job.startIndex; i < codeElements.size(); i++) {
                 visited.add(i);
                 newPath.add(i);
                 final CodeElement current = codeElements.get(i);
@@ -178,7 +179,7 @@ public class MethodAnalyzer {
                             final Label target = branch.target();
                             // Unconditional Branch
                             if (labelToIndex.containsKey(target)) {
-                               final int newIndex = labelToIndex.get(target);
+                                final int newIndex = labelToIndex.get(target);
                                 if (!visited.contains(newIndex)) {
                                     jobs.add(new CFGAnalysisJob(newIndex, newPath));
                                 }
@@ -248,7 +249,7 @@ public class MethodAnalyzer {
                     nextFrame.predecessors.add(new CFGEdge(i, CFGProjection.DEFAULT, ControlType.FORWARD));
                 }
 
-                if (visited.contains(i +1)) {
+                if (visited.contains(i + 1)) {
                     break;
                 }
             }
@@ -263,7 +264,7 @@ public class MethodAnalyzer {
         currentPath.add(frames[0]);
         final Set<Frame> marked = new HashSet<>();
         marked.add(frames[0]);
-        while(!currentPath.isEmpty()) {
+        while (!currentPath.isEmpty()) {
             final Frame currentNode = currentPath.peek();
             final List<Frame> forwardNodes = new ArrayList<>();
 
@@ -383,7 +384,8 @@ public class MethodAnalyzer {
                 // We need to compute the incoming status from the predecessors
                 if (frame.predecessors.isEmpty()) {
                     illegalState("No predecessors for " + frame.elementIndex);
-                } if (frame.predecessors.size() == 1) {
+                }
+                if (frame.predecessors.size() == 1) {
                     final CFGEdge edge = frame.predecessors.getFirst();
                     final Frame outgoing = posToFrame.get(edge.fromIndex);
                     if (outgoing == null) {
@@ -522,17 +524,21 @@ public class MethodAnalyzer {
         } else if (node instanceof final Instruction ins) {
             // Real bytecode instructions
             switch (ins) {
-                case final IncrementInstruction incrementInstruction -> parse_IINC(incrementInstruction.slot(), incrementInstruction.constant(), frame);
-                case final InvokeInstruction invokeInstruction -> visitInvokeInstruction(invokeInstruction, frame);
+                case final IncrementInstruction incrementInstruction ->
+                        parse_IINC(incrementInstruction.slot(), incrementInstruction.constant(), frame);
+                case final InvokeInstruction invokeInstruction ->
+                        visitInvokeInstruction(invokeInstruction.opcode(), invokeInstruction.owner().asSymbol(), invokeInstruction.name().stringValue(), invokeInstruction.typeSymbol(), frame);
                 case final LoadInstruction load -> visitLoadInstruction(load.opcode(), load.slot(), frame);
                 case final StoreInstruction store -> visitStoreInstruction(store.opcode(), store.slot(), frame);
                 case final BranchInstruction branchInstruction -> visitBranchInstruction(branchInstruction, frame);
                 case final ConstantInstruction constantInstruction ->
                         visitConstantInstruction(constantInstruction.opcode(), constantInstruction.constantValue(), frame);
-                case final FieldInstruction fieldInstruction -> visitFieldInstruction(fieldInstruction.opcode(), fieldInstruction.field().owner().asSymbol(), fieldInstruction.typeSymbol(), fieldInstruction.name().stringValue(), frame);
+                case final FieldInstruction fieldInstruction ->
+                        visitFieldInstruction(fieldInstruction.opcode(), fieldInstruction.field().owner().asSymbol(), fieldInstruction.typeSymbol(), fieldInstruction.name().stringValue(), frame);
                 case final NewObjectInstruction newObjectInstruction ->
                         visitNewObjectInstruction(newObjectInstruction.opcode(), newObjectInstruction.className().asSymbol(), frame);
-                case final ReturnInstruction returnInstruction -> visitReturnInstruction(returnInstruction.opcode(), frame);
+                case final ReturnInstruction returnInstruction ->
+                        visitReturnInstruction(returnInstruction.opcode(), frame);
                 case final InvokeDynamicInstruction invokeDynamicInstruction ->
                         parse_INVOKEDYNAMIC(invokeDynamicInstruction, frame);
                 case final TypeCheckInstruction typeCheckInstruction ->
@@ -544,12 +550,14 @@ public class MethodAnalyzer {
                         visitMonitorInstruction(monitorInstruction.opcode(), frame);
                 case final ThrowInstruction thr -> visitThrowInstruction(frame);
                 case final NewPrimitiveArrayInstruction na -> visitNewPrimitiveArray(na.typeKind(), frame);
-                case final ArrayStoreInstruction as -> visitArrayStoreInstruction(as, frame);
-                case final ArrayLoadInstruction al -> visitArrayLoadInstruction(al, frame);
+                case final ArrayStoreInstruction as -> visitArrayStoreInstruction(as.opcode(), frame);
+                case final ArrayLoadInstruction al -> visitArrayLoadInstruction(al.opcode(), frame);
                 case final NopInstruction nop -> visitNopInstruction(frame);
-                case final NewReferenceArrayInstruction rei -> visitNewObjectArray(rei.componentType().asSymbol(), frame);
+                case final NewReferenceArrayInstruction rei ->
+                        visitNewObjectArray(rei.componentType().asSymbol(), frame);
                 case final ConvertInstruction ci -> visitConvertInstruction(ci.opcode(), frame);
-                case final NewMultiArrayInstruction nm -> visitNewMultiArray(nm.arrayType().asSymbol(), nm.dimensions(), frame);
+                case final NewMultiArrayInstruction nm ->
+                        visitNewMultiArray(nm.arrayType().asSymbol(), nm.dimensions(), frame);
                 default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
             }
         } else {
@@ -587,14 +595,14 @@ public class MethodAnalyzer {
         frame.out.setLocal(slot, new Add(ConstantDescs.CD_int, value, ir.definePrimitiveInt(constant)));
     }
 
-    private void visitInvokeInstruction(final InvokeInstruction node, final Frame frame) {
+    protected void visitInvokeInstruction(final Opcode opcode, final ClassDesc owner, final String methodName, final MethodTypeDesc methodTypeDesc, final Frame frame) {
         // A node that represents a method instruction. A method instruction is an instruction that invokes a method.
-        switch (node.opcode()) {
-            case Opcode.INVOKESPECIAL -> parse_INVOKESPECIAL(node, frame);
-            case Opcode.INVOKEVIRTUAL -> parse_INVOKEVIRTUAL(node, frame);
-            case Opcode.INVOKEINTERFACE -> parse_INVOKEINTERFACE(node, frame);
-            case Opcode.INVOKESTATIC -> parse_INVOKESTATIC(node, frame);
-            default -> throw new IllegalArgumentException("Not implemented yet : " + node);
+        switch (opcode) {
+            case Opcode.INVOKESPECIAL -> parse_INVOKESPECIAL(owner, methodName, methodTypeDesc, frame);
+            case Opcode.INVOKEVIRTUAL -> parse_INVOKEVIRTUAL(owner, methodName, methodTypeDesc, frame);
+            case Opcode.INVOKEINTERFACE -> parse_INVOKEINTERFACE(owner, methodName, methodTypeDesc, frame);
+            case Opcode.INVOKESTATIC -> parse_INVOKESTATIC(owner, methodName, methodTypeDesc, frame);
+            default -> throw new IllegalArgumentException("Not implemented yet : " + opcode);
         }
     }
 
@@ -752,7 +760,8 @@ public class MethodAnalyzer {
                  Opcode.IOR, Opcode.IXOR, Opcode.ISHL, Opcode.ISHR, Opcode.IUSHR, Opcode.LAND, Opcode.LOR,
                  Opcode.LXOR, Opcode.LSHL, Opcode.LSHR, Opcode.LUSHR, Opcode.FCMPG, Opcode.FCMPL, Opcode.DCMPG,
                  Opcode.DCMPL, Opcode.LCMP -> visitBinaryOperatorInstruction(opcode, frame);
-            case Opcode.ARRAYLENGTH, Opcode.INEG, Opcode.LNEG, Opcode.FNEG, Opcode.DNEG -> visitUnaryOperatorInstruction(opcode, frame);
+            case Opcode.ARRAYLENGTH, Opcode.INEG, Opcode.LNEG, Opcode.FNEG, Opcode.DNEG ->
+                    visitUnaryOperatorInstruction(opcode, frame);
             default -> throw new IllegalArgumentException("Not implemented yet : " + opcode);
         }
     }
@@ -785,24 +794,40 @@ public class MethodAnalyzer {
             case Opcode.LREM -> parse_REM_X(frame, value1, value2, ConstantDescs.CD_long);
             case Opcode.FREM -> parse_REM_X(frame, value1, value2, ConstantDescs.CD_float);
             case Opcode.DREM -> parse_REM_X(frame, value1, value2, ConstantDescs.CD_double);
-            case Opcode.IAND -> parse_BITOPERATION_X(frame, value1, value2, ConstantDescs.CD_int, BitOperation.Operation.AND);
-            case Opcode.IOR -> parse_BITOPERATION_X(frame, value1, value2, ConstantDescs.CD_int, BitOperation.Operation.OR);
-            case Opcode.IXOR -> parse_BITOPERATION_X(frame, value1, value2, ConstantDescs.CD_int, BitOperation.Operation.XOR);
-            case Opcode.ISHL -> parse_BITOPERATION_X(frame, value1, value2, ConstantDescs.CD_int, BitOperation.Operation.SHL);
-            case Opcode.ISHR -> parse_BITOPERATION_X(frame, value1, value2, ConstantDescs.CD_int, BitOperation.Operation.SHR);
-            case Opcode.IUSHR -> parse_BITOPERATION_X(frame, value1, value2, ConstantDescs.CD_int, BitOperation.Operation.USHR);
-            case Opcode.LAND -> parse_BITOPERATION_X(frame, value1, value2, ConstantDescs.CD_long, BitOperation.Operation.AND);
-            case Opcode.LOR -> parse_BITOPERATION_X(frame, value1, value2, ConstantDescs.CD_long, BitOperation.Operation.OR);
-            case Opcode.LXOR -> parse_BITOPERATION_X(frame, value1, value2, ConstantDescs.CD_long, BitOperation.Operation.XOR);
-            case Opcode.LSHL -> parse_BITOPERATION_X(frame, value1, value2, ConstantDescs.CD_long, BitOperation.Operation.SHL);
-            case Opcode.LSHR -> parse_BITOPERATION_X(frame, value1, value2, ConstantDescs.CD_long, BitOperation.Operation.SHR);
+            case Opcode.IAND ->
+                    parse_BITOPERATION_X(frame, value1, value2, ConstantDescs.CD_int, BitOperation.Operation.AND);
+            case Opcode.IOR ->
+                    parse_BITOPERATION_X(frame, value1, value2, ConstantDescs.CD_int, BitOperation.Operation.OR);
+            case Opcode.IXOR ->
+                    parse_BITOPERATION_X(frame, value1, value2, ConstantDescs.CD_int, BitOperation.Operation.XOR);
+            case Opcode.ISHL ->
+                    parse_BITOPERATION_X(frame, value1, value2, ConstantDescs.CD_int, BitOperation.Operation.SHL);
+            case Opcode.ISHR ->
+                    parse_BITOPERATION_X(frame, value1, value2, ConstantDescs.CD_int, BitOperation.Operation.SHR);
+            case Opcode.IUSHR ->
+                    parse_BITOPERATION_X(frame, value1, value2, ConstantDescs.CD_int, BitOperation.Operation.USHR);
+            case Opcode.LAND ->
+                    parse_BITOPERATION_X(frame, value1, value2, ConstantDescs.CD_long, BitOperation.Operation.AND);
+            case Opcode.LOR ->
+                    parse_BITOPERATION_X(frame, value1, value2, ConstantDescs.CD_long, BitOperation.Operation.OR);
+            case Opcode.LXOR ->
+                    parse_BITOPERATION_X(frame, value1, value2, ConstantDescs.CD_long, BitOperation.Operation.XOR);
+            case Opcode.LSHL ->
+                    parse_BITOPERATION_X(frame, value1, value2, ConstantDescs.CD_long, BitOperation.Operation.SHL);
+            case Opcode.LSHR ->
+                    parse_BITOPERATION_X(frame, value1, value2, ConstantDescs.CD_long, BitOperation.Operation.SHR);
             case Opcode.LUSHR ->
                     parse_BITOPERATION_X(frame, value1, value2, ConstantDescs.CD_long, BitOperation.Operation.USHR);
-            case Opcode.FCMPG -> parse_NUMERICCOMPARE_X(frame, value1, value2, ConstantDescs.CD_float, NumericCompare.Mode.NAN_IS_1);
-            case Opcode.FCMPL -> parse_NUMERICCOMPARE_X(frame, value1, value2, ConstantDescs.CD_float, NumericCompare.Mode.NAN_IS_MINUS_1);
-            case Opcode.DCMPG -> parse_NUMERICCOMPARE_X(frame, value1, value2, ConstantDescs.CD_double, NumericCompare.Mode.NAN_IS_1);
-            case Opcode.DCMPL -> parse_NUMERICCOMPARE_X(frame, value1, value2, ConstantDescs.CD_double, NumericCompare.Mode.NAN_IS_MINUS_1);
-            case Opcode.LCMP -> parse_NUMERICCOMPARE_X(frame, value1, value2, ConstantDescs.CD_long, NumericCompare.Mode.NONFLOATINGPOINT);
+            case Opcode.FCMPG ->
+                    parse_NUMERICCOMPARE_X(frame, value1, value2, ConstantDescs.CD_float, NumericCompare.Mode.NAN_IS_1);
+            case Opcode.FCMPL ->
+                    parse_NUMERICCOMPARE_X(frame, value1, value2, ConstantDescs.CD_float, NumericCompare.Mode.NAN_IS_MINUS_1);
+            case Opcode.DCMPG ->
+                    parse_NUMERICCOMPARE_X(frame, value1, value2, ConstantDescs.CD_double, NumericCompare.Mode.NAN_IS_1);
+            case Opcode.DCMPL ->
+                    parse_NUMERICCOMPARE_X(frame, value1, value2, ConstantDescs.CD_double, NumericCompare.Mode.NAN_IS_MINUS_1);
+            case Opcode.LCMP ->
+                    parse_NUMERICCOMPARE_X(frame, value1, value2, ConstantDescs.CD_long, NumericCompare.Mode.NONFLOATINGPOINT);
             default -> throw new IllegalArgumentException("Not implemented yet : " + opcode);
         }
     }
@@ -854,8 +879,7 @@ public class MethodAnalyzer {
             case LONG -> type = ConstantDescs.CD_long.arrayType();
             case FLOAT -> type = ConstantDescs.CD_float.arrayType();
             case DOUBLE -> type = ConstantDescs.CD_double.arrayType();
-            default ->
-                    throw new IllegalArgumentException("Not implemented type kind for array creation " + kind);
+            default -> throw new IllegalArgumentException("Not implemented type kind for array creation " + kind);
         }
         final NewArray newArray = new NewArray(type.componentType(), length);
         frame.out.push(newArray);
@@ -863,37 +887,35 @@ public class MethodAnalyzer {
         frame.entryPoint = newArray;
     }
 
-    private void visitArrayStoreInstruction(final ArrayStoreInstruction ins, final Frame frame) {
-        switch (ins.opcode()) {
-            case Opcode.BASTORE -> parse_ASTORE_X(ins, frame, ConstantDescs.CD_byte.arrayType());
-            case Opcode.CASTORE -> parse_ASTORE_X(ins, frame, ConstantDescs.CD_char.arrayType());
-            case Opcode.SASTORE -> parse_ASTORE_X(ins, frame, ConstantDescs.CD_short.arrayType());
-            case Opcode.IASTORE -> parse_ASTORE_X(ins, frame, ConstantDescs.CD_int.arrayType());
-            case Opcode.LASTORE -> parse_ASTORE_X(ins, frame, ConstantDescs.CD_long.arrayType());
-            case Opcode.FASTORE -> parse_ASTORE_X(ins, frame, ConstantDescs.CD_float.arrayType());
-            case Opcode.DASTORE -> parse_ASTORE_X(ins, frame, ConstantDescs.CD_double.arrayType());
-            case Opcode.AASTORE -> parse_AASTORE(ins, frame);
-            default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
+    protected void visitArrayStoreInstruction(final Opcode opcode, final Frame frame) {
+        switch (opcode) {
+            case Opcode.BASTORE -> parse_ASTORE_X(frame, ConstantDescs.CD_byte.arrayType());
+            case Opcode.CASTORE -> parse_ASTORE_X(frame, ConstantDescs.CD_char.arrayType());
+            case Opcode.SASTORE -> parse_ASTORE_X(frame, ConstantDescs.CD_short.arrayType());
+            case Opcode.IASTORE -> parse_ASTORE_X(frame, ConstantDescs.CD_int.arrayType());
+            case Opcode.LASTORE -> parse_ASTORE_X(frame, ConstantDescs.CD_long.arrayType());
+            case Opcode.FASTORE -> parse_ASTORE_X(frame, ConstantDescs.CD_float.arrayType());
+            case Opcode.DASTORE -> parse_ASTORE_X(frame, ConstantDescs.CD_double.arrayType());
+            case Opcode.AASTORE -> parse_AASTORE(frame);
+            default -> throw new IllegalArgumentException("Not implemented yet : " + opcode);
         }
     }
 
-    private void visitArrayLoadInstruction(final ArrayLoadInstruction ins, final Frame frame) {
-        switch (ins.opcode()) {
+    protected void visitArrayLoadInstruction(final Opcode opcode, final Frame frame) {
+        switch (opcode) {
             case Opcode.BALOAD ->
-                    parse_ALOAD_X(ins, frame, ConstantDescs.CD_byte.arrayType(), ConstantDescs.CD_int); // Sign extend!
+                    parse_ALOAD_X(frame, ConstantDescs.CD_byte.arrayType(), ConstantDescs.CD_int); // Sign extend!
             case Opcode.CALOAD ->
-                    parse_ALOAD_X(ins, frame, ConstantDescs.CD_char.arrayType(), ConstantDescs.CD_int); // Zero extend!
+                    parse_ALOAD_X( frame, ConstantDescs.CD_char.arrayType(), ConstantDescs.CD_int); // Zero extend!
             case Opcode.SALOAD ->
-                    parse_ALOAD_X(ins, frame, ConstantDescs.CD_short.arrayType(), ConstantDescs.CD_int); // Sign extend!
-            case Opcode.IALOAD -> parse_ALOAD_X(ins, frame, ConstantDescs.CD_int.arrayType(), ConstantDescs.CD_int);
-            case Opcode.LALOAD ->
-                    parse_ALOAD_X(ins, frame, ConstantDescs.CD_long.arrayType(), ConstantDescs.CD_long);
-            case Opcode.FALOAD ->
-                    parse_ALOAD_X(ins, frame, ConstantDescs.CD_float.arrayType(), ConstantDescs.CD_float);
+                    parse_ALOAD_X(frame, ConstantDescs.CD_short.arrayType(), ConstantDescs.CD_int); // Sign extend!
+            case Opcode.IALOAD -> parse_ALOAD_X(frame, ConstantDescs.CD_int.arrayType(), ConstantDescs.CD_int);
+            case Opcode.LALOAD -> parse_ALOAD_X(frame, ConstantDescs.CD_long.arrayType(), ConstantDescs.CD_long);
+            case Opcode.FALOAD -> parse_ALOAD_X(frame, ConstantDescs.CD_float.arrayType(), ConstantDescs.CD_float);
             case Opcode.DALOAD ->
-                    parse_ALOAD_X(ins, frame, ConstantDescs.CD_double.arrayType(), ConstantDescs.CD_double);
-            case Opcode.AALOAD -> parse_AALOAD(ins, frame);
-            default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
+                    parse_ALOAD_X(frame, ConstantDescs.CD_double.arrayType(), ConstantDescs.CD_double);
+            case Opcode.AALOAD -> parse_AALOAD(frame);
+            default -> throw new IllegalArgumentException("Not implemented yet : " + opcode);
         }
     }
 
@@ -948,25 +970,23 @@ public class MethodAnalyzer {
         frame.entryPoint = newMultiArray;
     }
 
-    @Testbacklog
-    protected void parse_INVOKESPECIAL(final InvokeInstruction node, final Frame frame) {
-
-        final MethodTypeDesc methodTypeDesc = node.typeSymbol();
+    private void parse_INVOKESPECIAL(final ClassDesc owner, final String methodName, final MethodTypeDesc methodTypeDesc, final Frame frame) {
 
         final Status outgoing = frame.copyIncomingToOutgoing();
 
         final ClassDesc returnType = methodTypeDesc.returnType();
         final ClassDesc[] args = methodTypeDesc.parameterArray();
-        final int expectedarguments = 1 + args.length;
 
-        assertMinimumStackSize(outgoing, expectedarguments);
+        assertMinimumStackSize(outgoing, args.length + 1);
 
         final List<Value> arguments = new ArrayList<>();
-        for (int i = 0; i < expectedarguments; i++) {
+        for (int i = 0; i < args.length; i++) {
             arguments.add(outgoing.pop());
         }
 
-        final Value next = new Invocation(node, arguments.reversed());
+        final Value target = outgoing.pop();
+
+        final Value next = new InvocationSpecial(owner, target, methodName, methodTypeDesc, arguments.reversed());
         outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(next);
 
@@ -977,25 +997,24 @@ public class MethodAnalyzer {
         frame.entryPoint = next;
     }
 
-    @Testbacklog
-    protected void parse_INVOKEVIRTUAL(final InvokeInstruction node, final Frame frame) {
-
-        final MethodTypeDesc methodTypeDesc = node.typeSymbol();
+    private void parse_INVOKEVIRTUAL(final ClassDesc owner, final String methodName, final MethodTypeDesc methodTypeDesc, final Frame frame) {
 
         final Status outgoing = frame.copyIncomingToOutgoing();
 
         final ClassDesc returnType = methodTypeDesc.returnType();
         final ClassDesc[] args = methodTypeDesc.parameterArray();
-        final int expectedarguments = 1 + args.length;
 
-        assertMinimumStackSize(outgoing, expectedarguments);
+        assertMinimumStackSize(outgoing, args.length + 1);
 
         final List<Value> arguments = new ArrayList<>();
-        for (int i = 0; i < expectedarguments; i++) {
+        for (int i = 0; i < args.length; i++) {
             final Value v = outgoing.pop();
             arguments.add(v);
         }
-        final Invocation invocation = new Invocation(node, arguments.reversed());
+
+        final Value target = outgoing.pop();
+
+        final Invocation invocation = new InvocationVirtual(owner, target, methodName, methodTypeDesc, arguments.reversed());
 
         outgoing.control = outgoing.control.controlFlowsTo(invocation, ControlType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(invocation);
@@ -1007,23 +1026,23 @@ public class MethodAnalyzer {
         frame.entryPoint = invocation;
     }
 
-    @Testbacklog
-    protected void parse_INVOKEINTERFACE(final InvokeInstruction node, final Frame frame) {
-        final MethodTypeDesc methodTypeDesc = node.typeSymbol();
+    private void parse_INVOKEINTERFACE(final ClassDesc owner, final String methodName, final MethodTypeDesc methodTypeDesc, final Frame frame) {
 
         final ClassDesc returnType = methodTypeDesc.returnType();
         final ClassDesc[] args = methodTypeDesc.parameterArray();
-        final int expectedarguments = 1 + args.length;
 
         final Status outgoing = frame.copyIncomingToOutgoing();
-        assertMinimumStackSize(outgoing, expectedarguments);
+        assertMinimumStackSize(outgoing, args.length + 1);
 
         final List<Value> arguments = new ArrayList<>();
-        for (int i = 0; i < expectedarguments; i++) {
+        for (int i = 0; i < args.length; i++) {
             final Value v = outgoing.pop();
             arguments.add(v);
         }
-        final Invocation invocation = new Invocation(node, arguments.reversed());
+
+        final Value target = outgoing.pop();
+
+        final Invocation invocation = new InvocationInterface(owner, target, methodName, methodTypeDesc, arguments.reversed());
 
         outgoing.control = outgoing.control.controlFlowsTo(invocation, ControlType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(invocation);
@@ -1035,28 +1054,24 @@ public class MethodAnalyzer {
         frame.entryPoint = invocation;
     }
 
-    @Testbacklog
-    protected void parse_INVOKESTATIC(final InvokeInstruction node, final Frame frame) {
-        final MethodTypeDesc methodTypeDesc = node.typeSymbol();
+    private void parse_INVOKESTATIC(final ClassDesc owner, final String methodName, final MethodTypeDesc methodTypeDesc, final Frame frame) {
 
         final ClassDesc returnType = methodTypeDesc.returnType();
         final ClassDesc[] args = methodTypeDesc.parameterArray();
-        final int expectedarguments = args.length;
 
         final Status outgoing = frame.copyIncomingToOutgoing();
-        assertMinimumStackSize(outgoing, expectedarguments);
+        assertMinimumStackSize(outgoing, args.length);
 
-        final RuntimeclassReference runtimeClass = ir.defineRuntimeclassReference(node.method().owner().asSymbol());
+        final RuntimeclassReference runtimeClass = ir.defineRuntimeclassReference(owner);
         final ClassInitialization init = new ClassInitialization(runtimeClass);
 
         final List<Value> arguments = new ArrayList<>();
-        for (int i = 0; i < expectedarguments; i++) {
+        for (int i = 0; i < args.length; i++) {
             final Value v = outgoing.pop();
             arguments.add(v);
         }
-        arguments.add(init);
 
-        final Invocation invocation = new Invocation(node, arguments.reversed());
+        final Invocation invocation = new InvocationStatic(owner, init, methodName, methodTypeDesc, arguments.reversed());
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(init);
         outgoing.memory = outgoing.memory.memoryFlowsTo(invocation);
@@ -1667,8 +1682,7 @@ public class MethodAnalyzer {
         outgoing.control = outgoing.control.controlFlowsTo(new MonitorExit(v), ControlType.FORWARD);
     }
 
-    @Testbacklog
-    protected void parse_ASTORE_X(final ArrayStoreInstruction node, final Frame frame, final ClassDesc arrayType) {
+    private void parse_ASTORE_X(final Frame frame, final ClassDesc arrayType) {
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, 3);
 
@@ -1682,8 +1696,7 @@ public class MethodAnalyzer {
         outgoing.control = outgoing.control.controlFlowsTo(store, ControlType.FORWARD);
     }
 
-    @Testbacklog
-    protected void parse_AASTORE(final ArrayStoreInstruction node, final Frame frame) {
+    private void parse_AASTORE(final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, 3);
 
@@ -1698,7 +1711,7 @@ public class MethodAnalyzer {
     }
 
     @Testbacklog
-    protected void parse_ALOAD_X(final ArrayLoadInstruction node, final Frame frame, final ClassDesc arrayType, final ClassDesc elementType) {
+    protected void parse_ALOAD_X(final Frame frame, final ClassDesc arrayType, final ClassDesc elementType) {
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, 2);
 
@@ -1711,7 +1724,7 @@ public class MethodAnalyzer {
     }
 
     @Testbacklog
-    protected void parse_AALOAD(final ArrayLoadInstruction node, final Frame frame) {
+    protected void parse_AALOAD(final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, 2);
 
