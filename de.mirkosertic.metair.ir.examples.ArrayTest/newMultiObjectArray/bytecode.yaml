@@ -1,0 +1,38 @@
+
+  - method name: newMultiObjectArray
+    flags: [PUBLIC]
+    method type: ()V
+    attributes: [Code]
+    code: 
+        max stack: 3
+        max locals: 4
+        attributes: [LineNumberTable, LocalVariableTable]
+        line numbers: 
+          - {start: 0, line number: 72}
+          - {start: 9, line number: 73}
+          - {start: 16, line number: 74}
+          - {start: 20, line number: 75}
+          - {start: 23, line number: 76}
+        local variables: 
+          - {start: 0, end: 24, slot: 0, name: this, type: Lde/mirkosertic/metair/ir/examples/ArrayTest;}
+          - {start: 9, end: 24, slot: 1, name: c, type: '[Ljava/lang/Object;'}
+          - {start: 20, end: 24, slot: 2, name: c2, type: Ljava/lang/Object;}
+          - {start: 23, end: 24, slot: 3, name: l, type: I}
+        //stack map frame @0: {locals: [de/mirkosertic/metair/ir/examples/ArrayTest], stack: []}
+        0: {opcode: BIPUSH, constant value: 10}
+        2: {opcode: BIPUSH, constant value: 20}
+        4: {opcode: MULTIANEWARRAY, dimensions: 2, descriptor: '[[Ljava/lang/Object;'}
+        8: {opcode: ASTORE_1, slot: 1}
+        9: {opcode: ALOAD_1, slot: 1, type: '[Ljava/lang/Object;', variable name: c}
+        10: {opcode: ICONST_0, constant value: 0}
+        11: {opcode: ICONST_5, constant value: 5}
+        12: {opcode: ANEWARRAY, dimensions: 1, descriptor: java/lang/Object}
+        15: {opcode: AASTORE}
+        16: {opcode: ALOAD_1, slot: 1, type: '[Ljava/lang/Object;', variable name: c}
+        17: {opcode: ICONST_1, constant value: 1}
+        18: {opcode: AALOAD}
+        19: {opcode: ASTORE_2, slot: 2}
+        20: {opcode: ALOAD_1, slot: 1, type: '[Ljava/lang/Object;', variable name: c}
+        21: {opcode: ARRAYLENGTH}
+        22: {opcode: ISTORE_3, slot: 3}
+        23: {opcode: RETURN}

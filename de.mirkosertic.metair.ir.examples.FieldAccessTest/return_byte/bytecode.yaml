@@ -1,0 +1,19 @@
+
+  - method name: return_byte
+    flags: [PUBLIC]
+    method type: ()B
+    attributes: [Code]
+    code: 
+        max stack: 2
+        max locals: 1
+        attributes: [LineNumberTable, LocalVariableTable]
+        line numbers: 
+          - {start: 0, line number: 75}
+        local variables: 
+          - {start: 0, end: 11, slot: 0, name: this, type: Lde/mirkosertic/metair/ir/examples/FieldAccessTest;}
+        //stack map frame @0: {locals: [de/mirkosertic/metair/ir/examples/FieldAccessTest], stack: []}
+        0: {opcode: NEW, type: de/mirkosertic/metair/ir/examples/FieldAccessTest$Source}
+        3: {opcode: DUP}
+        4: {opcode: INVOKESPECIAL, owner: de/mirkosertic/metair/ir/examples/FieldAccessTest$Source, method name: <init>, method type: ()V}
+        7: {opcode: GETFIELD, owner: de/mirkosertic/metair/ir/examples/FieldAccessTest$Source, field name: byte_field, field type: B}
+        10: {opcode: IRETURN}

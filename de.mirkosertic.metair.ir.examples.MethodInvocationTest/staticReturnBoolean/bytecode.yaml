@@ -1,0 +1,25 @@
+
+  - method name: staticReturnBoolean
+    flags: [PUBLIC, STATIC]
+    method type: (Z)Z
+    attributes: [Code]
+    code: 
+        max stack: 1
+        max locals: 1
+        attributes: [LineNumberTable, LocalVariableTable, StackMapTable]
+        line numbers: 
+          - {start: 0, line number: 111}
+        local variables: 
+          - {start: 0, end: 10, slot: 0, name: bool, type: Z}
+        stack map frames: 
+            8: {locals: [int], stack: []}
+            9: {locals: [int], stack: [int]}
+        //stack map frame @0: {locals: [int], stack: []}
+        0: {opcode: ILOAD_0, slot: 0, type: Z, variable name: bool}
+        1: {opcode: IFNE, target: 8}
+        4: {opcode: ICONST_1, constant value: 1}
+        5: {opcode: GOTO, target: 9}
+        //stack map frame @8: {locals: [int], stack: []}
+        8: {opcode: ICONST_0, constant value: 0}
+        //stack map frame @9: {locals: [int], stack: [int]}
+        9: {opcode: IRETURN}

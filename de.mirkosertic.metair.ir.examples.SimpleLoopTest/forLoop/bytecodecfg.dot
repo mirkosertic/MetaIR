@@ -1,0 +1,58 @@
+digraph {
+ node0[label="#0 LocalVariable[name=i, slot=1, type=I] Order: 0", shape=box, fillcolor=lightgrey, style=filled];
+ node1[label="#1 LocalVariable[name=a, slot=0, type=I] Order: 1", shape=box, fillcolor=lightgrey, style=filled];
+ node2[label="#2 Label[context=CodeModel[id=1515403487], bci=0] Order: 2", shape=box, fillcolor=lightgrey, style=filled];
+ node3[label="#3 LineNumber[line=9] Order: 3", shape=box, fillcolor=lightgrey, style=filled];
+ node4[label="#4 UnboundIntrinsicConstantInstruction[op=ICONST_0] Order: 4", shape=box, fillcolor=lightgrey, style=filled];
+ node5[label="#5 Store[OP=ISTORE_1, slot=1] Order: 5", shape=box, fillcolor=lightgrey, style=filled];
+ node6[label="#6 Label[context=CodeModel[id=1515403487], bci=2] Order: 6", shape=box, fillcolor=lightgrey, style=filled];
+ node7[label="#7 Load[OP=ILOAD_1, slot=1] Order: 7", shape=box, fillcolor=lightgrey, style=filled];
+ node8[label="#8 Load[OP=ILOAD_0, slot=0] Order: 8", shape=box, fillcolor=lightgrey, style=filled];
+ node9[label="#9 Branch[OP=IF_ICMPGE] Order: 9", shape=box, fillcolor=lightgrey, style=filled];
+ node10[label="#10 LineNumber[line=10] Order: 10", shape=box, fillcolor=lightgrey, style=filled];
+ node11[label="#11 Load[OP=ILOAD_1, slot=1] Order: 11", shape=box, fillcolor=lightgrey, style=filled];
+ node12[label="#12 Invoke[OP=INVOKESTATIC, m=de/mirkosertic/metair/ir/examples/SimpleLoopTest.compute(I)I] Order: 12", shape=box, fillcolor=lightgrey, style=filled];
+ node13[label="#13 UnboundStackInstruction[op=POP] Order: 13", shape=box, fillcolor=lightgrey, style=filled];
+ node14[label="#14 LineNumber[line=9] Order: 14", shape=box, fillcolor=lightgrey, style=filled];
+ node15[label="#15 Increment[OP=IINC, slot=1, val=1] Order: 15", shape=box, fillcolor=lightgrey, style=filled];
+ node16[label="#16 Branch[OP=GOTO] Order: 16", shape=box, fillcolor=lightgrey, style=filled];
+ node17[label="#17 Label[context=CodeModel[id=1515403487], bci=18] Order: 17", shape=box, fillcolor=lightgrey, style=filled];
+ node18[label="#18 LineNumber[line=12] Order: 18", shape=box, fillcolor=lightgrey, style=filled];
+ node19[label="#19 Load[OP=ILOAD_0, slot=0] Order: 19", shape=box, fillcolor=lightgrey, style=filled];
+ node20[label="#20 Return[OP=IRETURN] Order: 20", shape=box, fillcolor=lightgrey, style=filled];
+ node0 -> node1[color=red];
+ node1 -> node2[color=red];
+ node2 -> node3[color=red];
+ node3 -> node4[color=red];
+ node4 -> node5[color=red];
+ node5 -> node6[color=red];
+ node16 -> node6[color=red, style=dotted];
+ node6 -> node7[color=red];
+ node7 -> node8[color=red];
+ node8 -> node9[color=red];
+ node9 -> node10[color=red];
+ node10 -> node11[color=red];
+ node11 -> node12[color=red];
+ node12 -> node13[color=red];
+ node13 -> node14[color=red];
+ node14 -> node15[color=red];
+ node15 -> node16[color=red];
+ node9 -> node17[color=red];
+ node17 -> node18[color=red];
+ node18 -> node19[color=red];
+ node19 -> node20[color=red];
+ subgraph cluster_000 {
+  label = "Legend";
+  node [shape=point]
+  {
+   rank=same;
+   c0 [style = invis];
+   c1 [style = invis];
+   c2 [style = invis];
+   c3 [style = invis];
+  }
+  c0 -> c1 [label="Control flow", style=solid, color=red]
+  c2 -> c3 [label="Control flow back edge", style=dashed, color=red]
+ }
+
+}

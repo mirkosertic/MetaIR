@@ -1,0 +1,20 @@
+
+  - method name: dmul
+    flags: [PUBLIC]
+    method type: (DD)D
+    attributes: [Code]
+    code: 
+        max stack: 4
+        max locals: 5
+        attributes: [LineNumberTable, LocalVariableTable]
+        line numbers: 
+          - {start: 0, line number: 53}
+        local variables: 
+          - {start: 0, end: 4, slot: 0, name: this, type: Lde/mirkosertic/metair/ir/examples/MathTest;}
+          - {start: 0, end: 4, slot: 1, name: a, type: D}
+          - {start: 0, end: 4, slot: 3, name: b, type: D}
+        //stack map frame @0: {locals: [de/mirkosertic/metair/ir/examples/MathTest, double, double2, double, double2], stack: []}
+        0: {opcode: DLOAD_1, slot: 1, type: D, variable name: a}
+        1: {opcode: DLOAD_3, slot: 3, type: D, variable name: b}
+        2: {opcode: DMUL}
+        3: {opcode: DRETURN}

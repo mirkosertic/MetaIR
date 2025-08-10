@@ -1,0 +1,18 @@
+
+  - method name: <init>
+    flags: [PUBLIC]
+    method type: ()V
+    attributes: [Code]
+    code: 
+        max stack: 1
+        max locals: 1
+        attributes: [LineNumberTable, LocalVariableTable]
+        line numbers: 
+          - {start: 0, line number: 8}
+          - {start: 4, line number: 9}
+        local variables: 
+          - {start: 0, end: 5, slot: 0, name: this, type: Lde/mirkosertic/metair/ir/examples/NewInstanceTest;}
+        //stack map frame @0: {locals: [THIS], stack: []}
+        0: {opcode: ALOAD_0, slot: 0, type: Lde/mirkosertic/metair/ir/examples/NewInstanceTest;, variable name: this}
+        1: {opcode: INVOKESPECIAL, owner: java/lang/Object, method name: <init>, method type: ()V}
+        4: {opcode: RETURN}

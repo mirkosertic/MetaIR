@@ -1,0 +1,16 @@
+
+  - method name: staticReturnShort
+    flags: [PUBLIC, STATIC]
+    method type: (S)S
+    attributes: [Code]
+    code: 
+        max stack: 1
+        max locals: 1
+        attributes: [LineNumberTable, LocalVariableTable]
+        line numbers: 
+          - {start: 0, line number: 127}
+        local variables: 
+          - {start: 0, end: 2, slot: 0, name: st, type: S}
+        //stack map frame @0: {locals: [int], stack: []}
+        0: {opcode: ILOAD_0, slot: 0, type: S, variable name: st}
+        1: {opcode: IRETURN}

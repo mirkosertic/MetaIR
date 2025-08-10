@@ -1,0 +1,36 @@
+
+  - method name: newIntArray
+    flags: [PUBLIC]
+    method type: ()V
+    attributes: [Code]
+    code: 
+        max stack: 3
+        max locals: 4
+        attributes: [LineNumberTable, LocalVariableTable]
+        line numbers: 
+          - {start: 0, line number: 30}
+          - {start: 5, line number: 31}
+          - {start: 10, line number: 32}
+          - {start: 14, line number: 33}
+          - {start: 17, line number: 34}
+        local variables: 
+          - {start: 0, end: 18, slot: 0, name: this, type: Lde/mirkosertic/metair/ir/examples/ArrayTest;}
+          - {start: 5, end: 18, slot: 1, name: c, type: '[I'}
+          - {start: 14, end: 18, slot: 2, name: c2, type: I}
+          - {start: 17, end: 18, slot: 3, name: l, type: I}
+        //stack map frame @0: {locals: [de/mirkosertic/metair/ir/examples/ArrayTest], stack: []}
+        0: {opcode: BIPUSH, constant value: 10}
+        2: {opcode: NEWARRAY, dimensions: 1, descriptor: int}
+        4: {opcode: ASTORE_1, slot: 1}
+        5: {opcode: ALOAD_1, slot: 1, type: '[I', variable name: c}
+        6: {opcode: ICONST_0, constant value: 0}
+        7: {opcode: BIPUSH, constant value: 10}
+        9: {opcode: IASTORE}
+        10: {opcode: ALOAD_1, slot: 1, type: '[I', variable name: c}
+        11: {opcode: ICONST_1, constant value: 1}
+        12: {opcode: IALOAD}
+        13: {opcode: ISTORE_2, slot: 2}
+        14: {opcode: ALOAD_1, slot: 1, type: '[I', variable name: c}
+        15: {opcode: ARRAYLENGTH}
+        16: {opcode: ISTORE_3, slot: 3}
+        17: {opcode: RETURN}

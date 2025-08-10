@@ -1,0 +1,39 @@
+digraph {
+ node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="3">#0 Method</td></tr><tr><td port="prj2" bgcolor="yellow">arg0 : float</td><td port="prj1" bgcolor="yellow">arg1 : float</td><td port="prj3" bgcolor="yellow">this : MathTest</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
+ node6[label="#6 ReturnValue : float",shape=box, fillcolor=lightgrey, style=filled];
+ node5 -> node6[headlabel="*0", labeldistance=2];
+ node5 -> node6[labeldistance=2, color=red, fontcolor=red];
+ node0 -> node6[labeldistance=2, color=green, constraint=false];
+ node5[label="#5 Rem : float",shape=octagon, fillcolor=orange, style=filled];
+ node0:prj2 -> node5[headlabel="*0", labeldistance=2];
+ node0:prj1 -> node5[headlabel="*1", labeldistance=2];
+ node4 -> node5[labeldistance=2, color=red, fontcolor=red];
+ node4[label="#4 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
+ node0 -> node4[labeldistance=2, color=red, fontcolor=red];
+ subgraph cluster_000 {
+  label = "Legend";
+  node [shape=point]
+  {
+   rank=same;
+   c0 [style = invis];
+   c1 [style = invis];
+   c2 [style = invis];
+   c3 [style = invis];
+   d0 [style = invis];
+   d1 [style = invis];
+   d2 [style = invis];
+   d3 [style = invis];
+   d4 [style = invis];
+   d5 [style = invis];
+   d6 [style = invis];
+   d7 [style = invis];
+  }
+  c0 -> c1 [label="Control flow", style=solid, color=red]
+  c2 -> c3 [label="Control flow back edge", style=dashed, color=red]
+  d0 -> d1 [label="Data flow"]
+  d2 -> d3 [label="Declaration", style=dotted]
+  d4 -> d5 [label="PHI Data flow", color=blue]
+  d6 -> d7 [label="Memory flow", color=green]
+ }
+
+}

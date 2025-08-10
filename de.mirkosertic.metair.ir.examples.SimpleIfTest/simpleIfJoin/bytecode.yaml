@@ -1,0 +1,37 @@
+
+  - method name: simpleIfJoin
+    flags: [PUBLIC, STATIC]
+    method type: (IIII)I
+    attributes: [Code]
+    code: 
+        max stack: 2
+        max locals: 5
+        attributes: [LineNumberTable, LocalVariableTable, StackMapTable]
+        line numbers: 
+          - {start: 0, line number: 18}
+          - {start: 5, line number: 19}
+          - {start: 11, line number: 21}
+          - {start: 14, line number: 23}
+        local variables: 
+          - {start: 8, end: 11, slot: 4, name: r, type: I}
+          - {start: 0, end: 17, slot: 0, name: a, type: I}
+          - {start: 0, end: 17, slot: 1, name: b, type: I}
+          - {start: 0, end: 17, slot: 2, name: c, type: I}
+          - {start: 0, end: 17, slot: 3, name: d, type: I}
+          - {start: 14, end: 17, slot: 4, name: r, type: I}
+        stack map frames: 
+            11: {locals: [int, int, int, int], stack: []}
+            14: {locals: [int, int, int, int, int], stack: []}
+        //stack map frame @0: {locals: [int, int, int, int], stack: []}
+        0: {opcode: ILOAD_0, slot: 0, type: I, variable name: a}
+        1: {opcode: ILOAD_1, slot: 1, type: I, variable name: b}
+        2: {opcode: IF_ICMPLE, target: 11}
+        5: {opcode: ILOAD_2, slot: 2, type: I, variable name: c}
+        6: {opcode: ISTORE, slot: 4}
+        8: {opcode: GOTO, target: 14}
+        //stack map frame @11: {locals: [int, int, int, int], stack: []}
+        11: {opcode: ILOAD_3, slot: 3, type: I, variable name: d}
+        12: {opcode: ISTORE, slot: 4}
+        //stack map frame @14: {locals: [int, int, int, int, int], stack: []}
+        14: {opcode: ILOAD, slot: 4, type: I, variable name: r}
+        16: {opcode: IRETURN}

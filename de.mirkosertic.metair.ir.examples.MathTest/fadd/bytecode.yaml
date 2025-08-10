@@ -1,0 +1,20 @@
+
+  - method name: fadd
+    flags: [PUBLIC]
+    method type: (FF)F
+    attributes: [Code]
+    code: 
+        max stack: 2
+        max locals: 3
+        attributes: [LineNumberTable, LocalVariableTable]
+        line numbers: 
+          - {start: 0, line number: 65}
+        local variables: 
+          - {start: 0, end: 4, slot: 0, name: this, type: Lde/mirkosertic/metair/ir/examples/MathTest;}
+          - {start: 0, end: 4, slot: 1, name: a, type: F}
+          - {start: 0, end: 4, slot: 2, name: b, type: F}
+        //stack map frame @0: {locals: [de/mirkosertic/metair/ir/examples/MathTest, float, float], stack: []}
+        0: {opcode: FLOAD_1, slot: 1, type: F, variable name: a}
+        1: {opcode: FLOAD_2, slot: 2, type: F, variable name: b}
+        2: {opcode: FADD}
+        3: {opcode: FRETURN}

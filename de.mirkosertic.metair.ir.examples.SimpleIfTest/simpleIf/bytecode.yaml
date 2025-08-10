@@ -1,0 +1,29 @@
+
+  - method name: simpleIf
+    flags: [PUBLIC, STATIC]
+    method type: (IIII)I
+    attributes: [Code]
+    code: 
+        max stack: 2
+        max locals: 4
+        attributes: [LineNumberTable, LocalVariableTable, StackMapTable]
+        line numbers: 
+          - {start: 0, line number: 9}
+          - {start: 5, line number: 10}
+          - {start: 7, line number: 12}
+        local variables: 
+          - {start: 0, end: 9, slot: 0, name: a, type: I}
+          - {start: 0, end: 9, slot: 1, name: b, type: I}
+          - {start: 0, end: 9, slot: 2, name: c, type: I}
+          - {start: 0, end: 9, slot: 3, name: d, type: I}
+        stack map frames: 
+            7: {locals: [int, int, int, int], stack: []}
+        //stack map frame @0: {locals: [int, int, int, int], stack: []}
+        0: {opcode: ILOAD_0, slot: 0, type: I, variable name: a}
+        1: {opcode: ILOAD_1, slot: 1, type: I, variable name: b}
+        2: {opcode: IF_ICMPLE, target: 7}
+        5: {opcode: ILOAD_2, slot: 2, type: I, variable name: c}
+        6: {opcode: IRETURN}
+        //stack map frame @7: {locals: [int, int, int, int], stack: []}
+        7: {opcode: ILOAD_3, slot: 3, type: I, variable name: d}
+        8: {opcode: IRETURN}

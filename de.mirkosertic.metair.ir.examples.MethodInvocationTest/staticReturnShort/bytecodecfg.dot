@@ -1,0 +1,25 @@
+digraph {
+ node0[label="#0 LocalVariable[name=st, slot=0, type=S] Order: 0", shape=box, fillcolor=lightgrey, style=filled];
+ node1[label="#1 Label[context=CodeModel[id=474488818], bci=0] Order: 1", shape=box, fillcolor=lightgrey, style=filled];
+ node2[label="#2 LineNumber[line=127] Order: 2", shape=box, fillcolor=lightgrey, style=filled];
+ node3[label="#3 Load[OP=ILOAD_0, slot=0] Order: 3", shape=box, fillcolor=lightgrey, style=filled];
+ node4[label="#4 Return[OP=IRETURN] Order: 4", shape=box, fillcolor=lightgrey, style=filled];
+ node0 -> node1[color=red];
+ node1 -> node2[color=red];
+ node2 -> node3[color=red];
+ node3 -> node4[color=red];
+ subgraph cluster_000 {
+  label = "Legend";
+  node [shape=point]
+  {
+   rank=same;
+   c0 [style = invis];
+   c1 [style = invis];
+   c2 [style = invis];
+   c3 [style = invis];
+  }
+  c0 -> c1 [label="Control flow", style=solid, color=red]
+  c2 -> c3 [label="Control flow back edge", style=dashed, color=red]
+ }
+
+}

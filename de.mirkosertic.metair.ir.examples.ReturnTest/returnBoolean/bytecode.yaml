@@ -1,0 +1,16 @@
+
+  - method name: returnBoolean
+    flags: [PUBLIC]
+    method type: ()Z
+    attributes: [Code]
+    code: 
+        max stack: 1
+        max locals: 1
+        attributes: [LineNumberTable, LocalVariableTable]
+        line numbers: 
+          - {start: 0, line number: 13}
+        local variables: 
+          - {start: 0, end: 2, slot: 0, name: this, type: Lde/mirkosertic/metair/ir/examples/ReturnTest;}
+        //stack map frame @0: {locals: [de/mirkosertic/metair/ir/examples/ReturnTest], stack: []}
+        0: {opcode: ICONST_1, constant value: 1}
+        1: {opcode: IRETURN}

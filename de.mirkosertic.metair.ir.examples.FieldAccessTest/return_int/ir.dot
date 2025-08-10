@@ -1,0 +1,56 @@
+digraph {
+ node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#0 Method</td></tr><tr><td port="prj6" bgcolor="yellow">this : FieldAccessTest</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
+ node8[label="#8 Class FieldAccessTest$Source",shape=octagon, fillcolor=lightgreen, style=filled];
+ node0 -> node8[style=dotted];
+ node1[label="#1 ClassInit",shape=box, fillcolor=lightgrey, style=filled];
+ node8 -> node1[headlabel="*0", labeldistance=2];
+ node7 -> node1[labeldistance=2, color=red, fontcolor=red];
+ node0 -> node1[labeldistance=2, color=green, constraint=false];
+ node7[label="#7 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
+ node0 -> node7[labeldistance=2, color=red, fontcolor=red];
+ node2[label="#2 Invoke special <init> : ()void",shape=box, fillcolor=lightgrey, style=filled];
+ node3 -> node2[headlabel="*0", labeldistance=2];
+ node1 -> node2[labeldistance=2, color=red, fontcolor=red];
+ node3 -> node2[labeldistance=2, color=green, constraint=false];
+ node3[label="#3 New",shape=octagon, fillcolor=orange, style=filled];
+ node1 -> node3[headlabel="*0", labeldistance=2];
+ node1 -> node3[labeldistance=2, color=green, constraint=false];
+ node4[label="#4 GetField : int_field : int",shape=octagon, fillcolor=orange, style=filled];
+ node3 -> node4[headlabel="*0", labeldistance=2];
+ node2 -> node4[labeldistance=2, color=green, constraint=false];
+ node5[label="#5 ReturnValue : int",shape=box, fillcolor=lightgrey, style=filled];
+ node4 -> node5[headlabel="*0", labeldistance=2];
+ node2 -> node5[labeldistance=2, color=red, fontcolor=red];
+ node4 -> node5[labeldistance=2, color=green, constraint=false];
+ subgraph cluster_0 {
+  color=lightgray;
+  node0;
+  node8;
+ }
+ subgraph cluster_000 {
+  label = "Legend";
+  node [shape=point]
+  {
+   rank=same;
+   c0 [style = invis];
+   c1 [style = invis];
+   c2 [style = invis];
+   c3 [style = invis];
+   d0 [style = invis];
+   d1 [style = invis];
+   d2 [style = invis];
+   d3 [style = invis];
+   d4 [style = invis];
+   d5 [style = invis];
+   d6 [style = invis];
+   d7 [style = invis];
+  }
+  c0 -> c1 [label="Control flow", style=solid, color=red]
+  c2 -> c3 [label="Control flow back edge", style=dashed, color=red]
+  d0 -> d1 [label="Data flow"]
+  d2 -> d3 [label="Declaration", style=dotted]
+  d4 -> d5 [label="PHI Data flow", color=blue]
+  d6 -> d7 [label="Memory flow", color=green]
+ }
+
+}

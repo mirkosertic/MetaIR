@@ -1,0 +1,16 @@
+
+  - method name: returnLong
+    flags: [PUBLIC]
+    method type: ()J
+    attributes: [Code]
+    code: 
+        max stack: 2
+        max locals: 1
+        attributes: [LineNumberTable, LocalVariableTable]
+        line numbers: 
+          - {start: 0, line number: 29}
+        local variables: 
+          - {start: 0, end: 4, slot: 0, name: this, type: Lde/mirkosertic/metair/ir/examples/ReturnTest;}
+        //stack map frame @0: {locals: [de/mirkosertic/metair/ir/examples/ReturnTest], stack: []}
+        0: {opcode: LDC2_W, constant value: 10}
+        3: {opcode: LRETURN}

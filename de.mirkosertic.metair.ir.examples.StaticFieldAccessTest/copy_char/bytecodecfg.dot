@@ -1,0 +1,29 @@
+digraph {
+ node0[label="#0 LocalVariable[name=this, slot=0, type=Lde/mirkosertic/metair/ir/examples/StaticFieldAccessTest;] Order: 0", shape=box, fillcolor=lightgrey, style=filled];
+ node1[label="#1 Label[context=CodeModel[id=1992801971], bci=0] Order: 1", shape=box, fillcolor=lightgrey, style=filled];
+ node2[label="#2 LineNumber[line=47] Order: 2", shape=box, fillcolor=lightgrey, style=filled];
+ node3[label="#3 Field[OP=GETSTATIC, field=de/mirkosertic/metair/ir/examples/StaticFieldAccessTest$Source.char_field:C] Order: 3", shape=box, fillcolor=lightgrey, style=filled];
+ node4[label="#4 Field[OP=PUTSTATIC, field=de/mirkosertic/metair/ir/examples/StaticFieldAccessTest$Destination.char_field:C] Order: 4", shape=box, fillcolor=lightgrey, style=filled];
+ node5[label="#5 LineNumber[line=48] Order: 5", shape=box, fillcolor=lightgrey, style=filled];
+ node6[label="#6 Return[OP=RETURN] Order: 6", shape=box, fillcolor=lightgrey, style=filled];
+ node0 -> node1[color=red];
+ node1 -> node2[color=red];
+ node2 -> node3[color=red];
+ node3 -> node4[color=red];
+ node4 -> node5[color=red];
+ node5 -> node6[color=red];
+ subgraph cluster_000 {
+  label = "Legend";
+  node [shape=point]
+  {
+   rank=same;
+   c0 [style = invis];
+   c1 [style = invis];
+   c2 [style = invis];
+   c3 [style = invis];
+  }
+  c0 -> c1 [label="Control flow", style=solid, color=red]
+  c2 -> c3 [label="Control flow back edge", style=dashed, color=red]
+ }
+
+}

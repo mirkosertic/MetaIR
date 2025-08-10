@@ -1,0 +1,35 @@
+
+  - method name: forLoop
+    flags: [PUBLIC, STATIC]
+    method type: (I)I
+    attributes: [Code]
+    code: 
+        max stack: 2
+        max locals: 2
+        attributes: [LineNumberTable, LocalVariableTable, StackMapTable]
+        line numbers: 
+          - {start: 0, line number: 9}
+          - {start: 7, line number: 10}
+          - {start: 12, line number: 9}
+          - {start: 18, line number: 12}
+        local variables: 
+          - {start: 2, end: 18, slot: 1, name: i, type: I}
+          - {start: 0, end: 20, slot: 0, name: a, type: I}
+        stack map frames: 
+            2: {locals: [int, int], stack: []}
+            18: {locals: [int], stack: []}
+        //stack map frame @0: {locals: [int], stack: []}
+        0: {opcode: ICONST_0, constant value: 0}
+        1: {opcode: ISTORE_1, slot: 1}
+        //stack map frame @2: {locals: [int, int], stack: []}
+        2: {opcode: ILOAD_1, slot: 1, type: I, variable name: i}
+        3: {opcode: ILOAD_0, slot: 0, type: I, variable name: a}
+        4: {opcode: IF_ICMPGE, target: 18}
+        7: {opcode: ILOAD_1, slot: 1, type: I, variable name: i}
+        8: {opcode: INVOKESTATIC, owner: de/mirkosertic/metair/ir/examples/SimpleLoopTest, method name: compute, method type: (I)I}
+        11: {opcode: POP}
+        12: {opcode: IINC, slot: 1, const: 1, type: I, variable name: i}
+        15: {opcode: GOTO, target: 2}
+        //stack map frame @18: {locals: [int], stack: []}
+        18: {opcode: ILOAD_0, slot: 0, type: I, variable name: a}
+        19: {opcode: IRETURN}

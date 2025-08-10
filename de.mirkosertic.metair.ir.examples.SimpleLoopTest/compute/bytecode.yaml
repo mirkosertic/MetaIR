@@ -1,0 +1,18 @@
+
+  - method name: compute
+    flags: [PRIVATE, STATIC]
+    method type: (I)I
+    attributes: [Code]
+    code: 
+        max stack: 2
+        max locals: 1
+        attributes: [LineNumberTable, LocalVariableTable]
+        line numbers: 
+          - {start: 0, line number: 16}
+        local variables: 
+          - {start: 0, end: 4, slot: 0, name: a, type: I}
+        //stack map frame @0: {locals: [int], stack: []}
+        0: {opcode: ILOAD_0, slot: 0, type: I, variable name: a}
+        1: {opcode: ICONST_1, constant value: 1}
+        2: {opcode: IADD}
+        3: {opcode: IRETURN}

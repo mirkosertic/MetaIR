@@ -1,0 +1,25 @@
+
+  - method name: simple_method_return_boolean
+    flags: [PUBLIC, STATIC]
+    method type: '(BZSCIJFDLjava/lang/String;[I)Z'
+    attributes: [Code]
+    code: 
+        max stack: 1
+        max locals: 12
+        attributes: [LineNumberTable, LocalVariableTable]
+        line numbers: 
+          - {start: 0, line number: 82}
+        local variables: 
+          - {start: 0, end: 2, slot: 0, name: byte_arg, type: B}
+          - {start: 0, end: 2, slot: 1, name: boolean_arg, type: Z}
+          - {start: 0, end: 2, slot: 2, name: short_arg, type: S}
+          - {start: 0, end: 2, slot: 3, name: char_arg, type: C}
+          - {start: 0, end: 2, slot: 4, name: int_arg, type: I}
+          - {start: 0, end: 2, slot: 5, name: long_arg, type: J}
+          - {start: 0, end: 2, slot: 7, name: float_arg, type: F}
+          - {start: 0, end: 2, slot: 8, name: double_arg, type: D}
+          - {start: 0, end: 2, slot: 10, name: string_arg, type: Ljava/lang/String;}
+          - {start: 0, end: 2, slot: 11, name: array_arg, type: '[I'}
+        //stack map frame @0: {locals: [int, int, int, int, int, long, long2, float, double, double2, java/lang/String, '[I'], stack: []}
+        0: {opcode: ILOAD_1, slot: 1, type: Z, variable name: boolean_arg}
+        1: {opcode: IRETURN}

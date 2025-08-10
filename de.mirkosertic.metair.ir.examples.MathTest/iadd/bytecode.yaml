@@ -1,0 +1,20 @@
+
+  - method name: iadd
+    flags: [PUBLIC]
+    method type: (II)I
+    attributes: [Code]
+    code: 
+        max stack: 2
+        max locals: 3
+        attributes: [LineNumberTable, LocalVariableTable]
+        line numbers: 
+          - {start: 0, line number: 57}
+        local variables: 
+          - {start: 0, end: 4, slot: 0, name: this, type: Lde/mirkosertic/metair/ir/examples/MathTest;}
+          - {start: 0, end: 4, slot: 1, name: a, type: I}
+          - {start: 0, end: 4, slot: 2, name: b, type: I}
+        //stack map frame @0: {locals: [de/mirkosertic/metair/ir/examples/MathTest, int, int], stack: []}
+        0: {opcode: ILOAD_1, slot: 1, type: I, variable name: a}
+        1: {opcode: ILOAD_2, slot: 2, type: I, variable name: b}
+        2: {opcode: IADD}
+        3: {opcode: IRETURN}
