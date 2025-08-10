@@ -2,6 +2,7 @@ package de.mirkosertic.metair.ir;
 
 import org.junit.jupiter.api.Test;
 
+import java.lang.constant.ClassDesc;
 import java.lang.constant.ConstantDescs;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,4 +48,14 @@ class TypeUtilsTest {
     public void doubleIsCategory2() {
         assertThat(TypeUtils.isCategory2(ConstantDescs.CD_double)).isTrue();
     }
+
+    @Test
+    public void jvmInternalTypeOf() {
+        assertThat(TypeUtils.jvmInternalTypeOf(ConstantDescs.CD_byte)).isEqualTo(ConstantDescs.CD_int);
+        assertThat(TypeUtils.jvmInternalTypeOf(ConstantDescs.CD_char)).isEqualTo(ConstantDescs.CD_int);
+        assertThat(TypeUtils.jvmInternalTypeOf(ConstantDescs.CD_boolean)).isEqualTo(ConstantDescs.CD_int);
+        assertThat(TypeUtils.jvmInternalTypeOf(ConstantDescs.CD_short)).isEqualTo(ConstantDescs.CD_int);
+        assertThat(TypeUtils.jvmInternalTypeOf(ConstantDescs.CD_Object)).isSameAs(ConstantDescs.CD_Object);
+    }
+
 }

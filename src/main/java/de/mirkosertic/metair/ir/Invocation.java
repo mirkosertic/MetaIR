@@ -12,7 +12,7 @@ public abstract class Invocation extends Value {
     public final MethodTypeDesc typeDesc;
 
     Invocation(final ClassDesc ownerType, final Value target, final String name, final MethodTypeDesc methodTypeDesc, final List<Value> arguments) {
-        super(methodTypeDesc.returnType());
+        super(TypeUtils.jvmInternalTypeOf(methodTypeDesc.returnType()));
 
         if (target.type.isPrimitive()) {
             illegalArgument("Cannot invoke a method on a primitive value");
@@ -23,7 +23,9 @@ public abstract class Invocation extends Value {
         }
 
         for (int i = 0; i < arguments.size(); i++) {
-            if (methodTypeDesc.parameterType(i).isPrimitive() && !arguments.get(i).type.equals(methodTypeDesc.parameterType(i))) {
+            if (methodTypeDesc.parameterType(i).isPrimitive() && !TypeUtils.jvmInternalTypeOf(arguments.get(i).type).equals(TypeUtils.jvmInternalTypeOf(methodTypeDesc.parameterType(i)))) {
+                // TODO: Convert byte, char, short, boolean rsp. type check it
+                // TODO: Floating point conversion if required...
                 illegalArgument("Parameter " + i + " of method " + name + " is a " + TypeUtils.toString(methodTypeDesc.parameterType(i)) + " type, but got " + TypeUtils.toString(arguments.get(i).type));
             }
         }

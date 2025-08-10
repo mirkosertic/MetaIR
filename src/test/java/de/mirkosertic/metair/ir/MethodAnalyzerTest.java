@@ -3288,6 +3288,21 @@ public class MethodAnalyzerTest {
             }
 
             @Test
+            public void i2c_fail_wrongtyoe() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(0);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    frame.in.stack.push(new StringConstant("hello"));
+
+                    analyzer.visitConvertInstruction(Opcode.I2C, frame);
+                    fail("Exception expected");
+                }).withMessage("Expected an int on stack for I2C, but got a String");
+            }
+
+            @Test
             public void i2b() {
                 final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
                 frame.in = new MethodAnalyzer.Status(0);
@@ -3302,7 +3317,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
 
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Convert.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Extend.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
             }
 
             @Test
@@ -3320,7 +3335,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
 
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Convert.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Extend.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
             }
 
             @Test
@@ -3338,7 +3353,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
 
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Convert.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Extend.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
             }
 
             @Test
@@ -3356,7 +3371,35 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
 
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Convert.class).matches(t -> t.type.equals(ConstantDescs.CD_long));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Extend.class).matches(t -> t.type.equals(ConstantDescs.CD_long));
+            }
+
+            @Test
+            public void i2l_fail_wrongtype() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(0);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    frame.in.stack.push(new PrimitiveLong(10));
+
+                    analyzer.visitConvertInstruction(Opcode.I2L, frame);
+                    fail("Exception expected");
+                }).withMessage("Expected an int on stack for I2L, but got a long");
+            }
+
+            @Test
+            public void i2l_fail_emptystack() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(0);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    analyzer.visitConvertInstruction(Opcode.I2L, frame);
+                    fail("Exception expected");
+                }).withMessage("A minimum stack size of 1 is required, but only 0 is available!");
             }
 
             @Test
@@ -4517,7 +4560,7 @@ public class MethodAnalyzerTest {
 
                     analyzer.visitReturnInstruction(Opcode.IRETURN, frame);
                     fail("Exception expected");
-                }).withMessage("Expecting only one value on the stack");
+                }).withMessage("Expecting only one value on the stack, but got 0");
             }
 
             @Test
@@ -4611,7 +4654,7 @@ public class MethodAnalyzerTest {
                     frame.in.push(new PrimitiveLong(10));
                     new MethodAnalyzer(MethodTypeDesc.of(ConstantDescs.CD_boolean)).visitReturnInstruction(Opcode.IRETURN, frame);
                     fail("Exception expected");
-                }).withMessage("Cannot return non int value long as int is expected for truncation to boolean");
+                }).withMessage("Cannot return value of type long as boolean is expected!");
             }
         }
     }

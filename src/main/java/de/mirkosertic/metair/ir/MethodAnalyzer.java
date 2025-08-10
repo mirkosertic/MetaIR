@@ -12,6 +12,7 @@ import java.lang.classfile.attribute.CodeAttribute;
 import java.lang.classfile.instruction.ArrayLoadInstruction;
 import java.lang.classfile.instruction.ArrayStoreInstruction;
 import java.lang.classfile.instruction.BranchInstruction;
+import java.lang.classfile.instruction.CharacterRange;
 import java.lang.classfile.instruction.ConstantInstruction;
 import java.lang.classfile.instruction.ConvertInstruction;
 import java.lang.classfile.instruction.ExceptionCatch;
@@ -128,15 +129,15 @@ public class MethodAnalyzer {
         }
     }
 
-    MethodModel getMethod() {
+    public MethodModel getMethod() {
         return method;
     }
 
-    Frame[] getFrames() {
+    public Frame[] getFrames() {
         return frames;
     }
 
-    List<Frame> getCodeModelTopologicalOrder() {
+    public List<Frame> getCodeModelTopologicalOrder() {
         return codeModelTopologicalOrder;
     }
 
@@ -341,8 +342,8 @@ public class MethodAnalyzer {
             final MethodTypeDesc methodTypeDesc = method.methodTypeSymbol();
             final ClassDesc[] argumentTypes = methodTypeDesc.parameterArray();
             for (int i = 0; i < argumentTypes.length; i++) {
-                final PHI p = loop.definePHI(argumentTypes[i]);
-                p.use(ir.defineMethodArgument(argumentTypes[i], i), new PHIUse(ir));
+                final PHI p = loop.definePHI(TypeUtils.jvmInternalTypeOf(argumentTypes[i]));
+                p.use(ir.defineMethodArgument(TypeUtils.jvmInternalTypeOf(argumentTypes[i]), i), new PHIUse(ir));
                 initStatus.setLocal(localIndex++, p);
                 if (TypeUtils.isCategory2(argumentTypes[i])) {
                     localIndex++;
@@ -358,13 +359,9 @@ public class MethodAnalyzer {
             final MethodTypeDesc methodTypeDesc = method.methodTypeSymbol();
             final ClassDesc[] argumentTypes = methodTypeDesc.parameterArray();
             for (int i = 0; i < argumentTypes.length; i++) {
-                if (ConstantDescs.CD_boolean.equals(argumentTypes[i])) {
-                    initStatus.setLocal(localIndex++, ir.defineMethodArgument(ConstantDescs.CD_int, i));
-                } else {
-                    initStatus.setLocal(localIndex++, ir.defineMethodArgument(argumentTypes[i], i));
-                    if (TypeUtils.isCategory2(argumentTypes[i])) {
-                        localIndex++;
-                    }
+                initStatus.setLocal(localIndex++, ir.defineMethodArgument(TypeUtils.jvmInternalTypeOf(argumentTypes[i]), i));
+                if (TypeUtils.isCategory2(argumentTypes[i])) {
+                    localIndex++;
                 }
             }
         }
@@ -447,6 +444,45 @@ public class MethodAnalyzer {
 
                     incomingStatus = new Status(cm.maxLocals());
 
+                    // TODO: What about the stack?
+                    int incomingStackSize = -1;
+                    for (final Frame fr : incomingFrames) {
+                        if (incomingStackSize == -1) {
+                            incomingStackSize = fr.out.stack.size();
+                        } else if (incomingStackSize != fr.out.stack.size()) {
+                            illegalState("Stack size mismatch for frame at " + frame.elementIndex + " expected " + incomingStackSize + " but got " + fr.out.stack.size());
+                        }
+                    }
+
+                    if (incomingStackSize > 0) {
+                        // Check of we need to to something
+                        for (int stackPos = 0; stackPos < incomingStackSize; stackPos++) {
+                            final List<Value> allValues = new ArrayList<>();
+                            for (final Frame fr : incomingFrames) {
+                                final Value sv = fr.out.stack.get(stackPos);
+                                if (sv != null) {
+                                    if (!allValues.contains(sv)) {
+                                        allValues.add(sv);
+                                    }
+                                }
+                            }
+                            if (allValues.size() > 1 || hasBackEdges) {
+                                // TODO: Insert phi node here
+                                final Value source = allValues.getFirst();
+                                final PHI p = target.definePHI(source.type);
+
+                                for (final Frame fr : incomingFrames) {
+                                    final Value sv = fr.out.stack.get(stackPos);
+                                    p.use(sv, new PHIUse(fr.out.control));
+                                }
+
+                                incomingStatus.stack.push(p);
+                          } else {
+                                incomingStatus.stack.push(allValues.getFirst());
+                            }
+                        }
+                    }
+
                     for (int mergeLocalIndex = 0; mergeLocalIndex < cm.maxLocals(); mergeLocalIndex++) {
                         final Value source = incomingFrames.getFirst().out.getLocal(mergeLocalIndex);
                         if (source != null) {
@@ -516,8 +552,9 @@ public class MethodAnalyzer {
                 case final LineNumber lineNumber -> visitLineNumberNode(lineNumber, frame);
                 case final LocalVariable localVariable ->
                     // Maybe we can use this for debugging?
-                        frame.out = frame.in.copy();
-                case final LocalVariableType localVariableType -> frame.in.copy();
+                        frame.copyIncomingToOutgoing();
+                case final LocalVariableType localVariableType -> frame.copyIncomingToOutgoing();
+                case final CharacterRange characterRange -> frame.copyIncomingToOutgoing();
                 case final ExceptionCatch exceptionCatch -> visitExceptionCatch(exceptionCatch, frame);
                 default -> throw new IllegalArgumentException("Not implemented yet : " + psi);
             }
@@ -933,14 +970,41 @@ public class MethodAnalyzer {
         frame.entryPoint = newArray;
     }
 
+    private void parse_truncate_and_extend(final Opcode opcode, final Frame frame, final ClassDesc targetType, final ClassDesc truncatedTo, final Extend.ExtendType extendType) {
+        assertMinimumStackSize(frame.in, 1);
+
+        final Status outgoing = frame.copyIncomingToOutgoing();
+
+        final Value value = frame.out.pop();
+        if (!ConstantDescs.CD_int.equals(value.type)) {
+            illegalState("Expected an int on stack for " + opcode + ", but got a " + TypeUtils.toString(value.type));
+        }
+
+        outgoing.stack.push(new Extend(targetType, extendType, new Truncate(truncatedTo, value)));
+    }
+
+    private void parse_extend(final Opcode opcode, final Frame frame, final ClassDesc expectedType, final ClassDesc targetType, final Extend.ExtendType extendType) {
+        assertMinimumStackSize(frame.in, 1);
+
+        final Status outgoing = frame.copyIncomingToOutgoing();
+
+        final Value value = frame.out.pop();
+        if (!expectedType.equals(value.type)) {
+            illegalState("Expected an " + TypeUtils.toString(expectedType) + " on stack for " + opcode + ", but got a " + TypeUtils.toString(value.type));
+        }
+
+        outgoing.stack.push(new Extend(targetType, extendType, value));
+    }
+
     protected void visitConvertInstruction(final Opcode opcode, final Frame frame) {
         assertMinimumStackSize(frame.in, 1);
 
         switch (opcode) {
-            case Opcode.I2B -> parse_CONVERT_X(frame, ConstantDescs.CD_int, ConstantDescs.CD_int);
-            case Opcode.I2C -> parse_CONVERT_X(frame, ConstantDescs.CD_int, ConstantDescs.CD_int);
-            case Opcode.I2S -> parse_CONVERT_X(frame, ConstantDescs.CD_int, ConstantDescs.CD_int);
-            case Opcode.I2L -> parse_CONVERT_X(frame, ConstantDescs.CD_int, ConstantDescs.CD_long);
+            case Opcode.I2B -> parse_truncate_and_extend(opcode, frame, ConstantDescs.CD_int, ConstantDescs.CD_byte, Extend.ExtendType.SIGN);
+            case Opcode.I2C -> parse_truncate_and_extend(opcode, frame, ConstantDescs.CD_int, ConstantDescs.CD_char, Extend.ExtendType.ZERO);
+            case Opcode.I2S -> parse_truncate_and_extend(opcode, frame, ConstantDescs.CD_int, ConstantDescs.CD_short, Extend.ExtendType.SIGN);
+            // TODO: Extend cases, maybe remove convert instruction?
+            case Opcode.I2L -> parse_extend(opcode, frame, ConstantDescs.CD_int, ConstantDescs.CD_long, Extend.ExtendType.SIGN);
             case Opcode.I2F -> parse_CONVERT_X(frame, ConstantDescs.CD_int, ConstantDescs.CD_float);
             case Opcode.I2D -> parse_CONVERT_X(frame, ConstantDescs.CD_int, ConstantDescs.CD_double);
             case Opcode.L2I -> parse_CONVERT_X(frame, ConstantDescs.CD_long, ConstantDescs.CD_int);
@@ -1240,6 +1304,11 @@ public class MethodAnalyzer {
                     target.use(v, new PHIUse(jumpSource));
                 }
             }
+
+            if (!outgoing.stack.isEmpty()) {
+                illegalState("Don't know how to handle a back edge with a non empty stack!");
+            }
+
             outgoing.control = outgoing.control.controlFlowsTo(targetFrame.entryPoint, ControlType.BACKWARD);
         }
     }
@@ -1408,26 +1477,17 @@ public class MethodAnalyzer {
     private void parse_RETURN_X(final Frame frame, final ClassDesc type) {
         final Status outgoing = frame.copyIncomingToOutgoing();
         if (outgoing.stack.size() != 1) {
-            illegalState("Expecting only one value on the stack");
+            illegalState("Expecting only one value on the stack, but got " + outgoing.stack.size());
         }
 
         final Value v = outgoing.pop();
-        Value toBeReturned = null;
         if (methodTypeDesc.returnType().isPrimitive()) {
-            if (!v.type.equals(methodTypeDesc.returnType())) {
-                // Truncation required
-                if (!v.type.equals(ConstantDescs.CD_int)) {
-                    illegalState("Cannot return non int value " + TypeUtils.toString(v.type) + " as int is expected for truncation to " + TypeUtils.toString(methodTypeDesc.returnType()));
-                }
-                toBeReturned = new Truncate(methodTypeDesc.returnType(), v);
-            } else {
-                toBeReturned = v;
+            if (!TypeUtils.jvmInternalTypeOf(v.type).equals(TypeUtils.jvmInternalTypeOf(methodTypeDesc.returnType()))) {
+                illegalState("Cannot return value of type " + TypeUtils.toString(v.type) + " as " + TypeUtils.toString(methodTypeDesc.returnType()) + " is expected!");
             }
-        } else {
-            toBeReturned = v;
         }
 
-        final ReturnValue next = new ReturnValue(type, toBeReturned);
+        final ReturnValue next = new ReturnValue(v.type, v);
         outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(next);
     }
@@ -1799,17 +1859,17 @@ public class MethodAnalyzer {
     private void step4PeepholeOptimizations() {
     }
 
-    protected enum CFGProjection {
+    public enum CFGProjection {
         DEFAULT, TRUE, FALSE
     }
 
-    protected record CFGEdge(int fromIndex, CFGProjection projection, ControlType controlType) {
+    public record CFGEdge(int fromIndex, CFGProjection projection, ControlType controlType) {
     }
 
     private record CFGAnalysisJob(int startIndex, List<Integer> path) {
     }
 
-    protected static class Frame {
+    public static class Frame {
 
         protected final CodeElement codeElement;
         protected final List<CFGEdge> predecessors;
@@ -1832,7 +1892,7 @@ public class MethodAnalyzer {
         }
     }
 
-    protected static class Status {
+    public static class Status {
 
         protected final static int UNDEFINED_LINE_NUMBER = -1;
 

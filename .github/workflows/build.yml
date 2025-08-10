@@ -1,0 +1,24 @@
+name: Build Workflow
+on:
+  push:
+    branches: [ main ]
+jobs:
+  build:
+    if: github.repository == 'mirkosertic/MetaIR'
+    environment: ci
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: 24
+          distribution: "temurin"
+          cache: maven
+      - run: |
+          cat <(echo -e "${{ secrets.OSSRH_GPG_SECRET_KEY }}") | gpg --batch --import
+          gpg --list-secret-keys --keyid-format LONG
+      - run: mvn --no-transfer-progress --batch-mode --settings .mvn/settings.xml clean javadoc:jar deploy -P signed
+        env:
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          GPG_KEY_PASSPHRASE: ${{ secrets.GPG_KEY_PASSPHRASE }}
