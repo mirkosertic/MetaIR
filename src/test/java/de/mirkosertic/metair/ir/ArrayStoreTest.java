@@ -12,12 +12,12 @@ public class ArrayStoreTest {
 
     @Test
     public void testUsage() {
-        final Value a = new NewArray(ConstantDescs.CD_byte, new PrimitiveInt(10));
+        final Value a = new NewArray(ConstantDescs.CD_int, new PrimitiveInt(10));
         final Value index = new PrimitiveInt(0);
         final Value value = new PrimitiveInt(42);
-        final ArrayStore store = new ArrayStore(ConstantDescs.CD_byte.arrayType(), a, index, value);
+        final ArrayStore store = new ArrayStore(a, index, value);
 
-        assertThat(store.debugDescription()).isEqualTo("ArrayStore : byte[]");
+        assertThat(store.debugDescription()).isEqualTo("ArrayStore : int[]");
 
         assertThat(a.usedBy).containsExactly(store);
         assertThat(index.usedBy).containsExactly(store);
@@ -30,14 +30,12 @@ public class ArrayStoreTest {
         assertThat(store.uses.get(2).node()).isSameAs(value);
         assertThat(store.uses.get(2).use()).isEqualTo(new ArgumentUse(2));
         assertThat(store.isConstant()).isFalse();
-
-        assertThat(store.debugDescription()).isEqualTo("ArrayStore : byte[]");
     }
 
     @Test
     public void fail_wrong_array() {
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
-            new ArrayStore(ConstantDescs.CD_byte.arrayType(), new PrimitiveInt(10), new PrimitiveInt(10), new PrimitiveInt(10));
+            new ArrayStore(new PrimitiveInt(10), new PrimitiveInt(10), new PrimitiveInt(10));
             fail("Exception expected");
         }).withMessage("Cannot store to non array of type int");
     }
@@ -45,8 +43,17 @@ public class ArrayStoreTest {
     @Test
     public void fail_wrong_index() {
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
-            new ArrayStore(ConstantDescs.CD_byte.arrayType(), new NewArray(ConstantDescs.CD_int, new PrimitiveInt(10)), new PrimitiveLong(10L), new PrimitiveInt(10));
+            new ArrayStore(new NewArray(ConstantDescs.CD_int, new PrimitiveInt(10)), new PrimitiveLong(10L), new PrimitiveInt(10));
             fail("Exception expected");
         }).withMessage("Cannot store to non int index of type long");
     }
+
+    @Test
+    public void fail_wrong_value() {
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+            new ArrayStore(new NewArray(ConstantDescs.CD_int, new PrimitiveInt(10)), new PrimitiveInt(10), new PrimitiveLong(10L));
+            fail("Exception expected");
+        }).withMessage("Cannot store non int value long to array of type int[]");
+    }
+
 }

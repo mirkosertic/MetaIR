@@ -889,9 +889,9 @@ public class MethodAnalyzer {
 
     protected void visitArrayStoreInstruction(final Opcode opcode, final Frame frame) {
         switch (opcode) {
-            case Opcode.BASTORE -> parse_ASTORE_X(frame, ConstantDescs.CD_byte.arrayType());
-            case Opcode.CASTORE -> parse_ASTORE_X(frame, ConstantDescs.CD_char.arrayType());
-            case Opcode.SASTORE -> parse_ASTORE_X(frame, ConstantDescs.CD_short.arrayType());
+            case Opcode.BASTORE -> parse_ARRAYSTORE_X_TRUNCATED(opcode, frame);
+            case Opcode.CASTORE -> parse_ARRAYSTORE_X_TRUNCATED(opcode, frame);
+            case Opcode.SASTORE -> parse_ARRAYSTORE_X_TRUNCATED(opcode, frame);
             case Opcode.IASTORE -> parse_ASTORE_X(frame, ConstantDescs.CD_int.arrayType());
             case Opcode.LASTORE -> parse_ASTORE_X(frame, ConstantDescs.CD_long.arrayType());
             case Opcode.FASTORE -> parse_ASTORE_X(frame, ConstantDescs.CD_float.arrayType());
@@ -904,16 +904,16 @@ public class MethodAnalyzer {
     protected void visitArrayLoadInstruction(final Opcode opcode, final Frame frame) {
         switch (opcode) {
             case Opcode.BALOAD ->
-                    parse_ALOAD_X(frame, ConstantDescs.CD_byte.arrayType(), ConstantDescs.CD_int); // Sign extend!
+                    parse_ALOAD_X_INTEXTENDED(frame, Extend.ExtendType.SIGN); // Sign extend!
             case Opcode.CALOAD ->
-                    parse_ALOAD_X( frame, ConstantDescs.CD_char.arrayType(), ConstantDescs.CD_int); // Zero extend!
+                    parse_ALOAD_X_INTEXTENDED(frame, Extend.ExtendType.ZERO); // Zero extend!
             case Opcode.SALOAD ->
-                    parse_ALOAD_X(frame, ConstantDescs.CD_short.arrayType(), ConstantDescs.CD_int); // Sign extend!
-            case Opcode.IALOAD -> parse_ALOAD_X(frame, ConstantDescs.CD_int.arrayType(), ConstantDescs.CD_int);
-            case Opcode.LALOAD -> parse_ALOAD_X(frame, ConstantDescs.CD_long.arrayType(), ConstantDescs.CD_long);
-            case Opcode.FALOAD -> parse_ALOAD_X(frame, ConstantDescs.CD_float.arrayType(), ConstantDescs.CD_float);
+                    parse_ALOAD_X_INTEXTENDED(frame, Extend.ExtendType.SIGN); // Sign extend!
+            case Opcode.IALOAD -> parse_ALOAD_X(frame, ConstantDescs.CD_int.arrayType());
+            case Opcode.LALOAD -> parse_ALOAD_X(frame, ConstantDescs.CD_long.arrayType());
+            case Opcode.FALOAD -> parse_ALOAD_X(frame, ConstantDescs.CD_float.arrayType());
             case Opcode.DALOAD ->
-                    parse_ALOAD_X(frame, ConstantDescs.CD_double.arrayType(), ConstantDescs.CD_double);
+                    parse_ALOAD_X(frame, ConstantDescs.CD_double.arrayType());
             case Opcode.AALOAD -> parse_AALOAD(frame);
             default -> throw new IllegalArgumentException("Not implemented yet : " + opcode);
         }
@@ -1394,7 +1394,9 @@ public class MethodAnalyzer {
 
     private void parse_ARETURN(final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
-        assertMinimumStackSize(outgoing, 1);
+        if (outgoing.stack.size() != 1) {
+            illegalState("Expecting only one value on the stack");
+        }
 
         final Value v = outgoing.pop();
 
@@ -1405,11 +1407,27 @@ public class MethodAnalyzer {
 
     private void parse_RETURN_X(final Frame frame, final ClassDesc type) {
         final Status outgoing = frame.copyIncomingToOutgoing();
-        assertMinimumStackSize(outgoing, 1);
+        if (outgoing.stack.size() != 1) {
+            illegalState("Expecting only one value on the stack");
+        }
 
         final Value v = outgoing.pop();
+        Value toBeReturned = null;
+        if (methodTypeDesc.returnType().isPrimitive()) {
+            if (!v.type.equals(methodTypeDesc.returnType())) {
+                // Truncation required
+                if (!v.type.equals(ConstantDescs.CD_int)) {
+                    illegalState("Cannot return non int value " + TypeUtils.toString(v.type) + " as int is expected for truncation to " + TypeUtils.toString(methodTypeDesc.returnType()));
+                }
+                toBeReturned = new Truncate(methodTypeDesc.returnType(), v);
+            } else {
+                toBeReturned = v;
+            }
+        } else {
+            toBeReturned = v;
+        }
 
-        final ReturnValue next = new ReturnValue(type, v);
+        final ReturnValue next = new ReturnValue(type, toBeReturned);
         outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(next);
     }
@@ -1682,6 +1700,24 @@ public class MethodAnalyzer {
         outgoing.control = outgoing.control.controlFlowsTo(new MonitorExit(v), ControlType.FORWARD);
     }
 
+    private void parse_ARRAYSTORE_X_TRUNCATED(final Opcode opcode, final Frame frame) {
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        assertMinimumStackSize(outgoing, 3);
+
+        final Value value = outgoing.pop();
+        final Value index = outgoing.pop();
+        final Value array = outgoing.pop();
+
+        if (!value.type.equals(ConstantDescs.CD_int)) {
+            illegalState("Expected value of type int for " + opcode);
+        }
+
+        final ArrayStore store = new ArrayStore(array, index, new Truncate(array.type.componentType(), value));
+
+        outgoing.memory = outgoing.memory.memoryFlowsTo(store);
+        outgoing.control = outgoing.control.controlFlowsTo(store, ControlType.FORWARD);
+    }
+
     private void parse_ASTORE_X(final Frame frame, final ClassDesc arrayType) {
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, 3);
@@ -1690,7 +1726,7 @@ public class MethodAnalyzer {
         final Value index = outgoing.pop();
         final Value array = outgoing.pop();
 
-        final ArrayStore store = new ArrayStore(arrayType, array, index, value);
+        final ArrayStore store = new ArrayStore(array, index, value);
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(store);
         outgoing.control = outgoing.control.controlFlowsTo(store, ControlType.FORWARD);
@@ -1704,33 +1740,47 @@ public class MethodAnalyzer {
         final Value index = outgoing.pop();
         final Value array = outgoing.pop();
 
-        final ArrayStore store = new ArrayStore(array.type.componentType(), array, index, value);
+        final ArrayStore store = new ArrayStore(array, index, value);
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(store);
         outgoing.control = outgoing.control.controlFlowsTo(store, ControlType.FORWARD);
     }
 
-    @Testbacklog
-    protected void parse_ALOAD_X(final Frame frame, final ClassDesc arrayType, final ClassDesc elementType) {
+    private void parse_ALOAD_X_INTEXTENDED(final Frame frame, final Extend.ExtendType type) {
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, 2);
 
         final Value index = outgoing.pop();
         final Value array = outgoing.pop();
-        final Value value = new ArrayLoad(elementType, arrayType, array, index);
+
+        final Value load = new ArrayLoad(array.type, array, index);
+
+        final Value value = new Extend(ConstantDescs.CD_int, type, load);
+
+        outgoing.memory = outgoing.memory.memoryFlowsTo(load);
+        outgoing.control = outgoing.control.controlFlowsTo(load, ControlType.FORWARD);
+        outgoing.push(value);
+    }
+
+    private void parse_ALOAD_X(final Frame frame, final ClassDesc arrayType) {
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        assertMinimumStackSize(outgoing, 2);
+
+        final Value index = outgoing.pop();
+        final Value array = outgoing.pop();
+        final Value value = new ArrayLoad(arrayType, array, index);
         outgoing.memory = outgoing.memory.memoryFlowsTo(value);
         outgoing.control = outgoing.control.controlFlowsTo(value, ControlType.FORWARD);
         outgoing.push(value);
     }
 
-    @Testbacklog
-    protected void parse_AALOAD(final Frame frame) {
+    private void parse_AALOAD(final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, 2);
 
         final Value index = outgoing.pop();
         final Value array = outgoing.pop();
-        final Value value = new ArrayLoad(array.type.componentType(), array.type, array, index);
+        final Value value = new ArrayLoad(array.type, array, index);
         outgoing.memory = outgoing.memory.memoryFlowsTo(value);
         outgoing.control = outgoing.control.controlFlowsTo(value, ControlType.FORWARD);
         outgoing.push(value);

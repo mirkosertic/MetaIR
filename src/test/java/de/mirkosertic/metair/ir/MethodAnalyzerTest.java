@@ -167,6 +167,251 @@ public class MethodAnalyzerTest {
         }
 
         @Nested
+        public class ARRAYLOAD {
+
+            @Test
+            public void baload() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value array = new NewArray(ConstantDescs.CD_boolean, new PrimitiveInt(100));
+                final Value index = new PrimitiveInt(1);
+
+                frame.in.push(array);
+                frame.in.push(index);
+
+                analyzer.visitArrayLoadInstruction(Opcode.BALOAD, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+                assertThat(frame.out.control).isInstanceOf(ArrayLoad.class);
+                assertThat(frame.out.memory).isInstanceOf(ArrayLoad.class);
+
+                final Extend al = (Extend) frame.out.stack.getFirst();
+                assertThat(al.uses).hasSize(1);
+                assertThat(al.uses.getFirst().node()).isSameAs(frame.out.control);
+                assertThat(al.type).isEqualTo(ConstantDescs.CD_int);
+                assertThat(al.extendType).isEqualTo(Extend.ExtendType.SIGN);
+            }
+
+            @Test
+            public void caload() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value array = new NewArray(ConstantDescs.CD_char, new PrimitiveInt(100));
+                final Value index = new PrimitiveInt(1);
+
+                frame.in.push(array);
+                frame.in.push(index);
+
+                analyzer.visitArrayLoadInstruction(Opcode.CALOAD, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+                assertThat(frame.out.control).isInstanceOf(ArrayLoad.class);
+                assertThat(frame.out.memory).isInstanceOf(ArrayLoad.class);
+
+                final Extend al = (Extend) frame.out.stack.getFirst();
+                assertThat(al.uses).hasSize(1);
+                assertThat(al.uses.getFirst().node()).isSameAs(frame.out.control);
+                assertThat(al.type).isEqualTo(ConstantDescs.CD_int);
+                assertThat(al.extendType).isEqualTo(Extend.ExtendType.ZERO);
+            }
+
+            @Test
+            public void saload() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value array = new NewArray(ConstantDescs.CD_short, new PrimitiveInt(100));
+                final Value index = new PrimitiveInt(1);
+
+                frame.in.push(array);
+                frame.in.push(index);
+
+                analyzer.visitArrayLoadInstruction(Opcode.SALOAD, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+                assertThat(frame.out.control).isInstanceOf(ArrayLoad.class);
+                assertThat(frame.out.memory).isInstanceOf(ArrayLoad.class);
+
+                final Extend al = (Extend) frame.out.stack.getFirst();
+                assertThat(al.uses).hasSize(1);
+                assertThat(al.uses.getFirst().node()).isSameAs(frame.out.control);
+                assertThat(al.type).isEqualTo(ConstantDescs.CD_int);
+                assertThat(al.extendType).isEqualTo(Extend.ExtendType.SIGN);
+            }
+
+            @Test
+            public void iaload() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value array = new NewArray(ConstantDescs.CD_int, new PrimitiveInt(100));
+                final Value index = new PrimitiveInt(1);
+
+                frame.in.push(array);
+                frame.in.push(index);
+
+                analyzer.visitArrayLoadInstruction(Opcode.IALOAD, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+                assertThat(frame.out.control).isInstanceOf(ArrayLoad.class);
+                assertThat(frame.out.memory).isInstanceOf(ArrayLoad.class);
+
+                final ArrayLoad al = (ArrayLoad) frame.out.stack.getFirst();
+                assertThat(al.uses).hasSize(4);
+                assertThat(al.uses.get(0).node()).isSameAs(array);
+                assertThat(al.uses.get(1).node()).isSameAs(index);
+                assertThat(al.type).isEqualTo(ConstantDescs.CD_int);
+            }
+
+            @Test
+            public void iaload_fail_emptystack() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(10);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    analyzer.visitArrayLoadInstruction(Opcode.IALOAD, frame);
+                    fail("Exception expected");
+                }).withMessage("A minimum stack size of 2 is required, but only 0 is available!");
+            }
+
+            @Test
+            public void laload() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value array = new NewArray(ConstantDescs.CD_long, new PrimitiveInt(100));
+                final Value index = new PrimitiveInt(1);
+
+                frame.in.push(array);
+                frame.in.push(index);
+
+                analyzer.visitArrayLoadInstruction(Opcode.LALOAD, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+                assertThat(frame.out.control).isInstanceOf(ArrayLoad.class);
+                assertThat(frame.out.memory).isInstanceOf(ArrayLoad.class);
+
+                final ArrayLoad al = (ArrayLoad) frame.out.stack.getFirst();
+                assertThat(al.uses).hasSize(4);
+                assertThat(al.uses.get(0).node()).isSameAs(array);
+                assertThat(al.uses.get(1).node()).isSameAs(index);
+                assertThat(al.type).isEqualTo(ConstantDescs.CD_long);
+            }
+
+            @Test
+            public void faload() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value array = new NewArray(ConstantDescs.CD_float, new PrimitiveInt(100));
+                final Value index = new PrimitiveInt(1);
+
+                frame.in.push(array);
+                frame.in.push(index);
+
+                analyzer.visitArrayLoadInstruction(Opcode.FALOAD, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+                assertThat(frame.out.control).isInstanceOf(ArrayLoad.class);
+                assertThat(frame.out.memory).isInstanceOf(ArrayLoad.class);
+
+                final ArrayLoad al = (ArrayLoad) frame.out.stack.getFirst();
+                assertThat(al.uses).hasSize(4);
+                assertThat(al.uses.get(0).node()).isSameAs(array);
+                assertThat(al.uses.get(1).node()).isSameAs(index);
+                assertThat(al.type).isEqualTo(ConstantDescs.CD_float);
+            }
+
+            @Test
+            public void daload() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value array = new NewArray(ConstantDescs.CD_double, new PrimitiveInt(100));
+                final Value index = new PrimitiveInt(1);
+
+                frame.in.push(array);
+                frame.in.push(index);
+
+                analyzer.visitArrayLoadInstruction(Opcode.DALOAD, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+                assertThat(frame.out.control).isInstanceOf(ArrayLoad.class);
+                assertThat(frame.out.memory).isInstanceOf(ArrayLoad.class);
+
+                final ArrayLoad al = (ArrayLoad) frame.out.stack.getFirst();
+                assertThat(al.uses).hasSize(4);
+                assertThat(al.uses.get(0).node()).isSameAs(array);
+                assertThat(al.uses.get(1).node()).isSameAs(index);
+                assertThat(al.type).isEqualTo(ConstantDescs.CD_double);
+            }
+
+            @Test
+            public void aaload() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(10);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                final Value array = new NewArray(ConstantDescs.CD_Object, new PrimitiveInt(100));
+                final Value index = new PrimitiveInt(1);
+
+                frame.in.push(array);
+                frame.in.push(index);
+
+                analyzer.visitArrayLoadInstruction(Opcode.AALOAD, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).hasSize(1);
+                assertThat(frame.out.control).isInstanceOf(ArrayLoad.class);
+                assertThat(frame.out.memory).isInstanceOf(ArrayLoad.class);
+
+                final ArrayLoad al = (ArrayLoad) frame.out.stack.getFirst();
+                assertThat(al.uses).hasSize(4);
+                assertThat(al.uses.get(0).node()).isSameAs(array);
+                assertThat(al.uses.get(1).node()).isSameAs(index);
+            }
+
+            @Test
+            public void aaload_fail_emptystack() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(10);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    analyzer.visitArrayLoadInstruction(Opcode.AALOAD, frame);
+                    fail("Exception expected");
+                }).withMessage("A minimum stack size of 2 is required, but only 0 is available!");
+            }
+        }
+
+        @Nested
         public class ARRAYSTORE {
 
             @Test
@@ -237,7 +482,28 @@ public class MethodAnalyzerTest {
                 assertThat(as.uses).hasSize(5);
                 assertThat(as.uses.get(0).node()).isSameAs(array);
                 assertThat(as.uses.get(1).node()).isSameAs(index);
-                assertThat(as.uses.get(2).node()).isSameAs(value);
+                assertThat(as.uses.get(2).node()).isInstanceOf(Truncate.class);
+            }
+
+            @Test
+            public void castore_fail_wrongvalue() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(10);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    final Value array = new NewArray(ConstantDescs.CD_char, new PrimitiveInt(100));
+                    final Value index = new PrimitiveInt(1);
+                    final Value value = new PrimitiveLong(10);
+
+                    frame.in.push(array);
+                    frame.in.push(index);
+                    frame.in.push(value);
+
+                    analyzer.visitArrayStoreInstruction(Opcode.CASTORE, frame);
+                    fail("Exception expected");
+                }).withMessage("Expected value of type int for CASTORE");
             }
 
             @Test
@@ -266,7 +532,7 @@ public class MethodAnalyzerTest {
                 assertThat(as.uses).hasSize(5);
                 assertThat(as.uses.get(0).node()).isSameAs(array);
                 assertThat(as.uses.get(1).node()).isSameAs(index);
-                assertThat(as.uses.get(2).node()).isSameAs(value);
+                assertThat(as.uses.get(2).node()).isInstanceOf(Truncate.class);
             }
 
             @Test
@@ -295,7 +561,7 @@ public class MethodAnalyzerTest {
                 assertThat(as.uses).hasSize(5);
                 assertThat(as.uses.get(0).node()).isSameAs(array);
                 assertThat(as.uses.get(1).node()).isSameAs(index);
-                assertThat(as.uses.get(2).node()).isSameAs(value);
+                assertThat(as.uses.get(2).node()).isInstanceOf(Truncate.class);
             }
 
             @Test
@@ -2533,7 +2799,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out.stack.get(1)).isSameAs(frame.in.stack.get(2));
                 assertThat(frame.out.stack.get(2)).isSameAs(frame.in.stack.get(0));
                 assertThat(frame.out.stack.get(2)).isSameAs(frame.in.stack.get(0));
-                assertThat(frame.out.stack.get(2)).isSameAs(frame.in.stack.get(0));
+                assertThat(frame.out.stack.get(2)).isSameAs(frame.in.stack.getFirst());
             }
 
             @Test
@@ -4209,7 +4475,7 @@ public class MethodAnalyzerTest {
 
                     new MethodAnalyzer(MethodTypeDesc.of(ConstantDescs.CD_String)).visitReturnInstruction(Opcode.ARETURN, frame);
                     fail("Exception expected");
-                }).withMessage("A minimum stack size of 1 is required, but only 0 is available!");
+                }).withMessage("Expecting only one value on the stack");
             }
 
             @Test
@@ -4251,7 +4517,7 @@ public class MethodAnalyzerTest {
 
                     analyzer.visitReturnInstruction(Opcode.IRETURN, frame);
                     fail("Exception expected");
-                }).withMessage("A minimum stack size of 1 is required, but only 0 is available!");
+                }).withMessage("Expecting only one value on the stack");
             }
 
             @Test
@@ -4262,7 +4528,7 @@ public class MethodAnalyzerTest {
                 frame.in.memory = new LabelNode("memory");
 
                 frame.in.push(new PrimitiveInt(10));
-                analyzer.visitReturnInstruction(Opcode.IRETURN, frame);
+                new MethodAnalyzer(MethodTypeDesc.of(ConstantDescs.CD_int)).visitReturnInstruction(Opcode.IRETURN, frame);
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
@@ -4278,7 +4544,7 @@ public class MethodAnalyzerTest {
                 frame.in.memory = new LabelNode("memory");
 
                 frame.in.push(new PrimitiveDouble(10d));
-                analyzer.visitReturnInstruction(Opcode.DRETURN, frame);
+                new MethodAnalyzer(MethodTypeDesc.of(ConstantDescs.CD_double)).visitReturnInstruction(Opcode.DRETURN, frame);
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
@@ -4294,7 +4560,7 @@ public class MethodAnalyzerTest {
                 frame.in.memory = new LabelNode("memory");
 
                 frame.in.push(new PrimitiveFloat(10f));
-                analyzer.visitReturnInstruction(Opcode.FRETURN, frame);
+                new MethodAnalyzer(MethodTypeDesc.of(ConstantDescs.CD_float)).visitReturnInstruction(Opcode.FRETURN, frame);
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
@@ -4310,12 +4576,42 @@ public class MethodAnalyzerTest {
                 frame.in.memory = new LabelNode("memory");
 
                 frame.in.push(new PrimitiveLong(10L));
-                analyzer.visitReturnInstruction(Opcode.LRETURN, frame);
+                new MethodAnalyzer(MethodTypeDesc.of(ConstantDescs.CD_long)).visitReturnInstruction(Opcode.LRETURN, frame);
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
                 assertThat(frame.out.control).isInstanceOf(ReturnValue.class);
                 assertThat(frame.in.control.usedBy).containsExactly(frame.out.control);
+            }
+
+            @Test
+            public void ireturn_with_truncation() {
+                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                frame.in = new MethodAnalyzer.Status(0);
+                frame.in.control = new LabelNode("control");
+                frame.in.memory = new LabelNode("memory");
+
+                frame.in.push(new PrimitiveInt(10));
+                new MethodAnalyzer(MethodTypeDesc.of(ConstantDescs.CD_boolean)).visitReturnInstruction(Opcode.IRETURN, frame);
+
+                assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
+                assertThat(frame.out.stack).isEmpty();
+                assertThat(frame.out.control).isInstanceOf(ReturnValue.class);
+                assertThat(frame.in.control.usedBy).containsExactly(frame.out.control);
+            }
+
+            @Test
+            public void ireturn_with_truncation_fail_wrongtype() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(0);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    frame.in.push(new PrimitiveLong(10));
+                    new MethodAnalyzer(MethodTypeDesc.of(ConstantDescs.CD_boolean)).visitReturnInstruction(Opcode.IRETURN, frame);
+                    fail("Exception expected");
+                }).withMessage("Cannot return non int value long as int is expected for truncation to boolean");
             }
         }
     }
