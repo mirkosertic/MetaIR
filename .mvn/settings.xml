@@ -34,7 +34,7 @@
             </activation>
             <id>signed-release</id>
             <properties>
-                <gpg.keyname>0D9F1DB8</gpg.keyname>
+                <gpg.keyname>05C91BA9B8D15BC0</gpg.keyname>
             </properties>
         </profile>
     </profiles>
