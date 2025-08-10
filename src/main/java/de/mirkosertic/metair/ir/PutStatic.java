@@ -10,6 +10,11 @@ public class PutStatic extends Node {
     PutStatic(final RuntimeclassReference target, final String fieldName, final ClassDesc fieldType, final Value value) {
         this.fieldName = fieldName;
         this.fieldType = fieldType;
+
+        if (fieldType.isPrimitive() && !value.type.equals(fieldType)) {
+            illegalArgument("Cannot put value of type " + TypeUtils.toString(value.type) + " in field " + fieldName + " of type " + TypeUtils.toString(fieldType));
+        }
+
         use(target, new ArgumentUse(0));
         use(value, new ArgumentUse(1));
     }

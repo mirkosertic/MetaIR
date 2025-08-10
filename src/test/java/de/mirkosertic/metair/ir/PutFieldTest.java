@@ -42,6 +42,6 @@ public class PutFieldTest {
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
             new PutField(ConstantDescs.CD_String, ConstantDescs.CD_int, "fieldname", new StringConstant("hello"), new StringConstant("hello"));
             fail("Exception expected");
-        }).withMessage("Cannot put non primitive value String on field fieldname of type int");
+        }).withMessage("Cannot put value of type String in field fieldname of type int");
     }
 }

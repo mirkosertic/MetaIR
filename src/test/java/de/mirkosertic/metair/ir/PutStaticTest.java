@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import java.lang.constant.ConstantDescs;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.fail;
 
 public class PutStaticTest {
 
@@ -25,5 +27,14 @@ public class PutStaticTest {
         assertThat(put.debugDescription()).isEqualTo("PutStaticField : fieldname : int");
         assertThat(put.fieldName).isEqualTo("fieldname");
         assertThat(put.isConstant()).isFalse();
+    }
+
+
+    @Test
+    public void fail_wrongtype_field_is_primitive() {
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+            new PutStatic(new RuntimeclassReference(ConstantDescs.CD_String), "fieldname", ConstantDescs.CD_int, new StringConstant("hello"));
+            fail("Exception expected");
+        }).withMessage("Cannot put value of type String in field fieldname of type int");
     }
 }

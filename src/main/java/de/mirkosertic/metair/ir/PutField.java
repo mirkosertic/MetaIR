@@ -13,8 +13,8 @@ public class PutField extends Node {
         if (target.type.isPrimitive() || target.type.isArray()) {
             illegalArgument("Cannot put field " + fieldName + " on non object target " + TypeUtils.toString(target.type));
         }
-        if (fieldType.isPrimitive() && !value.type.isPrimitive()) {
-            illegalArgument("Cannot put non primitive value " + TypeUtils.toString(value.type) + " on field " + fieldName + " of type " + TypeUtils.toString(fieldType));
+        if (fieldType.isPrimitive() && !value.type.equals(fieldType)) {
+            illegalArgument("Cannot put value of type " + TypeUtils.toString(value.type) + " in field " + fieldName + " of type " + TypeUtils.toString(fieldType));
         }
 
         this.owner = owner;
