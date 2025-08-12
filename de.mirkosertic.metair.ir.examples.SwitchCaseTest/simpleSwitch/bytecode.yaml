@@ -1,0 +1,33 @@
+
+  - method name: simpleSwitch
+    flags: []
+    method type: (I)I
+    attributes: [Code]
+    code: 
+        max stack: 1
+        max locals: 2
+        attributes: [LineNumberTable, LocalVariableTable, StackMapTable]
+        line numbers: 
+          - {start: 0, line number: 9}
+          - {start: 28, line number: 11}
+          - {start: 31, line number: 13}
+          - {start: 35, line number: 15}
+        local variables: 
+          - {start: 0, end: 39, slot: 0, name: this, type: Lde/mirkosertic/metair/ir/examples/SwitchCaseTest;}
+          - {start: 0, end: 39, slot: 1, name: value, type: I}
+        stack map frames: 
+            28: {locals: [de/mirkosertic/metair/ir/examples/SwitchCaseTest, int], stack: []}
+            31: {locals: [de/mirkosertic/metair/ir/examples/SwitchCaseTest, int], stack: []}
+            35: {locals: [de/mirkosertic/metair/ir/examples/SwitchCaseTest, int], stack: []}
+        //stack map frame @0: {locals: [de/mirkosertic/metair/ir/examples/SwitchCaseTest, int], stack: []}
+        0: {opcode: ILOAD_1, slot: 1, type: I, variable name: value}
+        1: {opcode: LOOKUPSWITCH, targets: [35, 28, 31]}
+        //stack map frame @28: {locals: [de/mirkosertic/metair/ir/examples/SwitchCaseTest, int], stack: []}
+        28: {opcode: BIPUSH, constant value: 100}
+        30: {opcode: IRETURN}
+        //stack map frame @31: {locals: [de/mirkosertic/metair/ir/examples/SwitchCaseTest, int], stack: []}
+        31: {opcode: SIPUSH, constant value: 200}
+        34: {opcode: IRETURN}
+        //stack map frame @35: {locals: [de/mirkosertic/metair/ir/examples/SwitchCaseTest, int], stack: []}
+        35: {opcode: SIPUSH, constant value: 300}
+        38: {opcode: IRETURN}

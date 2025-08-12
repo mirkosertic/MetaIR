@@ -1,13 +1,13 @@
 digraph {
  node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#0 Method</td></tr><tr><td port="prj2" bgcolor="yellow">this : MethodInvocationTest</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
- node7[label="#7 Class MethodInvocationTest",shape=octagon, fillcolor=lightgreen, style=filled];
- node0 -> node7[style=dotted];
  node1[label="#1 ClassInit",shape=box, fillcolor=lightgrey, style=filled];
  node7 -> node1[headlabel="*0", labeldistance=2];
  node0 -> node1[labeldistance=2, color=green, constraint=false];
  node3 -> node1[labeldistance=2, color=red, fontcolor=red];
  node3[label="#3 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
  node0 -> node3[labeldistance=2, color=red, fontcolor=red];
+ node7[label="#7 Class MethodInvocationTest",shape=octagon, fillcolor=lightgreen, style=filled];
+ node0 -> node7[style=dotted];
  node5[label="#5 Invoke static staticReturnBoolean : (boolean)boolean",shape=box, fillcolor=lightgrey, style=filled];
  node1 -> node5[headlabel="*0", labeldistance=2];
  node4 -> node5[headlabel="*1", labeldistance=2];

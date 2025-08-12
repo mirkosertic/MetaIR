@@ -1,13 +1,13 @@
 digraph {
  node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#0 Method</td></tr><tr><td port="prj6" bgcolor="yellow">this : FieldAccessTest</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
- node8[label="#8 Class FieldAccessTest$Source",shape=octagon, fillcolor=lightgreen, style=filled];
- node0 -> node8[style=dotted];
+ node7[label="#7 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
+ node0 -> node7[labeldistance=2, color=red, fontcolor=red];
  node1[label="#1 ClassInit",shape=box, fillcolor=lightgrey, style=filled];
  node8 -> node1[headlabel="*0", labeldistance=2];
  node7 -> node1[labeldistance=2, color=red, fontcolor=red];
  node0 -> node1[labeldistance=2, color=green, constraint=false];
- node7[label="#7 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
- node0 -> node7[labeldistance=2, color=red, fontcolor=red];
+ node8[label="#8 Class FieldAccessTest$Source",shape=octagon, fillcolor=lightgreen, style=filled];
+ node0 -> node8[style=dotted];
  node2[label="#2 Invoke special <init> : ()void",shape=box, fillcolor=lightgrey, style=filled];
  node3 -> node2[headlabel="*0", labeldistance=2];
  node1 -> node2[labeldistance=2, color=red, fontcolor=red];

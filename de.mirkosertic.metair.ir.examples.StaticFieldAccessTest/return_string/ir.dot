@@ -8,13 +8,13 @@ digraph {
  node3 -> node1[labeldistance=2, color=red, fontcolor=red];
  node3[label="#3 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
  node0 -> node3[labeldistance=2, color=red, fontcolor=red];
+ node5[label="#5 GetStaticField : string_field : String",shape=octagon, fillcolor=orange, style=filled];
+ node4 -> node5[headlabel="*0", labeldistance=2];
+ node1 -> node5[labeldistance=2, color=green, constraint=false];
  node6[label="#6 ReturnValue : String",shape=box, fillcolor=lightgrey, style=filled];
  node5 -> node6[headlabel="*0", labeldistance=2];
  node1 -> node6[labeldistance=2, color=red, fontcolor=red];
  node5 -> node6[labeldistance=2, color=green, constraint=false];
- node5[label="#5 GetStaticField : string_field : String",shape=octagon, fillcolor=orange, style=filled];
- node4 -> node5[headlabel="*0", labeldistance=2];
- node1 -> node5[labeldistance=2, color=green, constraint=false];
  subgraph cluster_0 {
   color=lightgray;
   node0;

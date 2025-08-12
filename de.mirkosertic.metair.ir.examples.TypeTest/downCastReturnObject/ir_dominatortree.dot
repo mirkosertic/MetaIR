@@ -6,7 +6,7 @@ digraph debugoutput {
  node2[label="#2 LabelNode Order : 2",shape=box, fillcolor=lightgrey, style=filled];
  node2 -> node0[dir="forward" color="green" penwidth="2"];
  node0 -> node2[labeldistance=2, color=red, fontcolor=red];
- node3[label="#3 ReturnValue : String Order : 3",shape=box, fillcolor=lightgrey, style=filled];
+ node3[label="#3 ReturnValue : Object Order : 3",shape=box, fillcolor=lightgrey, style=filled];
  node3 -> node0[dir="forward" color="green" penwidth="2"];
  node4 -> node3[headlabel="*0", labeldistance=2];
  node2 -> node3[labeldistance=2, color=red, fontcolor=red];

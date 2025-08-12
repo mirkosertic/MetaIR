@@ -10,7 +10,7 @@ digraph debugoutput {
  node3 -> node0[dir="forward" color="green" penwidth="2"];
  node5 -> node3[headlabel="*0", labeldistance=2];
  node0 -> node3;
- node4[label="#4 ReturnValue : Object[] Order : 4",shape=box, fillcolor=lightgrey, style=filled];
+ node4[label="#4 ReturnValue : Object Order : 4",shape=box, fillcolor=lightgrey, style=filled];
  node4 -> node0[dir="forward" color="green" penwidth="2"];
  node3 -> node4[headlabel="*0", labeldistance=2];
  node2 -> node4[labeldistance=2, color=red, fontcolor=red];

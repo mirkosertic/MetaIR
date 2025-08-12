@@ -1,0 +1,65 @@
+digraph {
+ node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="2">#0 Method</td></tr><tr><td port="prj1" bgcolor="yellow">arg0 : int</td><td port="prj2" bgcolor="yellow">this : SwitchCaseTest</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
+ node3[label="#3 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
+ node0 -> node3[labeldistance=2, color=red, fontcolor=red];
+ node4[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="3">#4 LookupSwitch</td></tr><tr><td port="prj8" bgcolor="yellow">case0</td><td port="prj6" bgcolor="yellow">case1</td><td port="prj5" bgcolor="yellow">default</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
+ node0:prj1 -> node4[headlabel="*0", labeldistance=2];
+ node3 -> node4[labeldistance=2, color=red, fontcolor=red];
+ node9[label="#9 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
+ node4:prj8 -> node9[labeldistance=2, color=red, fontcolor=red];
+ node14[label="#14 ReturnValue : int",shape=box, fillcolor=lightgrey, style=filled];
+ node12 -> node14[headlabel="*0", labeldistance=2];
+ node9 -> node14[labeldistance=2, color=red, fontcolor=red];
+ node0 -> node14[labeldistance=2, color=green, constraint=false];
+ node12[label="#12 int 100",shape=octagon, fillcolor=lightgreen, style=filled];
+ node0 -> node12[style=dotted];
+ node10[label="#10 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
+ node4 -> node10[labeldistance=2, color=red, fontcolor=red];
+ node15[label="#15 ReturnValue : int",shape=box, fillcolor=lightgrey, style=filled];
+ node13 -> node15[headlabel="*0", labeldistance=2];
+ node10 -> node15[labeldistance=2, color=red, fontcolor=red];
+ node0 -> node15[labeldistance=2, color=green, constraint=false];
+ node13[label="#13 int 300",shape=octagon, fillcolor=lightgreen, style=filled];
+ node0 -> node13[style=dotted];
+ node7[label="#7 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
+ node4:prj6 -> node7[labeldistance=2, color=red, fontcolor=red];
+ node16[label="#16 ReturnValue : int",shape=box, fillcolor=lightgrey, style=filled];
+ node11 -> node16[headlabel="*0", labeldistance=2];
+ node7 -> node16[labeldistance=2, color=red, fontcolor=red];
+ node0 -> node16[labeldistance=2, color=green, constraint=false];
+ node11[label="#11 int 200",shape=octagon, fillcolor=lightgreen, style=filled];
+ node0 -> node11[style=dotted];
+ subgraph cluster_0 {
+  color=lightgray;
+  node0;
+  node11;
+  node12;
+  node13;
+ }
+ subgraph cluster_000 {
+  label = "Legend";
+  node [shape=point]
+  {
+   rank=same;
+   c0 [style = invis];
+   c1 [style = invis];
+   c2 [style = invis];
+   c3 [style = invis];
+   d0 [style = invis];
+   d1 [style = invis];
+   d2 [style = invis];
+   d3 [style = invis];
+   d4 [style = invis];
+   d5 [style = invis];
+   d6 [style = invis];
+   d7 [style = invis];
+  }
+  c0 -> c1 [label="Control flow", style=solid, color=red]
+  c2 -> c3 [label="Control flow back edge", style=dashed, color=red]
+  d0 -> d1 [label="Data flow"]
+  d2 -> d3 [label="Declaration", style=dotted]
+  d4 -> d5 [label="PHI Data flow", color=blue]
+  d6 -> d7 [label="Memory flow", color=green]
+ }
+
+}

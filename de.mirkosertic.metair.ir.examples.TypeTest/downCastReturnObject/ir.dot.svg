@@ -43,8 +43,8 @@
 <!-- node3 -->
 <g id="node3" class="node">
 <title>node3</title>
-<polygon fill="lightgrey" stroke="black" points="290.5,-36 101.5,-36 101.5,0 290.5,0 290.5,-36"/>
-<text text-anchor="middle" x="196" y="-14.3" font-family="Times,serif" font-size="14.00">#3 ReturnValue : String</text>
+<polygon fill="lightgrey" stroke="black" points="291.5,-36 100.5,-36 100.5,0 291.5,0 291.5,-36"/>
+<text text-anchor="middle" x="196" y="-14.3" font-family="Times,serif" font-size="14.00">#3 ReturnValue : Object</text>
 </g>
 <!-- node0&#45;&gt;node3 -->
 <g id="edge4" class="edge">
