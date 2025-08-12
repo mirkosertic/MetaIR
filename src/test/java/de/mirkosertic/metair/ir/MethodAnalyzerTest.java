@@ -11,6 +11,7 @@ import java.lang.constant.ClassDesc;
 import java.lang.constant.ConstantDescs;
 import java.lang.constant.MethodTypeDesc;
 import java.util.EmptyStackException;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -164,6 +165,40 @@ public class MethodAnalyzerTest {
         @BeforeEach
         public void setup() {
             analyzer = new MethodAnalyzer();
+        }
+
+        @Nested
+        public class TABLESWITCH {
+
+            @Test
+            public void tableswitch_fail_emptystack() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(10);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    analyzer.visitTableSwitchInstruction(1, 10, List.of(), null, frame);
+                    fail("Exception expected");
+                }).withMessage("A minimum stack size of 1 is required, but only 0 is available!");
+            }
+        }
+
+        @Nested
+        public class LOOKUPSWITCH {
+
+            @Test
+            public void lookupswitch_fail_emptystack() {
+                assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
+                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
+                    frame.in = new MethodAnalyzer.Status(10);
+                    frame.in.control = new LabelNode("control");
+                    frame.in.memory = new LabelNode("memory");
+
+                    analyzer.visitLookupSwitchInstruction(List.of(), null, frame);
+                    fail("Exception expected");
+                }).withMessage("A minimum stack size of 1 is required, but only 0 is available!");
+            }
         }
 
         @Nested

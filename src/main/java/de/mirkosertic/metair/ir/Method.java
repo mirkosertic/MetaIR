@@ -6,7 +6,7 @@ import java.lang.constant.ClassDesc;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Method extends Node {
+public class Method extends TupleNode {
 
     private final Map<Label, LabelNode> labelMap;
     private final Map<ClassDesc, RuntimeclassReference> runtimeclassReferences;
@@ -45,11 +45,15 @@ public class Method extends Node {
     }
 
     public ExtractThisRefProjection defineThisRef(final ClassDesc type) {
-        return (ExtractThisRefProjection) controlFlowsTo(new ExtractThisRefProjection(type), ControlType.FORWARD);
+        final ExtractThisRefProjection n = (ExtractThisRefProjection) controlFlowsTo(new ExtractThisRefProjection(type), ControlType.FORWARD);
+        registerAs(n.name(), n);
+        return n;
     }
 
     public ExtractMethodArgProjection defineMethodArgument(final ClassDesc type, final int index) {
-        return (ExtractMethodArgProjection) controlFlowsTo(new ExtractMethodArgProjection(type, index), ControlType.FORWARD);
+        final ExtractMethodArgProjection n = (ExtractMethodArgProjection) controlFlowsTo(new ExtractMethodArgProjection(type, index), ControlType.FORWARD);
+        registerAs(n.name(), n);
+        return n;
     }
 
     public MergeNode createMergeNode(final String label) {

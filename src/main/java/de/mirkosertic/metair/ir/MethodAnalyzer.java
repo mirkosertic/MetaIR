@@ -25,6 +25,7 @@ import java.lang.classfile.instruction.LineNumber;
 import java.lang.classfile.instruction.LoadInstruction;
 import java.lang.classfile.instruction.LocalVariable;
 import java.lang.classfile.instruction.LocalVariableType;
+import java.lang.classfile.instruction.LookupSwitchInstruction;
 import java.lang.classfile.instruction.MonitorInstruction;
 import java.lang.classfile.instruction.NewMultiArrayInstruction;
 import java.lang.classfile.instruction.NewObjectInstruction;
@@ -35,6 +36,8 @@ import java.lang.classfile.instruction.OperatorInstruction;
 import java.lang.classfile.instruction.ReturnInstruction;
 import java.lang.classfile.instruction.StackInstruction;
 import java.lang.classfile.instruction.StoreInstruction;
+import java.lang.classfile.instruction.SwitchCase;
+import java.lang.classfile.instruction.TableSwitchInstruction;
 import java.lang.classfile.instruction.ThrowInstruction;
 import java.lang.classfile.instruction.TypeCheckInstruction;
 import java.lang.constant.ClassDesc;
@@ -76,10 +79,9 @@ public class MethodAnalyzer {
     }
 
     public MethodAnalyzer(final ClassDesc owner, final MethodModel method) {
-        this();
+        this(method.methodTypeSymbol());
         this.owner = owner;
         this.method = method;
-        this.methodTypeDesc = method.methodTypeSymbol();
 
         final Optional<CodeModel> optCode = method.code();
         if (optCode.isPresent()) {
@@ -193,7 +195,7 @@ public class MethodAnalyzer {
                                     frame = new Frame(newIndex, codeElements.get(newIndex));
                                     frames[newIndex] = frame;
                                 }
-                                frame.predecessors.add(new CFGEdge(i, CFGProjection.DEFAULT, controlType));
+                                frame.predecessors.add(new CFGEdge(i, NamedProjection.DEFAULT, controlType));
                                 break;
                             } else {
                                 illegalState("Unconditional branch to " + branch.target() + " which is not mapped to an index");
@@ -217,11 +219,105 @@ public class MethodAnalyzer {
                                     frame = new Frame(newIndex, codeElements.get(newIndex));
                                     frames[newIndex] = frame;
                                 }
-                                frame.predecessors.add(new CFGEdge(i, CFGProjection.TRUE, controlType));
+                                frame.predecessors.add(new CFGEdge(i, new NamedProjection("true"), controlType));
                             } else {
-                                illegalState("Unconditional branch to " + branch.target() + " which is not mapped to an index");
+                                illegalState("Conditional branch to " + branch.target() + " which is not mapped to an index");
                             }
                         }
+                    } else if (instruction instanceof final LookupSwitchInstruction lsu) {
+                        final List<SwitchCase> cases = lsu.cases();
+                        for (int j = 0; j < cases.size(); j++) {
+                            final SwitchCase sc = cases.get(j);
+                            final Label target = sc.target();
+
+                            if (labelToIndex.containsKey(target)) {
+                                final int newIndex = labelToIndex.get(target);
+                                if (!visited.contains(newIndex)) {
+                                    jobs.add(new CFGAnalysisJob(newIndex, newPath));
+                                }
+                                ControlType controlType = ControlType.FORWARD;
+                                if (newPath.contains(newIndex)) {
+                                    controlType = ControlType.BACKWARD;
+                                }
+                                Frame frame = frames[newIndex];
+                                if (frame == null) {
+                                    frame = new Frame(newIndex, codeElements.get(newIndex));
+                                    frames[newIndex] = frame;
+                                }
+                                frame.predecessors.add(new CFGEdge(i, new NamedProjection("case" + j), controlType));
+                            } else {
+                                illegalState("Case branch to " + target + " which is not mapped to an index");
+                            }
+                        }
+
+                        final Label target = lsu.defaultTarget();
+                        if (labelToIndex.containsKey(target)) {
+                            final int newIndex = labelToIndex.get(target);
+                            if (!visited.contains(newIndex)) {
+                                jobs.add(new CFGAnalysisJob(newIndex, newPath));
+                            }
+                            ControlType controlType = ControlType.FORWARD;
+                            if (newPath.contains(newIndex)) {
+                                controlType = ControlType.BACKWARD;
+                            }
+                            Frame frame = frames[newIndex];
+                            if (frame == null) {
+                                frame = new Frame(newIndex, codeElements.get(newIndex));
+                                frames[newIndex] = frame;
+                            }
+                            frame.predecessors.add(new CFGEdge(i, new NamedProjection("default"), controlType));
+                        } else {
+                            illegalState("Default branch to " + target + " which is not mapped to an index");
+                        }
+
+                        break;
+                    } else if (instruction instanceof final TableSwitchInstruction tsi) {
+                        final List<SwitchCase> cases = tsi.cases();
+                        for (int j = 0; j < cases.size(); j++) {
+                            final SwitchCase sc = cases.get(j);
+                            final Label target = sc.target();
+
+                            if (labelToIndex.containsKey(target)) {
+                                final int newIndex = labelToIndex.get(target);
+                                if (!visited.contains(newIndex)) {
+                                    jobs.add(new CFGAnalysisJob(newIndex, newPath));
+                                }
+                                ControlType controlType = ControlType.FORWARD;
+                                if (newPath.contains(newIndex)) {
+                                    controlType = ControlType.BACKWARD;
+                                }
+                                Frame frame = frames[newIndex];
+                                if (frame == null) {
+                                    frame = new Frame(newIndex, codeElements.get(newIndex));
+                                    frames[newIndex] = frame;
+                                }
+                                frame.predecessors.add(new CFGEdge(i, new NamedProjection("case" + j), controlType));
+                            } else {
+                                illegalState("Case branch to " + target + " which is not mapped to an index");
+                            }
+                        }
+
+                        final Label target = tsi.defaultTarget();
+                        if (labelToIndex.containsKey(target)) {
+                            final int newIndex = labelToIndex.get(target);
+                            if (!visited.contains(newIndex)) {
+                                jobs.add(new CFGAnalysisJob(newIndex, newPath));
+                            }
+                            ControlType controlType = ControlType.FORWARD;
+                            if (newPath.contains(newIndex)) {
+                                controlType = ControlType.BACKWARD;
+                            }
+                            Frame frame = frames[newIndex];
+                            if (frame == null) {
+                                frame = new Frame(newIndex, codeElements.get(newIndex));
+                                frames[newIndex] = frame;
+                            }
+                            frame.predecessors.add(new CFGEdge(i, new NamedProjection("default"), controlType));
+                        } else {
+                            illegalState("Default branch to " + target + " which is not mapped to an index");
+                        }
+
+                        break;
                     } else {
                         // The following opcode ends the analysis of the current job, as control-flow terminates
                         switch (instruction.opcode()) {
@@ -245,9 +341,9 @@ public class MethodAnalyzer {
                 }
                 // This is a regular forward flow
                 if (current instanceof BranchInstruction) {
-                    nextFrame.predecessors.add(new CFGEdge(i, CFGProjection.FALSE, ControlType.FORWARD));
+                    nextFrame.predecessors.add(new CFGEdge(i, new NamedProjection("false"), ControlType.FORWARD));
                 } else {
-                    nextFrame.predecessors.add(new CFGEdge(i, CFGProjection.DEFAULT, ControlType.FORWARD));
+                    nextFrame.predecessors.add(new CFGEdge(i, NamedProjection.DEFAULT, ControlType.FORWARD));
                 }
 
                 if (visited.contains(i + 1)) {
@@ -339,7 +435,6 @@ public class MethodAnalyzer {
                 p.use(ir.defineThisRef(owner), new PHIUse(ir));
                 initStatus.setLocal(localIndex++, p);
             }
-            final MethodTypeDesc methodTypeDesc = method.methodTypeSymbol();
             final ClassDesc[] argumentTypes = methodTypeDesc.parameterArray();
             for (int i = 0; i < argumentTypes.length; i++) {
                 final PHI p = loop.definePHI(TypeUtils.jvmInternalTypeOf(argumentTypes[i]));
@@ -356,7 +451,6 @@ public class MethodAnalyzer {
             if (!method.flags().flags().contains(AccessFlag.STATIC)) {
                 initStatus.setLocal(localIndex++, ir.defineThisRef(owner));
             }
-            final MethodTypeDesc methodTypeDesc = method.methodTypeSymbol();
             final ClassDesc[] argumentTypes = methodTypeDesc.parameterArray();
             for (int i = 0; i < argumentTypes.length; i++) {
                 initStatus.setLocal(localIndex++, ir.defineMethodArgument(TypeUtils.jvmInternalTypeOf(argumentTypes[i]), i));
@@ -392,14 +486,15 @@ public class MethodAnalyzer {
                         illegalState("No outgoing status for " + frame.elementIndex);
                     }
                     incomingStatus = outgoing.out.copy();
-                    switch (edge.projection) {
-                        case DEFAULT -> {
-                            // No nothing in this case, we just keep the incoming control node
-                        }
-                        case TRUE -> incomingStatus.control = (Node) ((If) incomingStatus.control).trueCase;
-                        case FALSE -> incomingStatus.control = (Node) ((If) incomingStatus.control).falseCase;
-                        default -> illegalState("Unknown projection type " + edge.projection);
+
+                    if (NamedProjection.DEFAULT.equals(edge.projection)) {
+                        // No nothing in this case, we just keep the incoming control node
+                    } else if (incomingStatus.control instanceof TupleNode) {
+                        incomingStatus.control = ((TupleNode) incomingStatus.control).getNamedNode(edge.projection().name());
+                    } else {
+                        illegalState("Unknown projection type " + edge.projection + " or unsupported node : " + incomingStatus.control);
                     }
+
                     frame.in = incomingStatus;
                 } else {
                     // Eager PHI creation and memory-edge merging
@@ -444,7 +539,6 @@ public class MethodAnalyzer {
 
                     incomingStatus = new Status(cm.maxLocals());
 
-                    // TODO: What about the stack?
                     int incomingStackSize = -1;
                     for (final Frame fr : incomingFrames) {
                         if (incomingStackSize == -1) {
@@ -467,7 +561,6 @@ public class MethodAnalyzer {
                                 }
                             }
                             if (allValues.size() > 1 || hasBackEdges) {
-                                // TODO: Insert phi node here
                                 final Value source = allValues.getFirst();
                                 final PHI p = target.definePHI(source.type);
 
@@ -522,8 +615,6 @@ public class MethodAnalyzer {
 
                     frame.in = incomingStatus;
                     frame.entryPoint = target;
-
-//                    illegalState("Multi-Join or phi not supported yed!");
                 }
             }
 
@@ -595,11 +686,49 @@ public class MethodAnalyzer {
                 case final ConvertInstruction ci -> visitConvertInstruction(ci.opcode(), frame);
                 case final NewMultiArrayInstruction nm ->
                         visitNewMultiArray(nm.arrayType().asSymbol(), nm.dimensions(), frame);
+                case final LookupSwitchInstruction lsi ->
+                        visitLookupSwitchInstruction(lsi.cases(), lsi.defaultTarget().toString(), frame);
+                case final TableSwitchInstruction tsi ->
+                        visitTableSwitchInstruction(tsi.lowValue(), tsi.highValue(), tsi.cases(), tsi.defaultTarget().toString(), frame);
                 default -> throw new IllegalArgumentException("Not implemented yet : " + ins);
             }
         } else {
             throw new IllegalArgumentException("Not implemented yet : " + node);
         }
+    }
+
+    protected void visitLookupSwitchInstruction(final List<SwitchCase> switchCases, final String defaultLabel, final Frame frame) {
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        assertMinimumStackSize(outgoing, 1);
+
+        final Value check = outgoing.pop();
+
+        // TODO: Back edges not allowed here!
+
+        final List<Integer> cases = new ArrayList<>();
+        for (final SwitchCase sc : switchCases) {
+            cases.add(sc.caseValue());
+        }
+
+        final Node node = new LookupSwitch(check, defaultLabel, cases);
+        outgoing.control = outgoing.control.controlFlowsTo(node, ControlType.FORWARD);
+    }
+
+    protected void visitTableSwitchInstruction(final int minValue, final int maxValue, final List<SwitchCase> switchCases, final String defaultLabel, final Frame frame) {
+        final Status outgoing = frame.copyIncomingToOutgoing();
+        assertMinimumStackSize(outgoing, 1);
+
+        final Value check = outgoing.pop();
+
+        // TODO: Back edges not allowed here!
+
+        final List<Integer> cases = new ArrayList<>();
+        for (final SwitchCase sc : switchCases) {
+            cases.add(sc.caseValue());
+        }
+
+        final Node node = new TableSwitch(check, minValue, maxValue, defaultLabel, cases);
+        outgoing.control = outgoing.control.controlFlowsTo(node, ControlType.FORWARD);
     }
 
     @Testbacklog
@@ -1469,7 +1598,7 @@ public class MethodAnalyzer {
 
         final Value v = outgoing.pop();
 
-        final ReturnValue next = new ReturnValue(v.type, v);
+        final ReturnValue next = new ReturnValue(methodTypeDesc.returnType(), v);
         outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(next);
     }
@@ -1487,6 +1616,7 @@ public class MethodAnalyzer {
             }
         }
 
+        // TODO: Does not 100% match the method signature type here
         final ReturnValue next = new ReturnValue(v.type, v);
         outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(next);
@@ -1859,11 +1989,11 @@ public class MethodAnalyzer {
     private void step4PeepholeOptimizations() {
     }
 
-    public enum CFGProjection {
-        DEFAULT, TRUE, FALSE
+    public record NamedProjection(String name) {
+        public static final NamedProjection DEFAULT = new NamedProjection("default");
     }
 
-    public record CFGEdge(int fromIndex, CFGProjection projection, ControlType controlType) {
+    public record CFGEdge(int fromIndex, NamedProjection projection, ControlType controlType) {
     }
 
     private record CFGAnalysisJob(int startIndex, List<Integer> path) {

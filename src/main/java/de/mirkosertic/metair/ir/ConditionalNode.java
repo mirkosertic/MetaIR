@@ -1,4 +1,4 @@
 package de.mirkosertic.metair.ir;
 
-public abstract class ConditionalNode extends Node {
+public abstract class ConditionalNode extends TupleNode {
 }
