@@ -4,17 +4,17 @@ import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
 import java.util.List;
 
-public abstract class Invocation extends Value {
+public abstract class Invoke extends Value {
 
     public final ClassDesc ownerType;
     public final Value target;
     public final String name;
     public final MethodTypeDesc typeDesc;
 
-    Invocation(final ClassDesc ownerType, final Value target, final String name, final MethodTypeDesc methodTypeDesc, final List<Value> arguments) {
+    Invoke(final ClassDesc ownerType, final Value target, final String name, final MethodTypeDesc methodTypeDesc, final List<Value> arguments) {
         super(TypeUtils.jvmInternalTypeOf(methodTypeDesc.returnType()));
 
-        if (target.type.isPrimitive()) {
+        if (target.isPrimitive()) {
             illegalArgument("Cannot invoke a method on a primitive value");
         }
 

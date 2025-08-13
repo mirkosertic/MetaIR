@@ -15,9 +15,4 @@ public class PrimitiveInt extends PrimitiveValue {
     public String debugDescription() {
         return "int " + value;
     }
-
-    @Override
-    public boolean isConstant() {
-        return true;
-    }
 }

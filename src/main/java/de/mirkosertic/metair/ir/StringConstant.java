@@ -2,7 +2,7 @@ package de.mirkosertic.metair.ir;
 
 import java.lang.constant.ConstantDescs;
 
-public class StringConstant extends Value {
+public class StringConstant extends ConstantValue {
 
     public final String value;
 
@@ -14,10 +14,5 @@ public class StringConstant extends Value {
     @Override
     public String debugDescription() {
         return "String : " + value;
-    }
-
-    @Override
-    public boolean isConstant() {
-        return true;
     }
 }

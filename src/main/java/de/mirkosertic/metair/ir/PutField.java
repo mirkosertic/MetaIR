@@ -10,7 +10,7 @@ public class PutField extends Node {
 
     PutField(final ClassDesc owner, final ClassDesc fieldType, final String fieldName, final Value target, final Value value) {
 
-        if (target.type.isPrimitive() || target.type.isArray()) {
+        if (target.isPrimitive() || target.isArray()) {
             illegalArgument("Cannot put field " + fieldName + " on non object target " + TypeUtils.toString(target.type));
         }
         if (fieldType.isPrimitive() && !value.type.equals(fieldType)) {

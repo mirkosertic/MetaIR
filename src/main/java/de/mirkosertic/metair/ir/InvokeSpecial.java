@@ -4,9 +4,9 @@ import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
 import java.util.List;
 
-public class InvocationSpecial extends Invocation {
+public class InvokeSpecial extends Invoke {
 
-    public InvocationSpecial(final ClassDesc ownerType, final Value target, final String name, final MethodTypeDesc methodTypeDesc, final List<Value> arguments) {
+    public InvokeSpecial(final ClassDesc ownerType, final Value target, final String name, final MethodTypeDesc methodTypeDesc, final List<Value> arguments) {
         super(ownerType, target, name, methodTypeDesc, arguments);
     }
 

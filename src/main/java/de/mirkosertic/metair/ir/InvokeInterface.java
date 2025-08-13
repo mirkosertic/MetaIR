@@ -4,9 +4,9 @@ import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
 import java.util.List;
 
-public class InvocationInterface extends Invocation {
+public class InvokeInterface extends Invoke {
 
-    public InvocationInterface(final ClassDesc ownerType, final Value target, final String name, final MethodTypeDesc methodTypeDesc, final List<Value> arguments) {
+    public InvokeInterface(final ClassDesc ownerType, final Value target, final String name, final MethodTypeDesc methodTypeDesc, final List<Value> arguments) {
         super(ownerType, target, name, methodTypeDesc, arguments);
     }
 

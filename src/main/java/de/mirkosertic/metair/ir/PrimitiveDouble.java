@@ -15,9 +15,4 @@ public class PrimitiveDouble extends PrimitiveValue {
     public String debugDescription() {
         return "double " + value;
     }
-
-    @Override
-    public boolean isConstant() {
-        return true;
-    }
 }

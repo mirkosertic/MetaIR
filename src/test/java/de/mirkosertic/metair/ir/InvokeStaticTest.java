@@ -8,12 +8,12 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class InvocationStaticTest {
+public class InvokeStaticTest {
 
     @Test
     public void testUsage() {
         final Value target = new StringConstant("hello");
-        final InvocationStatic a = new InvocationStatic(ConstantDescs.CD_String, target, "bar", MethodTypeDesc.of(ConstantDescs.CD_void, List.of(ConstantDescs.CD_int)), List.of(new PrimitiveInt(10)));
+        final InvokeStatic a = new InvokeStatic(ConstantDescs.CD_String, target, "bar", MethodTypeDesc.of(ConstantDescs.CD_void, List.of(ConstantDescs.CD_int)), List.of(new PrimitiveInt(10)));
 
         assertThat(a.type).isEqualTo(ConstantDescs.CD_void);
         assertThat(a).isInstanceOf(Value.class);

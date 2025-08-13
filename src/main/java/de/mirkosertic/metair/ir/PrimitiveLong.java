@@ -15,9 +15,4 @@ public class PrimitiveLong extends PrimitiveValue {
     public String debugDescription() {
         return "long " + value;
     }
-
-    @Override
-    public boolean isConstant() {
-        return true;
-    }
 }

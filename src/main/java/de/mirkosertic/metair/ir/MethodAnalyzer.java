@@ -43,7 +43,10 @@ import java.lang.classfile.instruction.TypeCheckInstruction;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.ConstantDesc;
 import java.lang.constant.ConstantDescs;
+import java.lang.constant.DirectMethodHandleDesc;
+import java.lang.constant.MethodHandleDesc;
 import java.lang.constant.MethodTypeDesc;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.AccessFlag;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -884,12 +887,50 @@ public class MethodAnalyzer {
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, expectedarguments);
 
-        for (int i = 0; i < expectedarguments; i++) {
-            final Value v = frame.out.pop();
+        // First of all, we need the bootstrap method as the later invocation target
+        final DirectMethodHandleDesc bootstrapMethod = node.bootstrapMethod();
+        if (bootstrapMethod.kind() != DirectMethodHandleDesc.Kind.STATIC) {
+            illegalState("Only static bootstrap methods are supported yet");
         }
+        final List<Value> bootstrapArguments = new ArrayList<>();
+
+        final Value invokerType = ir.defineRuntimeclassReference(owner);
+        final ClassDesc lookupOwner = ClassDesc.of(MethodHandles.Lookup.class.getName());
+
+        // Default bootstrap arguments
+        bootstrapArguments.add(new InvokeStatic(lookupOwner, invokerType, "in", MethodTypeDesc.of(lookupOwner, ClassDesc.of(Class.class.getName())), List.of(invokerType)));
+        bootstrapArguments.add(ir.defineStringConstant(node.name().stringValue()));
+        bootstrapArguments.add(constantToValue(node.typeSymbol()));
+
+        final MethodTypeDesc bootstrapMethodType = bootstrapMethod.invocationType();
+
+        // TODO: Check arity...
+        for (final ConstantDesc bootstrapArgument : node.bootstrapArgs()) {
+            bootstrapArguments.add(constantToValue(bootstrapArgument));
+        }
+        if (bootstrapArguments.size() < bootstrapMethodType.parameterCount()) {
+            if (bootstrapMethodType.parameterType(bootstrapMethodType.parameterCount() - 1).isArray()) {
+                // TODO: Check for memory flow...
+                final NewArray emptyArgs = new NewArray(ConstantDescs.CD_Object, ir.definePrimitiveInt(0));
+                bootstrapArguments.add(emptyArgs);
+            } else {
+                illegalState("Don't get this signature for invokedynamic here...");
+            }
+        }
+        final Value bootstrapInvocation = new InvokeStatic(bootstrapMethod.owner(), ir.defineRuntimeclassReference(bootstrapMethod.owner()), bootstrapMethod.methodName(), bootstrapMethodType, bootstrapArguments);
+
+        final List<Value> dynamicArguments = new ArrayList<>();
+        for (int i = 0; i < expectedarguments; i++) {
+            dynamicArguments.add(frame.out.pop());
+        }
+
+        final Value invokeDynamic = new InvokeDynamic(owner, bootstrapInvocation, node.name().stringValue(), methodTypeDesc, dynamicArguments.reversed());
+
+        outgoing.memory = outgoing.memory.memoryFlowsTo(invokeDynamic);
+        outgoing.control = outgoing.control.controlFlowsTo(invokeDynamic, ControlType.FORWARD);
+
         if (!returnType.equals(ConstantDescs.CD_void)) {
-            // TODO: Create invocation here
-            frame.out.push(new Null());
+            frame.out.push(invokeDynamic);
         }
     }
 
@@ -1179,7 +1220,7 @@ public class MethodAnalyzer {
 
         final Value target = outgoing.pop();
 
-        final Value next = new InvocationSpecial(owner, target, methodName, methodTypeDesc, arguments.reversed());
+        final Value next = new InvokeSpecial(owner, target, methodName, methodTypeDesc, arguments.reversed());
         outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(next);
 
@@ -1207,16 +1248,16 @@ public class MethodAnalyzer {
 
         final Value target = outgoing.pop();
 
-        final Invocation invocation = new InvocationVirtual(owner, target, methodName, methodTypeDesc, arguments.reversed());
+        final Invoke invoke = new InvokeVirtual(owner, target, methodName, methodTypeDesc, arguments.reversed());
 
-        outgoing.control = outgoing.control.controlFlowsTo(invocation, ControlType.FORWARD);
-        outgoing.memory = outgoing.memory.memoryFlowsTo(invocation);
+        outgoing.control = outgoing.control.controlFlowsTo(invoke, ControlType.FORWARD);
+        outgoing.memory = outgoing.memory.memoryFlowsTo(invoke);
 
         if (!returnType.equals(ConstantDescs.CD_void)) {
-            outgoing.push(invocation);
+            outgoing.push(invoke);
         }
 
-        frame.entryPoint = invocation;
+        frame.entryPoint = invoke;
     }
 
     private void parse_INVOKEINTERFACE(final ClassDesc owner, final String methodName, final MethodTypeDesc methodTypeDesc, final Frame frame) {
@@ -1235,16 +1276,16 @@ public class MethodAnalyzer {
 
         final Value target = outgoing.pop();
 
-        final Invocation invocation = new InvocationInterface(owner, target, methodName, methodTypeDesc, arguments.reversed());
+        final Invoke invoke = new InvokeInterface(owner, target, methodName, methodTypeDesc, arguments.reversed());
 
-        outgoing.control = outgoing.control.controlFlowsTo(invocation, ControlType.FORWARD);
-        outgoing.memory = outgoing.memory.memoryFlowsTo(invocation);
+        outgoing.control = outgoing.control.controlFlowsTo(invoke, ControlType.FORWARD);
+        outgoing.memory = outgoing.memory.memoryFlowsTo(invoke);
 
         if (!returnType.equals(ConstantDescs.CD_void)) {
-            outgoing.push(invocation);
+            outgoing.push(invoke);
         }
 
-        frame.entryPoint = invocation;
+        frame.entryPoint = invoke;
     }
 
     private void parse_INVOKESTATIC(final ClassDesc owner, final String methodName, final MethodTypeDesc methodTypeDesc, final Frame frame) {
@@ -1264,15 +1305,15 @@ public class MethodAnalyzer {
             arguments.add(v);
         }
 
-        final Invocation invocation = new InvocationStatic(owner, init, methodName, methodTypeDesc, arguments.reversed());
+        final Invoke invoke = new InvokeStatic(owner, init, methodName, methodTypeDesc, arguments.reversed());
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(init);
-        outgoing.memory = outgoing.memory.memoryFlowsTo(invocation);
+        outgoing.memory = outgoing.memory.memoryFlowsTo(invoke);
         outgoing.control = outgoing.control.controlFlowsTo(init, ControlType.FORWARD);
-        outgoing.control = outgoing.control.controlFlowsTo(invocation, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(invoke, ControlType.FORWARD);
 
         if (!returnType.equals(ConstantDescs.CD_void)) {
-            outgoing.push(invocation);
+            outgoing.push(invoke);
         }
 
         frame.entryPoint = init;
@@ -1283,7 +1324,7 @@ public class MethodAnalyzer {
         if (v == null) {
             illegalState("Slot " + slot + " is null");
         }
-        if (v.type.isPrimitive()) {
+        if (v.isPrimitive()) {
             illegalState("Cannot load primitive value " + TypeUtils.toString(v.type) + " for slot " + slot);
         }
 
@@ -1308,7 +1349,7 @@ public class MethodAnalyzer {
         assertMinimumStackSize(outgoing, 1);
 
         final Value v = outgoing.pop();
-        if (v.type.isPrimitive()) {
+        if (v.isPrimitive()) {
             illegalState("Cannot store primitive value " + TypeUtils.toString(v.type));
         }
 
@@ -1460,18 +1501,28 @@ public class MethodAnalyzer {
         handlePotentialBackedgeFor(next, frame, targetFrame);
     }
 
+    private Value constantToValue(final ConstantDesc constantDesc) {
+        return switch (constantDesc) {
+            case final String str -> ir.defineStringConstant(str);
+            case final Integer i -> ir.definePrimitiveInt(i);
+            case final Long l -> ir.definePrimitiveLong(l);
+            case final Float f -> ir.definePrimitiveFloat(f);
+            case final Double d -> ir.definePrimitiveDouble(d);
+            case final ClassDesc classDesc -> ir.defineRuntimeclassReference(classDesc);
+            case final MethodTypeDesc mtd -> ir.defineMethodType(mtd);
+            case final MethodHandleDesc mh -> ir.defineMethodHandle(mh);
+            case null, default -> {
+                illegalState("Cannot convert " + constantDesc + " to IR value");
+                yield null;
+            }
+        };
+    }
+
     protected void parse_LDC(final ConstantDesc value, final Frame frame) {
         // A node that represents an LDC instruction.
         final Status outgoing = frame.copyIncomingToOutgoing();
-        switch (value) {
-            case final String str -> outgoing.push(ir.defineStringConstant(str));
-            case final Integer i -> outgoing.push(ir.definePrimitiveInt(i));
-            case final Long l -> outgoing.push(ir.definePrimitiveLong(l));
-            case final Float f -> outgoing.push(ir.definePrimitiveFloat(f));
-            case final Double d -> outgoing.push(ir.definePrimitiveDouble(d));
-            case final ClassDesc classDesc -> outgoing.push(ir.defineRuntimeclassReference(classDesc));
-            case null, default -> illegalState("Cannot parse LDC instruction with value " + value);
-        }
+
+        outgoing.push(constantToValue(value));
     }
 
     private void parse_ICONST(final ConstantDesc node, final Frame frame) {
@@ -1902,7 +1953,9 @@ public class MethodAnalyzer {
             illegalState("Expected value of type int for " + opcode);
         }
 
-        final ArrayStore store = new ArrayStore(array, index, new Truncate(array.type.componentType(), value));
+        final ClassDesc arrayType = (ClassDesc) array.type;
+
+        final ArrayStore store = new ArrayStore(array, index, new Truncate(arrayType.componentType(), value));
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(store);
         outgoing.control = outgoing.control.controlFlowsTo(store, ControlType.FORWARD);
@@ -1943,7 +1996,9 @@ public class MethodAnalyzer {
         final Value index = outgoing.pop();
         final Value array = outgoing.pop();
 
-        final Value load = new ArrayLoad(array.type, array, index);
+        final ClassDesc arrayType = (ClassDesc) array.type;
+
+        final Value load = new ArrayLoad(arrayType, array, index);
 
         final Value value = new Extend(ConstantDescs.CD_int, type, load);
 
@@ -1970,7 +2025,10 @@ public class MethodAnalyzer {
 
         final Value index = outgoing.pop();
         final Value array = outgoing.pop();
-        final Value value = new ArrayLoad(array.type, array, index);
+
+        final ClassDesc arrayType = (ClassDesc) array.type;
+
+        final Value value = new ArrayLoad(arrayType, array, index);
         outgoing.memory = outgoing.memory.memoryFlowsTo(value);
         outgoing.control = outgoing.control.controlFlowsTo(value, ControlType.FORWARD);
         outgoing.push(value);

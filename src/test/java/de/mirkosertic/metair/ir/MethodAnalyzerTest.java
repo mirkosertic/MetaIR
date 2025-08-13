@@ -749,7 +749,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out.control).isSameAs(frame.out.stack.getFirst());
                 assertThat(frame.out.memory).isSameAs(frame.out.stack.getFirst());
 
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(InvocationStatic.class);
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(InvokeStatic.class);
             }
 
             @Test
@@ -769,7 +769,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out.control).isSameAs(frame.out.stack.getFirst());
                 assertThat(frame.out.memory).isSameAs(frame.out.stack.getFirst());
 
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(InvocationSpecial.class);
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(InvokeSpecial.class);
             }
 
             @Test
@@ -802,7 +802,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out.control).isSameAs(frame.out.stack.getFirst());
                 assertThat(frame.out.memory).isSameAs(frame.out.stack.getFirst());
 
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(InvocationVirtual.class);
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(InvokeVirtual.class);
             }
 
             @Test
@@ -835,7 +835,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out.control).isSameAs(frame.out.stack.getFirst());
                 assertThat(frame.out.memory).isSameAs(frame.out.stack.getFirst());
 
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(InvocationInterface.class);
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(InvokeInterface.class);
             }
 
             @Test
@@ -4021,7 +4021,7 @@ public class MethodAnalyzerTest {
                 assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
                     analyzer.parse_LDC(null, frame);
                     fail("Exception expected");
-                }).withMessage("Cannot parse LDC instruction with value null");
+                }).withMessage("Cannot convert null to IR value");
             }
         }
 

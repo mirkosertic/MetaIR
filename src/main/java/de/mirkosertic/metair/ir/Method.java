@@ -3,6 +3,9 @@ package de.mirkosertic.metair.ir;
 
 import java.lang.classfile.Label;
 import java.lang.constant.ClassDesc;
+import java.lang.constant.ConstantDesc;
+import java.lang.constant.MethodHandleDesc;
+import java.lang.constant.MethodTypeDesc;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,6 +13,8 @@ public class Method extends TupleNode {
 
     private final Map<Label, LabelNode> labelMap;
     private final Map<ClassDesc, RuntimeclassReference> runtimeclassReferences;
+    private final Map<MethodTypeDesc, MethodType> methodtypeReferences;
+    private final Map<MethodHandleDesc, MethodHandle> methodHandles;
     private final Map<Object, Value> constants;
     private Null nullref;
 
@@ -17,6 +22,8 @@ public class Method extends TupleNode {
         this.labelMap = new HashMap<>();
         this.runtimeclassReferences = new HashMap<>();
         this.constants = new HashMap<>();
+        this.methodtypeReferences = new HashMap<>();
+        this.methodHandles = new HashMap<>();
         this.nullref = null;
     }
 
@@ -28,6 +35,21 @@ public class Method extends TupleNode {
         });
     }
 
+    public MethodType defineMethodType(final MethodTypeDesc type) {
+        return methodtypeReferences.computeIfAbsent(type, key -> {
+            final MethodType r = new MethodType(key);
+            r.use(Method.this, DefinedByUse.INSTANCE);
+            return r;
+        });
+    }
+
+    public MethodHandle defineMethodHandle(final MethodHandleDesc type) {
+        return methodHandles.computeIfAbsent(type, key -> {
+            final MethodHandle r = new MethodHandle(key);
+            r.use(Method.this, DefinedByUse.INSTANCE);
+            return r;
+        });
+    }
     public Null defineNullReference() {
         if (nullref == null) {
             nullref = new Null();
@@ -50,7 +72,7 @@ public class Method extends TupleNode {
         return n;
     }
 
-    public ExtractMethodArgProjection defineMethodArgument(final ClassDesc type, final int index) {
+    public ExtractMethodArgProjection defineMethodArgument(final ConstantDesc type, final int index) {
         final ExtractMethodArgProjection n = (ExtractMethodArgProjection) controlFlowsTo(new ExtractMethodArgProjection(type, index), ControlType.FORWARD);
         registerAs(n.name(), n);
         return n;

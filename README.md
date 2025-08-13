@@ -18,11 +18,15 @@ The framework leverages the Java Class-File API introduced in Java 24 (JEP 484).
 - Implements Sea-of-Nodes IR design
 - Further examples and documentation: [SeaOfNodes/Simple](https://github.com/SeaOfNodes/Simple)
 
-> 🚧 Scheduling logic for machine code transformation is under development.
+> * 🚧 Scheduling logic for machine code transformation is under development.
+> * 🚧 Exception handling is under development.
+
+## Credits
+- An excellent tutorial about the Class-File API: [Build A Compiler With The Java Class-File API by Dr. James Hamilton](https://jameshamilton.eu/programming/build-compiler-java-class-file-api)
 
 ## Example new instance creation
 
-A simple Java example with constructor invocation, demonstrating the use of
+A simple Java example with constructor invoke, demonstrating the use of
 the JUnit Platform integration:
 
 ```
@@ -34,7 +38,8 @@ public class NewInstanceTest {
     public void newInstance() {
         new NewInstanceTest();
     }
-}``
+}
+```
 
 Class-File API Debug YAML:
 ```
@@ -58,7 +63,6 @@ Class-File API Debug YAML:
   4: {opcode: INVOKESPECIAL, owner: de/mirkosertic/metair/ir/examples/NewInstanceTest, method name: <init>, method type: ()V}
   7: {opcode: POP}
   8: {opcode: RETURN}
-
 ```
 
 Generated IR (raw and unoptimized):
@@ -90,14 +94,6 @@ TODO: Add links to examples repository
      * @see Kind#DISCONTINUED_RET
      */
     RET(RawBytecodeHelper.RET, 2, Kind.DISCONTINUED_RET),
-
-    /**
-     * Invoke a dynamically-computed call site.
-     *
-     * @jvms 6.5.invokedynamic <em>invokedynamic</em>
-     * @see Kind#INVOKE_DYNAMIC
-     */
-    INVOKEDYNAMIC(RawBytecodeHelper.INVOKEDYNAMIC, 5, Kind.INVOKE_DYNAMIC),
 
     /**
      * (Discontinued) Jump subroutine (wide index); last used in major

@@ -4,7 +4,7 @@ public class MonitorExit extends Node {
 
     MonitorExit(final Value object) {
 
-        if (object.type.isPrimitive()) {
+        if (object.isPrimitive()) {
             illegalArgument("Expecting non primitive type for monitorexit on stack, got " + TypeUtils.toString(object.type));
         }
 

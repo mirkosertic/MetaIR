@@ -57,5 +57,4 @@ class TypeUtilsTest {
         assertThat(TypeUtils.jvmInternalTypeOf(ConstantDescs.CD_short)).isEqualTo(ConstantDescs.CD_int);
         assertThat(TypeUtils.jvmInternalTypeOf(ConstantDescs.CD_Object)).isSameAs(ConstantDescs.CD_Object);
     }
-
 }

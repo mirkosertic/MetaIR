@@ -4,9 +4,9 @@ import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
 import java.util.List;
 
-public class InvocationVirtual extends Invocation {
+public class InvokeVirtual extends Invoke {
 
-    public InvocationVirtual(final ClassDesc ownerType, final Value target, final String name, final MethodTypeDesc methodTypeDesc, final List<Value> arguments) {
+    public InvokeVirtual(final ClassDesc ownerType, final Value target, final String name, final MethodTypeDesc methodTypeDesc, final List<Value> arguments) {
         super(ownerType, target, name, methodTypeDesc, arguments);
     }
 

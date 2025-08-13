@@ -7,7 +7,7 @@ public class ArrayLength extends Value {
     ArrayLength(final Value array) {
         super(ConstantDescs.CD_int);
 
-        if (!array.type.isArray()) {
+        if (!array.isArray()) {
             illegalArgument("Cannot get array length of non array of type " + TypeUtils.toString(array.type));
         }
 

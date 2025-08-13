@@ -15,9 +15,4 @@ public class PrimitiveFloat extends PrimitiveValue {
     public String debugDescription() {
         return "float " + value;
     }
-
-    @Override
-    public boolean isConstant() {
-        return true;
-    }
 }

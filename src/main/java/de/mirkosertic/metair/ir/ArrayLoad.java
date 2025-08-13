@@ -10,7 +10,7 @@ public class ArrayLoad extends Value {
     ArrayLoad(final ClassDesc arrayType, final Value array, final Value index) {
         super(arrayType.componentType());
 
-        if (!array.type.isArray()) {
+        if (!array.isArray()) {
             illegalArgument("Cannot store to non array of type " + TypeUtils.toString(array.type));
         }
 

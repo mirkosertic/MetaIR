@@ -10,7 +10,7 @@ public class GetField extends Value {
     GetField(final ClassDesc owner, final ClassDesc fieldType, final String fieldName, final Value source) {
         super(fieldType);
 
-        if (source.type.isPrimitive() || source.type.isArray()) {
+        if (source.isPrimitive() || source.isArray()) {
             illegalArgument("Cannot get field " + fieldName + " from non object source " + TypeUtils.toString(source.type));
         }
 

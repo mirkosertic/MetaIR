@@ -3,7 +3,7 @@ package de.mirkosertic.metair.ir.examples;
 import de.mirkosertic.metair.ir.test.MetaIRTest;
 
 @MetaIRTest
-public class MethodInvocationTest {
+public class MethodInvokeTest {
 
     public static class Source {
         public byte byte_field;
