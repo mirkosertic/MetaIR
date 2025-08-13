@@ -29,8 +29,8 @@ jobs:
           find . -name "*.dot" -exec dot -Tsvg {} -o {}.svg \;
       - name: Generate index.html for examples directory
         run: |
-          find . -type d -print -exec sh -c 'tree "$0" \
-          -H "./target/metair-test" \
+          find ./target/metair-test -type d -print -exec sh -c 'tree "$0" \
+          -H "." \
           -L 1 \
           --noreport \
           --houtro ""
