@@ -69,11 +69,13 @@ Generated IR (raw and unoptimized):
 
 ![IRExample New Instance Creation](https://mirkosertic.github.io/MetaIR/de.mirkosertic.metair.ir.examples.NewInstanceTest/newInstance/ir.dot.svg)
 
-TODO: Add links to examples repository
+A full set of examples can be found in the [MetaIR Test Suite](https://mirkosertic.github.io/MetaIR/). Each directory corresponds
+to a single testcase, and you will find the Class-File API Debug YAML and the
+generated IR (raw and unoptimized) as well in dot(graphviz) notation and as SVG images.
 
-## JVM instructions not yet implemented
+## JVM instructions not implemented
 
-> 🚧 Under development.
+> 🚧 These instructions are discontinued and will be removed in the future, so MetaIR will not support them for now.
 
     /**
      * (Discontinued) Jump subroutine; last used in major version {@value
