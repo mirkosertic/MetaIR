@@ -1,11 +1,11 @@
 digraph {
  node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#0 Method</td></tr><tr><td port="prj2" bgcolor="yellow">arg0 : int</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
- node17[label="#17 ReturnValue : int",shape=box, fillcolor=lightgrey, style=filled];
- node5 -> node17[headlabel="*0", labeldistance=2];
- node16 -> node17[labeldistance=2, color=red, fontcolor=red];
- node0 -> node17[labeldistance=2, color=green, constraint=false];
- node16[label="#16 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
- node13:prj15 -> node16[labeldistance=2, color=red, fontcolor=red];
+ node18[label="#18 Class SimpleLoopTest",shape=octagon, fillcolor=lightgreen, style=filled];
+ node0 -> node18[style=dotted];
+ node1[label="#1 ClassInit",shape=box, fillcolor=lightgrey, style=filled];
+ node18 -> node1[headlabel="*0", labeldistance=2];
+ node0 -> node1[labeldistance=2, color=green, constraint=false];
+ node13:prj14 -> node1[labeldistance=2, color=red, fontcolor=red];
  node13[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="2">#13 If</td></tr><tr><td port="prj14" bgcolor="yellow">false</td><td port="prj15" bgcolor="yellow">true</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
  node12 -> node13[headlabel="*0", labeldistance=2];
  node4 -> node13[labeldistance=2, color=red, fontcolor=red];
@@ -16,46 +16,46 @@ digraph {
  node10 -> node11[labeldistance=2, color=red, fontcolor=red];
  node10[label="#10 Invoke static compute : (int)int",shape=box, fillcolor=lightgrey, style=filled];
  node1 -> node10[headlabel="*0", labeldistance=2];
- node8 -> node10[headlabel="*1", labeldistance=2];
+ node9 -> node10[headlabel="*1", labeldistance=2];
  node1 -> node10[labeldistance=2, color=green, constraint=false];
  node1 -> node10[labeldistance=2, color=red, fontcolor=red];
- node1[label="#1 ClassInit",shape=box, fillcolor=lightgrey, style=filled];
- node18 -> node1[headlabel="*0", labeldistance=2];
- node0 -> node1[labeldistance=2, color=green, constraint=false];
- node13:prj14 -> node1[labeldistance=2, color=red, fontcolor=red];
- node18[label="#18 Class SimpleLoopTest",shape=octagon, fillcolor=lightgreen, style=filled];
- node0 -> node18[style=dotted];
- node8[label="#8 Φ int",shape=octagon, fillcolor=orange, style=filled];
- node4 -> node8[style=dotted];
- node7 -> node8[headlabel="if #3", labeldistance=2, color=blue, constraint=false];
- node9 -> node8[headlabel="if #11", labeldistance=2, color=blue, constraint=false];
- node9[label="#9 Add : int",shape=octagon, fillcolor=orange, style=filled];
- node8 -> node9[headlabel="*0", labeldistance=2];
- node6 -> node9[headlabel="*1", labeldistance=2];
- node6[label="#6 int 1",shape=octagon, fillcolor=lightgreen, style=filled];
- node0 -> node6[style=dotted];
- node7[label="#7 int 0",shape=octagon, fillcolor=lightgreen, style=filled];
+ node9[label="#9 Φ int",shape=octagon, fillcolor=orange, style=filled];
+ node4 -> node9[style=dotted];
+ node6 -> node9[headlabel="if #3", labeldistance=2, color=blue, constraint=false];
+ node8 -> node9[headlabel="if #11", labeldistance=2, color=blue, constraint=false];
+ node8[label="#8 Add : int",shape=octagon, fillcolor=orange, style=filled];
+ node9 -> node8[headlabel="*0", labeldistance=2];
+ node7 -> node8[headlabel="*1", labeldistance=2];
+ node7[label="#7 int 1",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node7[style=dotted];
+ node6[label="#6 int 0",shape=octagon, fillcolor=lightgreen, style=filled];
+ node0 -> node6[style=dotted];
  node12[label="#12 NumericCondition : GE",shape=octagon, fillcolor=orange, style=filled];
  node5 -> node12[headlabel="*0", labeldistance=2];
- node8 -> node12[headlabel="*1", labeldistance=2];
+ node9 -> node12[headlabel="*1", labeldistance=2];
  node5[label="#5 Φ int",shape=octagon, fillcolor=orange, style=filled];
  node4 -> node5[style=dotted];
  node0:prj2 -> node5[headlabel="if #3", labeldistance=2, color=blue, constraint=false];
+ node17[label="#17 ReturnValue : int",shape=box, fillcolor=lightgrey, style=filled];
+ node5 -> node17[headlabel="*0", labeldistance=2];
+ node16 -> node17[labeldistance=2, color=red, fontcolor=red];
+ node0 -> node17[labeldistance=2, color=green, constraint=false];
+ node16[label="#16 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
+ node13:prj15 -> node16[labeldistance=2, color=red, fontcolor=red];
  node3[label="#3 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
  node0 -> node3[labeldistance=2, color=red, fontcolor=red];
  subgraph cluster_0 {
+  color=lightgray;
+  node4;
+  node5;
+  node9;
+ }
+ subgraph cluster_1 {
   color=lightgray;
   node0;
   node6;
   node7;
   node18;
- }
- subgraph cluster_1 {
-  color=lightgray;
-  node4;
-  node5;
-  node8;
  }
  subgraph cluster_000 {
   label = "Legend";

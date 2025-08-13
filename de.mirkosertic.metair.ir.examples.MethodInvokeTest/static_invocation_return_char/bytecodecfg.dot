@@ -1,0 +1,79 @@
+digraph {
+ node0[label="#0 LocalVariable[name=this, slot=0, type=Lde/mirkosertic/metair/ir/examples/MethodInvokeTest;] Order: 0", shape=box, fillcolor=lightgrey, style=filled];
+ node1[label="#1 LocalVariable[name=source, slot=1, type=Lde/mirkosertic/metair/ir/examples/MethodInvokeTest$Source;] Order: 1", shape=box, fillcolor=lightgrey, style=filled];
+ node2[label="#2 Label[context=CodeModel[id=636782475], bci=0] Order: 2", shape=box, fillcolor=lightgrey, style=filled];
+ node3[label="#3 LineNumber[line=96] Order: 3", shape=box, fillcolor=lightgrey, style=filled];
+ node4[label="#4 NewObj[OP=NEW, type=de/mirkosertic/metair/ir/examples/MethodInvokeTest$Source] Order: 4", shape=box, fillcolor=lightgrey, style=filled];
+ node5[label="#5 UnboundStackInstruction[op=DUP] Order: 5", shape=box, fillcolor=lightgrey, style=filled];
+ node6[label="#6 Invoke[OP=INVOKESPECIAL, m=de/mirkosertic/metair/ir/examples/MethodInvokeTest$Source.<init>()V] Order: 6", shape=box, fillcolor=lightgrey, style=filled];
+ node7[label="#7 Store[OP=ASTORE_1, slot=1] Order: 7", shape=box, fillcolor=lightgrey, style=filled];
+ node8[label="#8 Label[context=CodeModel[id=636782475], bci=8] Order: 8", shape=box, fillcolor=lightgrey, style=filled];
+ node9[label="#9 LineNumber[line=97] Order: 9", shape=box, fillcolor=lightgrey, style=filled];
+ node10[label="#10 Load[OP=ALOAD_1, slot=1] Order: 10", shape=box, fillcolor=lightgrey, style=filled];
+ node11[label="#11 Field[OP=GETFIELD, field=de/mirkosertic/metair/ir/examples/MethodInvokeTest$Source.byte_field:B] Order: 11", shape=box, fillcolor=lightgrey, style=filled];
+ node12[label="#12 Load[OP=ALOAD_1, slot=1] Order: 12", shape=box, fillcolor=lightgrey, style=filled];
+ node13[label="#13 Field[OP=GETFIELD, field=de/mirkosertic/metair/ir/examples/MethodInvokeTest$Source.boolean_field:Z] Order: 13", shape=box, fillcolor=lightgrey, style=filled];
+ node14[label="#14 Load[OP=ALOAD_1, slot=1] Order: 14", shape=box, fillcolor=lightgrey, style=filled];
+ node15[label="#15 Field[OP=GETFIELD, field=de/mirkosertic/metair/ir/examples/MethodInvokeTest$Source.short_field:S] Order: 15", shape=box, fillcolor=lightgrey, style=filled];
+ node16[label="#16 Load[OP=ALOAD_1, slot=1] Order: 16", shape=box, fillcolor=lightgrey, style=filled];
+ node17[label="#17 Field[OP=GETFIELD, field=de/mirkosertic/metair/ir/examples/MethodInvokeTest$Source.char_field:C] Order: 17", shape=box, fillcolor=lightgrey, style=filled];
+ node18[label="#18 Load[OP=ALOAD_1, slot=1] Order: 18", shape=box, fillcolor=lightgrey, style=filled];
+ node19[label="#19 Field[OP=GETFIELD, field=de/mirkosertic/metair/ir/examples/MethodInvokeTest$Source.int_field:I] Order: 19", shape=box, fillcolor=lightgrey, style=filled];
+ node20[label="#20 Load[OP=ALOAD_1, slot=1] Order: 20", shape=box, fillcolor=lightgrey, style=filled];
+ node21[label="#21 Field[OP=GETFIELD, field=de/mirkosertic/metair/ir/examples/MethodInvokeTest$Source.long_field:J] Order: 21", shape=box, fillcolor=lightgrey, style=filled];
+ node22[label="#22 Load[OP=ALOAD_1, slot=1] Order: 22", shape=box, fillcolor=lightgrey, style=filled];
+ node23[label="#23 Field[OP=GETFIELD, field=de/mirkosertic/metair/ir/examples/MethodInvokeTest$Source.float_field:F] Order: 23", shape=box, fillcolor=lightgrey, style=filled];
+ node24[label="#24 Load[OP=ALOAD_1, slot=1] Order: 24", shape=box, fillcolor=lightgrey, style=filled];
+ node25[label="#25 Field[OP=GETFIELD, field=de/mirkosertic/metair/ir/examples/MethodInvokeTest$Source.double_field:D] Order: 25", shape=box, fillcolor=lightgrey, style=filled];
+ node26[label="#26 Load[OP=ALOAD_1, slot=1] Order: 26", shape=box, fillcolor=lightgrey, style=filled];
+ node27[label="#27 Field[OP=GETFIELD, field=de/mirkosertic/metair/ir/examples/MethodInvokeTest$Source.string_field:Ljava/lang/String;] Order: 27", shape=box, fillcolor=lightgrey, style=filled];
+ node28[label="#28 Load[OP=ALOAD_1, slot=1] Order: 28", shape=box, fillcolor=lightgrey, style=filled];
+ node29[label="#29 Field[OP=GETFIELD, field=de/mirkosertic/metair/ir/examples/MethodInvokeTest$Source.array_field:[I] Order: 29", shape=box, fillcolor=lightgrey, style=filled];
+ node30[label="#30 Invoke[OP=INVOKESTATIC, m=de/mirkosertic/metair/ir/examples/MethodInvokeTest.simple_method_return_char(BZSCIJFDLjava/lang/String;[I)C] Order: 30", shape=box, fillcolor=lightgrey, style=filled];
+ node31[label="#31 Return[OP=IRETURN] Order: 31", shape=box, fillcolor=lightgrey, style=filled];
+ node0 -> node1[color=red];
+ node1 -> node2[color=red];
+ node2 -> node3[color=red];
+ node3 -> node4[color=red];
+ node4 -> node5[color=red];
+ node5 -> node6[color=red];
+ node6 -> node7[color=red];
+ node7 -> node8[color=red];
+ node8 -> node9[color=red];
+ node9 -> node10[color=red];
+ node10 -> node11[color=red];
+ node11 -> node12[color=red];
+ node12 -> node13[color=red];
+ node13 -> node14[color=red];
+ node14 -> node15[color=red];
+ node15 -> node16[color=red];
+ node16 -> node17[color=red];
+ node17 -> node18[color=red];
+ node18 -> node19[color=red];
+ node19 -> node20[color=red];
+ node20 -> node21[color=red];
+ node21 -> node22[color=red];
+ node22 -> node23[color=red];
+ node23 -> node24[color=red];
+ node24 -> node25[color=red];
+ node25 -> node26[color=red];
+ node26 -> node27[color=red];
+ node27 -> node28[color=red];
+ node28 -> node29[color=red];
+ node29 -> node30[color=red];
+ node30 -> node31[color=red];
+ subgraph cluster_000 {
+  label = "Legend";
+  node [shape=point]
+  {
+   rank=same;
+   c0 [style = invis];
+   c1 [style = invis];
+   c2 [style = invis];
+   c3 [style = invis];
+  }
+  c0 -> c1 [label="Control flow", style=solid, color=red]
+  c2 -> c3 [label="Control flow back edge", style=dashed, color=red]
+ }
+
+}

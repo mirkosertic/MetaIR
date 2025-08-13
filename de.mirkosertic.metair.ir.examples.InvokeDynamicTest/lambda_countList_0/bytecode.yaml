@@ -1,0 +1,28 @@
+
+  - method name: lambda$countList$0
+    flags: [PRIVATE, STATIC, SYNTHETIC]
+    method type: (ILjava/lang/Integer;)Z
+    attributes: [Code]
+    code: 
+        max stack: 2
+        max locals: 2
+        attributes: [LineNumberTable, LocalVariableTable, StackMapTable]
+        line numbers: 
+          - {start: 0, line number: 11}
+        local variables: 
+          - {start: 0, end: 14, slot: 0, name: min, type: I}
+          - {start: 0, end: 14, slot: 1, name: t, type: Ljava/lang/Integer;}
+        stack map frames: 
+            12: {locals: [int, java/lang/Integer], stack: []}
+            13: {locals: [int, java/lang/Integer], stack: [int]}
+        //stack map frame @0: {locals: [int, java/lang/Integer], stack: []}
+        0: {opcode: ALOAD_1, slot: 1, type: Ljava/lang/Integer;, variable name: t}
+        1: {opcode: INVOKEVIRTUAL, owner: java/lang/Integer, method name: intValue, method type: ()I}
+        4: {opcode: ILOAD_0, slot: 0, type: I, variable name: min}
+        5: {opcode: IF_ICMPLT, target: 12}
+        8: {opcode: ICONST_1, constant value: 1}
+        9: {opcode: GOTO, target: 13}
+        //stack map frame @12: {locals: [int, java/lang/Integer], stack: []}
+        12: {opcode: ICONST_0, constant value: 0}
+        //stack map frame @13: {locals: [int, java/lang/Integer], stack: [int]}
+        13: {opcode: IRETURN}

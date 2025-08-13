@@ -1,0 +1,26 @@
+
+  - method name: countList
+    flags: [PUBLIC]
+    method type: (Ljava/util/List;I)J
+    attributes: [Code, Signature]
+    signature: (Ljava/util/List<Ljava/lang/Integer;>;I)J
+    code: 
+        max stack: 2
+        max locals: 3
+        attributes: [LineNumberTable, LocalVariableTable, LocalVariableTypeTable]
+        line numbers: 
+          - {start: 0, line number: 11}
+        local variables: 
+          - {start: 0, end: 23, slot: 0, name: this, type: Lde/mirkosertic/metair/ir/examples/InvokeDynamicTest;}
+          - {start: 0, end: 23, slot: 1, name: list, type: Ljava/util/List;}
+          - {start: 0, end: 23, slot: 2, name: min, type: I}
+        local variable types: 
+          - {start: 0, end: 23, slot: 1, name: list, signature: Ljava/util/List<Ljava/lang/Integer;>;}
+        //stack map frame @0: {locals: [de/mirkosertic/metair/ir/examples/InvokeDynamicTest, java/util/List, int], stack: []}
+        0: {opcode: ALOAD_1, slot: 1, type: Ljava/util/List;, variable name: list}
+        1: {opcode: INVOKEINTERFACE, owner: java/util/List, method name: stream, method type: ()Ljava/util/stream/Stream;}
+        6: {opcode: ILOAD_2, slot: 2, type: I, variable name: min}
+        7: {opcode: INVOKEDYNAMIC, name: test, descriptor: (I)Ljava/util/function/Predicate;, bootstrap method: STATIC java/lang/invoke/LambdaMetafactory::metafactory, arguments: ['MethodTypeDesc[(Object)boolean]', 'MethodHandleDesc[STATIC/InvokeDynamicTest::lambda$countList$0(int,Integer)boolean]', 'MethodTypeDesc[(Integer)boolean]']}
+        12: {opcode: INVOKEINTERFACE, owner: java/util/stream/Stream, method name: filter, method type: (Ljava/util/function/Predicate;)Ljava/util/stream/Stream;}
+        17: {opcode: INVOKEINTERFACE, owner: java/util/stream/Stream, method name: count, method type: ()J}
+        22: {opcode: LRETURN}

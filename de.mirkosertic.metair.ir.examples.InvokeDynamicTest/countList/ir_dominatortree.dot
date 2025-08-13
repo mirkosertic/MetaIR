@@ -1,0 +1,102 @@
+digraph debugoutput {
+ node0[label="#0 Method Order : 0",shape=box, fillcolor=lightgrey, style=filled];
+ node1[label="#1 arg1 : int Order : 14",shape=box, fillcolor=lightgrey, style=filled];
+ node1 -> node0[dir="forward" color="green" penwidth="2"];
+ node0 -> node1[labeldistance=2, color=red, fontcolor=red];
+ node2[label="#2 arg0 : List Order : 12",shape=box, fillcolor=lightgrey, style=filled];
+ node2 -> node0[dir="forward" color="green" penwidth="2"];
+ node0 -> node2[labeldistance=2, color=red, fontcolor=red];
+ node3[label="#3 this : InvokeDynamicTest Order : 11",shape=box, fillcolor=lightgrey, style=filled];
+ node3 -> node0[dir="forward" color="green" penwidth="2"];
+ node0 -> node3[labeldistance=2, color=red, fontcolor=red];
+ node4[label="#4 Invoke interface stream : ()Stream Order : 13",shape=box, fillcolor=lightgrey, style=filled];
+ node4 -> node0[dir="forward" color="green" penwidth="2"];
+ node2 -> node4[headlabel="*0", labeldistance=2];
+ node5 -> node4[labeldistance=2, color=red, fontcolor=red];
+ node0 -> node4;
+ node5[label="#5 LabelNode Order : 10",shape=box, fillcolor=lightgrey, style=filled];
+ node5 -> node0[dir="forward" color="green" penwidth="2"];
+ node0 -> node5[labeldistance=2, color=red, fontcolor=red];
+ node6[label="#6 MethodHandle : invokeStatic : InvokeDynamicTest.lambda$countList$0 (int,Integer)boolean Order : 8",shape=octagon, fillcolor=lightgreen, style=filled];
+ node6 -> node0[dir="forward" color="green" penwidth="2"];
+ node0 -> node6[style=dotted];
+ node7[label="#7 MethodType : (int)Predicate Order : 7",shape=octagon, fillcolor=lightgreen, style=filled];
+ node7 -> node0[dir="forward" color="green" penwidth="2"];
+ node0 -> node7[style=dotted];
+ node8[label="#8 MethodType : (Object)boolean Order : 6",shape=octagon, fillcolor=lightgreen, style=filled];
+ node8 -> node0[dir="forward" color="green" penwidth="2"];
+ node0 -> node8[style=dotted];
+ node9[label="#9 MethodType : (Integer)boolean Order : 5",shape=octagon, fillcolor=lightgreen, style=filled];
+ node9 -> node0[dir="forward" color="green" penwidth="2"];
+ node0 -> node9[style=dotted];
+ node10[label="#10 Class LambdaMetafactory Order : 4",shape=octagon, fillcolor=lightgreen, style=filled];
+ node10 -> node0[dir="forward" color="green" penwidth="2"];
+ node0 -> node10[style=dotted];
+ node11[label="#11 Class InvokeDynamicTest Order : 2",shape=octagon, fillcolor=lightgreen, style=filled];
+ node11 -> node0[dir="forward" color="green" penwidth="2"];
+ node0 -> node11[style=dotted];
+ node12[label="#12 Invoke static in : (Class)MethodHandles$Lookup Order : 3",shape=box, fillcolor=lightgrey, style=filled];
+ node12 -> node11[dir="forward" color="green" penwidth="2"];
+ node11 -> node12[headlabel="*0", labeldistance=2];
+ node11 -> node12[headlabel="*1", labeldistance=2];
+ node13[label="#13 String : test Order : 1",shape=octagon, fillcolor=lightgreen, style=filled];
+ node13 -> node0[dir="forward" color="green" penwidth="2"];
+ node0 -> node13[style=dotted];
+ node14[label="#14 Invoke static metafactory : (MethodHandles$Lookup,String,MethodType,MethodType,MethodHandle,MethodType)CallSite Order : 9",shape=box, fillcolor=lightgrey, style=filled];
+ node14 -> node0[dir="forward" color="green" penwidth="2"];
+ node10 -> node14[headlabel="*0", labeldistance=2];
+ node12 -> node14[headlabel="*1", labeldistance=2];
+ node13 -> node14[headlabel="*2", labeldistance=2];
+ node7 -> node14[headlabel="*3", labeldistance=2];
+ node8 -> node14[headlabel="*4", labeldistance=2];
+ node6 -> node14[headlabel="*5", labeldistance=2];
+ node9 -> node14[headlabel="*6", labeldistance=2];
+ node15[label="#15 Invoke dynamic test : (int)Predicate Order : 15",shape=box, fillcolor=lightgrey, style=filled];
+ node15 -> node0[dir="forward" color="green" penwidth="2"];
+ node14 -> node15[headlabel="*0", labeldistance=2];
+ node1 -> node15[headlabel="*1", labeldistance=2];
+ node4 -> node15;
+ node4 -> node15[labeldistance=2, color=red, fontcolor=red];
+ node16[label="#16 Invoke interface filter : (Predicate)Stream Order : 16",shape=box, fillcolor=lightgrey, style=filled];
+ node16 -> node0[dir="forward" color="green" penwidth="2"];
+ node4 -> node16[headlabel="*0", labeldistance=2];
+ node15 -> node16[headlabel="*1", labeldistance=2];
+ node15 -> node16[labeldistance=2, color=red, fontcolor=red];
+ node15 -> node16;
+ node17[label="#17 Invoke interface count : ()long Order : 17",shape=box, fillcolor=lightgrey, style=filled];
+ node17 -> node16[dir="forward" color="green" penwidth="2"];
+ node16 -> node17[headlabel="*0", labeldistance=2];
+ node16 -> node17[labeldistance=2, color=red, fontcolor=red];
+ node16 -> node17;
+ node18[label="#18 ReturnValue : long Order : 18",shape=box, fillcolor=lightgrey, style=filled];
+ node18 -> node17[dir="forward" color="green" penwidth="2"];
+ node17 -> node18[headlabel="*0", labeldistance=2];
+ node17 -> node18[labeldistance=2, color=red, fontcolor=red];
+ node17 -> node18;
+ subgraph cluster_000 {
+  label = "Legend";
+  node [shape=point]
+  {
+   rank=same;
+   c0 [style = invis];
+   c1 [style = invis];
+   c2 [style = invis];
+   c3 [style = invis];
+   d0 [style = invis];
+   d1 [style = invis];
+   d2 [style = invis];
+   d3 [style = invis];
+   d4 [style = invis];
+   d5 [style = invis];
+   d6 [style = invis];
+   d7 [style = invis];
+  }
+  c0 -> c1 [label="Control flow", style=solid, color=red]
+  c2 -> c3 [label="Control flow back edge", style=dashed, color=red]
+  d0 -> d1 [label="Data flow"]
+  d2 -> d3 [label="Declaration", style=dotted]
+  d4 -> d5 [label="PHI Data flow", color=blue]
+  d6 -> d7 [label="Dominance", color=green]
+ }
+
+}

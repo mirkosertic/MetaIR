@@ -1,0 +1,20 @@
+
+  - method name: concat
+    flags: [PUBLIC]
+    method type: (II)Ljava/lang/String;
+    attributes: [Code]
+    code: 
+        max stack: 2
+        max locals: 3
+        attributes: [LineNumberTable, LocalVariableTable]
+        line numbers: 
+          - {start: 0, line number: 15}
+        local variables: 
+          - {start: 0, end: 8, slot: 0, name: this, type: Lde/mirkosertic/metair/ir/examples/InvokeDynamicTest;}
+          - {start: 0, end: 8, slot: 1, name: a, type: I}
+          - {start: 0, end: 8, slot: 2, name: b, type: I}
+        //stack map frame @0: {locals: [de/mirkosertic/metair/ir/examples/InvokeDynamicTest, int, int], stack: []}
+        0: {opcode: ILOAD_1, slot: 1, type: I, variable name: a}
+        1: {opcode: ILOAD_2, slot: 2, type: I, variable name: b}
+        2: {opcode: INVOKEDYNAMIC, name: makeConcatWithConstants, descriptor: (II)Ljava/lang/String;, bootstrap method: STATIC java/lang/invoke/StringConcatFactory::makeConcatWithConstants, arguments: ['hello \u0001 world \u0001']}
+        7: {opcode: ARETURN}

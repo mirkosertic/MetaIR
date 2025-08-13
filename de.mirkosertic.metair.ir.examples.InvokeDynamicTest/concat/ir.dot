@@ -1,0 +1,75 @@
+digraph {
+ node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="3">#0 Method</td></tr><tr><td port="prj2" bgcolor="yellow">arg0 : int</td><td port="prj1" bgcolor="yellow">arg1 : int</td><td port="prj3" bgcolor="yellow">this : InvokeDynamicTest</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
+ node8[label="#8 int 0",shape=octagon, fillcolor=lightgreen, style=filled];
+ node0 -> node8[style=dotted];
+ node9[label="#9 NewArray : Object[]",shape=octagon, fillcolor=orange, style=filled];
+ node8 -> node9[headlabel="*0", labeldistance=2];
+ node15[label="#15 Invoke static makeConcatWithConstants : (MethodHandles$Lookup,String,MethodType,String,Object[])CallSite",shape=box, fillcolor=lightgrey, style=filled];
+ node12 -> node15[headlabel="*0", labeldistance=2];
+ node11 -> node15[headlabel="*1", labeldistance=2];
+ node14 -> node15[headlabel="*2", labeldistance=2];
+ node7 -> node15[headlabel="*3", labeldistance=2];
+ node13 -> node15[headlabel="*4", labeldistance=2];
+ node9 -> node15[headlabel="*5", labeldistance=2];
+ node13[label="#13 String : hello  world ",shape=octagon, fillcolor=lightgreen, style=filled];
+ node0 -> node13[style=dotted];
+ node7[label="#7 MethodType : (int,int)String",shape=octagon, fillcolor=lightgreen, style=filled];
+ node0 -> node7[style=dotted];
+ node14[label="#14 String : makeConcatWithConstants",shape=octagon, fillcolor=lightgreen, style=filled];
+ node0 -> node14[style=dotted];
+ node11[label="#11 Invoke static in : (Class)MethodHandles$Lookup",shape=box, fillcolor=lightgrey, style=filled];
+ node10 -> node11[headlabel="*0", labeldistance=2];
+ node10 -> node11[headlabel="*1", labeldistance=2];
+ node10[label="#10 Class InvokeDynamicTest",shape=octagon, fillcolor=lightgreen, style=filled];
+ node0 -> node10[style=dotted];
+ node12[label="#12 Class StringConcatFactory",shape=octagon, fillcolor=lightgreen, style=filled];
+ node0 -> node12[style=dotted];
+ node4[label="#4 Invoke dynamic makeConcatWithConstants : (int,int)String",shape=box, fillcolor=lightgrey, style=filled];
+ node15 -> node4[headlabel="*0", labeldistance=2];
+ node0:prj2 -> node4[headlabel="*1", labeldistance=2];
+ node0:prj1 -> node4[headlabel="*2", labeldistance=2];
+ node0 -> node4[labeldistance=2, color=green, constraint=false];
+ node6 -> node4[labeldistance=2, color=red, fontcolor=red];
+ node6[label="#6 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
+ node0 -> node6[labeldistance=2, color=red, fontcolor=red];
+ node5[label="#5 ReturnValue : String",shape=box, fillcolor=lightgrey, style=filled];
+ node4 -> node5[headlabel="*0", labeldistance=2];
+ node4 -> node5[labeldistance=2, color=red, fontcolor=red];
+ node4 -> node5[labeldistance=2, color=green, constraint=false];
+ subgraph cluster_0 {
+  color=lightgray;
+  node0;
+  node7;
+  node8;
+  node10;
+  node12;
+  node13;
+  node14;
+ }
+ subgraph cluster_000 {
+  label = "Legend";
+  node [shape=point]
+  {
+   rank=same;
+   c0 [style = invis];
+   c1 [style = invis];
+   c2 [style = invis];
+   c3 [style = invis];
+   d0 [style = invis];
+   d1 [style = invis];
+   d2 [style = invis];
+   d3 [style = invis];
+   d4 [style = invis];
+   d5 [style = invis];
+   d6 [style = invis];
+   d7 [style = invis];
+  }
+  c0 -> c1 [label="Control flow", style=solid, color=red]
+  c2 -> c3 [label="Control flow back edge", style=dashed, color=red]
+  d0 -> d1 [label="Data flow"]
+  d2 -> d3 [label="Declaration", style=dotted]
+  d4 -> d5 [label="PHI Data flow", color=blue]
+  d6 -> d7 [label="Memory flow", color=green]
+ }
+
+}

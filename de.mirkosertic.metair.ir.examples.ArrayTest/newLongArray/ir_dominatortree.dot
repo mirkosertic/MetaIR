@@ -11,15 +11,15 @@ digraph debugoutput {
  node2 -> node3[labeldistance=2, color=red, fontcolor=red];
  node4[label="#4 NewArray : long[] Order : 5",shape=octagon, fillcolor=orange, style=filled];
  node4 -> node0[dir="forward" color="green" penwidth="2"];
- node6 -> node4[headlabel="*0", labeldistance=2];
+ node7 -> node4[headlabel="*0", labeldistance=2];
  node0 -> node4;
  node5[label="#5 ArrayLength Order : 6",shape=octagon, fillcolor=orange, style=filled];
  node5 -> node4[dir="forward" color="green" penwidth="2"];
  node4 -> node5[headlabel="*0", labeldistance=2];
- node6[label="#6 int 10 Order : 4",shape=octagon, fillcolor=lightgreen, style=filled];
+ node6[label="#6 int 0 Order : 4",shape=octagon, fillcolor=lightgreen, style=filled];
  node6 -> node0[dir="forward" color="green" penwidth="2"];
  node0 -> node6[style=dotted];
- node7[label="#7 int 0 Order : 3",shape=octagon, fillcolor=lightgreen, style=filled];
+ node7[label="#7 int 10 Order : 3",shape=octagon, fillcolor=lightgreen, style=filled];
  node7 -> node0[dir="forward" color="green" penwidth="2"];
  node0 -> node7[style=dotted];
  node8[label="#8 int 1 Order : 2",shape=octagon, fillcolor=lightgreen, style=filled];
@@ -31,7 +31,7 @@ digraph debugoutput {
  node10[label="#10 ArrayStore : long[] Order : 9",shape=box, fillcolor=lightgrey, style=filled];
  node10 -> node0[dir="forward" color="green" penwidth="2"];
  node4 -> node10[headlabel="*0", labeldistance=2];
- node7 -> node10[headlabel="*1", labeldistance=2];
+ node6 -> node10[headlabel="*1", labeldistance=2];
  node9 -> node10[headlabel="*2", labeldistance=2];
  node4 -> node10;
  node3 -> node10[labeldistance=2, color=red, fontcolor=red];

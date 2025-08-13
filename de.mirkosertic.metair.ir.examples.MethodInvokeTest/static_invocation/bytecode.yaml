@@ -1,0 +1,43 @@
+
+  - method name: static_invocation
+    flags: [PUBLIC]
+    method type: ()V
+    attributes: [Code]
+    code: 
+        max stack: 12
+        max locals: 2
+        attributes: [LineNumberTable, LocalVariableTable]
+        line numbers: 
+          - {start: 0, line number: 86}
+          - {start: 8, line number: 87}
+          - {start: 51, line number: 88}
+        local variables: 
+          - {start: 0, end: 52, slot: 0, name: this, type: Lde/mirkosertic/metair/ir/examples/MethodInvokeTest;}
+          - {start: 8, end: 52, slot: 1, name: source, type: Lde/mirkosertic/metair/ir/examples/MethodInvokeTest$Source;}
+        //stack map frame @0: {locals: [de/mirkosertic/metair/ir/examples/MethodInvokeTest], stack: []}
+        0: {opcode: NEW, type: de/mirkosertic/metair/ir/examples/MethodInvokeTest$Source}
+        3: {opcode: DUP}
+        4: {opcode: INVOKESPECIAL, owner: de/mirkosertic/metair/ir/examples/MethodInvokeTest$Source, method name: <init>, method type: ()V}
+        7: {opcode: ASTORE_1, slot: 1}
+        8: {opcode: ALOAD_1, slot: 1, type: Lde/mirkosertic/metair/ir/examples/MethodInvokeTest$Source;, variable name: source}
+        9: {opcode: GETFIELD, owner: de/mirkosertic/metair/ir/examples/MethodInvokeTest$Source, field name: byte_field, field type: B}
+        12: {opcode: ALOAD_1, slot: 1, type: Lde/mirkosertic/metair/ir/examples/MethodInvokeTest$Source;, variable name: source}
+        13: {opcode: GETFIELD, owner: de/mirkosertic/metair/ir/examples/MethodInvokeTest$Source, field name: boolean_field, field type: Z}
+        16: {opcode: ALOAD_1, slot: 1, type: Lde/mirkosertic/metair/ir/examples/MethodInvokeTest$Source;, variable name: source}
+        17: {opcode: GETFIELD, owner: de/mirkosertic/metair/ir/examples/MethodInvokeTest$Source, field name: short_field, field type: S}
+        20: {opcode: ALOAD_1, slot: 1, type: Lde/mirkosertic/metair/ir/examples/MethodInvokeTest$Source;, variable name: source}
+        21: {opcode: GETFIELD, owner: de/mirkosertic/metair/ir/examples/MethodInvokeTest$Source, field name: char_field, field type: C}
+        24: {opcode: ALOAD_1, slot: 1, type: Lde/mirkosertic/metair/ir/examples/MethodInvokeTest$Source;, variable name: source}
+        25: {opcode: GETFIELD, owner: de/mirkosertic/metair/ir/examples/MethodInvokeTest$Source, field name: int_field, field type: I}
+        28: {opcode: ALOAD_1, slot: 1, type: Lde/mirkosertic/metair/ir/examples/MethodInvokeTest$Source;, variable name: source}
+        29: {opcode: GETFIELD, owner: de/mirkosertic/metair/ir/examples/MethodInvokeTest$Source, field name: long_field, field type: J}
+        32: {opcode: ALOAD_1, slot: 1, type: Lde/mirkosertic/metair/ir/examples/MethodInvokeTest$Source;, variable name: source}
+        33: {opcode: GETFIELD, owner: de/mirkosertic/metair/ir/examples/MethodInvokeTest$Source, field name: float_field, field type: F}
+        36: {opcode: ALOAD_1, slot: 1, type: Lde/mirkosertic/metair/ir/examples/MethodInvokeTest$Source;, variable name: source}
+        37: {opcode: GETFIELD, owner: de/mirkosertic/metair/ir/examples/MethodInvokeTest$Source, field name: double_field, field type: D}
+        40: {opcode: ALOAD_1, slot: 1, type: Lde/mirkosertic/metair/ir/examples/MethodInvokeTest$Source;, variable name: source}
+        41: {opcode: GETFIELD, owner: de/mirkosertic/metair/ir/examples/MethodInvokeTest$Source, field name: string_field, field type: Ljava/lang/String;}
+        44: {opcode: ALOAD_1, slot: 1, type: Lde/mirkosertic/metair/ir/examples/MethodInvokeTest$Source;, variable name: source}
+        45: {opcode: GETFIELD, owner: de/mirkosertic/metair/ir/examples/MethodInvokeTest$Source, field name: array_field, field type: '[I'}
+        48: {opcode: INVOKESTATIC, owner: de/mirkosertic/metair/ir/examples/MethodInvokeTest, method name: simple_method, method type: '(BZSCIJFDLjava/lang/String;[I)V'}
+        51: {opcode: RETURN}
