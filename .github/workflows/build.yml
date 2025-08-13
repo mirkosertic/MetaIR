@@ -29,20 +29,7 @@ jobs:
           find . -name "*.dot" -exec dot -Tsvg {} -o {}.svg \;
       - name: Generate index.html for examples directory
         run: |
-          find ./target/metair-test -type d -print -exec sh -c 'tree "$0" \
-          -H "." \
-          -L 1 \
-          --noreport \
-          --houtro ""
-          --dirsfirst \
-          --charset utf-8 \
-          -I "index.html" \
-          -T "MetaIR Examples" \
-          --ignore-case \
-          --timefmt "%d-%b-%Y %H:%M" \
-          -s \
-          -D \
-          -o "$0/index.html"' {} \;
+          find ./target/metair-test -type d -print -exec sh -c 'tree "$0" -H "."  -L 1 --noreport --houtro "" --dirsfirst --charset utf-8 -I "index.html" -T "MetaIR Examples" --ignore-case --timefmt "%d-%b-%Y %H:%M" -s -D -o "$0/index.html"' {} \;
       - uses: JamesIves/github-pages-deploy-action@3.7.1
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
