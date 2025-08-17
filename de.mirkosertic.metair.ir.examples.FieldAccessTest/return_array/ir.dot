@@ -8,20 +8,20 @@ digraph {
  node0 -> node7[labeldistance=2, color=red, fontcolor=red];
  node8[label="#8 Class FieldAccessTest$Source",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node8[style=dotted];
+ node3[label="#3 New",shape=octagon, fillcolor=orange, style=filled];
+ node1 -> node3[headlabel="*0", labeldistance=2];
+ node1 -> node3[labeldistance=2, color=green, constraint=false];
  node2[label="#2 Invoke special <init> : ()void",shape=box, fillcolor=lightgrey, style=filled];
  node3 -> node2[headlabel="*0", labeldistance=2];
  node1 -> node2[labeldistance=2, color=red, fontcolor=red];
  node3 -> node2[labeldistance=2, color=green, constraint=false];
- node3[label="#3 New",shape=octagon, fillcolor=orange, style=filled];
- node1 -> node3[headlabel="*0", labeldistance=2];
- node1 -> node3[labeldistance=2, color=green, constraint=false];
- node4[label="#4 GetField : array_field : int[]",shape=octagon, fillcolor=orange, style=filled];
- node3 -> node4[headlabel="*0", labeldistance=2];
- node2 -> node4[labeldistance=2, color=green, constraint=false];
  node5[label="#5 ReturnValue : int[]",shape=box, fillcolor=lightgrey, style=filled];
  node4 -> node5[headlabel="*0", labeldistance=2];
  node2 -> node5[labeldistance=2, color=red, fontcolor=red];
  node4 -> node5[labeldistance=2, color=green, constraint=false];
+ node4[label="#4 GetField : array_field : int[]",shape=octagon, fillcolor=orange, style=filled];
+ node3 -> node4[headlabel="*0", labeldistance=2];
+ node2 -> node4[labeldistance=2, color=green, constraint=false];
  subgraph cluster_0 {
   color=lightgray;
   node0;

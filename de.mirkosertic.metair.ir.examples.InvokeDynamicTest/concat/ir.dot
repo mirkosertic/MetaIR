@@ -1,12 +1,12 @@
 digraph {
- node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="3">#0 Method</td></tr><tr><td port="prj2" bgcolor="yellow">arg0 : int</td><td port="prj1" bgcolor="yellow">arg1 : int</td><td port="prj3" bgcolor="yellow">this : InvokeDynamicTest</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
+ node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="3">#0 Method</td></tr><tr><td port="prj1" bgcolor="yellow">arg0 : int</td><td port="prj2" bgcolor="yellow">arg1 : int</td><td port="prj3" bgcolor="yellow">this : InvokeDynamicTest</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
  node8[label="#8 int 0",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node8[style=dotted];
  node9[label="#9 NewArray : Object[]",shape=octagon, fillcolor=orange, style=filled];
  node8 -> node9[headlabel="*0", labeldistance=2];
  node15[label="#15 Invoke static makeConcatWithConstants : (MethodHandles$Lookup,String,MethodType,String,Object[])CallSite",shape=box, fillcolor=lightgrey, style=filled];
- node12 -> node15[headlabel="*0", labeldistance=2];
- node11 -> node15[headlabel="*1", labeldistance=2];
+ node10 -> node15[headlabel="*0", labeldistance=2];
+ node12 -> node15[headlabel="*1", labeldistance=2];
  node14 -> node15[headlabel="*2", labeldistance=2];
  node7 -> node15[headlabel="*3", labeldistance=2];
  node13 -> node15[headlabel="*4", labeldistance=2];
@@ -17,17 +17,17 @@ digraph {
  node0 -> node7[style=dotted];
  node14[label="#14 String : makeConcatWithConstants",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node14[style=dotted];
- node11[label="#11 Invoke static in : (Class)MethodHandles$Lookup",shape=box, fillcolor=lightgrey, style=filled];
- node10 -> node11[headlabel="*0", labeldistance=2];
- node10 -> node11[headlabel="*1", labeldistance=2];
- node10[label="#10 Class InvokeDynamicTest",shape=octagon, fillcolor=lightgreen, style=filled];
+ node12[label="#12 Invoke static in : (Class)MethodHandles$Lookup",shape=box, fillcolor=lightgrey, style=filled];
+ node11 -> node12[headlabel="*0", labeldistance=2];
+ node11 -> node12[headlabel="*1", labeldistance=2];
+ node11[label="#11 Class InvokeDynamicTest",shape=octagon, fillcolor=lightgreen, style=filled];
+ node0 -> node11[style=dotted];
+ node10[label="#10 Class StringConcatFactory",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node10[style=dotted];
- node12[label="#12 Class StringConcatFactory",shape=octagon, fillcolor=lightgreen, style=filled];
- node0 -> node12[style=dotted];
  node4[label="#4 Invoke dynamic makeConcatWithConstants : (int,int)String",shape=box, fillcolor=lightgrey, style=filled];
  node15 -> node4[headlabel="*0", labeldistance=2];
- node0:prj2 -> node4[headlabel="*1", labeldistance=2];
- node0:prj1 -> node4[headlabel="*2", labeldistance=2];
+ node0:prj1 -> node4[headlabel="*1", labeldistance=2];
+ node0:prj2 -> node4[headlabel="*2", labeldistance=2];
  node0 -> node4[labeldistance=2, color=green, constraint=false];
  node6 -> node4[labeldistance=2, color=red, fontcolor=red];
  node6[label="#6 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
@@ -42,7 +42,7 @@ digraph {
   node7;
   node8;
   node10;
-  node12;
+  node11;
   node13;
   node14;
  }

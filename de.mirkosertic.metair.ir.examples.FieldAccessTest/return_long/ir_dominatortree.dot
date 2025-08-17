@@ -25,7 +25,7 @@ digraph debugoutput {
  node4 -> node5;
  node6[label="#6 this : FieldAccessTest Order : 3",shape=box, fillcolor=lightgrey, style=filled];
  node6 -> node0[dir="forward" color="green" penwidth="2"];
- node0 -> node6[labeldistance=2, color=red, fontcolor=red];
+ node0 -> node6[headlabel="*0", labeldistance=2];
  node7[label="#7 LabelNode Order : 2",shape=box, fillcolor=lightgrey, style=filled];
  node7 -> node0[dir="forward" color="green" penwidth="2"];
  node0 -> node7[labeldistance=2, color=red, fontcolor=red];

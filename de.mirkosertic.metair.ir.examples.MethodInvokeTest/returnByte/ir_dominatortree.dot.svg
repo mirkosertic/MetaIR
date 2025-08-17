@@ -65,8 +65,9 @@
 <!-- node0&#45;&gt;node2 -->
 <g id="edge6" class="edge">
 <title>node0&#45;&gt;node2</title>
-<path fill="none" stroke="red" d="M594.91,-291.99C630.62,-281.71 677.62,-268.55 717,-257.79"/>
-<polygon fill="red" stroke="red" points="718.11,-261.12 726.84,-255.11 716.27,-254.36 718.11,-261.12"/>
+<path fill="none" stroke="black" d="M594.91,-291.99C630.62,-281.71 677.62,-268.55 717,-257.79"/>
+<polygon fill="black" stroke="black" points="718.11,-261.12 726.84,-255.11 716.27,-254.36 718.11,-261.12"/>
+<text text-anchor="middle" x="711.57" y="-264.33" font-family="Times,serif" font-size="14.00">*0</text>
 </g>
 <!-- node4 -->
 <g id="node6" class="node">

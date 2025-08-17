@@ -2,7 +2,7 @@ digraph debugoutput {
  node0[label="#0 Method Order : 0",shape=box, fillcolor=lightgrey, style=filled];
  node1[label="#1 this : ReturnTest Order : 2",shape=box, fillcolor=lightgrey, style=filled];
  node1 -> node0[dir="forward" color="green" penwidth="2"];
- node0 -> node1[labeldistance=2, color=red, fontcolor=red];
+ node0 -> node1[headlabel="*0", labeldistance=2];
  node2[label="#2 LabelNode Order : 1",shape=box, fillcolor=lightgrey, style=filled];
  node2 -> node0[dir="forward" color="green" penwidth="2"];
  node0 -> node2[labeldistance=2, color=red, fontcolor=red];

@@ -29,8 +29,9 @@
 <!-- node0&#45;&gt;node1 -->
 <g id="edge2" class="edge">
 <title>node0&#45;&gt;node1</title>
-<path fill="none" stroke="red" d="M356.46,-146.08C307.53,-135.61 245.93,-122.13 197.24,-111.24"/>
-<polygon fill="red" stroke="red" points="197.89,-107.8 187.36,-109.03 196.36,-114.63 197.89,-107.8"/>
+<path fill="none" stroke="black" d="M356.46,-146.08C307.53,-135.61 245.93,-122.13 197.24,-111.24"/>
+<polygon fill="black" stroke="black" points="197.89,-107.8 187.36,-109.03 196.36,-114.63 197.89,-107.8"/>
+<text text-anchor="middle" x="206.9" y="-101.04" font-family="Times,serif" font-size="14.00">*0</text>
 </g>
 <!-- node2 -->
 <g id="node3" class="node">

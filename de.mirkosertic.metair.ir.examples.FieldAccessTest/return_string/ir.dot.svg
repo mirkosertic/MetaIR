@@ -28,29 +28,29 @@
 <polygon fill="none" stroke="black" points="185,-365 185,-392 352,-392 352,-365 185,-365"/>
 <text text-anchor="start" x="191" y="-374.8" font-family="Times,serif" font-size="14.00">this : FieldAccessTest</text>
 </g>
-<!-- node1 -->
-<g id="node2" class="node">
-<title>node1</title>
-<polygon fill="lightgrey" stroke="black" points="353.5,-255 248.5,-255 248.5,-219 353.5,-219 353.5,-255"/>
-<text text-anchor="middle" x="301" y="-233.3" font-family="Times,serif" font-size="14.00">#1 ClassInit</text>
-</g>
-<!-- node0&#45;&gt;node1 -->
-<g id="edge3" class="edge">
-<title>node0&#45;&gt;node1</title>
-<path fill="none" stroke="green" d="M346.34,-364.99C362.5,-355.88 377.47,-343.82 387,-328 397.09,-311.25 397.05,-300.77 387,-284 381.08,-274.11 372.22,-266.23 362.42,-259.99"/>
-<polygon fill="green" stroke="green" points="364.02,-256.87 353.61,-254.92 360.53,-262.94 364.02,-256.87"/>
-</g>
 <!-- node8 -->
-<g id="node3" class="node">
+<g id="node2" class="node">
 <title>node8</title>
 <polygon fill="lightgreen" stroke="black" points="377.6,-302.54 377.6,-317.46 271.81,-328 122.19,-328 16.4,-317.46 16.4,-302.54 122.19,-292 271.81,-292 377.6,-302.54"/>
 <text text-anchor="middle" x="197" y="-306.3" font-family="Times,serif" font-size="14.00">#8 Class FieldAccessTest$Source</text>
 </g>
 <!-- node0&#45;&gt;node8 -->
-<g id="edge5" class="edge">
+<g id="edge1" class="edge">
 <title>node0&#45;&gt;node8</title>
 <path fill="none" stroke="black" stroke-dasharray="1,5" d="M244.75,-364.81C236.49,-355.5 227.23,-345.06 219.07,-335.87"/>
 <polygon fill="black" stroke="black" points="221.5,-333.33 212.24,-328.17 216.26,-337.98 221.5,-333.33"/>
+</g>
+<!-- node1 -->
+<g id="node3" class="node">
+<title>node1</title>
+<polygon fill="lightgrey" stroke="black" points="353.5,-255 248.5,-255 248.5,-219 353.5,-219 353.5,-255"/>
+<text text-anchor="middle" x="301" y="-233.3" font-family="Times,serif" font-size="14.00">#1 ClassInit</text>
+</g>
+<!-- node0&#45;&gt;node1 -->
+<g id="edge4" class="edge">
+<title>node0&#45;&gt;node1</title>
+<path fill="none" stroke="green" d="M346.34,-364.99C362.5,-355.88 377.47,-343.82 387,-328 397.09,-311.25 397.05,-300.77 387,-284 381.08,-274.11 372.22,-266.23 362.42,-259.99"/>
+<polygon fill="green" stroke="green" points="364.02,-256.87 353.61,-254.92 360.53,-262.94 364.02,-256.87"/>
 </g>
 <!-- node7 -->
 <g id="node4" class="node">
@@ -59,10 +59,17 @@
 <text text-anchor="middle" x="494" y="-306.3" font-family="Times,serif" font-size="14.00">#7 LabelNode</text>
 </g>
 <!-- node0&#45;&gt;node7 -->
-<g id="edge4" class="edge">
+<g id="edge5" class="edge">
 <title>node0&#45;&gt;node7</title>
 <path fill="none" stroke="red" d="M341.69,-364.92C372.36,-354.06 407.44,-341.64 436.2,-331.46"/>
 <polygon fill="red" stroke="red" points="437.43,-334.74 445.69,-328.1 435.1,-328.14 437.43,-334.74"/>
+</g>
+<!-- node8&#45;&gt;node1 -->
+<g id="edge2" class="edge">
+<title>node8&#45;&gt;node1</title>
+<path fill="none" stroke="black" d="M221.91,-291.99C235.57,-282.67 252.7,-270.97 267.52,-260.86"/>
+<polygon fill="black" stroke="black" points="269.65,-263.64 275.93,-255.11 265.7,-257.86 269.65,-263.64"/>
+<text text-anchor="middle" x="265.73" y="-268.61" font-family="Times,serif" font-size="14.00">*0</text>
 </g>
 <!-- node2 -->
 <g id="node5" class="node">
@@ -95,15 +102,8 @@
 <path fill="none" stroke="green" d="M322.13,-218.81C330.69,-210.18 340.32,-199.56 348.27,-190.03"/>
 <polygon fill="green" stroke="green" points="351.18,-192 354.75,-182.03 345.74,-187.6 351.18,-192"/>
 </g>
-<!-- node8&#45;&gt;node1 -->
-<g id="edge1" class="edge">
-<title>node8&#45;&gt;node1</title>
-<path fill="none" stroke="black" d="M221.91,-291.99C235.57,-282.67 252.7,-270.97 267.52,-260.86"/>
-<polygon fill="black" stroke="black" points="269.65,-263.64 275.93,-255.11 265.7,-257.86 269.65,-263.64"/>
-<text text-anchor="middle" x="265.73" y="-268.61" font-family="Times,serif" font-size="14.00">*0</text>
-</g>
 <!-- node7&#45;&gt;node1 -->
-<g id="edge2" class="edge">
+<g id="edge3" class="edge">
 <title>node7&#45;&gt;node1</title>
 <path fill="none" stroke="red" d="M447.77,-291.99C420.52,-281.97 385.85,-269.21 357.04,-258.62"/>
 <polygon fill="red" stroke="red" points="358.11,-255.28 347.52,-255.11 355.7,-261.85 358.11,-255.28"/>
