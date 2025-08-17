@@ -4,8 +4,10 @@ import java.lang.constant.ClassDesc;
 
 public class ExtractThisRefProjection extends Value implements Projection {
 
-    ExtractThisRefProjection(final ClassDesc type) {
+    ExtractThisRefProjection(final ClassDesc type, final Method source) {
         super(type);
+
+        use(source, new ArgumentUse(0));
     }
 
     @Override

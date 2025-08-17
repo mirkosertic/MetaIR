@@ -10,12 +10,15 @@ public class ExtractThisRefProjectionTest {
 
     @Test
     public void testUsage() {
-        final ExtractThisRefProjection a = new ExtractThisRefProjection(ConstantDescs.CD_String);
+        final Method m = new Method();
+        final ExtractThisRefProjection a = new ExtractThisRefProjection(ConstantDescs.CD_String, m);
 
         assertThat(a.type).isEqualTo(ConstantDescs.CD_String);
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).isEmpty();
-        assertThat(a.uses).isEmpty();
+        assertThat(a.uses).hasSize(1);
+        assertThat(a.uses.getFirst().node()).isSameAs(m);
+        assertThat(a.uses.getFirst().use()).isEqualTo(new ArgumentUse(0));
         assertThat(a.debugDescription()).isEqualTo("this : String");
         assertThat(a.name()).isEqualTo("this");
     }

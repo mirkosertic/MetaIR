@@ -1,7 +1,6 @@
 package de.mirkosertic.metair.ir;
 
 
-import java.lang.classfile.Label;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.ConstantDesc;
 import java.lang.constant.MethodHandleDesc;
@@ -11,7 +10,6 @@ import java.util.Map;
 
 public class Method extends TupleNode {
 
-    private final Map<Label, LabelNode> labelMap;
     private final Map<ClassDesc, RuntimeclassReference> runtimeclassReferences;
     private final Map<MethodTypeDesc, MethodType> methodtypeReferences;
     private final Map<MethodHandleDesc, MethodHandle> methodHandles;
@@ -19,12 +17,13 @@ public class Method extends TupleNode {
     private Null nullref;
 
     Method() {
-        this.labelMap = new HashMap<>();
         this.runtimeclassReferences = new HashMap<>();
         this.constants = new HashMap<>();
         this.methodtypeReferences = new HashMap<>();
         this.methodHandles = new HashMap<>();
         this.nullref = null;
+
+        registerAs("default", this);
     }
 
     public RuntimeclassReference defineRuntimeclassReference(final ClassDesc type) {
@@ -50,6 +49,7 @@ public class Method extends TupleNode {
             return r;
         });
     }
+
     public Null defineNullReference() {
         if (nullref == null) {
             nullref = new Null();
@@ -67,27 +67,15 @@ public class Method extends TupleNode {
     }
 
     public ExtractThisRefProjection defineThisRef(final ClassDesc type) {
-        final ExtractThisRefProjection n = (ExtractThisRefProjection) controlFlowsTo(new ExtractThisRefProjection(type), ControlType.FORWARD);
+        final ExtractThisRefProjection n = new ExtractThisRefProjection(type, this);
         registerAs(n.name(), n);
         return n;
     }
 
     public ExtractMethodArgProjection defineMethodArgument(final ConstantDesc type, final int index) {
-        final ExtractMethodArgProjection n = (ExtractMethodArgProjection) controlFlowsTo(new ExtractMethodArgProjection(type, index), ControlType.FORWARD);
+        final ExtractMethodArgProjection n = new ExtractMethodArgProjection(type, this, index);
         registerAs(n.name(), n);
         return n;
-    }
-
-    public MergeNode createMergeNode(final String label) {
-        return new MergeNode(label);
-    }
-
-    public LoopHeaderNode createLoop(final String label) {
-        return new LoopHeaderNode(label);
-    }
-
-    public LabelNode createLabel(final Label label) {
-        return labelMap.computeIfAbsent(label, key -> new LabelNode(label.toString()));
     }
 
     public PrimitiveInt definePrimitiveInt(final int value) {

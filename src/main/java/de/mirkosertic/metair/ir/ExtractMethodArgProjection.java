@@ -6,9 +6,11 @@ public class ExtractMethodArgProjection extends Value implements Projection {
 
     private final int index;
 
-    ExtractMethodArgProjection(final ConstantDesc type, final int index) {
+    ExtractMethodArgProjection(final ConstantDesc type, final Method source, final int index) {
         super(type);
         this.index = index;
+
+        use(source, new ArgumentUse(index));
     }
 
     public int index() {

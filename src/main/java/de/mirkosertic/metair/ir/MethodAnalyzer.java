@@ -60,6 +60,7 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 public class MethodAnalyzer {
 
@@ -178,7 +179,33 @@ public class MethodAnalyzer {
                 visited.add(i);
                 newPath.add(i);
                 final CodeElement current = codeElements.get(i);
-                if (current instanceof final Instruction instruction) {
+                if (current instanceof final LabelTarget lt) {
+                    final Label label = lt.label();
+                    // Search for exception handlers
+                    for (int exceptionIndex = 0; exceptionIndex < code.exceptionHandlers().size(); exceptionIndex++) {
+                        final ExceptionCatch c = code.exceptionHandlers().get(exceptionIndex);
+
+                        if (c.tryStart().equals(label)) {
+                            final Label target = c.handler();
+                            if (!target.equals(label)) {
+                                if (labelToIndex.containsKey(target)) {
+                                    final int newIndex = labelToIndex.get(target);
+                                    if (!visited.contains(newIndex)) {
+                                        jobs.add(new CFGAnalysisJob(newIndex, newPath));
+                                    }
+                                    Frame frame = frames[newIndex];
+                                    if (frame == null) {
+                                        frame = new Frame(newIndex, codeElements.get(newIndex));
+                                        frames[newIndex] = frame;
+                                    }
+                                    frame.predecessors.add(new CFGEdge(i, new NamedProjection("catch:" + exceptionIndex + ":" + (c.catchType().isPresent() ? c.catchType().get().name().stringValue() : "any")), ControlType.FORWARD));
+                                } else {
+                                    illegalState("Exception handler target " + target + " is not mapped to an index");
+                                }
+                            }
+                        }
+                    }
+                } else  if (current instanceof final Instruction instruction) {
                     if (instruction instanceof final BranchInstruction branch) {
                         // This can either be a conditional or unconditional branch
                         if (instruction.opcode() == Opcode.GOTO || instruction.opcode() == Opcode.GOTO_W) {
@@ -421,6 +448,8 @@ public class MethodAnalyzer {
         initStatus.control = ir;
         initStatus.memory = ir;
 
+        final Set<Label> exceptionHandlers = cm.exceptionHandlers().stream().map(ExceptionCatch::handler).collect(Collectors.toSet());
+
         // We need the topological (reverse-post-order) of the CFG to traverse
         // the instructions in the right order
         final List<Frame> topologicalOrder = getCodeModelTopologicalOrder();
@@ -428,7 +457,7 @@ public class MethodAnalyzer {
         // Init locals according to the method signature and their types
         if (!topologicalOrder.getFirst().predecessors.isEmpty()) {
             // We have a cfg to the start, so the start should already be a loop header!
-            final LoopHeaderNode loop = ir.createLoop("Loop0");
+            final LoopHeaderNode loop = new LoopHeaderNode("Loop0");
             initStatus.control = initStatus.control.controlFlowsTo(loop, ControlType.FORWARD);
 
             // We start directly
@@ -473,6 +502,13 @@ public class MethodAnalyzer {
         for (int i = 0; i < topologicalOrder.size(); i++) {
             final Frame frame = topologicalOrder.get(i);
 
+            boolean isExceptionHandler = false;
+            final CodeElement frameElement = cm.elementList().get(frame.elementIndex);
+            if (frameElement instanceof final LabelTarget labelTarget) {
+                // Check is this is an exception handler
+                isExceptionHandler = exceptionHandlers.contains(labelTarget.label());
+            }
+
             Status incomingStatus = frame.in;
             if (incomingStatus == null) {
                 // We need to compute the incoming status from the predecessors
@@ -489,17 +525,34 @@ public class MethodAnalyzer {
                         illegalState("No outgoing status for " + frame.elementIndex);
                     }
                     incomingStatus = outgoing.out.copy();
+                    // TODO: In case of exception handlers we do not have a guaranteed stack, but only the provided exception
 
-                    if (NamedProjection.DEFAULT.equals(edge.projection)) {
-                        // No nothing in this case, we just keep the incoming control node
-                    } else if (incomingStatus.control instanceof TupleNode) {
+                    if (incomingStatus.control instanceof TupleNode) {
                         incomingStatus.control = ((TupleNode) incomingStatus.control).getNamedNode(edge.projection().name());
+                    } else if (NamedProjection.DEFAULT.equals(edge.projection)) {
+                        // No nothing in this case, we just keep the incoming control node
                     } else {
                         illegalState("Unknown projection type " + edge.projection + " or unsupported node : " + incomingStatus.control);
                     }
 
+                    if (isExceptionHandler) {
+                        incomingStatus.stack.clear();
+                        if (!(incomingStatus.control instanceof Catch)) {
+                            illegalState("Catch node expected for exception handler, not " + incomingStatus.control);
+                        }
+
+                        // We put the caught exception on the stack here
+                        final Catch c = (Catch) incomingStatus.control;
+                        incomingStatus.stack.push(c.caughtException());
+                    }
+
                     frame.in = incomingStatus;
                 } else {
+
+                    if (isExceptionHandler) {
+                        illegalState("Exception handler with multiple predecessors not supported yet");
+                    }
+
                     // Eager PHI creation and memory-edge merging
                     final List<Frame> incomingFrames = new ArrayList<>();
                     final List<Node> incomingMemories = new ArrayList<>();
@@ -525,9 +578,9 @@ public class MethodAnalyzer {
 
                     final MultiInputNode target;
                     if (hasBackEdges) {
-                        target = ir.createLoop("Loop" + frame.elementIndex);
+                        target = new LoopHeaderNode("Loop" + frame.elementIndex);
                     } else {
-                        target = ir.createMergeNode("Merge" + frame.elementIndex);
+                        target = new MergeNode("Merge" + frame.elementIndex);
                     }
 
                     for (final CFGEdge edge : frame.predecessors) {
@@ -542,6 +595,8 @@ public class MethodAnalyzer {
 
                     incomingStatus = new Status(cm.maxLocals());
 
+                    // TODO: In case of exception handlers we do not have a guaranteed stack, but only the provided exception
+
                     int incomingStackSize = -1;
                     for (final Frame fr : incomingFrames) {
                         if (incomingStackSize == -1) {
@@ -552,7 +607,7 @@ public class MethodAnalyzer {
                     }
 
                     if (incomingStackSize > 0) {
-                        // Check of we need to to something
+                        // Check of we need to do something
                         for (int stackPos = 0; stackPos < incomingStackSize; stackPos++) {
                             final List<Value> allValues = new ArrayList<>();
                             for (final Frame fr : incomingFrames) {
@@ -606,6 +661,13 @@ public class MethodAnalyzer {
                         }
                     }
 
+                    if (frame.codeElement instanceof final LabelTarget lt) {
+                        final List<ExceptionCatch> catchesEndingHere = code.exceptionHandlers().stream().filter(t -> t.tryEnd().equals(lt.label())).toList();
+                        if (!catchesEndingHere.isEmpty()) {
+                            illegalState("Merge at end of exception handler not supported yet");
+                        }
+                    }
+
                     if (incomingMemories.size() == 1) {
                         incomingStatus.memory = incomingMemories.getFirst();
                     } else {
@@ -623,13 +685,12 @@ public class MethodAnalyzer {
 
             if (frame.entryPoint == null) {
                 // This is the thing we need to interpret
-                final CodeElement element = frame.codeElement;
 
                 // Interpret the node
-                visitNode(element, frame);
+                visitNode(code, frameElement, frame);
 
                 if (frame.out == null || frame.out == incomingStatus) {
-                    illegalState("No outgoing or same same as incoming status for " + element);
+                    illegalState("No outgoing or same same as incoming status for " + frameElement);
                 }
             } else {
                 frame.copyIncomingToOutgoing();
@@ -637,12 +698,12 @@ public class MethodAnalyzer {
         }
     }
 
-    private void visitNode(final CodeElement node, final Frame frame) {
+    private void visitNode(final CodeModel codeModel, final CodeElement node, final Frame frame) {
 
         if (node instanceof final PseudoInstruction psi) {
             // Pseudo Instructions
             switch (psi) {
-                case final LabelTarget labelTarget -> visitLabelTarget(labelTarget, frame);
+                case final LabelTarget labelTarget -> visitLabelTarget(codeModel, labelTarget, frame);
                 case final LineNumber lineNumber -> visitLineNumberNode(lineNumber, frame);
                 case final LocalVariable localVariable ->
                     // Maybe we can use this for debugging?
@@ -735,11 +796,49 @@ public class MethodAnalyzer {
     }
 
     @Testbacklog
-    protected void visitLabelTarget(final LabelTarget node, final Frame frame) {
-        final LabelNode label = ir.createLabel(node.label());
-        final Status outgoing = frame.copyIncomingToOutgoing();
-        outgoing.control = outgoing.control.controlFlowsTo(label, ControlType.FORWARD);
-        frame.entryPoint = label;
+    protected void visitLabelTarget(final CodeModel codeModel, final LabelTarget node, final Frame frame) {
+
+        final Label label = node.label();
+        final List<ExceptionCatch> catchesFromHere = codeModel.exceptionHandlers().stream().filter(t -> t.tryStart().equals(label)).toList();
+        final List<ExceptionCatch> catchesEndingHere = codeModel.exceptionHandlers().stream().filter(t -> t.tryEnd().equals(label)).toList();
+
+        if (!catchesEndingHere.isEmpty()) {
+            if (!catchesFromHere.isEmpty()) {
+                illegalState("Not implemented yet here: Label starts and ends an TryCatch at the same time");
+            }
+            if (catchesEndingHere.size() > 1) {
+                illegalState("Multiple TryCatch ending at the same label not implemented yet");
+            }
+            final Status outgoing = frame.copyIncomingToOutgoing();
+            final ExceptionGuard activeGuard = outgoing.popExceptionGuard();
+
+            final Node n = new MergeNode("EndOfGuardedBlock" + frame.elementIndex);
+            outgoing.control.controlFlowsTo(n, ControlType.FORWARD);
+            outgoing.control = activeGuard.exitNode().controlFlowsTo(n, ControlType.FORWARD);
+
+            frame.entryPoint = n;
+            return;
+        }
+
+        if (catchesFromHere.isEmpty()) {
+            final Status outgoing = frame.copyIncomingToOutgoing();
+            final Node n = new LabelNode("Frame" + frame.elementIndex);
+            outgoing.control = outgoing.control.controlFlowsTo(n, ControlType.FORWARD);
+
+            frame.entryPoint = n;
+        } else {
+            final Status outgoing = frame.copyIncomingToOutgoing();
+            final ExceptionGuard n = new ExceptionGuard(catchesFromHere.stream().map(t -> {
+                if (t.catchType().isPresent()) {
+                    return new ExceptionGuard.Catches(Optional.of(t.catchType().get().asSymbol()));
+                }
+                return new ExceptionGuard.Catches(Optional.empty());
+            }).toList());
+            outgoing.registerExceptionGuard(n);
+            outgoing.control = outgoing.control.controlFlowsTo(n, ControlType.FORWARD);
+
+            frame.entryPoint = n;
+        }
     }
 
     @Testbacklog
@@ -749,8 +848,7 @@ public class MethodAnalyzer {
         outgoing.lineNumber = node.line();
     }
 
-    @Testbacklog
-    protected void visitExceptionCatch(final ExceptionCatch node, final Frame frame) {
+    private void visitExceptionCatch(final ExceptionCatch node, final Frame frame) {
         frame.copyIncomingToOutgoing();
     }
 
@@ -887,7 +985,7 @@ public class MethodAnalyzer {
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, expectedarguments);
 
-        // First of all, we need the bootstrap method as the later invocation target
+        // We need the bootstrap method as the later invocation target
         final DirectMethodHandleDesc bootstrapMethod = node.bootstrapMethod();
         if (bootstrapMethod.kind() != DirectMethodHandleDesc.Kind.STATIC) {
             illegalState("Only static bootstrap methods are supported yet");
@@ -2089,11 +2187,13 @@ public class MethodAnalyzer {
         protected final Stack<Value> stack;
         protected Node control;
         protected Node memory;
+        protected final Stack<ExceptionGuard> activeExceptionGuards;
 
         protected Status(final int maxLocals) {
             this.locals = new Value[maxLocals];
             this.stack = new Stack<>();
             this.lineNumber = UNDEFINED_LINE_NUMBER;
+            this.activeExceptionGuards = new Stack<>();
         }
 
         protected int numberOfLocals() {
@@ -2125,6 +2225,7 @@ public class MethodAnalyzer {
             result.lineNumber = lineNumber;
             System.arraycopy(locals, 0, result.locals, 0, locals.length);
             result.stack.addAll(stack);
+            result.activeExceptionGuards.addAll(activeExceptionGuards);
             result.control = control;
             result.memory = memory;
             return result;
@@ -2140,6 +2241,17 @@ public class MethodAnalyzer {
 
         protected void push(final Value value) {
             stack.push(value);
+        }
+
+        protected void registerExceptionGuard(final ExceptionGuard guard) {
+            activeExceptionGuards.add(guard);
+        }
+
+        protected ExceptionGuard popExceptionGuard() {
+            if (activeExceptionGuards.isEmpty()) {
+                throw new IllegalStateException("No exception guard to pop!");
+            }
+            return activeExceptionGuards.peek();
         }
     }
 }
