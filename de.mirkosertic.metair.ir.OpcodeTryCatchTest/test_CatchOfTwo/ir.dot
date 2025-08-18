@@ -1,12 +1,10 @@
 digraph {
  node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#0 Method</td></tr><tr><td port="prj16" bgcolor="yellow">this : Test</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
- node1[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="4">#1 ExceptionGuard</td></tr><tr><td port="prj9" bgcolor="yellow">catch : IllegalArgumentException</td><td port="prj10" bgcolor="yellow">catch : RuntimeException</td><td port="prj12" bgcolor="yellow">default</td><td port="prj11" bgcolor="yellow">exit</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
- node0 -> node1[labeldistance=2, color=red, fontcolor=red];
- node13[label="#13 Merge : EndOfGuardedBlock5",shape=box, fillcolor=lightgrey, style=filled];
- node1:prj12 -> node13[labeldistance=2, color=red, fontcolor=red];
- node1:prj11 -> node13[labeldistance=2, color=red, fontcolor=red];
- node14[label="#14 Goto",shape=box, fillcolor=lightgrey, style=filled];
- node13 -> node14[labeldistance=2, color=red, fontcolor=red];
+ node17[label="#17 int 3",shape=octagon, fillcolor=lightgreen, style=filled];
+ node0 -> node17[style=dotted];
+ node18[label="#18 Return",shape=box, fillcolor=lightgrey, style=filled];
+ node15 -> node18[labeldistance=2, color=red, fontcolor=red];
+ node0 -> node18[labeldistance=2, color=green, constraint=false];
  node15[label="#15 Merge : Merge12",shape=box, fillcolor=lightgrey, style=filled];
  node14 -> node15[labeldistance=2, color=red, fontcolor=red];
  node8 -> node15[labeldistance=2, color=red, fontcolor=red];
@@ -16,18 +14,20 @@ digraph {
  node2[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#2 Catch : RuntimeException</td></tr><tr><td port="prj3" bgcolor="yellow">exception : RuntimeException</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
  node1 -> node2[headlabel="*0", labeldistance=2];
  node1:prj10 -> node2[labeldistance=2, color=red, fontcolor=red];
- node8[label="#8 Goto",shape=box, fillcolor=lightgrey, style=filled];
- node7 -> node8[labeldistance=2, color=red, fontcolor=red];
- node7[label="#7 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
- node5 -> node7[labeldistance=2, color=red, fontcolor=red];
+ node1[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="4">#1 ExceptionGuard</td></tr><tr><td port="prj9" bgcolor="yellow">catch : IllegalArgumentException</td><td port="prj10" bgcolor="yellow">catch : RuntimeException</td><td port="prj11" bgcolor="yellow">default</td><td port="prj12" bgcolor="yellow">exit</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
+ node0 -> node1[labeldistance=2, color=red, fontcolor=red];
+ node13[label="#13 Merge : EndOfGuardedBlock5",shape=box, fillcolor=lightgrey, style=filled];
+ node1:prj11 -> node13[labeldistance=2, color=red, fontcolor=red];
+ node1:prj12 -> node13[labeldistance=2, color=red, fontcolor=red];
+ node14[label="#14 Goto",shape=box, fillcolor=lightgrey, style=filled];
+ node13 -> node14[labeldistance=2, color=red, fontcolor=red];
  node5[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#5 Catch : IllegalArgumentException</td></tr><tr><td port="prj6" bgcolor="yellow">exception : IllegalArgumentException</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
  node1 -> node5[headlabel="*0", labeldistance=2];
  node1:prj9 -> node5[labeldistance=2, color=red, fontcolor=red];
- node18[label="#18 Return",shape=box, fillcolor=lightgrey, style=filled];
- node15 -> node18[labeldistance=2, color=red, fontcolor=red];
- node0 -> node18[labeldistance=2, color=green, constraint=false];
- node17[label="#17 int 3",shape=octagon, fillcolor=lightgreen, style=filled];
- node0 -> node17[style=dotted];
+ node7[label="#7 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
+ node5 -> node7[labeldistance=2, color=red, fontcolor=red];
+ node8[label="#8 Goto",shape=box, fillcolor=lightgrey, style=filled];
+ node7 -> node8[labeldistance=2, color=red, fontcolor=red];
  subgraph cluster_0 {
   color=lightgray;
   node0;

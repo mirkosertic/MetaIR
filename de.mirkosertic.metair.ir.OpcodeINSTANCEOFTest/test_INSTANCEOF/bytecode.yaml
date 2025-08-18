@@ -1,0 +1,13 @@
+
+  - method name: test
+    flags: [PUBLIC]
+    method type: (Ljava/lang/Object;)I
+    attributes: [Code]
+    code: 
+        max stack: 1
+        max locals: 2
+        attributes: []
+        //stack map frame @0: {locals: [de/mirkosertic/test/Test, java/lang/Object], stack: []}
+        0: {opcode: ALOAD_1, slot: 1}
+        1: {opcode: INSTANCEOF, type: java/lang/String}
+        4: {opcode: IRETURN}

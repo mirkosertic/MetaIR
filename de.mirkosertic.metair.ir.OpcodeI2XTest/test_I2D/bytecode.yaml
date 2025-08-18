@@ -1,0 +1,13 @@
+
+  - method name: test
+    flags: [PUBLIC]
+    method type: ()D
+    attributes: [Code]
+    code: 
+        max stack: 2
+        max locals: 1
+        attributes: []
+        //stack map frame @0: {locals: [de/mirkosertic/test/Test], stack: []}
+        0: {opcode: ICONST_0, constant value: 0}
+        1: {opcode: I2D}
+        2: {opcode: DRETURN}

@@ -1,0 +1,25 @@
+
+  - method name: test
+    flags: [PUBLIC]
+    method type: ()V
+    attributes: [Code]
+    code: 
+        max stack: 3
+        max locals: 2
+        attributes: []
+        //stack map frame @0: {locals: [de/mirkosertic/test/Test], stack: []}
+        0: {opcode: BIPUSH, constant value: 10}
+        2: {opcode: NEWARRAY, dimensions: 1, descriptor: int}
+        4: {opcode: ASTORE_1, slot: 1}
+        5: {opcode: ALOAD_1, slot: 1}
+        6: {opcode: ICONST_0, constant value: 0}
+        7: {opcode: LDC, constant value: 2}
+        9: {opcode: IASTORE}
+        10: {opcode: ALOAD_1, slot: 1}
+        11: {opcode: SIPUSH, constant value: 2}
+        14: {opcode: IALOAD}
+        15: {opcode: POP}
+        16: {opcode: ALOAD_1, slot: 1}
+        17: {opcode: ARRAYLENGTH}
+        18: {opcode: POP}
+        19: {opcode: RETURN}

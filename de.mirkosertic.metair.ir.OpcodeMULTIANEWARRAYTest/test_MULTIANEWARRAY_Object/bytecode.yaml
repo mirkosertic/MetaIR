@@ -1,0 +1,15 @@
+
+  - method name: test
+    flags: [PUBLIC]
+    method type: ()V
+    attributes: [Code]
+    code: 
+        max stack: 2
+        max locals: 2
+        attributes: []
+        //stack map frame @0: {locals: [de/mirkosertic/test/Test], stack: []}
+        0: {opcode: BIPUSH, constant value: 10}
+        2: {opcode: BIPUSH, constant value: 20}
+        4: {opcode: MULTIANEWARRAY, dimensions: 2, descriptor: java/lang/String}
+        8: {opcode: ASTORE_1, slot: 1}
+        9: {opcode: RETURN}

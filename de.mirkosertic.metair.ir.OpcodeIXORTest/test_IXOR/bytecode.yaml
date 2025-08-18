@@ -1,0 +1,14 @@
+
+  - method name: test
+    flags: [PUBLIC]
+    method type: ()I
+    attributes: [Code]
+    code: 
+        max stack: 2
+        max locals: 1
+        attributes: []
+        //stack map frame @0: {locals: [de/mirkosertic/test/Test], stack: []}
+        0: {opcode: ICONST_0, constant value: 0}
+        1: {opcode: ICONST_1, constant value: 1}
+        2: {opcode: IXOR}
+        3: {opcode: IRETURN}

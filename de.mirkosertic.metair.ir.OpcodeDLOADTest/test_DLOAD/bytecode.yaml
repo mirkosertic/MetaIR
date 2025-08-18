@@ -1,0 +1,39 @@
+
+  - method name: test
+    flags: [PUBLIC]
+    method type: ()V
+    attributes: [Code]
+    code: 
+        max stack: 8
+        max locals: 14
+        attributes: []
+        //stack map frame @0: {locals: [de/mirkosertic/test/Test], stack: []}
+        0: {opcode: DCONST_1, constant value: 1.0}
+        1: {opcode: DSTORE_0, slot: 0}
+        2: {opcode: DLOAD_0, slot: 0}
+        3: {opcode: POP}
+        4: {opcode: DCONST_1, constant value: 1.0}
+        5: {opcode: DSTORE_2, slot: 2}
+        6: {opcode: DLOAD_2, slot: 2}
+        7: {opcode: POP}
+        8: {opcode: DCONST_1, constant value: 1.0}
+        9: {opcode: DSTORE, slot: 4}
+        11: {opcode: DLOAD, slot: 4}
+        13: {opcode: POP}
+        14: {opcode: DCONST_1, constant value: 1.0}
+        15: {opcode: DSTORE, slot: 6}
+        17: {opcode: DLOAD, slot: 6}
+        19: {opcode: POP}
+        20: {opcode: DCONST_1, constant value: 1.0}
+        21: {opcode: DSTORE, slot: 8}
+        23: {opcode: DLOAD, slot: 8}
+        25: {opcode: POP}
+        26: {opcode: DCONST_1, constant value: 1.0}
+        27: {opcode: DSTORE, slot: 10}
+        29: {opcode: DLOAD, slot: 10}
+        31: {opcode: POP}
+        32: {opcode: DCONST_1, constant value: 1.0}
+        33: {opcode: DSTORE, slot: 12}
+        35: {opcode: DLOAD, slot: 12}
+        37: {opcode: POP}
+        38: {opcode: RETURN}

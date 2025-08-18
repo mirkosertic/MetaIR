@@ -1,0 +1,20 @@
+digraph {
+ node0[label="#0 UnboundIntrinsicConstantInstruction[op=LCONST_0] Order: 0", shape=box, fillcolor=lightgrey, style=filled];
+ node1[label="#1 UnboundStackInstruction[op=POP2] Order: 1", shape=box, fillcolor=lightgrey, style=filled];
+ node2[label="#2 Return[OP=RETURN] Order: 2", shape=box, fillcolor=lightgrey, style=filled];
+ node0 -> node1[color=red];
+ subgraph cluster_000 {
+  label = "Legend";
+  node [shape=point]
+  {
+   rank=same;
+   c0 [style = invis];
+   c1 [style = invis];
+   c2 [style = invis];
+   c3 [style = invis];
+  }
+  c0 -> c1 [label="Control flow", style=solid, color=red]
+  c2 -> c3 [label="Control flow back edge", style=dashed, color=red]
+ }
+
+}

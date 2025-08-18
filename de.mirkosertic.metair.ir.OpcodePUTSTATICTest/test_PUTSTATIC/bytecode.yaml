@@ -1,0 +1,13 @@
+
+  - method name: test
+    flags: [PUBLIC]
+    method type: ()V
+    attributes: [Code]
+    code: 
+        max stack: 1
+        max locals: 1
+        attributes: []
+        //stack map frame @0: {locals: [de/mirkosertic/test/Test], stack: []}
+        0: {opcode: ICONST_1, constant value: 1}
+        1: {opcode: PUTSTATIC, owner: java/lang/String, field name: field, field type: I}
+        4: {opcode: RETURN}

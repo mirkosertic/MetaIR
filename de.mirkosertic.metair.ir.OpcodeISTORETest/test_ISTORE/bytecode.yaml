@@ -1,0 +1,27 @@
+
+  - method name: test
+    flags: [PUBLIC]
+    method type: ()V
+    attributes: [Code]
+    code: 
+        max stack: 1
+        max locals: 7001
+        attributes: []
+        //stack map frame @0: {locals: [de/mirkosertic/test/Test], stack: []}
+        0: {opcode: ICONST_0, constant value: 0}
+        1: {opcode: ISTORE_0, slot: 0}
+        2: {opcode: ICONST_0, constant value: 0}
+        3: {opcode: ISTORE_1, slot: 1}
+        4: {opcode: ICONST_0, constant value: 0}
+        5: {opcode: ISTORE_2, slot: 2}
+        6: {opcode: ICONST_0, constant value: 0}
+        7: {opcode: ISTORE_3, slot: 3}
+        8: {opcode: ICONST_0, constant value: 0}
+        9: {opcode: ISTORE, slot: 4}
+        11: {opcode: ICONST_0, constant value: 0}
+        12: {opcode: ISTORE, slot: 5}
+        14: {opcode: ICONST_0, constant value: 0}
+        15: {opcode: ISTORE, slot: 7}
+        17: {opcode: ICONST_0, constant value: 0}
+        18: {opcode: ISTORE_W, slot: 7000}
+        22: {opcode: RETURN}

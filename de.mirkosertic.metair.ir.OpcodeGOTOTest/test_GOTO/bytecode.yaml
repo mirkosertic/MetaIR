@@ -1,0 +1,17 @@
+
+  - method name: test
+    flags: [PUBLIC]
+    method type: ()V
+    attributes: [Code]
+    code: 
+        max stack: 1
+        max locals: 1
+        attributes: [StackMapTable]
+        stack map frames: 
+            0: {locals: [de/mirkosertic/test/Test], stack: []}
+            4: {locals: [], stack: [java/lang/Throwable]}
+        //stack map frame @0: {locals: [de/mirkosertic/test/Test], stack: []}
+        0: {opcode: NOP}
+        1: {opcode: GOTO, target: 0}
+        //stack map frame @4: {locals: [], stack: [java/lang/Throwable]}
+        4: {opcode: ATHROW}

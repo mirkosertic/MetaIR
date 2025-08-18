@@ -1,0 +1,20 @@
+
+  - method name: test
+    flags: [PUBLIC]
+    method type: ()I
+    attributes: [Code]
+    code: 
+        max stack: 2
+        max locals: 1
+        attributes: [StackMapTable]
+        stack map frames: 
+            7: {locals: [de/mirkosertic/test/Test], stack: []}
+        //stack map frame @0: {locals: [de/mirkosertic/test/Test], stack: []}
+        0: {opcode: ICONST_0, constant value: 0}
+        1: {opcode: ICONST_0, constant value: 0}
+        2: {opcode: IF_ICMPGT, target: 7}
+        5: {opcode: ICONST_1, constant value: 1}
+        6: {opcode: IRETURN}
+        //stack map frame @7: {locals: [de/mirkosertic/test/Test], stack: []}
+        7: {opcode: ICONST_0, constant value: 0}
+        8: {opcode: IRETURN}

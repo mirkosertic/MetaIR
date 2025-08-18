@@ -1,0 +1,15 @@
+
+  - method name: test
+    flags: [PUBLIC]
+    method type: ()V
+    attributes: [Code]
+    code: 
+        max stack: 4
+        max locals: 1
+        attributes: []
+        //stack map frame @0: {locals: [de/mirkosertic/test/Test], stack: []}
+        0: {opcode: LCONST_0, constant value: 0}
+        1: {opcode: LCONST_1, constant value: 1}
+        2: {opcode: LCMP}
+        3: {opcode: POP}
+        4: {opcode: RETURN}
