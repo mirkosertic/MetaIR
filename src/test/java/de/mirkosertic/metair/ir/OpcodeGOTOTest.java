@@ -1,6 +1,9 @@
 package de.mirkosertic.metair.ir;
 
+import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
+import de.mirkosertic.metair.ir.test.MetaIRTestTools;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
 import java.lang.classfile.ClassModel;
@@ -13,10 +16,11 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@ExtendWith(MetaIRTestTools.class)
 public class OpcodeGOTOTest {
 
     @Test
-    public void test_GOTO() throws IOException {
+    public void test_GOTO(final MetaIRTestHelper testHelper) throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
             final Label back = codeBuilder.newLabel();
             codeBuilder.labelBinding(back);
@@ -27,11 +31,11 @@ public class OpcodeGOTOTest {
         final Optional<MethodModel> method = model.methods().stream().filter(m -> "test".contentEquals(m.methodName())).findFirst();
         assertThat(method).isPresent();
 
-        final MethodAnalyzer analyzer = new MethodAnalyzer(model.thisClass().asSymbol(), method.get());
+        testHelper.analyzeAndReport(model, method.get());
     }
 
     @Test
-    public void test_GOTO_W() throws IOException {
+    public void test_GOTO_W(final MetaIRTestHelper testHelper) throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
             final Label back = codeBuilder.newLabel();
             codeBuilder.labelBinding(back);
@@ -44,6 +48,6 @@ public class OpcodeGOTOTest {
         final Optional<MethodModel> method = model.methods().stream().filter(m -> "test".contentEquals(m.methodName())).findFirst();
         assertThat(method).isPresent();
 
-        final MethodAnalyzer analyzer = new MethodAnalyzer(model.thisClass().asSymbol(), method.get());
+        testHelper.analyzeAndReport(model, method.get());
     }
 }

@@ -1,6 +1,9 @@
 package de.mirkosertic.metair.ir;
 
+import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
+import de.mirkosertic.metair.ir.test.MetaIRTestTools;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
 import java.lang.classfile.ClassModel;
@@ -12,10 +15,11 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@ExtendWith(MetaIRTestTools.class)
 public class OpcodeL2XTest {
 
     @Test
-    public void test_L2I() throws IOException {
+    public void test_L2I(final MetaIRTestHelper testHelper) throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_int), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
             codeBuilder.lconst_1();
             codeBuilder.l2i();
@@ -24,12 +28,11 @@ public class OpcodeL2XTest {
         final Optional<MethodModel> method = model.methods().stream().filter(m -> "test".contentEquals(m.methodName())).findFirst();
         assertThat(method).isPresent();
 
-        final MethodAnalyzer analyzer = new MethodAnalyzer(model.thisClass().asSymbol(), method.get());
-        // We did not crash!
+        testHelper.analyzeAndReport(model, method.get());
     }
 
     @Test
-    public void test_L2F() throws IOException {
+    public void test_L2F(final MetaIRTestHelper testHelper) throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_float), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
             codeBuilder.lconst_1();
             codeBuilder.l2f();
@@ -38,12 +41,11 @@ public class OpcodeL2XTest {
         final Optional<MethodModel> method = model.methods().stream().filter(m -> "test".contentEquals(m.methodName())).findFirst();
         assertThat(method).isPresent();
 
-        final MethodAnalyzer analyzer = new MethodAnalyzer(model.thisClass().asSymbol(), method.get());
-        // We did not crash!
+        testHelper.analyzeAndReport(model, method.get());
     }
 
     @Test
-    public void test_L2D() throws IOException {
+    public void test_L2D(final MetaIRTestHelper testHelper) throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_double), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
             codeBuilder.lconst_1();
             codeBuilder.l2d();
@@ -52,8 +54,7 @@ public class OpcodeL2XTest {
         final Optional<MethodModel> method = model.methods().stream().filter(m -> "test".contentEquals(m.methodName())).findFirst();
         assertThat(method).isPresent();
 
-        final MethodAnalyzer analyzer = new MethodAnalyzer(model.thisClass().asSymbol(), method.get());
-        // We did not crash!
+        testHelper.analyzeAndReport(model, method.get());
     }
 
 }

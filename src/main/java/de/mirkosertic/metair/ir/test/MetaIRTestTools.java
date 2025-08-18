@@ -10,7 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.io.IOException;
 
-public class MetaIRTestHelperResolver implements ParameterResolver {
+public class MetaIRTestTools implements ParameterResolver {
 
     @Override
     public boolean supportsParameter(final ParameterContext parameterContext,
@@ -29,7 +29,7 @@ public class MetaIRTestHelperResolver implements ParameterResolver {
                 ExtensionContext.Namespace.GLOBAL);
 
         // TODO: This is not working, why?
-        OutputDirectoryProvider provider = store.get(
+        final OutputDirectoryProvider provider = store.get(
                 OutputDirectoryProvider.class, OutputDirectoryProvider.class);
 
         final String baseOutputDir = System.getProperty("test.output.dir", "target/metair-test");

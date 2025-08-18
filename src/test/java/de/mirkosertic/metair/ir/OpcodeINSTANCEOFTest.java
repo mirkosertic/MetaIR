@@ -1,6 +1,9 @@
 package de.mirkosertic.metair.ir;
 
+import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
+import de.mirkosertic.metair.ir.test.MetaIRTestTools;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
 import java.lang.classfile.ClassModel;
@@ -12,10 +15,11 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@ExtendWith(MetaIRTestTools.class)
 public class OpcodeINSTANCEOFTest {
 
     @Test
-    public void test_INSTANCEOF() throws IOException {
+    public void test_INSTANCEOF(final MetaIRTestHelper testHelper) throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_int, ConstantDescs.CD_Object), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
             codeBuilder.aload(1);
             codeBuilder.instanceOf(ConstantDescs.CD_String);
@@ -24,6 +28,6 @@ public class OpcodeINSTANCEOFTest {
         final Optional<MethodModel> method = model.methods().stream().filter(m -> "test".contentEquals(m.methodName())).findFirst();
         assertThat(method).isPresent();
 
-        final MethodAnalyzer analyzer = new MethodAnalyzer(model.thisClass().asSymbol(), method.get());
+        testHelper.analyzeAndReport(model, method.get());
     }
 }

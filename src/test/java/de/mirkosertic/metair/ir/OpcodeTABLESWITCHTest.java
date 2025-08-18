@@ -1,6 +1,9 @@
 package de.mirkosertic.metair.ir;
 
+import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
+import de.mirkosertic.metair.ir.test.MetaIRTestTools;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
 import java.lang.classfile.ClassModel;
@@ -15,10 +18,11 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@ExtendWith(MetaIRTestTools.class)
 public class OpcodeTABLESWITCHTest {
 
     @Test
-    public void test_TABLESWITCH() throws IOException {
+    public void test_TABLESWITCH(final MetaIRTestHelper testHelper) throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_int), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
             final Label defaultLabel = codeBuilder.newLabel();
             final Label case1 = codeBuilder.newLabel();
@@ -34,6 +38,6 @@ public class OpcodeTABLESWITCHTest {
         final Optional<MethodModel> method = model.methods().stream().filter(m -> "test".contentEquals(m.methodName())).findFirst();
         assertThat(method).isPresent();
 
-        final MethodAnalyzer analyzer = new MethodAnalyzer(model.thisClass().asSymbol(), method.get());
+        testHelper.analyzeAndReport(model, method.get());
     }
 }

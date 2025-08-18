@@ -1,6 +1,9 @@
 package de.mirkosertic.metair.ir;
 
+import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
+import de.mirkosertic.metair.ir.test.MetaIRTestTools;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
 import java.lang.classfile.ClassModel;
@@ -12,10 +15,11 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@ExtendWith(MetaIRTestTools.class)
 public class OpcodeICONSTTest {
 
     @Test
-    public void test_ICONST_0() throws IOException {
+    public void test_ICONST_0(final MetaIRTestHelper testHelper) throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
             codeBuilder.iconst_0();
             codeBuilder.pop();
@@ -24,12 +28,12 @@ public class OpcodeICONSTTest {
         final Optional<MethodModel> method = model.methods().stream().filter(m -> "test".contentEquals(m.methodName())).findFirst();
         assertThat(method).isPresent();
 
-        final MethodAnalyzer analyzer = new MethodAnalyzer(model.thisClass().asSymbol(), method.get());
+        final MethodAnalyzer analyzer = testHelper.analyzeAndReport(model, method.get());
         assertThat(analyzer.ir().usedBy.stream().filter(t -> t instanceof PrimitiveInt).map(t -> ((PrimitiveInt) t).value).toList()).containsExactly(0);
     }
 
     @Test
-    public void test_ICONST_1() throws IOException {
+    public void test_ICONST_1(final MetaIRTestHelper testHelper) throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> {
             methodBuilder.constantPool();
             methodBuilder.withCode(codeBuilder -> {
@@ -41,12 +45,12 @@ public class OpcodeICONSTTest {
         final Optional<MethodModel> method = model.methods().stream().filter(m -> "test".contentEquals(m.methodName())).findFirst();
         assertThat(method).isPresent();
 
-        final MethodAnalyzer analyzer = new MethodAnalyzer(model.thisClass().asSymbol(), method.get());
+        final MethodAnalyzer analyzer = testHelper.analyzeAndReport(model, method.get());
         assertThat(analyzer.ir().usedBy.stream().filter(t -> t instanceof PrimitiveInt).map(t -> ((PrimitiveInt) t).value).toList()).containsExactly(1);
     }
 
     @Test
-    public void test_ICONST_2() throws IOException {
+    public void test_ICONST_2(final MetaIRTestHelper testHelper) throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> {
             methodBuilder.constantPool();
             methodBuilder.withCode(codeBuilder -> {
@@ -58,12 +62,12 @@ public class OpcodeICONSTTest {
         final Optional<MethodModel> method = model.methods().stream().filter(m -> "test".contentEquals(m.methodName())).findFirst();
         assertThat(method).isPresent();
 
-        final MethodAnalyzer analyzer = new MethodAnalyzer(model.thisClass().asSymbol(), method.get());
+        final MethodAnalyzer analyzer = testHelper.analyzeAndReport(model, method.get());
         assertThat(analyzer.ir().usedBy.stream().filter(t -> t instanceof PrimitiveInt).map(t -> ((PrimitiveInt) t).value).toList()).containsExactly(2);
     }
 
     @Test
-    public void test_ICONST_3() throws IOException {
+    public void test_ICONST_3(final MetaIRTestHelper testHelper) throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> {
             methodBuilder.constantPool();
             methodBuilder.withCode(codeBuilder -> {
@@ -75,12 +79,12 @@ public class OpcodeICONSTTest {
         final Optional<MethodModel> method = model.methods().stream().filter(m -> "test".contentEquals(m.methodName())).findFirst();
         assertThat(method).isPresent();
 
-        final MethodAnalyzer analyzer = new MethodAnalyzer(model.thisClass().asSymbol(), method.get());
+        final MethodAnalyzer analyzer = testHelper.analyzeAndReport(model, method.get());
         assertThat(analyzer.ir().usedBy.stream().filter(t -> t instanceof PrimitiveInt).map(t -> ((PrimitiveInt) t).value).toList()).containsExactly(3);
     }
 
     @Test
-    public void test_ICONST_4() throws IOException {
+    public void test_ICONST_4(final MetaIRTestHelper testHelper) throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> {
             methodBuilder.constantPool();
             methodBuilder.withCode(codeBuilder -> {
@@ -92,12 +96,12 @@ public class OpcodeICONSTTest {
         final Optional<MethodModel> method = model.methods().stream().filter(m -> "test".contentEquals(m.methodName())).findFirst();
         assertThat(method).isPresent();
 
-        final MethodAnalyzer analyzer = new MethodAnalyzer(model.thisClass().asSymbol(), method.get());
+        final MethodAnalyzer analyzer = testHelper.analyzeAndReport(model, method.get());
         assertThat(analyzer.ir().usedBy.stream().filter(t -> t instanceof PrimitiveInt).map(t -> ((PrimitiveInt) t).value).toList()).containsExactly(4);
     }
 
     @Test
-    public void test_ICONST_5() throws IOException {
+    public void test_ICONST_5(final MetaIRTestHelper testHelper) throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> {
             methodBuilder.constantPool();
             methodBuilder.withCode(codeBuilder -> {
@@ -109,12 +113,12 @@ public class OpcodeICONSTTest {
         final Optional<MethodModel> method = model.methods().stream().filter(m -> "test".contentEquals(m.methodName())).findFirst();
         assertThat(method).isPresent();
 
-        final MethodAnalyzer analyzer = new MethodAnalyzer(model.thisClass().asSymbol(), method.get());
+        final MethodAnalyzer analyzer = testHelper.analyzeAndReport(model, method.get());
         assertThat(analyzer.ir().usedBy.stream().filter(t -> t instanceof PrimitiveInt).map(t -> ((PrimitiveInt) t).value).toList()).containsExactly(5);
     }
 
     @Test
-    public void test_ICONST_M1() throws IOException {
+    public void test_ICONST_M1(final MetaIRTestHelper testHelper) throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> {
             methodBuilder.constantPool();
             methodBuilder.withCode(codeBuilder -> {
@@ -126,7 +130,7 @@ public class OpcodeICONSTTest {
         final Optional<MethodModel> method = model.methods().stream().filter(m -> "test".contentEquals(m.methodName())).findFirst();
         assertThat(method).isPresent();
 
-        final MethodAnalyzer analyzer = new MethodAnalyzer(model.thisClass().asSymbol(), method.get());
+        final MethodAnalyzer analyzer = testHelper.analyzeAndReport(model, method.get());
         assertThat(analyzer.ir().usedBy.stream().filter(t -> t instanceof PrimitiveInt).map(t -> ((PrimitiveInt) t).value).toList()).containsExactly(-1);
     }
 

@@ -1,7 +1,7 @@
 package de.mirkosertic.metair.ir;
 
 import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
-import de.mirkosertic.metair.ir.test.MetaIRTestHelperResolver;
+import de.mirkosertic.metair.ir.test.MetaIRTestTools;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -17,7 +17,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ExtendWith(MetaIRTestHelperResolver.class)
+@ExtendWith(MetaIRTestTools.class)
 public class OpcodeTryCatchTest {
 
     @Test
