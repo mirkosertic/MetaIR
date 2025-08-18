@@ -17,7 +17,7 @@ public class ExceptionGuardTest {
         assertThat(guard.debugDescription()).isEqualTo("ExceptionGuard");
         assertThat(guard.exitNode()).isInstanceOf(ExtractControlFlowProjection.class).matches(t -> ((ExtractControlFlowProjection) t).name().equals("exit"));
         assertThat(guard.getNamedNode("default")).isInstanceOf(ExtractControlFlowProjection.class).matches(t -> ((ExtractControlFlowProjection) t).name().equals("default"));
-        assertThat(guard.getNamedNode("catch:0:IllegalArgumentException")).isInstanceOf(Catch.class).matches(t -> ((Catch) t).exceptionType.equals(ClassDesc.of(IllegalArgumentException.class.getName())));
+        assertThat(guard.getNamedNode("catch:0:Ljava/lang/IllegalArgumentException;")).isInstanceOf(Catch.class).matches(t -> ((Catch) t).exceptionType.equals(ClassDesc.of(IllegalArgumentException.class.getName())));
         assertThat(guard.getNamedNode("catch:1:any")).isInstanceOf(Catch.class).matches(t -> ((Catch) t).exceptionType.equals(ClassDesc.of(Throwable.class.getName())));
     }
 }

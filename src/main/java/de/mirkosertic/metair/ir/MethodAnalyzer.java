@@ -198,7 +198,7 @@ public class MethodAnalyzer {
                                         frame = new Frame(newIndex, codeElements.get(newIndex));
                                         frames[newIndex] = frame;
                                     }
-                                    frame.predecessors.add(new CFGEdge(i, new NamedProjection("catch:" + exceptionIndex + ":" + (c.catchType().isPresent() ? c.catchType().get().name().stringValue() : "any")), ControlType.FORWARD));
+                                    frame.predecessors.add(new CFGEdge(i, new NamedProjection("catch:" + exceptionIndex + ":" + (c.catchType().isPresent() ? c.catchType().get().asSymbol().descriptorString() : "any")), ControlType.FORWARD));
                                 } else {
                                     illegalState("Exception handler target " + target + " is not mapped to an index");
                                 }
@@ -800,7 +800,7 @@ public class MethodAnalyzer {
 
         final Label label = node.label();
         final List<ExceptionCatch> catchesFromHere = codeModel.exceptionHandlers().stream().filter(t -> t.tryStart().equals(label)).toList();
-        final List<ExceptionCatch> catchesEndingHere = codeModel.exceptionHandlers().stream().filter(t -> t.tryEnd().equals(label)).toList();
+        final Map<Label, List<ExceptionCatch>> catchesEndingHere = codeModel.exceptionHandlers().stream().filter(t -> t.tryEnd().equals(label)).collect(Collectors.groupingBy(ExceptionCatch::tryStart));
 
         if (!catchesEndingHere.isEmpty()) {
             if (!catchesFromHere.isEmpty()) {

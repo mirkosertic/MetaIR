@@ -15,11 +15,8 @@ public class ExceptionGuard extends TupleNode {
             if (catchEntry.catchType().isPresent()) {
                 final ClassDesc catchType = catchEntry.catchType().get();
 
-                // TODO: Find a better naming convention: is the exception type still relevant, as the index should be unique?
-                // Naming should match the catch projection name
-                registerAs("catch:" + i + ":" + catchEntry.catchType().get().displayName(), controlFlowsTo(new CatchProjection(i, catchType), ControlType.FORWARD).controlFlowsTo(new Catch(catchType, this), ControlType.FORWARD));
+                registerAs("catch:" + i + ":" + catchEntry.catchType().get().descriptorString(), controlFlowsTo(new CatchProjection(i, catchType), ControlType.FORWARD).controlFlowsTo(new Catch(catchType, this), ControlType.FORWARD));
             } else {
-
                 registerAs("catch:" + i + ":any", controlFlowsTo(new CatchProjection(i), ControlType.FORWARD).controlFlowsTo(new Catch(ClassDesc.of(Throwable.class.getName()), this), ControlType.FORWARD));
             }
         }
