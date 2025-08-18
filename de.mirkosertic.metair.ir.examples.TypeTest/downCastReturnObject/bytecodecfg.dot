@@ -1,6 +1,6 @@
 digraph {
  node0[label="#0 LocalVariable[name=this, slot=0, type=Lde/mirkosertic/metair/ir/examples/TypeTest;] Order: 0", shape=box, fillcolor=lightgrey, style=filled];
- node1[label="#1 Label[context=CodeModel[id=694069884], bci=0] Order: 1", shape=box, fillcolor=lightgrey, style=filled];
+ node1[label="#1 Label[context=CodeModel[id=259630944], bci=0] Order: 1", shape=box, fillcolor=lightgrey, style=filled];
  node2[label="#2 LineNumber[line=9] Order: 2", shape=box, fillcolor=lightgrey, style=filled];
  node3[label="#3 LoadConstant[OP=LDC, val=hello] Order: 3", shape=box, fillcolor=lightgrey, style=filled];
  node4[label="#4 Return[OP=ARETURN] Order: 4", shape=box, fillcolor=lightgrey, style=filled];

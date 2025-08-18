@@ -1,9 +1,9 @@
 digraph debugoutput {
  node0[label="#0 Method Order : 0",shape=box, fillcolor=lightgrey, style=filled];
- node1[label="#1 arg1 : float Order : 4",shape=box, fillcolor=lightgrey, style=filled];
+ node1[label="#1 arg0 : float Order : 4",shape=box, fillcolor=lightgrey, style=filled];
  node1 -> node0[dir="forward" color="green" penwidth="2"];
  node0 -> node1[headlabel="*0", labeldistance=2];
- node2[label="#2 arg0 : float Order : 3",shape=box, fillcolor=lightgrey, style=filled];
+ node2[label="#2 arg1 : float Order : 3",shape=box, fillcolor=lightgrey, style=filled];
  node2 -> node0[dir="forward" color="green" penwidth="2"];
  node0 -> node2[headlabel="*0", labeldistance=2];
  node3[label="#3 this : MathTest Order : 2",shape=box, fillcolor=lightgrey, style=filled];
@@ -14,8 +14,8 @@ digraph debugoutput {
  node0 -> node4[labeldistance=2, color=red, fontcolor=red];
  node5[label="#5 Rem : float Order : 5",shape=octagon, fillcolor=orange, style=filled];
  node5 -> node0[dir="forward" color="green" penwidth="2"];
- node2 -> node5[headlabel="*0", labeldistance=2];
- node1 -> node5[headlabel="*1", labeldistance=2];
+ node1 -> node5[headlabel="*0", labeldistance=2];
+ node2 -> node5[headlabel="*1", labeldistance=2];
  node4 -> node5[labeldistance=2, color=red, fontcolor=red];
  node6[label="#6 ReturnValue : float Order : 6",shape=box, fillcolor=lightgrey, style=filled];
  node6 -> node0[dir="forward" color="green" penwidth="2"];

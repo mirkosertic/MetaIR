@@ -1,0 +1,72 @@
+digraph {
+ node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#0 Method</td></tr><tr><td port="prj16" bgcolor="yellow">this : Test</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
+ node1[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="4">#1 ExceptionGuard</td></tr><tr><td port="prj10" bgcolor="yellow">catch : IllegalArgumentException</td><td port="prj9" bgcolor="yellow">catch : RuntimeException</td><td port="prj11" bgcolor="yellow">default</td><td port="prj12" bgcolor="yellow">exit</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
+ node0 -> node1[labeldistance=2, color=red, fontcolor=red];
+ node2[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#2 Catch : IllegalArgumentException</td></tr><tr><td port="prj3" bgcolor="yellow">exception : IllegalArgumentException</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
+ node1 -> node2[headlabel="*0", labeldistance=2];
+ node1:prj10 -> node2[labeldistance=2, color=red, fontcolor=red];
+ node4[label="#4 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
+ node2 -> node4[labeldistance=2, color=red, fontcolor=red];
+ node5[label="#5 Goto",shape=box, fillcolor=lightgrey, style=filled];
+ node4 -> node5[labeldistance=2, color=red, fontcolor=red];
+ node15[label="#15 Merge : Merge12",shape=box, fillcolor=lightgrey, style=filled];
+ node14 -> node15[labeldistance=2, color=red, fontcolor=red];
+ node5 -> node15[labeldistance=2, color=red, fontcolor=red];
+ node8 -> node15[labeldistance=2, color=red, fontcolor=red];
+ node8[label="#8 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
+ node6 -> node8[labeldistance=2, color=red, fontcolor=red];
+ node6[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#6 Catch : RuntimeException</td></tr><tr><td port="prj7" bgcolor="yellow">exception : RuntimeException</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
+ node1 -> node6[headlabel="*0", labeldistance=2];
+ node1:prj9 -> node6[labeldistance=2, color=red, fontcolor=red];
+ node14[label="#14 Goto",shape=box, fillcolor=lightgrey, style=filled];
+ node13 -> node14[labeldistance=2, color=red, fontcolor=red];
+ node13[label="#13 Merge : EndOfGuardedBlock5",shape=box, fillcolor=lightgrey, style=filled];
+ node1:prj11 -> node13[labeldistance=2, color=red, fontcolor=red];
+ node1:prj12 -> node13[labeldistance=2, color=red, fontcolor=red];
+ node18[label="#18 Φ int",shape=octagon, fillcolor=orange, style=filled];
+ node15 -> node18[style=dotted];
+ node17 -> node18[headlabel="if #14", labeldistance=2, color=blue, constraint=false];
+ node0:prj16 -> node18[headlabel="if #5", labeldistance=2, color=blue, constraint=false];
+ node0:prj16 -> node18[headlabel="if #8", labeldistance=2, color=blue, constraint=false];
+ node17[label="#17 int 3",shape=octagon, fillcolor=lightgreen, style=filled];
+ node0 -> node17[style=dotted];
+ node19[label="#19 Return",shape=box, fillcolor=lightgrey, style=filled];
+ node15 -> node19[labeldistance=2, color=red, fontcolor=red];
+ node0 -> node19[labeldistance=2, color=green, constraint=false];
+ subgraph cluster_0 {
+  color=lightgray;
+  node15;
+  node18;
+ }
+ subgraph cluster_1 {
+  color=lightgray;
+  node0;
+  node17;
+ }
+ subgraph cluster_000 {
+  label = "Legend";
+  node [shape=point]
+  {
+   rank=same;
+   c0 [style = invis];
+   c1 [style = invis];
+   c2 [style = invis];
+   c3 [style = invis];
+   d0 [style = invis];
+   d1 [style = invis];
+   d2 [style = invis];
+   d3 [style = invis];
+   d4 [style = invis];
+   d5 [style = invis];
+   d6 [style = invis];
+   d7 [style = invis];
+  }
+  c0 -> c1 [label="Control flow", style=solid, color=red]
+  c2 -> c3 [label="Control flow back edge", style=dashed, color=red]
+  d0 -> d1 [label="Data flow"]
+  d2 -> d3 [label="Declaration", style=dotted]
+  d4 -> d5 [label="PHI Data flow", color=blue]
+  d6 -> d7 [label="Memory flow", color=green]
+ }
+
+}
