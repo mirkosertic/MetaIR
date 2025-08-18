@@ -25,7 +25,7 @@ public class OpcodeTryCatchTest {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
             codeBuilder.trying(tryHandler -> {
                 tryHandler.iconst_3();
-                tryHandler.istore(0);
+                tryHandler.istore(1);
             }, catchHandler -> {
                 catchHandler.catching(ClassDesc.of(IllegalArgumentException.class.getName()), CodeBuilder::pop);
             });
@@ -42,7 +42,7 @@ public class OpcodeTryCatchTest {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
             codeBuilder.trying(tryHandler -> {
                 tryHandler.iconst_3();
-                tryHandler.istore(0);
+                tryHandler.istore(1);
             }, catchHandler -> {
                 catchHandler.catchingAll(CodeBuilder::pop);
             });
@@ -59,10 +59,10 @@ public class OpcodeTryCatchTest {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
             codeBuilder.trying(tryHandler -> {
                 tryHandler.iconst_3();
-                tryHandler.istore(0);
+                tryHandler.istore(1);
             }, catchHandler -> {
                 catchHandler.catching(ClassDesc.of(IllegalArgumentException.class.getName()), builder -> {
-                    builder.astore(1);
+                    builder.astore(2);
                 });
                 catchHandler.catching(ClassDesc.of(RuntimeException.class.getName()), builder -> {
                     builder.astore(2);
