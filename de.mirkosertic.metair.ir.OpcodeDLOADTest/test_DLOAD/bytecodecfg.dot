@@ -55,6 +55,7 @@ digraph {
  node24 -> node25[color=red];
  node25 -> node26[color=red];
  node26 -> node27[color=red];
+ node27 -> node28[color=red];
  subgraph cluster_000 {
   label = "Legend";
   node [shape=point]

@@ -5,6 +5,7 @@ digraph {
  node3[label="#3 Return[OP=RETURN] Order: 3", shape=box, fillcolor=lightgrey, style=filled];
  node0 -> node1[color=red];
  node1 -> node2[color=red];
+ node2 -> node3[color=red];
  subgraph cluster_000 {
   label = "Legend";
   node [shape=point]

@@ -1,6 +1,7 @@
 digraph {
  node0[label="#0 UnboundNopInstruction[op=NOP] Order: 0", shape=box, fillcolor=lightgrey, style=filled];
  node1[label="#1 Return[OP=RETURN] Order: 1", shape=box, fillcolor=lightgrey, style=filled];
+ node0 -> node1[color=red];
  subgraph cluster_000 {
   label = "Legend";
   node [shape=point]

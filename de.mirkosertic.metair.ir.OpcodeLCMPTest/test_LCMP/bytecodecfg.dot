@@ -7,6 +7,7 @@ digraph {
  node0 -> node1[color=red];
  node1 -> node2[color=red];
  node2 -> node3[color=red];
+ node3 -> node4[color=red];
  subgraph cluster_000 {
   label = "Legend";
   node [shape=point]
