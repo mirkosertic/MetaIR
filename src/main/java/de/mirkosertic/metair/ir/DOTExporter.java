@@ -324,7 +324,7 @@ public final class DOTExporter {
                 ps.println(", shape=box, fillcolor=lightgrey, style=filled];");
             }
 
-            for (int elementIndex = 0; elementIndex < frames.length - 1; elementIndex++) {
+            for (int elementIndex = 0; elementIndex < frames.length; elementIndex++) {
                 final MethodAnalyzer.Frame frame = frames[elementIndex];
                 if (frame != null) {
                     for (final MethodAnalyzer.CFGEdge edge : frame.predecessors) {
