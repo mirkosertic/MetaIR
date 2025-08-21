@@ -61,7 +61,7 @@
 <g id="node9" class="node">
 <title>node8</title>
 <polygon fill="lightgreen" stroke="black" points="744.61,-302.54 744.61,-317.46 685.38,-328 601.62,-328 542.39,-317.46 542.39,-302.54 601.62,-292 685.38,-292 744.61,-302.54"/>
-<text text-anchor="middle" x="643.5" y="-306.3" font-family="Times,serif" font-size="14.00">#8 int 2 Order : 2</text>
+<text text-anchor="middle" x="643.5" y="-306.3" font-family="Times,serif" font-size="14.00">#8 int 1 Order : 2</text>
 </g>
 <!-- node0&#45;&gt;node8 -->
 <g id="edge17" class="edge">
@@ -73,7 +73,7 @@
 <g id="node10" class="node">
 <title>node9</title>
 <polygon fill="lightgreen" stroke="black" points="1020.61,-302.54 1020.61,-317.46 961.38,-328 877.62,-328 818.39,-317.46 818.39,-302.54 877.62,-292 961.38,-292 1020.61,-302.54"/>
-<text text-anchor="middle" x="919.5" y="-306.3" font-family="Times,serif" font-size="14.00">#9 int 1 Order : 1</text>
+<text text-anchor="middle" x="919.5" y="-306.3" font-family="Times,serif" font-size="14.00">#9 int 2 Order : 1</text>
 </g>
 <!-- node0&#45;&gt;node9 -->
 <g id="edge19" class="edge">
@@ -120,8 +120,8 @@
 <!-- node3 -->
 <g id="node5" class="node">
 <title>node3</title>
-<polygon fill="lightgrey" stroke="black" points="442.5,-182 290.5,-182 290.5,-146 442.5,-146 442.5,-182"/>
-<text text-anchor="middle" x="366.5" y="-160.3" font-family="Times,serif" font-size="14.00">#3 case0 Order : 8</text>
+<polygon fill="lightgrey" stroke="black" points="447,-182 286,-182 286,-146 447,-146 447,-182"/>
+<text text-anchor="middle" x="366.5" y="-160.3" font-family="Times,serif" font-size="14.00">#3 default Order : 8</text>
 </g>
 <!-- node2&#45;&gt;node3 -->
 <g id="edge7" class="edge">
@@ -132,8 +132,8 @@
 <!-- node5 -->
 <g id="node7" class="node">
 <title>node5</title>
-<polygon fill="lightgrey" stroke="black" points="628,-182 467,-182 467,-146 628,-146 628,-182"/>
-<text text-anchor="middle" x="547.5" y="-160.3" font-family="Times,serif" font-size="14.00">#5 default Order : 5</text>
+<polygon fill="lightgrey" stroke="black" points="623.5,-182 471.5,-182 471.5,-146 623.5,-146 623.5,-182"/>
+<text text-anchor="middle" x="547.5" y="-160.3" font-family="Times,serif" font-size="14.00">#5 case0 Order : 5</text>
 </g>
 <!-- node2&#45;&gt;node5 -->
 <g id="edge11" class="edge">

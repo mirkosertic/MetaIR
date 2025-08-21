@@ -26,15 +26,15 @@ digraph debugoutput {
  node8 -> node7[dir="forward" color="green" penwidth="2"];
  node7 -> node8[headlabel="*0", labeldistance=2];
  node7 -> node8[headlabel="*1", labeldistance=2];
- node9[label="#9 ReturnValue : int Order : 9",shape=box, fillcolor=lightgrey, style=filled];
+ node9[label="#9 ReturnValue : int Order : 7",shape=box, fillcolor=lightgrey, style=filled];
  node9 -> node0[dir="forward" color="green" penwidth="2"];
- node6 -> node9[headlabel="*0", labeldistance=2];
- node3 -> node9[labeldistance=2, color=red, fontcolor=red];
+ node7 -> node9[headlabel="*0", labeldistance=2];
+ node5 -> node9[labeldistance=2, color=red, fontcolor=red];
  node0 -> node9;
- node10[label="#10 ReturnValue : int Order : 7",shape=box, fillcolor=lightgrey, style=filled];
+ node10[label="#10 ReturnValue : int Order : 9",shape=box, fillcolor=lightgrey, style=filled];
  node10 -> node0[dir="forward" color="green" penwidth="2"];
- node7 -> node10[headlabel="*0", labeldistance=2];
- node5 -> node10[labeldistance=2, color=red, fontcolor=red];
+ node6 -> node10[headlabel="*0", labeldistance=2];
+ node3 -> node10[labeldistance=2, color=red, fontcolor=red];
  node0 -> node10;
  subgraph cluster_000 {
   label = "Legend";

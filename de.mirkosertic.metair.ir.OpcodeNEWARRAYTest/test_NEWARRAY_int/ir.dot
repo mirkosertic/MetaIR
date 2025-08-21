@@ -1,36 +1,36 @@
 digraph {
  node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#0 Method</td></tr><tr><td port="prj2" bgcolor="yellow">this : Test</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
- node9[label="#9 int 0",shape=octagon, fillcolor=lightgreen, style=filled];
- node0 -> node9[style=dotted];
+ node3[label="#3 NewArray : int[]",shape=octagon, fillcolor=orange, style=filled];
+ node5 -> node3[headlabel="*0", labeldistance=2];
+ node0 -> node3[labeldistance=2, color=green, constraint=false];
+ node5[label="#5 int 10",shape=octagon, fillcolor=lightgreen, style=filled];
+ node0 -> node5[style=dotted];
+ node8[label="#8 ArrayLoad : int",shape=box, fillcolor=lightgrey, style=filled];
+ node3 -> node8[headlabel="*0", labeldistance=2];
+ node7 -> node8[headlabel="*1", labeldistance=2];
+ node1 -> node8[labeldistance=2, color=green, constraint=false];
+ node1 -> node8[labeldistance=2, color=red, fontcolor=red];
  node1[label="#1 ArrayStore : int[]",shape=box, fillcolor=lightgrey, style=filled];
  node3 -> node1[headlabel="*0", labeldistance=2];
- node9 -> node1[headlabel="*1", labeldistance=2];
- node5 -> node1[headlabel="*2", labeldistance=2];
+ node6 -> node1[headlabel="*1", labeldistance=2];
+ node7 -> node1[headlabel="*2", labeldistance=2];
  node3 -> node1[labeldistance=2, color=green, constraint=false];
  node0 -> node1[labeldistance=2, color=red, fontcolor=red];
- node3[label="#3 NewArray : int[]",shape=octagon, fillcolor=orange, style=filled];
- node8 -> node3[headlabel="*0", labeldistance=2];
- node0 -> node3[labeldistance=2, color=green, constraint=false];
- node8[label="#8 int 10",shape=octagon, fillcolor=lightgreen, style=filled];
- node0 -> node8[style=dotted];
+ node7[label="#7 int 2",shape=octagon, fillcolor=lightgreen, style=filled];
+ node0 -> node7[style=dotted];
+ node6[label="#6 int 0",shape=octagon, fillcolor=lightgreen, style=filled];
+ node0 -> node6[style=dotted];
+ node9[label="#9 Return",shape=box, fillcolor=lightgrey, style=filled];
+ node8 -> node9[labeldistance=2, color=red, fontcolor=red];
+ node8 -> node9[labeldistance=2, color=green, constraint=false];
  node4[label="#4 ArrayLength",shape=octagon, fillcolor=orange, style=filled];
  node3 -> node4[headlabel="*0", labeldistance=2];
- node6[label="#6 ArrayLoad : int",shape=box, fillcolor=lightgrey, style=filled];
- node3 -> node6[headlabel="*0", labeldistance=2];
- node5 -> node6[headlabel="*1", labeldistance=2];
- node1 -> node6[labeldistance=2, color=green, constraint=false];
- node1 -> node6[labeldistance=2, color=red, fontcolor=red];
- node5[label="#5 int 2",shape=octagon, fillcolor=lightgreen, style=filled];
- node0 -> node5[style=dotted];
- node7[label="#7 Return",shape=box, fillcolor=lightgrey, style=filled];
- node6 -> node7[labeldistance=2, color=red, fontcolor=red];
- node6 -> node7[labeldistance=2, color=green, constraint=false];
  subgraph cluster_0 {
   color=lightgray;
   node0;
   node5;
-  node8;
-  node9;
+  node6;
+  node7;
  }
  subgraph cluster_000 {
   label = "Legend";
