@@ -2,7 +2,6 @@ package de.mirkosertic.metair.ir;
 
 import java.lang.constant.ClassDesc;
 import java.lang.constant.ConstantDesc;
-import java.util.Optional;
 
 public class ReturnValue extends Value {
 
@@ -17,12 +16,6 @@ public class ReturnValue extends Value {
             }
         }
         use(value, new ArgumentUse(0));
-    }
-
-    @Override
-    public boolean isConstant() {
-        final Optional<Node> argument = uses.stream().filter(t -> t.use() instanceof DataFlowUse).map(UseEdge::node).findFirst();
-        return argument.map(Node::isConstant).orElse(false);
     }
 
     @Override
