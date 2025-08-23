@@ -20,7 +20,7 @@ public final class DOTExporter {
 
     public static void writeTo(final Method method, final PrintStream ps) {
         ps.println("digraph {");
-
+        ps.println(" ordering=\"in\";");
         final Deque<Node> workingQueue = new ArrayDeque<>();
         workingQueue.push(method);
 
@@ -221,6 +221,7 @@ public final class DOTExporter {
 
     public static void writeTo(final DominatorTree tree, final PrintStream ps) {
         ps.println("digraph debugoutput {");
+        ps.println(" ordering=\"in\";");
         for (final Node n : tree.preOrder) {
             ps.print(" node" + tree.preOrder.indexOf(n) + "[");
             printNode(tree.preOrder.indexOf(n), n, ps, " Order : " + tree.rpo.indexOf(n));
@@ -295,6 +296,7 @@ public final class DOTExporter {
 
     public static void writeBytecodeCFGTo(final MethodAnalyzer analyzer, final PrintStream ps) {
         ps.println("digraph {");
+        ps.println(" ordering=\"in\";");
 
         final MethodModel method = analyzer.getMethod();
         final Optional<CodeModel> optCode = method.code();

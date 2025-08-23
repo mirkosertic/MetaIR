@@ -14,12 +14,12 @@ public class DFS {
 
     public DFS(final Node startNode) {
         final List<Node> reversePostOrder = new ArrayList<>();
-        final Deque<Node> currentPath = new ArrayDeque<>();
-        currentPath.add(startNode);
+        final Deque<Node> worklist = new ArrayDeque<>();
+        worklist.add(startNode);
         final Set<Node> marked = new HashSet<>();
         marked.add(startNode);
-        while(!currentPath.isEmpty()) {
-            final Node currentNode = currentPath.peek();
+        while(!worklist.isEmpty()) {
+            final Node currentNode = worklist.peek();
             final List<Node> forwardNodes = new ArrayList<>();
 
             for (final Node user : currentNode.usedBy) {
@@ -45,17 +45,17 @@ public class DFS {
                 boolean somethingFound = false;
                 for (final Node node : forwardNodes) {
                     if (marked.add(node)) {
-                        currentPath.push(node);
+                        worklist.push(node);
                         somethingFound = true;
                     }
                 }
                 if (!somethingFound) {
                     reversePostOrder.add(currentNode);
-                    currentPath.pop();
+                    worklist.pop();
                 }
             } else {
                 reversePostOrder.add(currentNode);
-                currentPath.pop();
+                worklist.pop();
             }
         }
 
