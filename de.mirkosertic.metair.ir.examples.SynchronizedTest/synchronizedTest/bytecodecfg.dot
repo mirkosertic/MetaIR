@@ -1,4 +1,5 @@
 digraph {
+ ordering="in";
  node0[label="#0 ExceptionCatch[catchType=<any>] Order: 0", shape=box, fillcolor=lightgrey, style=filled];
  node1[label="#1 ExceptionCatch[catchType=<any>] Order: 1", shape=box, fillcolor=lightgrey, style=filled];
  node2[label="#2 LocalVariable[name=this, slot=0, type=Lde/mirkosertic/metair/ir/examples/SynchronizedTest;] Order: 2", shape=box, fillcolor=lightgrey, style=filled];

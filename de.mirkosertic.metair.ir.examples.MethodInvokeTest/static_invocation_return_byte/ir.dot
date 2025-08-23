@@ -1,4 +1,5 @@
 digraph {
+ ordering="in";
  node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#0 Method</td></tr><tr><td port="prj15" bgcolor="yellow">this : MethodInvokeTest</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
  node18[label="#18 Class MethodInvokeTest",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node18[style=dotted];

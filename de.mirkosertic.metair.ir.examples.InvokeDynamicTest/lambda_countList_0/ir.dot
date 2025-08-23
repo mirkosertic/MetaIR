@@ -1,4 +1,5 @@
 digraph {
+ ordering="in";
  node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="2">#0 Method</td></tr><tr><td port="prj2" bgcolor="yellow">arg0 : int</td><td port="prj1" bgcolor="yellow">arg1 : Integer</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
  node10[label="#10 NumericCondition : LT",shape=octagon, fillcolor=orange, style=filled];
  node0:prj2 -> node10[headlabel="*0", labeldistance=2];

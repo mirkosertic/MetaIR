@@ -1,4 +1,5 @@
 digraph {
+ ordering="in";
  node0[label="#0 LocalVariable[name=this, slot=0, type=Lde/mirkosertic/metair/ir/examples/ReturnTest;] Order: 0", shape=box, fillcolor=lightgrey, style=filled];
  node1[label="#1 Label[context=CodeModel[id=502891368], bci=0] Order: 1", shape=box, fillcolor=lightgrey, style=filled];
  node2[label="#2 LineNumber[line=41] Order: 2", shape=box, fillcolor=lightgrey, style=filled];

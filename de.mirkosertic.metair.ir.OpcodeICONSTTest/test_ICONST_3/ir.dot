@@ -1,4 +1,5 @@
 digraph {
+ ordering="in";
  node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#0 Method</td></tr><tr><td port="prj1" bgcolor="yellow">this : Test</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
  node2[label="#2 int 3",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node2[style=dotted];
