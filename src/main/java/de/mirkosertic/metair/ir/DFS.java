@@ -26,13 +26,37 @@ public class DFS {
                 for (final Node.UseEdge edge : user.uses) {
                     if (edge.node() == currentNode) {
                         if (edge.use() instanceof final ControlFlowUse cfu && cfu.type == ControlType.FORWARD) {
-                            forwardNodes.add(user);
+                            final Set<Node> preds = predecessorsOf(user);
+                            if (marked.containsAll(preds)) {
+                                //System.out.println("All predecessors of node " + currentNode + " visited, continuing");
+                                forwardNodes.add(user);
+                            } else {
+                                //System.out.println("Not all preds of node " + currentNode + " visited yet, skipping for now");
+                            }
                         } else if (edge.use() instanceof DefinedByUse) {
-                            forwardNodes.add(user);
+                            final Set<Node> preds = predecessorsOf(user);
+                            if (marked.containsAll(preds)) {
+                                //System.out.println("All predecessors of node " + currentNode + " visited, continuing");
+                                forwardNodes.add(user);
+                            } else {
+                                //System.out.println("Not all preds of node " + currentNode + " visited yet, skipping for now");
+                            }
                         } else if (edge.use() instanceof DataFlowUse) {
-                            forwardNodes.add(user);
+                            final Set<Node> preds = predecessorsOf(user);
+                            if (marked.containsAll(preds)) {
+                                //System.out.println("All predecessors of node " + currentNode + " visited, continuing");
+                                forwardNodes.add(user);
+                            } else {
+                                //System.out.println("Not all preds of node " + currentNode + " visited yet, skipping for now");
+                            }
                         } else if (edge.use() instanceof MemoryUse) {
-                            forwardNodes.add(user);
+                            final Set<Node> preds = predecessorsOf(user);
+                            if (marked.containsAll(preds)) {
+                                //System.out.println("All predecessors of node " + currentNode + " visited, continuing");
+                                forwardNodes.add(user);
+                            } else {
+                                //System.out.println("Not all preds of node " + currentNode + " visited yet, skipping for now");
+                            }
                         }
                     }
                 }
@@ -63,6 +87,18 @@ public class DFS {
         for (int i = reversePostOrder.size() - 1; i >= 0; i--) {
             nodesInOrder.add(reversePostOrder.get(i));
         }
+    }
+
+    private Set<Node> predecessorsOf(final Node node) {
+        final Set<Node> predecessors = new HashSet<>();
+        for (final Node.UseEdge edge : node.uses) {
+            if (edge.use() instanceof final ControlFlowUse cfu) {
+                if (cfu.type == ControlType.FORWARD) {
+                    predecessors.add(edge.node());
+                }
+            } else predecessors.add(edge.node());
+        }
+        return predecessors;
     }
 
     public List<Node> getTopologicalOrder() {
