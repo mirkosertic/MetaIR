@@ -1,30 +1,30 @@
 digraph {
  ordering="in";
- node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#0 Method</td></tr><tr><td port="prj11" bgcolor="yellow">this : Test</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
- node12[label="#12 int 3",shape=octagon, fillcolor=lightgreen, style=filled];
- node0 -> node12[style=dotted];
- node13[label="#13 Return",shape=box, fillcolor=lightgrey, style=filled];
- node10 -> node13[labeldistance=2, color=red, fontcolor=red];
- node0 -> node13[labeldistance=2, color=green, constraint=false];
- node10[label="#10 Merge : Merge8",shape=box, fillcolor=lightgrey, style=filled];
- node9 -> node10[labeldistance=2, color=red, fontcolor=red];
- node4 -> node10[labeldistance=2, color=red, fontcolor=red];
- node4[label="#4 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
- node2 -> node4[labeldistance=2, color=red, fontcolor=red];
- node2[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#2 Catch : Throwable</td></tr><tr><td port="prj3" bgcolor="yellow">exception : Throwable</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
- node1 -> node2[headlabel="*0", labeldistance=2];
- node1:prj5 -> node2[labeldistance=2, color=red, fontcolor=red];
- node1[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="3">#1 ExceptionGuard</td></tr><tr><td port="prj5" bgcolor="yellow">any</td><td port="prj6" bgcolor="yellow">default</td><td port="prj7" bgcolor="yellow">exit</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
+ node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#0 Method</td></tr><tr><td port="prj12" bgcolor="yellow">this : Test</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
+ node13[label="#13 int 3",shape=octagon, fillcolor=lightgreen, style=filled];
+ node0 -> node13[style=dotted];
+ node7[label="#7 Return",shape=box, fillcolor=lightgrey, style=filled];
+ node6 -> node7[labeldistance=2, color=red, fontcolor=red];
+ node0 -> node7[labeldistance=2, color=green, constraint=false];
+ node6[label="#6 Merge : Merge8",shape=box, fillcolor=lightgrey, style=filled];
+ node11 -> node6[labeldistance=2, color=red, fontcolor=red];
+ node5 -> node6[labeldistance=2, color=red, fontcolor=red];
+ node5[label="#5 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
+ node3 -> node5[labeldistance=2, color=red, fontcolor=red];
+ node3[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#3 Catch : Throwable</td></tr><tr><td port="prj4" bgcolor="yellow">exception : Throwable</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
+ node1 -> node3[headlabel="*0", labeldistance=2];
+ node1:prj2 -> node3[labeldistance=2, color=red, fontcolor=red];
+ node1[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="3">#1 ExceptionGuard</td></tr><tr><td port="prj2" bgcolor="yellow">any</td><td port="prj8" bgcolor="yellow">default</td><td port="prj9" bgcolor="yellow">exit</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
  node0 -> node1[labeldistance=2, color=red, fontcolor=red];
- node8[label="#8 Merge : EndOfGuardedBlock4",shape=box, fillcolor=lightgrey, style=filled];
- node1:prj6 -> node8[labeldistance=2, color=red, fontcolor=red];
- node1:prj7 -> node8[labeldistance=2, color=red, fontcolor=red];
- node9[label="#9 Goto",shape=box, fillcolor=lightgrey, style=filled];
- node8 -> node9[labeldistance=2, color=red, fontcolor=red];
+ node10[label="#10 Merge : EndOfGuardedBlock4",shape=box, fillcolor=lightgrey, style=filled];
+ node1:prj8 -> node10[labeldistance=2, color=red, fontcolor=red];
+ node1:prj9 -> node10[labeldistance=2, color=red, fontcolor=red];
+ node11[label="#11 Goto",shape=box, fillcolor=lightgrey, style=filled];
+ node10 -> node11[labeldistance=2, color=red, fontcolor=red];
  subgraph cluster_0 {
   color=lightgray;
   node0;
-  node12;
+  node13;
  }
  subgraph cluster_000 {
   label = "Legend";

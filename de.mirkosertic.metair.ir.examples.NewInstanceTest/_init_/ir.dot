@@ -1,15 +1,15 @@
 digraph {
  ordering="in";
  node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#0 Method</td></tr><tr><td port="prj1" bgcolor="yellow">this : NewInstanceTest</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
- node2[label="#2 Invoke special <init> : ()void",shape=box, fillcolor=lightgrey, style=filled];
- node0:prj1 -> node2[headlabel="*0", labeldistance=2];
- node4 -> node2[labeldistance=2, color=red, fontcolor=red];
- node0 -> node2[labeldistance=2, color=green, constraint=false];
- node4[label="#4 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
- node0 -> node4[labeldistance=2, color=red, fontcolor=red];
- node3[label="#3 Return",shape=box, fillcolor=lightgrey, style=filled];
+ node3[label="#3 Invoke special <init> : ()void",shape=box, fillcolor=lightgrey, style=filled];
+ node0:prj1 -> node3[headlabel="*0", labeldistance=2];
  node2 -> node3[labeldistance=2, color=red, fontcolor=red];
- node2 -> node3[labeldistance=2, color=green, constraint=false];
+ node0 -> node3[labeldistance=2, color=green, constraint=false];
+ node2[label="#2 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
+ node0 -> node2[labeldistance=2, color=red, fontcolor=red];
+ node4[label="#4 Return",shape=box, fillcolor=lightgrey, style=filled];
+ node3 -> node4[labeldistance=2, color=red, fontcolor=red];
+ node3 -> node4[labeldistance=2, color=green, constraint=false];
  subgraph cluster_000 {
   label = "Legend";
   node [shape=point]
