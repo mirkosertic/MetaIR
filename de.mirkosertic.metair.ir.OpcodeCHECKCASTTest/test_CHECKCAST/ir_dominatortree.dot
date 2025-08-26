@@ -12,18 +12,18 @@ digraph debugoutput {
  node2 -> node3[headlabel="*0", labeldistance=2];
  node0 -> node3[labeldistance=2, color=red, fontcolor=red];
  node0 -> node3;
- node4[label="#4 CheckCast Order : 5",shape=box, fillcolor=lightgrey, style=filled];
+ node4[label="#4 String : Test Order : 1",shape=octagon, fillcolor=lightgreen, style=filled];
  node4 -> node0[dir="forward" color="green" penwidth="2"];
- node6 -> node4[headlabel="*0", labeldistance=2];
- node3 -> node4[headlabel="*1", labeldistance=2];
- node3 -> node4[labeldistance=2, color=red, fontcolor=red];
- node5[label="#5 Return Order : 6",shape=box, fillcolor=lightgrey, style=filled];
+ node0 -> node4[style=dotted];
+ node5[label="#5 CheckCast Order : 5",shape=box, fillcolor=lightgrey, style=filled];
  node5 -> node0[dir="forward" color="green" penwidth="2"];
- node4 -> node5[labeldistance=2, color=red, fontcolor=red];
- node3 -> node5;
- node6[label="#6 String : Test Order : 1",shape=octagon, fillcolor=lightgreen, style=filled];
+ node4 -> node5[headlabel="*0", labeldistance=2];
+ node3 -> node5[headlabel="*1", labeldistance=2];
+ node3 -> node5[labeldistance=2, color=red, fontcolor=red];
+ node6[label="#6 Return Order : 6",shape=box, fillcolor=lightgrey, style=filled];
  node6 -> node0[dir="forward" color="green" penwidth="2"];
- node0 -> node6[style=dotted];
+ node5 -> node6[labeldistance=2, color=red, fontcolor=red];
+ node3 -> node6;
  subgraph cluster_000 {
   label = "Legend";
   node [shape=point]

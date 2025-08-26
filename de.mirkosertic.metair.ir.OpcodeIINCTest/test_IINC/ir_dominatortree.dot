@@ -10,14 +10,14 @@ digraph debugoutput {
  node3[label="#3 int 1 Order : 2",shape=octagon, fillcolor=lightgreen, style=filled];
  node3 -> node0[dir="forward" color="green" penwidth="2"];
  node0 -> node3[style=dotted];
- node4[label="#4 Add : int Order : 4",shape=octagon, fillcolor=orange, style=filled];
+ node4[label="#4 Return Order : 1",shape=box, fillcolor=lightgrey, style=filled];
  node4 -> node0[dir="forward" color="green" penwidth="2"];
- node3 -> node4[headlabel="*0", labeldistance=2];
- node2 -> node4[headlabel="*1", labeldistance=2];
- node5[label="#5 Return Order : 1",shape=box, fillcolor=lightgrey, style=filled];
+ node0 -> node4[labeldistance=2, color=red, fontcolor=red];
+ node0 -> node4;
+ node5[label="#5 Add : int Order : 4",shape=octagon, fillcolor=orange, style=filled];
  node5 -> node0[dir="forward" color="green" penwidth="2"];
- node0 -> node5[labeldistance=2, color=red, fontcolor=red];
- node0 -> node5;
+ node3 -> node5[headlabel="*0", labeldistance=2];
+ node2 -> node5[headlabel="*1", labeldistance=2];
  subgraph cluster_000 {
   label = "Legend";
   node [shape=point]

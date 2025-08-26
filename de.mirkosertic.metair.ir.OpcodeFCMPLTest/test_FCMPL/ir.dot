@@ -1,16 +1,16 @@
 digraph {
  ordering="in";
  node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#0 Method</td></tr><tr><td port="prj1" bgcolor="yellow">this : Test</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
+ node4[label="#4 Return",shape=box, fillcolor=lightgrey, style=filled];
+ node0 -> node4[labeldistance=2, color=red, fontcolor=red];
+ node0 -> node4[labeldistance=2, color=green, constraint=false];
  node3[label="#3 float 2.0",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node3[style=dotted];
- node4[label="#4 NumericCompare : NAN_IS_MINUS_1 for float",shape=octagon, fillcolor=orange, style=filled];
- node3 -> node4[headlabel="*0", labeldistance=2];
- node2 -> node4[headlabel="*1", labeldistance=2];
+ node5[label="#5 NumericCompare : NAN_IS_MINUS_1 for float",shape=octagon, fillcolor=orange, style=filled];
+ node3 -> node5[headlabel="*0", labeldistance=2];
+ node2 -> node5[headlabel="*1", labeldistance=2];
  node2[label="#2 float 0.0",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node2[style=dotted];
- node5[label="#5 Return",shape=box, fillcolor=lightgrey, style=filled];
- node0 -> node5[labeldistance=2, color=red, fontcolor=red];
- node0 -> node5[labeldistance=2, color=green, constraint=false];
  subgraph cluster_0 {
   color=lightgray;
   node0;

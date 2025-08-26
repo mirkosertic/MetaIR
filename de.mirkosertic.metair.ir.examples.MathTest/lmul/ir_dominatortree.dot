@@ -1,27 +1,27 @@
 digraph debugoutput {
  ordering="in";
  node0[label="#0 Method Order : 0",shape=box, fillcolor=lightgrey, style=filled];
- node1[label="#1 arg1 : long Order : 4",shape=box, fillcolor=lightgrey, style=filled];
+ node1[label="#1 arg0 : long Order : 4",shape=box, fillcolor=lightgrey, style=filled];
  node1 -> node0[dir="forward" color="green" penwidth="2"];
  node0 -> node1[headlabel="*0", labeldistance=2];
- node2[label="#2 arg0 : long Order : 3",shape=box, fillcolor=lightgrey, style=filled];
+ node2[label="#2 arg1 : long Order : 3",shape=box, fillcolor=lightgrey, style=filled];
  node2 -> node0[dir="forward" color="green" penwidth="2"];
  node0 -> node2[headlabel="*0", labeldistance=2];
- node3[label="#3 Mul : long Order : 5",shape=octagon, fillcolor=orange, style=filled];
+ node3[label="#3 this : MathTest Order : 2",shape=box, fillcolor=lightgrey, style=filled];
  node3 -> node0[dir="forward" color="green" penwidth="2"];
- node2 -> node3[headlabel="*0", labeldistance=2];
- node1 -> node3[headlabel="*1", labeldistance=2];
- node4[label="#4 ReturnValue : long Order : 6",shape=box, fillcolor=lightgrey, style=filled];
+ node0 -> node3[headlabel="*0", labeldistance=2];
+ node4[label="#4 LabelNode Order : 1",shape=box, fillcolor=lightgrey, style=filled];
  node4 -> node0[dir="forward" color="green" penwidth="2"];
- node3 -> node4[headlabel="*0", labeldistance=2];
- node6 -> node4[labeldistance=2, color=red, fontcolor=red];
- node0 -> node4;
- node5[label="#5 this : MathTest Order : 2",shape=box, fillcolor=lightgrey, style=filled];
+ node0 -> node4[labeldistance=2, color=red, fontcolor=red];
+ node5[label="#5 Mul : long Order : 5",shape=octagon, fillcolor=orange, style=filled];
  node5 -> node0[dir="forward" color="green" penwidth="2"];
- node0 -> node5[headlabel="*0", labeldistance=2];
- node6[label="#6 LabelNode Order : 1",shape=box, fillcolor=lightgrey, style=filled];
+ node1 -> node5[headlabel="*0", labeldistance=2];
+ node2 -> node5[headlabel="*1", labeldistance=2];
+ node6[label="#6 ReturnValue : long Order : 6",shape=box, fillcolor=lightgrey, style=filled];
  node6 -> node0[dir="forward" color="green" penwidth="2"];
- node0 -> node6[labeldistance=2, color=red, fontcolor=red];
+ node5 -> node6[headlabel="*0", labeldistance=2];
+ node4 -> node6[labeldistance=2, color=red, fontcolor=red];
+ node0 -> node6;
  subgraph cluster_000 {
   label = "Legend";
   node [shape=point]
