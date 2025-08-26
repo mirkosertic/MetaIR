@@ -24,10 +24,10 @@ public class TableSwitch extends TupleNode {
         this.defaultLabel = defaultLabel;
 
         for (int i = 0; i < cases.size(); i++) {
-            registerAs("case" + i, controlFlowsTo(new ExtractControlFlowProjection("case" + i), ControlType.FORWARD));
+            registerAs("case" + i, controlFlowsTo(new ExtractControlFlowProjection("case" + i), FlowType.FORWARD));
         }
 
-        registerAs("default", controlFlowsTo(new ExtractControlFlowProjection("default"), ControlType.FORWARD));
+        registerAs("default", controlFlowsTo(new ExtractControlFlowProjection("default"), FlowType.FORWARD));
     }
 
     @Override

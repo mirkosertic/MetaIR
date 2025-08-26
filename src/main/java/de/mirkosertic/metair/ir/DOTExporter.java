@@ -27,7 +27,7 @@ public final class DOTExporter {
         final List<Node> nodeindex = new ArrayList<>();
         nodeindex.add(method);
 
-        for (final Node node : new DFS(method).getTopologicalOrder()) {
+        for (final Node node : new DFS2(method).getTopologicalOrder()) {
             if (!nodeindex.contains(node)) {
                 nodeindex.add(node);
             }
@@ -115,6 +115,9 @@ public final class DOTExporter {
                         if (useEdge.use() instanceof final PHIUse phiUse) {
                             ps.print("[");
                             ps.print("headlabel=\"if #" + nodeindex.indexOf(phiUse.origin) + "\", labeldistance=2, color=blue, constraint=false");
+                            if (phiUse.type == FlowType.BACKWARD) {
+                                ps.print(", style=dashed");
+                            }
                             ps.print("]");
                         } else if (useEdge.use() instanceof MemoryUse) {
                             ps.print("[labeldistance=2, color=green, constraint=false]");
@@ -126,7 +129,7 @@ public final class DOTExporter {
                             ps.print("[style=dotted]");
                         } else if (useEdge.use() instanceof final ControlFlowUse cfu) {
                             ps.print("[labeldistance=2, color=red, fontcolor=red");
-                            if (cfu.type == ControlType.BACKWARD) {
+                            if (cfu.type == FlowType.BACKWARD) {
                                 ps.print(", style=dashed");
                             }
                             ps.print("]");
@@ -254,7 +257,7 @@ public final class DOTExporter {
                     ps.print("]");
                 } else if (useEdge.use() instanceof final ControlFlowUse cfu) {
                     ps.print("[labeldistance=2, color=red, fontcolor=red");
-                    if (cfu.type == ControlType.BACKWARD) {
+                    if (cfu.type == FlowType.BACKWARD) {
                         ps.print(", style=dashed");
                     }
                     ps.print("]");
@@ -335,7 +338,7 @@ public final class DOTExporter {
                         ps.print(" -> node");
                         ps.print(elementIndex);
                         ps.print("[color=red");
-                        if (edge.controlType() == ControlType.BACKWARD) {
+                        if (edge.flowType() == FlowType.BACKWARD) {
                             ps.print(", style=dotted");
                         }
                         ps.println("];");

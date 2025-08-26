@@ -1,5 +1,5 @@
 package de.mirkosertic.metair.ir;
 
-public enum ControlType {
+public enum FlowType {
     FORWARD, BACKWARD
 }

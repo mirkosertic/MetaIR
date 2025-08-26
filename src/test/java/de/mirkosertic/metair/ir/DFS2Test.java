@@ -7,7 +7,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class DFSTest {
+public class DFS2Test {
 
     @Test
     public void testOrderWithoutBackEdges() {
@@ -18,7 +18,7 @@ public class DFSTest {
         a.controlFlowsTo(b, FlowType.FORWARD);
         b.controlFlowsTo(c, FlowType.FORWARD);
 
-        final DFS dfs = new DFS(a);
+        final DFS2 dfs = new DFS2(a);
         final List<Node> order = dfs.getTopologicalOrder();
 
         assertThat(order).containsExactly(a, b, c);
@@ -34,7 +34,7 @@ public class DFSTest {
         b.controlFlowsTo(c, FlowType.FORWARD);
         b.controlFlowsTo(a, FlowType.BACKWARD);
 
-        final DFS dfs = new DFS(a);
+        final DFS2 dfs = new DFS2(a);
         final List<Node> order = dfs.getTopologicalOrder();
 
         assertThat(order).containsExactly(a, b, c);
@@ -49,7 +49,7 @@ public class DFSTest {
         final ReturnValue rv = new ReturnValue(ConstantDescs.CD_int, add);
         m.controlFlowsTo(rv, FlowType.FORWARD);
 
-        final DFS dfs = new DFS(m);
+        final DFS2 dfs = new DFS2(m);
         final List<Node> order = dfs.getTopologicalOrder();
         assertThat(order).containsExactly(m, arg, i, add, rv);
     }

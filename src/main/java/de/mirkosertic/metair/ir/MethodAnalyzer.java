@@ -198,7 +198,7 @@ public class MethodAnalyzer {
                                         frame = new Frame(newIndex, codeElements.get(newIndex));
                                         frames[newIndex] = frame;
                                     }
-                                    frame.predecessors.add(new CFGEdge(i, new NamedProjection("catch:" + exceptionIndex + ":" + (c.catchType().isPresent() ? c.catchType().get().asSymbol().descriptorString() : "any")), ControlType.FORWARD));
+                                    frame.predecessors.add(new CFGEdge(i, new NamedProjection("catch:" + exceptionIndex + ":" + (c.catchType().isPresent() ? c.catchType().get().asSymbol().descriptorString() : "any")), FlowType.FORWARD));
                                 } else {
                                     illegalState("Exception handler target " + target + " is not mapped to an index");
                                 }
@@ -216,16 +216,16 @@ public class MethodAnalyzer {
                                 if (!visited.contains(newIndex)) {
                                     jobs.add(new CFGAnalysisJob(newIndex, newPath));
                                 }
-                                ControlType controlType = ControlType.FORWARD;
+                                FlowType flowType = FlowType.FORWARD;
                                 if (newPath.contains(newIndex)) {
-                                    controlType = ControlType.BACKWARD;
+                                    flowType = FlowType.BACKWARD;
                                 }
                                 Frame frame = frames[newIndex];
                                 if (frame == null) {
                                     frame = new Frame(newIndex, codeElements.get(newIndex));
                                     frames[newIndex] = frame;
                                 }
-                                frame.predecessors.add(new CFGEdge(i, NamedProjection.DEFAULT, controlType));
+                                frame.predecessors.add(new CFGEdge(i, NamedProjection.DEFAULT, flowType));
                                 break;
                             } else {
                                 illegalState("Unconditional branch to " + branch.target() + " which is not mapped to an index");
@@ -240,16 +240,16 @@ public class MethodAnalyzer {
                                 if (!visited.contains(newIndex)) {
                                     jobs.add(new CFGAnalysisJob(newIndex, newPath));
                                 }
-                                ControlType controlType = ControlType.FORWARD;
+                                FlowType flowType = FlowType.FORWARD;
                                 if (newPath.contains(newIndex)) {
-                                    controlType = ControlType.BACKWARD;
+                                    flowType = FlowType.BACKWARD;
                                 }
                                 Frame frame = frames[newIndex];
                                 if (frame == null) {
                                     frame = new Frame(newIndex, codeElements.get(newIndex));
                                     frames[newIndex] = frame;
                                 }
-                                frame.predecessors.add(new CFGEdge(i, new NamedProjection("true"), controlType));
+                                frame.predecessors.add(new CFGEdge(i, new NamedProjection("true"), flowType));
                             } else {
                                 illegalState("Conditional branch to " + branch.target() + " which is not mapped to an index");
                             }
@@ -265,16 +265,16 @@ public class MethodAnalyzer {
                                 if (!visited.contains(newIndex)) {
                                     jobs.add(new CFGAnalysisJob(newIndex, newPath));
                                 }
-                                ControlType controlType = ControlType.FORWARD;
+                                FlowType flowType = FlowType.FORWARD;
                                 if (newPath.contains(newIndex)) {
-                                    controlType = ControlType.BACKWARD;
+                                    flowType = FlowType.BACKWARD;
                                 }
                                 Frame frame = frames[newIndex];
                                 if (frame == null) {
                                     frame = new Frame(newIndex, codeElements.get(newIndex));
                                     frames[newIndex] = frame;
                                 }
-                                frame.predecessors.add(new CFGEdge(i, new NamedProjection("case" + j), controlType));
+                                frame.predecessors.add(new CFGEdge(i, new NamedProjection("case" + j), flowType));
                             } else {
                                 illegalState("Case branch to " + target + " which is not mapped to an index");
                             }
@@ -286,16 +286,16 @@ public class MethodAnalyzer {
                             if (!visited.contains(newIndex)) {
                                 jobs.add(new CFGAnalysisJob(newIndex, newPath));
                             }
-                            ControlType controlType = ControlType.FORWARD;
+                            FlowType flowType = FlowType.FORWARD;
                             if (newPath.contains(newIndex)) {
-                                controlType = ControlType.BACKWARD;
+                                flowType = FlowType.BACKWARD;
                             }
                             Frame frame = frames[newIndex];
                             if (frame == null) {
                                 frame = new Frame(newIndex, codeElements.get(newIndex));
                                 frames[newIndex] = frame;
                             }
-                            frame.predecessors.add(new CFGEdge(i, new NamedProjection("default"), controlType));
+                            frame.predecessors.add(new CFGEdge(i, new NamedProjection("default"), flowType));
                         } else {
                             illegalState("Default branch to " + target + " which is not mapped to an index");
                         }
@@ -312,16 +312,16 @@ public class MethodAnalyzer {
                                 if (!visited.contains(newIndex)) {
                                     jobs.add(new CFGAnalysisJob(newIndex, newPath));
                                 }
-                                ControlType controlType = ControlType.FORWARD;
+                                FlowType flowType = FlowType.FORWARD;
                                 if (newPath.contains(newIndex)) {
-                                    controlType = ControlType.BACKWARD;
+                                    flowType = FlowType.BACKWARD;
                                 }
                                 Frame frame = frames[newIndex];
                                 if (frame == null) {
                                     frame = new Frame(newIndex, codeElements.get(newIndex));
                                     frames[newIndex] = frame;
                                 }
-                                frame.predecessors.add(new CFGEdge(i, new NamedProjection("case" + j), controlType));
+                                frame.predecessors.add(new CFGEdge(i, new NamedProjection("case" + j), flowType));
                             } else {
                                 illegalState("Case branch to " + target + " which is not mapped to an index");
                             }
@@ -333,16 +333,16 @@ public class MethodAnalyzer {
                             if (!visited.contains(newIndex)) {
                                 jobs.add(new CFGAnalysisJob(newIndex, newPath));
                             }
-                            ControlType controlType = ControlType.FORWARD;
+                            FlowType flowType = FlowType.FORWARD;
                             if (newPath.contains(newIndex)) {
-                                controlType = ControlType.BACKWARD;
+                                flowType = FlowType.BACKWARD;
                             }
                             Frame frame = frames[newIndex];
                             if (frame == null) {
                                 frame = new Frame(newIndex, codeElements.get(newIndex));
                                 frames[newIndex] = frame;
                             }
-                            frame.predecessors.add(new CFGEdge(i, new NamedProjection("default"), controlType));
+                            frame.predecessors.add(new CFGEdge(i, new NamedProjection("default"), flowType));
                         } else {
                             illegalState("Default branch to " + target + " which is not mapped to an index");
                         }
@@ -371,9 +371,9 @@ public class MethodAnalyzer {
                 }
                 // This is a regular forward flow
                 if (current instanceof BranchInstruction) {
-                    nextFrame.predecessors.add(new CFGEdge(i, new NamedProjection("false"), ControlType.FORWARD));
+                    nextFrame.predecessors.add(new CFGEdge(i, new NamedProjection("false"), FlowType.FORWARD));
                 } else {
-                    nextFrame.predecessors.add(new CFGEdge(i, NamedProjection.DEFAULT, ControlType.FORWARD));
+                    nextFrame.predecessors.add(new CFGEdge(i, NamedProjection.DEFAULT, FlowType.FORWARD));
                 }
 
                 if (visited.contains(i + 1)) {
@@ -401,7 +401,7 @@ public class MethodAnalyzer {
                 // Maybe null due to unreachable statements in bytecode
                 if (frame != null) {
                     for (final CFGEdge edge : frame.predecessors) {
-                        if (edge.fromIndex == currentNode.elementIndex && edge.controlType == ControlType.FORWARD) {
+                        if (edge.fromIndex == currentNode.elementIndex && edge.flowType == FlowType.FORWARD) {
                             forwardNodes.add(frame);
                         }
                     }
@@ -458,19 +458,19 @@ public class MethodAnalyzer {
         if (!topologicalOrder.getFirst().predecessors.isEmpty()) {
             // We have a cfg to the start, so the start should already be a loop header!
             final LoopHeaderNode loop = new LoopHeaderNode("Loop0");
-            initStatus.control = initStatus.control.controlFlowsTo(loop, ControlType.FORWARD);
+            initStatus.control = initStatus.control.controlFlowsTo(loop, FlowType.FORWARD);
 
             // We start directly
             int localIndex = 0;
             if (!method.flags().flags().contains(AccessFlag.STATIC)) {
                 final PHI p = loop.definePHI(owner);
-                p.use(ir.defineThisRef(owner), new PHIUse(ir));
+                p.use(ir.defineThisRef(owner), new PHIUse(FlowType.FORWARD, ir));
                 initStatus.setLocal(localIndex++, p);
             }
             final ClassDesc[] argumentTypes = methodTypeDesc.parameterArray();
             for (int i = 0; i < argumentTypes.length; i++) {
                 final PHI p = loop.definePHI(TypeUtils.jvmInternalTypeOf(argumentTypes[i]));
-                p.use(ir.defineMethodArgument(TypeUtils.jvmInternalTypeOf(argumentTypes[i]), i), new PHIUse(ir));
+                p.use(ir.defineMethodArgument(TypeUtils.jvmInternalTypeOf(argumentTypes[i]), i), new PHIUse(FlowType.FORWARD, ir));
                 initStatus.setLocal(localIndex++, p);
                 if (TypeUtils.isCategory2(argumentTypes[i])) {
                     localIndex++;
@@ -561,7 +561,7 @@ public class MethodAnalyzer {
                         // We only respect forward control flows, as phi data propagation for backward
                         // edges is handled during node parsing of the source instruction, as
                         // the outgoing status for this node is not computed yet.
-                        if (edge.controlType == ControlType.FORWARD) {
+                        if (edge.flowType == FlowType.FORWARD) {
                             final Frame incomingFrame = posToFrame.get(edge.fromIndex);
                             if (incomingFrame.out == null) {
                                 illegalState("No outgoing status for " + incomingFrame.elementIndex);
@@ -587,9 +587,9 @@ public class MethodAnalyzer {
                         // We only respect forward control flows, as phi data propagation for backward
                         // edges is handled during node parsing of the source instruction, as
                         // the outgoing status for this node is not computed yet.
-                        if (edge.controlType == ControlType.FORWARD) {
+                        if (edge.flowType == FlowType.FORWARD) {
                             final Frame incomingFrame = posToFrame.get(edge.fromIndex);
-                            incomingFrame.out.control.controlFlowsTo(target, ControlType.FORWARD);
+                            incomingFrame.out.control.controlFlowsTo(target, FlowType.FORWARD);
                         }
                     }
 
@@ -624,7 +624,7 @@ public class MethodAnalyzer {
 
                                 for (final Frame fr : incomingFrames) {
                                     final Value sv = fr.out.stack.get(stackPos);
-                                    p.use(sv, new PHIUse(fr.out.control));
+                                    p.use(sv, new PHIUse(FlowType.FORWARD, fr.out.control));
                                 }
 
                                 incomingStatus.stack.push(p);
@@ -652,7 +652,7 @@ public class MethodAnalyzer {
                                     if (sv == null) {
                                         illegalState("No source value for local " + i + " from " + incomingFrame.elementIndex);
                                     }
-                                    p.use(sv, new PHIUse(incomingFrame.out.control));
+                                    p.use(sv, new PHIUse(FlowType.FORWARD, incomingFrame.out.control));
                                 }
                                 incomingStatus.setLocal(mergeLocalIndex, p);
                             } else {
@@ -775,7 +775,7 @@ public class MethodAnalyzer {
         }
 
         final Node node = new LookupSwitch(check, defaultLabel, cases);
-        outgoing.control = outgoing.control.controlFlowsTo(node, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(node, FlowType.FORWARD);
     }
 
     protected void visitTableSwitchInstruction(final int minValue, final int maxValue, final List<SwitchCase> switchCases, final String defaultLabel, final Frame frame) {
@@ -792,7 +792,7 @@ public class MethodAnalyzer {
         }
 
         final Node node = new TableSwitch(check, minValue, maxValue, defaultLabel, cases);
-        outgoing.control = outgoing.control.controlFlowsTo(node, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(node, FlowType.FORWARD);
     }
 
     @Testbacklog
@@ -813,8 +813,8 @@ public class MethodAnalyzer {
             final ExceptionGuard activeGuard = outgoing.popExceptionGuard();
 
             final Node n = new MergeNode("EndOfGuardedBlock" + frame.elementIndex);
-            outgoing.control.controlFlowsTo(n, ControlType.FORWARD);
-            outgoing.control = activeGuard.exitNode().controlFlowsTo(n, ControlType.FORWARD);
+            outgoing.control.controlFlowsTo(n, FlowType.FORWARD);
+            outgoing.control = activeGuard.exitNode().controlFlowsTo(n, FlowType.FORWARD);
 
             frame.entryPoint = n;
             return;
@@ -823,7 +823,7 @@ public class MethodAnalyzer {
         if (catchesFromHere.isEmpty()) {
             final Status outgoing = frame.copyIncomingToOutgoing();
             final Node n = new LabelNode("Frame" + frame.elementIndex);
-            outgoing.control = outgoing.control.controlFlowsTo(n, ControlType.FORWARD);
+            outgoing.control = outgoing.control.controlFlowsTo(n, FlowType.FORWARD);
 
             frame.entryPoint = n;
         } else {
@@ -835,7 +835,7 @@ public class MethodAnalyzer {
                 return new ExceptionGuard.Catches(Optional.empty());
             }).toList());
             outgoing.registerExceptionGuard(n);
-            outgoing.control = outgoing.control.controlFlowsTo(n, ControlType.FORWARD);
+            outgoing.control = outgoing.control.controlFlowsTo(n, FlowType.FORWARD);
 
             frame.entryPoint = n;
         }
@@ -1025,7 +1025,7 @@ public class MethodAnalyzer {
         final Value invokeDynamic = new InvokeDynamic(owner, bootstrapInvocation, node.name().stringValue(), methodTypeDesc, dynamicArguments.reversed());
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(invokeDynamic);
-        outgoing.control = outgoing.control.controlFlowsTo(invokeDynamic, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(invokeDynamic, FlowType.FORWARD);
 
         if (!returnType.equals(ConstantDescs.CD_void)) {
             frame.out.push(invokeDynamic);
@@ -1164,7 +1164,7 @@ public class MethodAnalyzer {
 
         final Value v = outgoing.pop();
         final Throw t = new Throw(v);
-        outgoing.control = outgoing.control.controlFlowsTo(t, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(t, FlowType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(t);
         frame.entryPoint = t;
     }
@@ -1319,7 +1319,7 @@ public class MethodAnalyzer {
         final Value target = outgoing.pop();
 
         final Value next = new InvokeSpecial(owner, target, methodName, methodTypeDesc, arguments.reversed());
-        outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(next, FlowType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(next);
 
         if (!returnType.equals(ConstantDescs.CD_void)) {
@@ -1348,7 +1348,7 @@ public class MethodAnalyzer {
 
         final Invoke invoke = new InvokeVirtual(owner, target, methodName, methodTypeDesc, arguments.reversed());
 
-        outgoing.control = outgoing.control.controlFlowsTo(invoke, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(invoke, FlowType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(invoke);
 
         if (!returnType.equals(ConstantDescs.CD_void)) {
@@ -1376,7 +1376,7 @@ public class MethodAnalyzer {
 
         final Invoke invoke = new InvokeInterface(owner, target, methodName, methodTypeDesc, arguments.reversed());
 
-        outgoing.control = outgoing.control.controlFlowsTo(invoke, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(invoke, FlowType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(invoke);
 
         if (!returnType.equals(ConstantDescs.CD_void)) {
@@ -1407,8 +1407,8 @@ public class MethodAnalyzer {
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(init);
         outgoing.memory = outgoing.memory.memoryFlowsTo(invoke);
-        outgoing.control = outgoing.control.controlFlowsTo(init, ControlType.FORWARD);
-        outgoing.control = outgoing.control.controlFlowsTo(invoke, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(init, FlowType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(invoke, FlowType.FORWARD);
 
         if (!returnType.equals(ConstantDescs.CD_void)) {
             outgoing.push(invoke);
@@ -1476,7 +1476,7 @@ public class MethodAnalyzer {
         final NumericCondition numericCondition = new NumericCondition(op, v1, v2);
         final If next = new If(numericCondition);
 
-        outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(next, FlowType.FORWARD);
         frame.entryPoint = next;
 
         final int codeElementIndex = labelToIndex.get(node.target());
@@ -1499,7 +1499,7 @@ public class MethodAnalyzer {
         final NumericCondition numericCondition = new NumericCondition(op, v, ir.definePrimitiveInt(0));
         final If next = new If(numericCondition);
 
-        outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(next, FlowType.FORWARD);
         frame.entryPoint = next;
 
         final int codeElementIndex = labelToIndex.get(node.target());
@@ -1522,7 +1522,7 @@ public class MethodAnalyzer {
         final ReferenceTest referenceCondition = new ReferenceTest(op, v);
         final If next = new If(referenceCondition);
 
-        outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(next, FlowType.FORWARD);
         frame.entryPoint = next;
 
         final int codeElementIndex = labelToIndex.get(node.target());
@@ -1546,7 +1546,7 @@ public class MethodAnalyzer {
         final ReferenceCondition condition = new ReferenceCondition(op, v1, v2);
         final If next = new If(condition);
 
-        outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(next, FlowType.FORWARD);
         frame.entryPoint = next;
 
         final int codeElementIndex = labelToIndex.get(node.target());
@@ -1569,7 +1569,7 @@ public class MethodAnalyzer {
                     illegalState("Local at index " + i + " is not a PHI value but " + v);
                 }
                 if (v != null && v != target) {
-                    target.use(v, new PHIUse(jumpSource));
+                    target.use(v, new PHIUse(FlowType.BACKWARD, jumpSource));
                 }
             }
 
@@ -1577,7 +1577,7 @@ public class MethodAnalyzer {
                 illegalState("Don't know how to handle a back edge with a non empty stack!");
             }
 
-            outgoing.control = outgoing.control.controlFlowsTo(targetFrame.entryPoint, ControlType.BACKWARD);
+            outgoing.control = outgoing.control.controlFlowsTo(targetFrame.entryPoint, FlowType.BACKWARD);
         }
     }
 
@@ -1586,7 +1586,7 @@ public class MethodAnalyzer {
         final Status outgoing = frame.copyIncomingToOutgoing();
 
         final Goto next = new Goto();
-        outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(next, FlowType.FORWARD);
         frame.entryPoint = next;
 
         final int codeElementIndex = labelToIndex.get(node.target());
@@ -1679,7 +1679,7 @@ public class MethodAnalyzer {
         final PutField put = new PutField(owner, fieldType, fieldName, target, v);
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(put);
-        outgoing.control = outgoing.control.controlFlowsTo(put, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(put, FlowType.FORWARD);
     }
 
     private void parse_GETSTATIC(final ClassDesc owner, final ClassDesc fieldType, final String fieldName, final Frame frame) {
@@ -1693,7 +1693,7 @@ public class MethodAnalyzer {
         final GetStatic get = new GetStatic(ri, fieldName, fieldType);
         outgoing.push(get);
 
-        outgoing.control = outgoing.control.controlFlowsTo(init, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(init, FlowType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(get);
     }
 
@@ -1710,8 +1710,8 @@ public class MethodAnalyzer {
 
         final PutStatic put = new PutStatic(ri, fieldName, fieldType, v);
         outgoing.memory = outgoing.memory.memoryFlowsTo(put);
-        outgoing.control = outgoing.control.controlFlowsTo(init, ControlType.FORWARD);
-        outgoing.control = outgoing.control.controlFlowsTo(put, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(init, FlowType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(put, FlowType.FORWARD);
     }
 
     private void parse_NEW(final ClassDesc type, final Frame frame) {
@@ -1722,7 +1722,7 @@ public class MethodAnalyzer {
 
         final New n = new New(init);
 
-        outgoing.control = outgoing.control.controlFlowsTo(init, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(init, FlowType.FORWARD);
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(init);
         outgoing.memory = outgoing.memory.memoryFlowsTo(n);
@@ -1735,7 +1735,7 @@ public class MethodAnalyzer {
         assertEmptyStack(outgoing);
 
         final Return next = new Return();
-        outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(next, FlowType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(next);
     }
 
@@ -1748,7 +1748,7 @@ public class MethodAnalyzer {
         final Value v = outgoing.pop();
 
         final ReturnValue next = new ReturnValue(methodTypeDesc.returnType(), v);
-        outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(next, FlowType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(next);
     }
 
@@ -1767,7 +1767,7 @@ public class MethodAnalyzer {
 
         // TODO: Does not 100% match the method signature type here
         final ReturnValue next = new ReturnValue(v.type, v);
-        outgoing.control = outgoing.control.controlFlowsTo(next, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(next, FlowType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(next);
     }
 
@@ -1778,10 +1778,10 @@ public class MethodAnalyzer {
         final RuntimeclassReference expectedType = ir.defineRuntimeclassReference(typeToCheck);
 
         final ClassInitialization classInit = new ClassInitialization(expectedType);
-        outgoing.control = outgoing.control.controlFlowsTo(classInit, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(classInit, FlowType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(classInit);
 
-        outgoing.control = outgoing.control.controlFlowsTo(new CheckCast(objectToCheck, classInit), ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(new CheckCast(objectToCheck, classInit), FlowType.FORWARD);
     }
 
     private void parse_INSTANCEOF(final ClassDesc typeToCheck, final Frame frame) {
@@ -1792,7 +1792,7 @@ public class MethodAnalyzer {
         final RuntimeclassReference expectedType = ir.defineRuntimeclassReference(typeToCheck);
 
         final ClassInitialization classInit = new ClassInitialization(expectedType);
-        outgoing.control = outgoing.control.controlFlowsTo(classInit, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(classInit, FlowType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(classInit);
 
         outgoing.push(new InstanceOf(objectToCheck, classInit));
@@ -2001,7 +2001,7 @@ public class MethodAnalyzer {
         final Div div = new Div(desc, value1, value2);
 
         final Status outgoing = frame.out;
-        outgoing.control = outgoing.control.controlFlowsTo(div, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(div, FlowType.FORWARD);
         outgoing.push(div);
         frame.entryPoint = div;
     }
@@ -2009,7 +2009,7 @@ public class MethodAnalyzer {
     private void parse_REM_X(final Frame frame, final Value value1, final Value value2, final ClassDesc desc) {
         final Rem rem = new Rem(desc, value1, value2);
         final Status outgoing = frame.out;
-        outgoing.control = outgoing.control.controlFlowsTo(rem, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(rem, FlowType.FORWARD);
         outgoing.push(rem);
     }
 
@@ -2028,7 +2028,7 @@ public class MethodAnalyzer {
         assertMinimumStackSize(outgoing, 1);
 
         final Value v = outgoing.pop();
-        outgoing.control = outgoing.control.controlFlowsTo(new MonitorEnter(v), ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(new MonitorEnter(v), FlowType.FORWARD);
     }
 
     private void parse_MONITOREXIT(final Frame frame) {
@@ -2036,7 +2036,7 @@ public class MethodAnalyzer {
         assertMinimumStackSize(outgoing, 1);
 
         final Value v = outgoing.pop();
-        outgoing.control = outgoing.control.controlFlowsTo(new MonitorExit(v), ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(new MonitorExit(v), FlowType.FORWARD);
     }
 
     private void parse_ARRAYSTORE_X_TRUNCATED(final Opcode opcode, final Frame frame) {
@@ -2056,7 +2056,7 @@ public class MethodAnalyzer {
         final ArrayStore store = new ArrayStore(array, index, new Truncate(arrayType.componentType(), value));
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(store);
-        outgoing.control = outgoing.control.controlFlowsTo(store, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(store, FlowType.FORWARD);
     }
 
     private void parse_ASTORE_X(final Frame frame, final ClassDesc arrayType) {
@@ -2070,7 +2070,7 @@ public class MethodAnalyzer {
         final ArrayStore store = new ArrayStore(array, index, value);
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(store);
-        outgoing.control = outgoing.control.controlFlowsTo(store, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(store, FlowType.FORWARD);
     }
 
     private void parse_AASTORE(final Frame frame) {
@@ -2084,7 +2084,7 @@ public class MethodAnalyzer {
         final ArrayStore store = new ArrayStore(array, index, value);
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(store);
-        outgoing.control = outgoing.control.controlFlowsTo(store, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(store, FlowType.FORWARD);
     }
 
     private void parse_ALOAD_X_INTEXTENDED(final Frame frame, final Extend.ExtendType type) {
@@ -2101,7 +2101,7 @@ public class MethodAnalyzer {
         final Value value = new Extend(ConstantDescs.CD_int, type, load);
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(load);
-        outgoing.control = outgoing.control.controlFlowsTo(load, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(load, FlowType.FORWARD);
         outgoing.push(value);
     }
 
@@ -2113,7 +2113,7 @@ public class MethodAnalyzer {
         final Value array = outgoing.pop();
         final Value value = new ArrayLoad(arrayType, array, index);
         outgoing.memory = outgoing.memory.memoryFlowsTo(value);
-        outgoing.control = outgoing.control.controlFlowsTo(value, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(value, FlowType.FORWARD);
         outgoing.push(value);
     }
 
@@ -2128,7 +2128,7 @@ public class MethodAnalyzer {
 
         final Value value = new ArrayLoad(arrayType, array, index);
         outgoing.memory = outgoing.memory.memoryFlowsTo(value);
-        outgoing.control = outgoing.control.controlFlowsTo(value, ControlType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(value, FlowType.FORWARD);
         outgoing.push(value);
     }
 
@@ -2149,7 +2149,7 @@ public class MethodAnalyzer {
         public static final NamedProjection DEFAULT = new NamedProjection("default");
     }
 
-    public record CFGEdge(int fromIndex, NamedProjection projection, ControlType controlType) {
+    public record CFGEdge(int fromIndex, NamedProjection projection, FlowType flowType) {
     }
 
     private record CFGAnalysisJob(int startIndex, List<Integer> path) {

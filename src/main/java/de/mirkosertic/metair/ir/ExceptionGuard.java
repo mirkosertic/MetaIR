@@ -15,13 +15,13 @@ public class ExceptionGuard extends TupleNode {
             if (catchEntry.catchType().isPresent()) {
                 final ClassDesc catchType = catchEntry.catchType().get();
 
-                registerAs("catch:" + i + ":" + catchEntry.catchType().get().descriptorString(), controlFlowsTo(new CatchProjection(i, catchType), ControlType.FORWARD).controlFlowsTo(new Catch(catchType, this), ControlType.FORWARD));
+                registerAs("catch:" + i + ":" + catchEntry.catchType().get().descriptorString(), controlFlowsTo(new CatchProjection(i, catchType), FlowType.FORWARD).controlFlowsTo(new Catch(catchType, this), FlowType.FORWARD));
             } else {
-                registerAs("catch:" + i + ":any", controlFlowsTo(new CatchProjection(i), ControlType.FORWARD).controlFlowsTo(new Catch(ClassDesc.of(Throwable.class.getName()), this), ControlType.FORWARD));
+                registerAs("catch:" + i + ":any", controlFlowsTo(new CatchProjection(i), FlowType.FORWARD).controlFlowsTo(new Catch(ClassDesc.of(Throwable.class.getName()), this), FlowType.FORWARD));
             }
         }
-        registerAs("default", controlFlowsTo(new ExtractControlFlowProjection("default"), ControlType.FORWARD));
-        registerAs("exit", controlFlowsTo(new ExtractControlFlowProjection("exit"), ControlType.FORWARD));
+        registerAs("default", controlFlowsTo(new ExtractControlFlowProjection("default"), FlowType.FORWARD));
+        registerAs("exit", controlFlowsTo(new ExtractControlFlowProjection("exit"), FlowType.FORWARD));
     }
 
     public Node exitNode() {

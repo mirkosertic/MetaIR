@@ -16,7 +16,7 @@ public class DominatorTreeTest {
         final PrimitiveInt i = m.definePrimitiveInt(10);
         final Add add = new Add(ConstantDescs.CD_int, arg, i);
         final ReturnValue rv = new ReturnValue(ConstantDescs.CD_int, add);
-        m.controlFlowsTo(rv, ControlType.FORWARD);
+        m.controlFlowsTo(rv, FlowType.FORWARD);
 
         final DominatorTree dt = new DominatorTree(m);
         final List<Node> order = dt.preOrder;

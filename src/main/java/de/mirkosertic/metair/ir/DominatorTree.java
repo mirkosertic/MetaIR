@@ -17,7 +17,7 @@ public class DominatorTree {
     final List<Node> rpo;
 
     public DominatorTree(final Node start) {
-        preOrder = new DFS(start).getTopologicalOrder();
+        preOrder = new DFS2(start).getTopologicalOrder();
         idom = new HashMap<>();
         rpo = new ArrayList<>();
         computeDominators();
@@ -39,7 +39,7 @@ public class DominatorTree {
                 for (final Node.UseEdge edge : user.uses) {
                     if (edge.node() == current) {
                         if (edge.use() instanceof final ControlFlowUse cfu) {
-                            if (cfu.type == ControlType.FORWARD) {
+                            if (cfu.type == FlowType.FORWARD) {
                                 computeRPO(user, finished, visited);
                             }
                         } else {

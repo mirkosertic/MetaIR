@@ -25,7 +25,7 @@ public class DFS {
             for (final Node user : currentNode.usedBy) {
                 for (final Node.UseEdge edge : user.uses) {
                     if (edge.node() == currentNode) {
-                        if (edge.use() instanceof final ControlFlowUse cfu && cfu.type == ControlType.FORWARD) {
+                        if (edge.use() instanceof final ControlFlowUse cfu && cfu.type == FlowType.FORWARD) {
                             final Set<Node> preds = predecessorsOf(user);
                             if (marked.containsAll(preds)) {
                                 //System.out.println("All predecessors of node " + currentNode + " visited, continuing");
@@ -93,7 +93,7 @@ public class DFS {
         final Set<Node> predecessors = new HashSet<>();
         for (final Node.UseEdge edge : node.uses) {
             if (edge.use() instanceof final ControlFlowUse cfu) {
-                if (cfu.type == ControlType.FORWARD) {
+                if (cfu.type == FlowType.FORWARD) {
                     predecessors.add(edge.node());
                 }
             } else predecessors.add(edge.node());

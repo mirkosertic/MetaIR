@@ -8,7 +8,7 @@ class ControlFlowUseTest {
 
     @Test
     public void testUsage() {
-        final ControlFlowUse controlFlowUse = new ControlFlowUse(ControlType.FORWARD);
-        assertThat(controlFlowUse.type).isEqualTo(ControlType.FORWARD);
+        final ControlFlowUse controlFlowUse = new ControlFlowUse(FlowType.FORWARD);
+        assertThat(controlFlowUse.type).isEqualTo(FlowType.FORWARD);
     }
 }

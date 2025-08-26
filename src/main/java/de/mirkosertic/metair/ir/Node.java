@@ -25,7 +25,7 @@ public abstract class Node {
         this.usedBy = new HashSet<>();
     }
 
-    public Node controlFlowsTo(final Node target, final ControlType type) {
+    public Node controlFlowsTo(final Node target, final FlowType type) {
         target.use(this, new ControlFlowUse(type));
         return target;
     }
