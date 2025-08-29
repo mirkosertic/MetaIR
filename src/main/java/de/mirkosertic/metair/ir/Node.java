@@ -51,6 +51,44 @@ public abstract class Node {
         return false;
     }
 
+    public Null defineNullReference() {
+        final Null nullref = new Null();
+        nullref.use(this, DefinedByUse.INSTANCE);
+        return nullref;
+    }
+
+
+    public StringConstant defineStringConstant(final String value) {
+        final StringConstant r = new StringConstant(value);
+        r.use(this, DefinedByUse.INSTANCE);
+        return r;
+    }
+
+    public PrimitiveInt definePrimitiveInt(final int value) {
+        final PrimitiveInt v = new PrimitiveInt(value);
+        v.use(this, DefinedByUse.INSTANCE);
+        return v;
+    }
+
+    public PrimitiveLong definePrimitiveLong(final long value) {
+        final PrimitiveLong v = new PrimitiveLong(value);
+        v.use(this, DefinedByUse.INSTANCE);
+        return v;
+    }
+
+    public PrimitiveFloat definePrimitiveFloat(final float value) {
+        final PrimitiveFloat v = new PrimitiveFloat(value);
+        v.use(this, DefinedByUse.INSTANCE);
+        return v;
+    }
+
+    public PrimitiveDouble definePrimitiveDouble(final double value) {
+        final PrimitiveDouble v = new PrimitiveDouble(value);
+        v.use(this, DefinedByUse.INSTANCE);
+        return v;
+    }
+
+
     public record UseEdge(Node node, Use use) {
     }
 

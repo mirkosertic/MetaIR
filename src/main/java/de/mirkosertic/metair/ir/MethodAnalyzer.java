@@ -854,12 +854,12 @@ public class MethodAnalyzer {
 
     protected void parse_IINC(final int slot, final int constant, final Frame frame) {
         // A node that represents an IINC instruction.
-        frame.copyIncomingToOutgoing();
+        final Status outgoing = frame.copyIncomingToOutgoing();
         final Value value = frame.in.getLocal(slot);
         if (value == null) {
             illegalState("No local value for slot " + slot);
         }
-        frame.out.setLocal(slot, new Add(ConstantDescs.CD_int, value, ir.definePrimitiveInt(constant)));
+        frame.out.setLocal(slot, new Add(ConstantDescs.CD_int, value, outgoing.control.definePrimitiveInt(constant)));
     }
 
     protected void visitInvokeInstruction(final Opcode opcode, final ClassDesc owner, final String methodName, final MethodTypeDesc methodTypeDesc, final Frame frame) {
@@ -997,19 +997,19 @@ public class MethodAnalyzer {
 
         // Default bootstrap arguments
         bootstrapArguments.add(new InvokeStatic(lookupOwner, invokerType, "in", MethodTypeDesc.of(lookupOwner, ClassDesc.of(Class.class.getName())), List.of(invokerType)));
-        bootstrapArguments.add(ir.defineStringConstant(node.name().stringValue()));
-        bootstrapArguments.add(constantToValue(node.typeSymbol()));
+        bootstrapArguments.add(outgoing.control.defineStringConstant(node.name().stringValue()));
+        bootstrapArguments.add(constantToValue(outgoing.control, node.typeSymbol()));
 
         final MethodTypeDesc bootstrapMethodType = bootstrapMethod.invocationType();
 
         // TODO: Check arity...
         for (final ConstantDesc bootstrapArgument : node.bootstrapArgs()) {
-            bootstrapArguments.add(constantToValue(bootstrapArgument));
+            bootstrapArguments.add(constantToValue(outgoing.control, bootstrapArgument));
         }
         if (bootstrapArguments.size() < bootstrapMethodType.parameterCount()) {
             if (bootstrapMethodType.parameterType(bootstrapMethodType.parameterCount() - 1).isArray()) {
                 // TODO: Check for memory flow...
-                final NewArray emptyArgs = new NewArray(ConstantDescs.CD_Object, ir.definePrimitiveInt(0));
+                final NewArray emptyArgs = new NewArray(ConstantDescs.CD_Object, outgoing.control.definePrimitiveInt(0));
                 bootstrapArguments.add(emptyArgs);
             } else {
                 illegalState("Don't get this signature for invokedynamic here...");
@@ -1496,7 +1496,7 @@ public class MethodAnalyzer {
 
         final Value v = outgoing.pop();
 
-        final NumericCondition numericCondition = new NumericCondition(op, v, ir.definePrimitiveInt(0));
+        final NumericCondition numericCondition = new NumericCondition(op, v, outgoing.control.definePrimitiveInt(0));
         final If next = new If(numericCondition);
 
         outgoing.control = outgoing.control.controlFlowsTo(next, FlowType.FORWARD);
@@ -1599,13 +1599,13 @@ public class MethodAnalyzer {
         handlePotentialBackedgeFor(next, frame, targetFrame);
     }
 
-    private Value constantToValue(final ConstantDesc constantDesc) {
+    private Value constantToValue(final Node control, final ConstantDesc constantDesc) {
         return switch (constantDesc) {
-            case final String str -> ir.defineStringConstant(str);
-            case final Integer i -> ir.definePrimitiveInt(i);
-            case final Long l -> ir.definePrimitiveLong(l);
-            case final Float f -> ir.definePrimitiveFloat(f);
-            case final Double d -> ir.definePrimitiveDouble(d);
+            case final String str -> control.defineStringConstant(str);
+            case final Integer i -> control.definePrimitiveInt(i);
+            case final Long l -> control.definePrimitiveLong(l);
+            case final Float f -> control.definePrimitiveFloat(f);
+            case final Double d -> control.definePrimitiveDouble(d);
             case final ClassDesc classDesc -> ir.defineRuntimeclassReference(classDesc);
             case final MethodTypeDesc mtd -> ir.defineMethodType(mtd);
             case final MethodHandleDesc mh -> ir.defineMethodHandle(mh);
@@ -1620,42 +1620,42 @@ public class MethodAnalyzer {
         // A node that represents an LDC instruction.
         final Status outgoing = frame.copyIncomingToOutgoing();
 
-        outgoing.push(constantToValue(value));
+        outgoing.push(constantToValue(outgoing.control, value));
     }
 
     private void parse_ICONST(final ConstantDesc node, final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
-        outgoing.push(ir.definePrimitiveInt((Integer) node));
+        outgoing.push(outgoing.control.definePrimitiveInt((Integer) node));
     }
 
     private void parse_LCONST(final ConstantDesc node, final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
-        outgoing.push(ir.definePrimitiveLong((Long) node));
+        outgoing.push(outgoing.control.definePrimitiveLong((Long) node));
     }
 
     private void parse_FCONST(final ConstantDesc node, final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
-        outgoing.push(ir.definePrimitiveFloat((Float) node));
+        outgoing.push(outgoing.control.definePrimitiveFloat((Float) node));
     }
 
     private void parse_DCONST(final ConstantDesc node, final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
-        outgoing.push(ir.definePrimitiveDouble((Double) node));
+        outgoing.push(outgoing.control.definePrimitiveDouble((Double) node));
     }
 
     private void parse_BIPUSH(final ConstantDesc node, final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
-        outgoing.push(ir.definePrimitiveInt((Integer) node));
+        outgoing.push(outgoing.control.definePrimitiveInt((Integer) node));
     }
 
     private void parse_SIPUSH(final ConstantDesc node, final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
-        outgoing.push(ir.definePrimitiveInt(((Number) node).shortValue()));
+        outgoing.push(outgoing.control.definePrimitiveInt(((Number) node).shortValue()));
     }
 
     private void parse_ACONST_NULL(final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
-        outgoing.push(ir.defineNullReference());
+        outgoing.push(outgoing.control.defineNullReference());
     }
 
     private void parse_GETFIELD(final ClassDesc owner, final ClassDesc fieldType, final String fieldName, final Frame frame) {

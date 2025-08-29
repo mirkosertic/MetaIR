@@ -15,10 +15,8 @@ public class MethodTest {
         final StringConstant r1 = method.defineStringConstant("a");
         final StringConstant r2 = method.defineStringConstant("a");
 
-        assertThat(r1).isSameAs(r2);
+        assertThat(r1).isNotSameAs(r2);
         assertThat(r1.usedBy).isEmpty();
-
-        assertThat(r1).isSameAs(r2);
     }
 
     @Test
