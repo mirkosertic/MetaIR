@@ -7,12 +7,12 @@ digraph debugoutput {
  node2[label="#2 this : SynchronizedTest Order : 3",shape=box, fillcolor=lightgrey, style=filled];
  node2 -> node0[dir="forward" color="green" penwidth="2"];
  node0 -> node2[headlabel="*0", labeldistance=2];
- node3[label="#3 LabelNode Order : 2",shape=box, fillcolor=lightgrey, style=filled];
+ node3[label="#3 LabelNode Order : 1",shape=box, fillcolor=lightgrey, style=filled];
  node3 -> node0[dir="forward" color="green" penwidth="2"];
  node0 -> node3[labeldistance=2, color=red, fontcolor=red];
- node4[label="#4 int 1 Order : 1",shape=octagon, fillcolor=lightgreen, style=filled];
- node4 -> node0[dir="forward" color="green" penwidth="2"];
- node0 -> node4[style=dotted];
+ node4[label="#4 int 1 Order : 2",shape=octagon, fillcolor=lightgreen, style=filled];
+ node4 -> node3[dir="forward" color="green" penwidth="2"];
+ node3 -> node4[style=dotted];
  node5[label="#5 Add : int Order : 5",shape=octagon, fillcolor=orange, style=filled];
  node5 -> node0[dir="forward" color="green" penwidth="2"];
  node1 -> node5[headlabel="*0", labeldistance=2];

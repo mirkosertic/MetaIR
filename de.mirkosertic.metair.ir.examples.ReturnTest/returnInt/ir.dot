@@ -8,10 +8,10 @@ digraph {
  node2[label="#2 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
  node0 -> node2[labeldistance=2, color=red, fontcolor=red];
  node3[label="#3 int 10",shape=octagon, fillcolor=lightgreen, style=filled];
- node0 -> node3[style=dotted];
+ node2 -> node3[style=dotted];
  subgraph cluster_0 {
   color=lightgray;
-  node0;
+  node2;
   node3;
  }
  subgraph cluster_000 {
