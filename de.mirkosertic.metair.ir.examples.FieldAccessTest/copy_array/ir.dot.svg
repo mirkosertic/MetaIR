@@ -31,26 +31,26 @@
 <!-- node4 -->
 <g id="node2" class="node">
 <title>node4</title>
-<polygon fill="lightgreen" stroke="black" points="583.53,-594.54 583.53,-609.46 464.01,-620 294.99,-620 175.47,-609.46 175.47,-594.54 294.99,-584 464.01,-584 583.53,-594.54"/>
-<text text-anchor="middle" x="379.5" y="-598.3" font-family="Times,serif" font-size="14.00">#4 Class FieldAccessTest$Destination</text>
+<polygon fill="lightgrey" stroke="black" points="432,-547 327,-547 327,-511 432,-511 432,-547"/>
+<text text-anchor="middle" x="379.5" y="-525.3" font-family="Times,serif" font-size="14.00">#4 ClassInit</text>
 </g>
 <!-- node0&#45;&gt;node4 -->
-<g id="edge1" class="edge">
+<g id="edge3" class="edge">
 <title>node0&#45;&gt;node4</title>
-<path fill="none" stroke="black" stroke-dasharray="1,5" d="M379.5,-656.81C379.5,-648.35 379.5,-638.95 379.5,-630.4"/>
-<polygon fill="black" stroke="black" points="383,-630.17 379.5,-620.17 376,-630.17 383,-630.17"/>
-</g>
-<!-- node5 -->
-<g id="node3" class="node">
-<title>node5</title>
-<polygon fill="lightgrey" stroke="black" points="432,-547 327,-547 327,-511 432,-511 432,-547"/>
-<text text-anchor="middle" x="379.5" y="-525.3" font-family="Times,serif" font-size="14.00">#5 ClassInit</text>
-</g>
-<!-- node0&#45;&gt;node5 -->
-<g id="edge4" class="edge">
-<title>node0&#45;&gt;node5</title>
 <path fill="none" stroke="green" d="M295.99,-671.15C219.69,-656.8 124.66,-627.85 166.5,-576 171.33,-570.02 255.8,-553.11 316.9,-541.54"/>
 <polygon fill="green" stroke="green" points="317.69,-544.96 326.86,-539.66 316.39,-538.08 317.69,-544.96"/>
+</g>
+<!-- node3 -->
+<g id="node3" class="node">
+<title>node3</title>
+<polygon fill="lightgreen" stroke="black" points="583.53,-594.54 583.53,-609.46 464.01,-620 294.99,-620 175.47,-609.46 175.47,-594.54 294.99,-584 464.01,-584 583.53,-594.54"/>
+<text text-anchor="middle" x="379.5" y="-598.3" font-family="Times,serif" font-size="14.00">#3 Class FieldAccessTest$Destination</text>
+</g>
+<!-- node0&#45;&gt;node3 -->
+<g id="edge5" class="edge">
+<title>node0&#45;&gt;node3</title>
+<path fill="none" stroke="black" stroke-dasharray="1,5" d="M379.5,-656.81C379.5,-648.35 379.5,-638.95 379.5,-630.4"/>
+<polygon fill="black" stroke="black" points="383,-630.17 379.5,-620.17 376,-630.17 383,-630.17"/>
 </g>
 <!-- node2 -->
 <g id="node4" class="node">
@@ -59,29 +59,22 @@
 <text text-anchor="middle" x="59.5" y="-598.3" font-family="Times,serif" font-size="14.00">#2 LabelNode</text>
 </g>
 <!-- node0&#45;&gt;node2 -->
-<g id="edge5" class="edge">
+<g id="edge4" class="edge">
 <title>node0&#45;&gt;node2</title>
 <path fill="none" stroke="red" d="M295.92,-677.29C243.37,-671.69 174.89,-660.66 117.5,-639 108.46,-635.59 99.3,-630.7 91.01,-625.62"/>
 <polygon fill="red" stroke="red" points="92.7,-622.55 82.4,-620.09 88.92,-628.44 92.7,-622.55"/>
 </g>
-<!-- node3 -->
+<!-- node5 -->
 <g id="node12" class="node">
-<title>node3</title>
+<title>node5</title>
 <polygon fill="lightgreen" stroke="black" points="963.1,-594.54 963.1,-609.46 857.31,-620 707.69,-620 601.9,-609.46 601.9,-594.54 707.69,-584 857.31,-584 963.1,-594.54"/>
-<text text-anchor="middle" x="782.5" y="-598.3" font-family="Times,serif" font-size="14.00">#3 Class FieldAccessTest$Source</text>
+<text text-anchor="middle" x="782.5" y="-598.3" font-family="Times,serif" font-size="14.00">#5 Class FieldAccessTest$Source</text>
 </g>
-<!-- node0&#45;&gt;node3 -->
+<!-- node0&#45;&gt;node5 -->
 <g id="edge23" class="edge">
-<title>node0&#45;&gt;node3</title>
+<title>node0&#45;&gt;node5</title>
 <path fill="none" stroke="black" stroke-dasharray="1,5" d="M463,-666.42C529.25,-653.27 621.78,-634.9 690.22,-621.32"/>
 <polygon fill="black" stroke="black" points="691.01,-624.73 700.14,-619.35 689.65,-617.86 691.01,-624.73"/>
-</g>
-<!-- node4&#45;&gt;node5 -->
-<g id="edge2" class="edge">
-<title>node4&#45;&gt;node5</title>
-<path fill="none" stroke="black" d="M379.5,-583.81C379.5,-575.79 379.5,-566.05 379.5,-557.07"/>
-<polygon fill="black" stroke="black" points="383,-557.03 379.5,-547.03 376,-557.03 383,-557.03"/>
-<text text-anchor="middle" x="387.95" y="-561.45" font-family="Times,serif" font-size="14.00">*0</text>
 </g>
 <!-- node7 -->
 <g id="node5" class="node">
@@ -89,9 +82,9 @@
 <polygon fill="lightgrey" stroke="black" points="598.5,-401 348.5,-401 348.5,-365 598.5,-365 598.5,-401"/>
 <text text-anchor="middle" x="473.5" y="-379.3" font-family="Times,serif" font-size="14.00">#7 Invoke special &lt;init&gt; : ()void</text>
 </g>
-<!-- node5&#45;&gt;node7 -->
+<!-- node4&#45;&gt;node7 -->
 <g id="edge7" class="edge">
-<title>node5&#45;&gt;node7</title>
+<title>node4&#45;&gt;node7</title>
 <path fill="none" stroke="red" d="M404.15,-510.82C416.46,-501.19 430.77,-488.25 440.5,-474 453.64,-454.75 462.28,-429.62 467.41,-410.81"/>
 <polygon fill="red" stroke="red" points="470.81,-411.64 469.91,-401.09 464.03,-409.9 470.81,-411.64"/>
 </g>
@@ -101,22 +94,29 @@
 <polygon fill="orange" stroke="black" points="431.62,-448.54 431.62,-463.46 401.09,-474 357.91,-474 327.38,-463.46 327.38,-448.54 357.91,-438 401.09,-438 431.62,-448.54"/>
 <text text-anchor="middle" x="379.5" y="-452.3" font-family="Times,serif" font-size="14.00">#6 New</text>
 </g>
-<!-- node5&#45;&gt;node6 -->
+<!-- node4&#45;&gt;node6 -->
 <g id="edge9" class="edge">
-<title>node5&#45;&gt;node6</title>
+<title>node4&#45;&gt;node6</title>
 <path fill="none" stroke="black" d="M373.62,-510.81C372.78,-502.79 372.55,-493.05 372.92,-484.07"/>
 <polygon fill="black" stroke="black" points="376.42,-484.25 373.64,-474.03 369.44,-483.75 376.42,-484.25"/>
 <text text-anchor="middle" x="380.78" y="-489.01" font-family="Times,serif" font-size="14.00">*0</text>
 </g>
-<!-- node5&#45;&gt;node6 -->
+<!-- node4&#45;&gt;node6 -->
 <g id="edge10" class="edge">
-<title>node5&#45;&gt;node6</title>
+<title>node4&#45;&gt;node6</title>
 <path fill="none" stroke="green" d="M385.38,-510.81C386.22,-502.79 386.45,-493.05 386.08,-484.07"/>
 <polygon fill="green" stroke="green" points="389.56,-483.75 385.36,-474.03 382.58,-484.25 389.56,-483.75"/>
 </g>
-<!-- node2&#45;&gt;node5 -->
-<g id="edge3" class="edge">
-<title>node2&#45;&gt;node5</title>
+<!-- node3&#45;&gt;node4 -->
+<g id="edge1" class="edge">
+<title>node3&#45;&gt;node4</title>
+<path fill="none" stroke="black" d="M379.5,-583.81C379.5,-575.79 379.5,-566.05 379.5,-557.07"/>
+<polygon fill="black" stroke="black" points="383,-557.03 379.5,-547.03 376,-557.03 383,-557.03"/>
+<text text-anchor="middle" x="387.95" y="-561.45" font-family="Times,serif" font-size="14.00">*0</text>
+</g>
+<!-- node2&#45;&gt;node4 -->
+<g id="edge2" class="edge">
+<title>node2&#45;&gt;node4</title>
 <path fill="none" stroke="red" d="M106.57,-583.99C115.45,-581.1 124.71,-578.29 133.5,-576 195.05,-559.93 266.66,-547.2 316.7,-539.24"/>
 <polygon fill="red" stroke="red" points="317.38,-542.67 326.72,-537.66 316.3,-535.76 317.38,-542.67"/>
 </g>
@@ -264,9 +264,9 @@
 <path fill="none" stroke="green" d="M785.65,-291.81C786.15,-283.79 785.97,-274.05 785.22,-265.07"/>
 <polygon fill="green" stroke="green" points="788.69,-264.57 784.08,-255.03 781.73,-265.36 788.69,-264.57"/>
 </g>
-<!-- node3&#45;&gt;node8 -->
+<!-- node5&#45;&gt;node8 -->
 <g id="edge20" class="edge">
-<title>node3&#45;&gt;node8</title>
+<title>node5&#45;&gt;node8</title>
 <path fill="none" stroke="black" d="M782.12,-583.78C781.84,-569.41 781.5,-548.37 781.5,-530 781.5,-530 781.5,-530 781.5,-382 781.5,-367.65 781.29,-351.67 781.07,-338.51"/>
 <polygon fill="black" stroke="black" points="784.56,-338.15 780.88,-328.22 777.56,-338.28 784.56,-338.15"/>
 <text text-anchor="middle" x="789.66" y="-342.48" font-family="Times,serif" font-size="14.00">*0</text>

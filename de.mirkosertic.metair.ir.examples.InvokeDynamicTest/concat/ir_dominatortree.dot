@@ -1,10 +1,10 @@
 digraph debugoutput {
  ordering="in";
  node0[label="#0 Method Order : 0",shape=box, fillcolor=lightgrey, style=filled];
- node1[label="#1 arg0 : int Order : 13",shape=box, fillcolor=lightgrey, style=filled];
+ node1[label="#1 arg1 : int Order : 13",shape=box, fillcolor=lightgrey, style=filled];
  node1 -> node0[dir="forward" color="green" penwidth="2"];
  node0 -> node1[headlabel="*0", labeldistance=2];
- node2[label="#2 arg1 : int Order : 12",shape=box, fillcolor=lightgrey, style=filled];
+ node2[label="#2 arg0 : int Order : 12",shape=box, fillcolor=lightgrey, style=filled];
  node2 -> node0[dir="forward" color="green" penwidth="2"];
  node0 -> node2[headlabel="*0", labeldistance=2];
  node3[label="#3 this : InvokeDynamicTest Order : 11",shape=box, fillcolor=lightgrey, style=filled];
@@ -25,10 +25,10 @@ digraph debugoutput {
  node8[label="#8 int 0 Order : 8",shape=octagon, fillcolor=lightgreen, style=filled];
  node8 -> node4[dir="forward" color="green" penwidth="2"];
  node4 -> node8[style=dotted];
- node9[label="#9 String : makeConcatWithConstants Order : 7",shape=octagon, fillcolor=lightgreen, style=filled];
+ node9[label="#9 String : hello  world  Order : 7",shape=octagon, fillcolor=lightgreen, style=filled];
  node9 -> node4[dir="forward" color="green" penwidth="2"];
  node4 -> node9[style=dotted];
- node10[label="#10 String : hello  world  Order : 6",shape=octagon, fillcolor=lightgreen, style=filled];
+ node10[label="#10 String : makeConcatWithConstants Order : 6",shape=octagon, fillcolor=lightgreen, style=filled];
  node10 -> node4[dir="forward" color="green" penwidth="2"];
  node4 -> node10[style=dotted];
  node11[label="#11 Invoke static in : (Class)MethodHandles$Lookup Order : 3",shape=box, fillcolor=lightgrey, style=filled];
@@ -42,15 +42,15 @@ digraph debugoutput {
  node13 -> node0[dir="forward" color="green" penwidth="2"];
  node7 -> node13[headlabel="*0", labeldistance=2];
  node11 -> node13[headlabel="*1", labeldistance=2];
- node9 -> node13[headlabel="*2", labeldistance=2];
+ node10 -> node13[headlabel="*2", labeldistance=2];
  node5 -> node13[headlabel="*3", labeldistance=2];
- node10 -> node13[headlabel="*4", labeldistance=2];
+ node9 -> node13[headlabel="*4", labeldistance=2];
  node12 -> node13[headlabel="*5", labeldistance=2];
  node14[label="#14 Invoke dynamic makeConcatWithConstants : (int,int)String Order : 14",shape=box, fillcolor=lightgrey, style=filled];
  node14 -> node0[dir="forward" color="green" penwidth="2"];
  node13 -> node14[headlabel="*0", labeldistance=2];
- node1 -> node14[headlabel="*1", labeldistance=2];
- node2 -> node14[headlabel="*2", labeldistance=2];
+ node2 -> node14[headlabel="*1", labeldistance=2];
+ node1 -> node14[headlabel="*2", labeldistance=2];
  node0 -> node14;
  node4 -> node14[labeldistance=2, color=red, fontcolor=red];
  node15[label="#15 ReturnValue : String Order : 15",shape=box, fillcolor=lightgrey, style=filled];

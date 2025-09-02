@@ -22,13 +22,13 @@ digraph {
  node0 -> node3[style=dotted];
  subgraph cluster_0 {
   color=lightgray;
-  node2;
-  node5;
+  node0;
+  node3;
  }
  subgraph cluster_1 {
   color=lightgray;
-  node0;
-  node3;
+  node2;
+  node5;
  }
  subgraph cluster_000 {
   label = "Legend";
