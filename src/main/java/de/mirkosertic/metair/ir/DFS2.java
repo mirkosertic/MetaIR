@@ -15,9 +15,15 @@ public class DFS2 {
     private final Set<Node> visited;
     private final Map<Node, Set<Node>> precomputedPredecessors;
     private final Map<Node, List<Node>> precomputedForwards;
+    private final boolean onlyControlFlow;
 
     public DFS2(final Node node) {
+        this(node, false);
+    }
 
+    public DFS2(final Node node, final boolean onlyControlFlow) {
+
+        this.onlyControlFlow = onlyControlFlow;
         this.nodesInOrder = new ArrayList<>();
         this.workList = new ArrayList<>();
         this.visited = new HashSet<>();
@@ -77,16 +83,22 @@ public class DFS2 {
             for (final Node user : key.usedBy) {
                 for (final Node.UseEdge edge : user.uses) {
                     if (edge.node() == key) {
-                        if (edge.use() instanceof final ControlFlowUse cfu && cfu.type == FlowType.FORWARD) {
-                            forwardNodes.add(user);
-                        } else if (edge.use() instanceof final PHIUse pu && pu.type == FlowType.FORWARD) {
-                            forwardNodes.add(user);
-                        } else if (edge.use() instanceof DefinedByUse) {
-                            forwardNodes.add(user);
-                        } else if (edge.use() instanceof DataFlowUse) {
-                            forwardNodes.add(user);
-                        } else if (edge.use() instanceof MemoryUse) {
-                            forwardNodes.add(user);
+                        if (onlyControlFlow) {
+                            if (edge.use() instanceof final ControlFlowUse cfu && cfu.type == FlowType.FORWARD) {
+                                forwardNodes.add(user);
+                            }
+                        } else {
+                            if (edge.use() instanceof final ControlFlowUse cfu && cfu.type == FlowType.FORWARD) {
+                                forwardNodes.add(user);
+                            } else if (edge.use() instanceof final PHIUse pu && pu.type == FlowType.FORWARD) {
+                                forwardNodes.add(user);
+                            } else if (edge.use() instanceof DefinedByUse) {
+                                forwardNodes.add(user);
+                            } else if (edge.use() instanceof DataFlowUse) {
+                                forwardNodes.add(user);
+                            } else if (edge.use() instanceof MemoryUse) {
+                                forwardNodes.add(user);
+                            }
                         }
                     }
                 }
@@ -102,15 +114,23 @@ public class DFS2 {
     private Set<Node> predecessorsOf(final Node node) {
         final Set<Node> predecessors = new HashSet<>();
         for (final Node.UseEdge edge : node.uses) {
-            if (edge.use() instanceof final ControlFlowUse cfu) {
-                if (cfu.type == FlowType.FORWARD) {
-                    predecessors.add(edge.node());
+            if (onlyControlFlow) {
+                if (edge.use() instanceof final ControlFlowUse cfu) {
+                    if (cfu.type == FlowType.FORWARD) {
+                        predecessors.add(edge.node());
+                    }
                 }
-            } else if (edge.use() instanceof final PHIUse pu) {
-                if (pu.type == FlowType.FORWARD) {
-                    predecessors.add(edge.node());
-                }
-            } else predecessors.add(edge.node());
+            } else {
+                if (edge.use() instanceof final ControlFlowUse cfu) {
+                    if (cfu.type == FlowType.FORWARD) {
+                        predecessors.add(edge.node());
+                    }
+                } else if (edge.use() instanceof final PHIUse pu) {
+                    if (pu.type == FlowType.FORWARD) {
+                        predecessors.add(edge.node());
+                    }
+                } else predecessors.add(edge.node());
+            }
         }
         return predecessors;
     }

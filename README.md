@@ -3,7 +3,10 @@
 [![Java CI with Maven](https://github.com/mirkosertic/MetaIR/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/mirkosertic/MetaIR/actions/workflows/maven.yml)
 
 MetaIR is a graph-based intermediate representation (IR) for JVM bytecode, built on Cliff Click's Sea-of-Nodes concept. 
-The framework leverages the Java Class-File API introduced in Java 24 (JEP 484).
+The framework leverages the Java Class-File API introduced in Java 24 (JEP 484). 
+
+Most parts of the IR are taken from [Bytecoder - Framework to interpret and transpile JVM bytecode to JavaScript, OpenCL or WebAssembly. ](https://github.com/mirkosertic/Bytecoder),
+but were rewritten to be more flexible and extensible.
 
 ## Key Features
 
@@ -12,6 +15,10 @@ The framework leverages the Java Class-File API introduced in Java 24 (JEP 484).
 - **Optimization**: Built-in peephole optimizations for graph reduction
 - **Integration**: Built-in integration with JUnit Platform
 - **Cross-Compilation**: Foundation framework for cross-compiler development
+- **MetaIR** covers all aspects of JVM bytecode, including:
+  - **Control Flow**: Branching, loops, exception handling
+  - **Data Flow**: Local variables, stack, memory
+  - **Memory aliasing**: Memory allocation, memory access
 
 ## Technical Details
 - Built on [Java Class-File API (JEP 484)](https://openjdk.org/jeps/484)

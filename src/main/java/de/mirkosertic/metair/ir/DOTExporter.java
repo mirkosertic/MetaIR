@@ -297,6 +297,55 @@ public final class DOTExporter {
         ps.flush();
     }
 
+    public static void writeTo(final CFGDominatorTree tree, final PrintStream ps) {
+        ps.println("digraph debugoutput {");
+        ps.println(" ordering=\"in\";");
+        for (final Node n : tree.preOrder) {
+            ps.print(" node" + tree.preOrder.indexOf(n) + "[");
+            printNode(tree.preOrder.indexOf(n), n, ps, " Order : " + tree.rpo.indexOf(n));
+            ps.println("];");
+
+            final Node id = tree.idom.get(n);
+            if (id != n) {
+                ps.print(" node" + tree.preOrder.indexOf(n) + " -> node" + tree.preOrder.indexOf(id) + "[dir=\"forward\"");
+                ps.print(" color=\"green\" penwidth=\"2\"");
+                ps.println("];");
+            }
+
+            for (final Node.UseEdge useEdge : n.uses) {
+                final Node usedNode = useEdge.node();
+
+                if (useEdge.use() instanceof final ControlFlowUse cfu) {
+                    ps.print(" node" + tree.preOrder.indexOf(usedNode));
+                    ps.print(" -> node" + tree.preOrder.indexOf(n));
+                    ps.print("[labeldistance=2, color=red, fontcolor=red");
+                    if (cfu.type == FlowType.BACKWARD) {
+                        ps.print(", style=dashed");
+                    }
+                    ps.print("]");
+                    ps.println(";");
+                }
+            }
+        }
+        ps.println("""
+                 subgraph cluster_000 {
+                  label = "Legend";
+                  node [shape=point]
+                  {
+                   rank=same;
+                   c0 [style = invis];
+                   c1 [style = invis];
+                   c2 [style = invis];
+                   c3 [style = invis];
+                  }
+                  c0 -> c1 [label="Control flow", style=solid, color=red]
+                  c2 -> c3 [label="Control flow back edge", style=dashed, color=red]
+                 }
+                """);
+        ps.println("}");
+        ps.flush();
+    }
+
     public static void writeBytecodeCFGTo(final MethodAnalyzer analyzer, final PrintStream ps) {
         ps.println("digraph {");
         ps.println(" ordering=\"in\";");

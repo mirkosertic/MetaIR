@@ -1,9 +1,11 @@
 package de.mirkosertic.metair.ir.test;
 
+import de.mirkosertic.metair.ir.CFGDominatorTree;
 import de.mirkosertic.metair.ir.DOTExporter;
 import de.mirkosertic.metair.ir.DominatorTree;
 import de.mirkosertic.metair.ir.IllegalParsingStateException;
 import de.mirkosertic.metair.ir.MethodAnalyzer;
+import de.mirkosertic.metair.ir.Sequencer;
 import org.junit.platform.engine.ExecutionRequest;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestExecutionResult;
@@ -76,6 +78,12 @@ public class MetaIRTestExecutor {
                             DOTExporter.writeTo(dominatorTree, new PrintStream(Files.newOutputStream(targetDir.resolve("ir_dominatortree.dot"))));
 
                             DOTExporter.writeBytecodeCFGTo(analyzer, new PrintStream(Files.newOutputStream(targetDir.resolve("bytecodecfg.dot"))));
+
+                            final CFGDominatorTree cfgDominatorTree = new CFGDominatorTree(analyzer.ir());
+                            DOTExporter.writeTo(cfgDominatorTree, new PrintStream(Files.newOutputStream(targetDir.resolve("ir_cfg_dominatortree.dot"))));
+
+                            //final YAMLStructuredControlflowCodeGenerator yamlStructuredControlflowCodeGenerator = new YAMLStructuredControlflowCodeGenerator();
+                            //new Sequencer(analyzer.ir(), yamlStructuredControlflowCodeGenerator);
 
                         } catch (final IllegalParsingStateException ex) {
 
