@@ -1,13 +1,13 @@
 digraph {
  ordering="in";
  node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#0 Method</td></tr><tr><td port="prj1" bgcolor="yellow">this : Test</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
- node4[label="#4 Return",shape=box, fillcolor=lightgrey, style=filled];
- node0 -> node4[labeldistance=2, color=red, fontcolor=red];
- node0 -> node4[labeldistance=2, color=green, constraint=false];
  node3[label="#3 double 0.0",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node3[style=dotted];
  node2[label="#2 double 1.0",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node2[style=dotted];
+ node4[label="#4 Return",shape=box, fillcolor=lightgrey, style=filled];
+ node0 -> node4[labeldistance=2, color=red, fontcolor=red];
+ node0 -> node4[labeldistance=2, color=green, constraint=false];
  subgraph cluster_0 {
   color=lightgray;
   node0;

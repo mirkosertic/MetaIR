@@ -6,11 +6,9 @@ digraph {
  node0:prj1 -> node3[headlabel="if #0", labeldistance=2, color=blue, constraint=false];
  node2[label="#2 LoopHeader : Loop0",shape=box, fillcolor=lightgrey, style=filled];
  node0 -> node2[labeldistance=2, color=red, fontcolor=red];
- node4[label="#4 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
+ node4 -> node2[labeldistance=2, color=red, fontcolor=red, style=dashed];
+ node4[label="#4 Goto",shape=box, fillcolor=lightgrey, style=filled];
  node2 -> node4[labeldistance=2, color=red, fontcolor=red];
- node5 -> node4[labeldistance=2, color=red, fontcolor=red, style=dashed];
- node5[label="#5 Goto",shape=box, fillcolor=lightgrey, style=filled];
- node4 -> node5[labeldistance=2, color=red, fontcolor=red];
  subgraph cluster_0 {
   color=lightgray;
   node2;
