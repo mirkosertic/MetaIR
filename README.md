@@ -30,6 +30,7 @@ but were rewritten to be more flexible and extensible.
 
 ## Credits
 - An excellent tutorial about the Class-File API: [Build A Compiler With The Java Class-File API by Dr. James Hamilton](https://jameshamilton.eu/programming/build-compiler-java-class-file-api)
+- IR Sequencing: [Beyond Relooper: recursive translation of unstructured control flow to structured control flow (functional pearl)](https://dl.acm.org/doi/10.1145/3547621)
 
 ## Example new instance creation
 

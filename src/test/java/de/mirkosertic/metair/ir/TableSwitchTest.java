@@ -23,6 +23,9 @@ class TableSwitchTest {
         assertThat(a.debugDescription()).isEqualTo("TableSwitch");
 
         assertThat(a.usedBy).containsExactlyInAnyOrder(a.getNamedNode("default"), a.getNamedNode("case0"));
+
+        assertThat(a.defaultProjection().name()).isEqualTo("default");
+        assertThat(a.caseProjection(0).name()).isEqualTo("case0");
     }
 
     @Test

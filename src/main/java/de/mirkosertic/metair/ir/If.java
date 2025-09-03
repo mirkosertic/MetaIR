@@ -12,6 +12,14 @@ public class If extends ConditionalNode {
         registerAs(FALSE, controlFlowsTo(new ExtractControlFlowProjection(FALSE), FlowType.FORWARD));
     }
 
+    public ExtractControlFlowProjection trueProjection() {
+        return (ExtractControlFlowProjection) getNamedNode(TRUE);
+    }
+
+    public ExtractControlFlowProjection falseProjection() {
+        return (ExtractControlFlowProjection) getNamedNode(FALSE);
+    }
+
     @Override
     public String debugDescription() {
         return getClass().getSimpleName();

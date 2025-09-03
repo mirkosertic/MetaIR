@@ -3,7 +3,7 @@ package de.mirkosertic.metair.ir;
 import java.lang.constant.ConstantDescs;
 import java.util.List;
 
-public class TableSwitch extends TupleNode {
+public class TableSwitch extends ConditionalNode {
 
     public final int lowValue;
     public final int highValue;
@@ -28,6 +28,14 @@ public class TableSwitch extends TupleNode {
         }
 
         registerAs("default", controlFlowsTo(new ExtractControlFlowProjection("default"), FlowType.FORWARD));
+    }
+
+    public ExtractControlFlowProjection defaultProjection() {
+        return (ExtractControlFlowProjection) getNamedNode("default");
+    }
+
+    public ExtractControlFlowProjection caseProjection(final int index) {
+        return (ExtractControlFlowProjection) getNamedNode("case" + index);
     }
 
     @Override

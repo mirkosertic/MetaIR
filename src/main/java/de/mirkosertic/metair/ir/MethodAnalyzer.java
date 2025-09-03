@@ -598,12 +598,25 @@ public class MethodAnalyzer {
                     // TODO: In case of exception handlers we do not have a guaranteed stack, but only the provided exception
 
                     int incomingStackSize = -1;
+                    int incomingExceptionGuards = -1;
                     for (final Frame fr : incomingFrames) {
                         if (incomingStackSize == -1) {
                             incomingStackSize = fr.out.stack.size();
                         } else if (incomingStackSize != fr.out.stack.size()) {
                             illegalState("Stack size mismatch for frame at " + frame.elementIndex + " expected " + incomingStackSize + " but got " + fr.out.stack.size());
                         }
+
+                        // TODO: Fix me
+                        /*if (incomingExceptionGuards == -1) {
+                            incomingExceptionGuards = fr.out.activeExceptionGuards.size();
+                        } else if (incomingExceptionGuards != fr.out.activeExceptionGuards.size()) {
+                            illegalState("Active exception guards mismatch for frame at " + frame.elementIndex + " expected " + incomingExceptionGuards + " but got " + fr.out.activeExceptionGuards.size());
+                        }*/
+                    }
+
+                    if (incomingExceptionGuards != -1) {
+                        // We assume all guards are the same here, no further validation!
+                        incomingStatus.activeExceptionGuards.addAll(incomingFrames.getFirst().out.activeExceptionGuards);
                     }
 
                     if (incomingStackSize > 0) {
@@ -810,6 +823,7 @@ public class MethodAnalyzer {
                 illegalState("Multiple TryCatch ending at the same label not implemented yet");
             }
             final Status outgoing = frame.copyIncomingToOutgoing();
+            // TODO: Find the corresponding exception guard by walking back the control flow graph
             final ExceptionGuard activeGuard = outgoing.popExceptionGuard();
 
             final Node n = new MergeNode("EndOfGuardedBlock" + frame.elementIndex);
@@ -822,10 +836,14 @@ public class MethodAnalyzer {
 
         if (catchesFromHere.isEmpty()) {
             final Status outgoing = frame.copyIncomingToOutgoing();
-            final Node n = new LabelNode("Frame" + frame.elementIndex);
-            outgoing.control = outgoing.control.controlFlowsTo(n, FlowType.FORWARD);
+            if (frame.predecessors.size() == 1 && (outgoing.control instanceof LoopHeaderNode || outgoing.control instanceof MergeNode)) {
+                frame.entryPoint = outgoing.control;
+            } else {
+                final Node n = new LabelNode("Frame" + frame.elementIndex);
+                outgoing.control = outgoing.control.controlFlowsTo(n, FlowType.FORWARD);
 
-            frame.entryPoint = n;
+                frame.entryPoint = n;
+            }
         } else {
             final Status outgoing = frame.copyIncomingToOutgoing();
             final ExceptionGuard n = new ExceptionGuard(catchesFromHere.stream().map(t -> {
@@ -834,6 +852,7 @@ public class MethodAnalyzer {
                 }
                 return new ExceptionGuard.Catches(Optional.empty());
             }).toList());
+
             outgoing.registerExceptionGuard(n);
             outgoing.control = outgoing.control.controlFlowsTo(n, FlowType.FORWARD);
 
@@ -1002,17 +1021,25 @@ public class MethodAnalyzer {
 
         final MethodTypeDesc bootstrapMethodType = bootstrapMethod.invocationType();
 
-        // TODO: Check arity...
-        for (final ConstantDesc bootstrapArgument : node.bootstrapArgs()) {
-            bootstrapArguments.add(constantToValue(outgoing.control, bootstrapArgument));
-        }
-        if (bootstrapArguments.size() < bootstrapMethodType.parameterCount()) {
-            if (bootstrapMethodType.parameterType(bootstrapMethodType.parameterCount() - 1).isArray()) {
-                // TODO: Check for memory flow...
-                final NewArray emptyArgs = new NewArray(ConstantDescs.CD_Object, outgoing.control.definePrimitiveInt(0));
-                bootstrapArguments.add(emptyArgs);
+        int argIndex = 0;
+        for (int i = 3; i < bootstrapMethodType.parameterCount(); i++) {
+            final ClassDesc param = bootstrapMethodType.parameterType(i);
+            if (!param.isArray()) {
+                bootstrapArguments.add(constantToValue(outgoing.control, node.bootstrapArgs().get(argIndex++)));
             } else {
-                illegalState("Don't get this signature for invokedynamic here...");
+                final int varArgNumber = bootstrapMethodType.parameterCount() - argIndex - 4;
+
+                final List<Value> varargsValues = new ArrayList<>();
+                for (int j = 0; j < varArgNumber; j++) {
+                    varargsValues.add(constantToValue(outgoing.control, node.bootstrapArgs().get(argIndex++)));
+                }
+
+                final VarArgsArray varargs = new VarArgsArray(ConstantDescs.CD_Object, varargsValues);
+                // The array instance must be reachable by the graph...
+                // TODO: Maybe this should be factored out?
+                varargs.use(outgoing.control, DefinedByUse.INSTANCE);
+                bootstrapArguments.add(varargs);
+                break;
             }
         }
         final Value bootstrapInvocation = new InvokeStatic(bootstrapMethod.owner(), ir.defineRuntimeclassReference(bootstrapMethod.owner()), bootstrapMethod.methodName(), bootstrapMethodType, bootstrapArguments);
@@ -1248,7 +1275,7 @@ public class MethodAnalyzer {
             illegalState("Expected an int on stack for " + opcode + ", but got a " + TypeUtils.toString(value.type));
         }
 
-        outgoing.stack.push(new Extend(targetType, extendType, new Truncate(truncatedTo, value)));
+        outgoing.push(new Extend(targetType, extendType, new Truncate(truncatedTo, value)));
     }
 
     private void parse_extend(final Opcode opcode, final Frame frame, final ClassDesc expectedType, final ClassDesc targetType, final Extend.ExtendType extendType) {
@@ -1261,7 +1288,7 @@ public class MethodAnalyzer {
             illegalState("Expected an " + TypeUtils.toString(expectedType) + " on stack for " + opcode + ", but got a " + TypeUtils.toString(value.type));
         }
 
-        outgoing.stack.push(new Extend(targetType, extendType, value));
+        outgoing.push(new Extend(targetType, extendType, value));
     }
 
     protected void visitConvertInstruction(final Opcode opcode, final Frame frame) {
@@ -1294,7 +1321,7 @@ public class MethodAnalyzer {
 
         final List<Value> dimensions = new ArrayList<>();
         for (int i = 0; i < dimensionSize; i++) {
-            dimensions.add(outgoing.stack.pop());
+            dimensions.add(outgoing.pop());
         }
         final NewMultiArray newMultiArray = new NewMultiArray(arrayType, dimensions);
         outgoing.push(newMultiArray);
@@ -1565,11 +1592,13 @@ public class MethodAnalyzer {
             for (int i = 0; i < outgoing.numberOfLocals(); i++) {
                 final Value v = frame.out.getLocal(i);
                 final Value target = targetFrame.in.getLocal(i);
-                if (!(target instanceof PHI)) {
-                    illegalState("Local at index " + i + " is not a PHI value but " + v);
-                }
-                if (v != null && v != target) {
-                    target.use(v, new PHIUse(FlowType.BACKWARD, jumpSource));
+                if (target != null) {
+                    if (!(target instanceof PHI)) {
+                        illegalState("Local at index " + i + " is not a PHI value but " + v + ", current frame is " + frame.codeElement + ", target frame is " + targetFrame.codeElement);
+                    }
+                    if (v != null && v != target) {
+                        target.use(v, new PHIUse(FlowType.BACKWARD, jumpSource));
+                    }
                 }
             }
 
@@ -2251,7 +2280,7 @@ public class MethodAnalyzer {
             if (activeExceptionGuards.isEmpty()) {
                 throw new IllegalStateException("No exception guard to pop!");
             }
-            return activeExceptionGuards.peek();
+            return activeExceptionGuards.pop();
         }
     }
 }

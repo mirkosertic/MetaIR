@@ -22,5 +22,8 @@ public class IfTest {
         assertThat(numericCondition.isConstant()).isFalse();
 
         assertThat(iff.debugDescription()).isEqualTo("If");
+
+        assertThat(iff.falseProjection().name()).isEqualTo("false");
+        assertThat(iff.trueProjection().name()).isEqualTo("true");
     }
 }

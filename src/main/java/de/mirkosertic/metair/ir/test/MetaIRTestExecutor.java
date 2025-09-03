@@ -1,11 +1,5 @@
 package de.mirkosertic.metair.ir.test;
 
-import de.mirkosertic.metair.ir.CFGDominatorTree;
-import de.mirkosertic.metair.ir.DOTExporter;
-import de.mirkosertic.metair.ir.DominatorTree;
-import de.mirkosertic.metair.ir.IllegalParsingStateException;
-import de.mirkosertic.metair.ir.MethodAnalyzer;
-import de.mirkosertic.metair.ir.Sequencer;
 import org.junit.platform.engine.ExecutionRequest;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestExecutionResult;
@@ -14,12 +8,10 @@ import org.junit.platform.engine.support.descriptor.EngineDescriptor;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
 import java.lang.classfile.ClassFile;
 import java.lang.classfile.ClassModel;
 import java.lang.classfile.MethodModel;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class MetaIRTestExecutor {
@@ -67,40 +59,10 @@ public class MetaIRTestExecutor {
 
                         final Path targetDir = request.getOutputDirectoryProvider().createOutputDirectory(descriptor);
 
-                        // We found our candidate
-                        try {
-                            final MethodAnalyzer analyzer = new MethodAnalyzer(model.thisClass().asSymbol(), method);
-
-                            DOTExporter.writeTo(analyzer.ir(), new PrintStream(Files.newOutputStream(targetDir.resolve("ir.dot"))));
-
-                            final DominatorTree dominatorTree = new DominatorTree(analyzer.ir());
-
-                            DOTExporter.writeTo(dominatorTree, new PrintStream(Files.newOutputStream(targetDir.resolve("ir_dominatortree.dot"))));
-
-                            DOTExporter.writeBytecodeCFGTo(analyzer, new PrintStream(Files.newOutputStream(targetDir.resolve("bytecodecfg.dot"))));
-
-                            final CFGDominatorTree cfgDominatorTree = new CFGDominatorTree(analyzer.ir());
-                            DOTExporter.writeTo(cfgDominatorTree, new PrintStream(Files.newOutputStream(targetDir.resolve("ir_cfg_dominatortree.dot"))));
-
-                            //final YAMLStructuredControlflowCodeGenerator yamlStructuredControlflowCodeGenerator = new YAMLStructuredControlflowCodeGenerator();
-                            //new Sequencer(analyzer.ir(), yamlStructuredControlflowCodeGenerator);
-
-                        } catch (final IllegalParsingStateException ex) {
-
-                            DOTExporter.writeBytecodeCFGTo(ex.getAnalyzer(), new PrintStream(Files.newOutputStream(targetDir.resolve("bytecodecfg.dot"))));
-
-                            throw ex;
-                        } finally {
-                            try (final PrintStream ps = new PrintStream(Files.newOutputStream(targetDir.resolve("bytecode.yaml")))) {
-                                ps.print(method.toDebugString());
-                            }
-
-                            request.getEngineExecutionListener().executionFinished(descriptor, TestExecutionResult.successful());
-                        }
+                        new MetaIRTestHelper(targetDir).analyzeAndReport(model, method);
                     }
                 }
             } catch (final IOException e) {
-
                 throw new RuntimeException("Failed to load class data for " + origin.getName(), e);
             }
 

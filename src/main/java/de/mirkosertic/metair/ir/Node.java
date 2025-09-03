@@ -57,7 +57,6 @@ public abstract class Node {
         return nullref;
     }
 
-
     public StringConstant defineStringConstant(final String value) {
         final StringConstant r = new StringConstant(value);
         r.use(this, DefinedByUse.INSTANCE);
@@ -88,8 +87,6 @@ public abstract class Node {
         return v;
     }
 
-
     public record UseEdge(Node node, Use use) {
     }
-
 }

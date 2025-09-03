@@ -3,7 +3,7 @@ package de.mirkosertic.metair.ir;
 import java.lang.constant.ConstantDescs;
 import java.util.List;
 
-public class LookupSwitch extends TupleNode {
+public class LookupSwitch extends ConditionalNode {
 
     public final List<Integer> cases;
     public final String defaultLabel;
@@ -24,6 +24,14 @@ public class LookupSwitch extends TupleNode {
         }
 
         registerAs("default", controlFlowsTo(new ExtractControlFlowProjection("default"), FlowType.FORWARD));
+    }
+
+    public ExtractControlFlowProjection defaultProjection() {
+        return (ExtractControlFlowProjection) getNamedNode("default");
+    }
+
+    public ExtractControlFlowProjection caseProjection(final int index) {
+        return (ExtractControlFlowProjection) getNamedNode("case" + index);
     }
 
     @Override
