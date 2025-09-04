@@ -31,10 +31,25 @@ public class PutStaticTest {
 
 
     @Test
+    public void testUsage_put_int_to_boolean() {
+        final RuntimeclassReference target = new RuntimeclassReference(ConstantDescs.CD_String);
+        final PrimitiveInt value = new PrimitiveInt(10);
+        final PutStatic put = new PutStatic(target, "fieldname", ConstantDescs.CD_boolean, value);
+    }
+
+    @Test
     public void fail_wrongtype_field_is_primitive() {
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
             new PutStatic(new RuntimeclassReference(ConstantDescs.CD_String), "fieldname", ConstantDescs.CD_int, new StringConstant("hello"));
             fail("Exception expected");
         }).withMessage("Cannot put value of type String in field fieldname of type int");
+    }
+
+    @Test
+    public void fail_wrongtype_field_is_primitive_boolean() {
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+            new PutStatic(new RuntimeclassReference(ConstantDescs.CD_String), "fieldname", ConstantDescs.CD_boolean, new StringConstant("hello"));
+            fail("Exception expected");
+        }).withMessage("Cannot put value of type String in field fieldname of type boolean");
     }
 }

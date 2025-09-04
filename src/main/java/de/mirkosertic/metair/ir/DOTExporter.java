@@ -154,7 +154,9 @@ public final class DOTExporter {
         for (final Map.Entry<Node, List<Node>> entry : defines.entrySet()) {
             ps.println(" subgraph cluster_" + (clusterIndex++) + " {");
             ps.println("  color=lightgray;");
-            ps.println("  node" + nodeindex.indexOf(entry.getKey()) + ";");
+            if (!(entry.getKey() instanceof Projection)) {
+                ps.println("  node" + nodeindex.indexOf(entry.getKey()) + ";");
+            }
             for (final Node value : entry.getValue()) {
                 ps.println("  node" + nodeindex.indexOf(value) + ";");
             }
@@ -202,7 +204,7 @@ public final class DOTExporter {
 
     private static void printNode(final String shape, final int index, final Node node, final PrintStream ps, final String labelSuffex) {
         ps.print("label=\"#" + index + " " + node.debugDescription() + labelSuffex + "\"");
-        if (node instanceof Method || node instanceof LabelNode || node instanceof Return || node instanceof ReturnValue || node instanceof Goto || node instanceof If || node instanceof Copy || node instanceof Invoke || node instanceof ClassInitialization || node instanceof MonitorEnter || node instanceof MonitorExit || node instanceof Throw || node instanceof ArrayStore || node instanceof ArrayLoad || node instanceof CheckCast || node instanceof PutField || node instanceof PutStatic || node instanceof MergeNode || node instanceof Projection || node instanceof LoopHeaderNode || node instanceof TableSwitch || node instanceof LookupSwitch || node instanceof ExceptionGuard || node instanceof Catch) {
+        if (node instanceof Method || node instanceof LabelNode || node instanceof Return || node instanceof ReturnValue || node instanceof Goto || node instanceof If || node instanceof Copy || node instanceof Invoke || node instanceof ClassInitialization || node instanceof MonitorEnter || node instanceof MonitorExit || node instanceof Throw || node instanceof ArrayStore || node instanceof ArrayLoad || node instanceof CheckCast || node instanceof PutField || node instanceof PutStatic || node instanceof MergeNode || node instanceof Projection || node instanceof LoopHeaderNode || node instanceof TableSwitch || node instanceof LookupSwitch || node instanceof ExceptionGuard || node instanceof Catch || node instanceof MultiCatch) {
             ps.print(",shape=" + shape +", fillcolor=lightgrey, style=filled");
         } else if (node.isConstant()) {
             ps.print(",shape=octagon, fillcolor=lightgreen, style=filled");
@@ -213,7 +215,7 @@ public final class DOTExporter {
 
     private static void printNodeWithLabel(final String label, final String shape, final Node node, final PrintStream ps) {
         ps.print("label=" + label);
-        if (node instanceof Method || node instanceof LabelNode || node instanceof Return || node instanceof ReturnValue || node instanceof Goto || node instanceof If || node instanceof Copy || node instanceof Invoke || node instanceof ClassInitialization || node instanceof MonitorEnter || node instanceof MonitorExit || node instanceof Throw || node instanceof ArrayStore || node instanceof ArrayLoad || node instanceof CheckCast || node instanceof PutField || node instanceof PutStatic || node instanceof MergeNode || node instanceof Projection || node instanceof LoopHeaderNode || node instanceof TableSwitch || node instanceof LookupSwitch || node instanceof ExceptionGuard || node instanceof Catch) {
+        if (node instanceof Method || node instanceof LabelNode || node instanceof Return || node instanceof ReturnValue || node instanceof Goto || node instanceof If || node instanceof Copy || node instanceof Invoke || node instanceof ClassInitialization || node instanceof MonitorEnter || node instanceof MonitorExit || node instanceof Throw || node instanceof ArrayStore || node instanceof ArrayLoad || node instanceof CheckCast || node instanceof PutField || node instanceof PutStatic || node instanceof MergeNode || node instanceof Projection || node instanceof LoopHeaderNode || node instanceof TableSwitch || node instanceof LookupSwitch || node instanceof ExceptionGuard || node instanceof Catch || node instanceof MultiCatch) {
             ps.print(",shape=" + shape +", fillcolor=lightgrey, style=filled");
         } else if (node.isConstant()) {
             ps.print(",shape=octagon, fillcolor=lightgreen, style=filled");

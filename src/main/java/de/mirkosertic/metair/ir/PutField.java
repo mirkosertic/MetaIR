@@ -1,6 +1,7 @@
 package de.mirkosertic.metair.ir;
 
 import java.lang.constant.ClassDesc;
+import java.lang.constant.ConstantDescs;
 
 public class PutField extends Node {
 
@@ -13,8 +14,15 @@ public class PutField extends Node {
         if (target.isPrimitive() || target.isArray()) {
             illegalArgument("Cannot put field " + fieldName + " on non object target " + TypeUtils.toString(target.type));
         }
-        if (fieldType.isPrimitive() && !value.type.equals(fieldType)) {
-            illegalArgument("Cannot put value of type " + TypeUtils.toString(value.type) + " in field " + fieldName + " of type " + TypeUtils.toString(fieldType));
+
+        if (fieldType.equals(ConstantDescs.CD_boolean)) {
+            if (!value.type.equals(ConstantDescs.CD_boolean) && !value.type.equals(ConstantDescs.CD_int)) {
+                illegalArgument("Cannot put value of type " + TypeUtils.toString(value.type) + " in field " + fieldName + " of type " + TypeUtils.toString(fieldType));
+            }
+        } else {
+            if (fieldType.isPrimitive() && !value.type.equals(fieldType)) {
+                illegalArgument("Cannot put value of type " + TypeUtils.toString(value.type) + " in field " + fieldName + " of type " + TypeUtils.toString(fieldType));
+            }
         }
 
         this.owner = owner;

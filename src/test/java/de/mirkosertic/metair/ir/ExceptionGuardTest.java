@@ -12,8 +12,9 @@ public class ExceptionGuardTest {
 
     @Test
     public void testUsage() {
-        final ExceptionGuard guard = new ExceptionGuard(List.of(new ExceptionGuard.Catches(Optional.of(ClassDesc.of(IllegalArgumentException.class.getName()))), new ExceptionGuard.Catches(Optional.empty())));
+        final ExceptionGuard guard = new ExceptionGuard("Guard0", List.of(new ExceptionGuard.Catches(Optional.of(ClassDesc.of(IllegalArgumentException.class.getName()))), new ExceptionGuard.Catches(Optional.empty())));
 
+        assertThat(guard.startLabel).isEqualTo("Guard0");
         assertThat(guard.debugDescription()).isEqualTo("ExceptionGuard");
         assertThat(guard.exitNode()).isInstanceOf(ExtractControlFlowProjection.class).matches(t -> t.name().equals("exit"));
         assertThat(guard.getNamedNode("default")).isInstanceOf(ExtractControlFlowProjection.class).matches(t -> ((ExtractControlFlowProjection) t).name().equals("default"));

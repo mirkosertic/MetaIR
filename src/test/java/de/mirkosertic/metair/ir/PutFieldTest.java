@@ -30,6 +30,13 @@ public class PutFieldTest {
     }
 
     @Test
+    public void testUsage_put_int_to_boolean() {
+        final Value target = new StringConstant("str");
+        final PrimitiveInt value = new PrimitiveInt(10);
+        new PutField(ConstantDescs.CD_String, ConstantDescs.CD_boolean, "fieldname", target, value);
+    }
+
+    @Test
     public void fail_wrongtype_target_is_primitive() {
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
             new PutField(ConstantDescs.CD_String, ConstantDescs.CD_int, "fieldname", new PrimitiveInt(10), new StringConstant("hello"));
@@ -43,5 +50,13 @@ public class PutFieldTest {
             new PutField(ConstantDescs.CD_String, ConstantDescs.CD_int, "fieldname", new StringConstant("hello"), new StringConstant("hello"));
             fail("Exception expected");
         }).withMessage("Cannot put value of type String in field fieldname of type int");
+    }
+
+    @Test
+    public void fail_wrongtype_field_is_primitive_boolean() {
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+            new PutField(ConstantDescs.CD_String, ConstantDescs.CD_boolean, "fieldname", new StringConstant("hello"), new StringConstant("hello"));
+            fail("Exception expected");
+        }).withMessage("Cannot put value of type String in field fieldname of type boolean");
     }
 }

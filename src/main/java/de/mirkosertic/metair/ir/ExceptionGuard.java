@@ -9,11 +9,13 @@ public class ExceptionGuard extends TupleNode {
     public record Catches(Optional<ClassDesc> catchType) {
     }
 
+    final String startLabel;
     final List<Catches> catches;
 
-    ExceptionGuard(final List<Catches> catches) {
+    ExceptionGuard(final String startLabel, final List<Catches> catches) {
 
         this.catches = catches;
+        this.startLabel = startLabel;
 
         for (int i = 0; i < catches.size(); i++) {
             final Catches catchEntry = catches.get(i);

@@ -1,5 +1,6 @@
 package de.mirkosertic.metair.ir;
 
+import java.lang.classfile.Attributes;
 import java.lang.classfile.CodeElement;
 import java.lang.classfile.CodeModel;
 import java.lang.classfile.Instruction;
@@ -9,6 +10,8 @@ import java.lang.classfile.Opcode;
 import java.lang.classfile.PseudoInstruction;
 import java.lang.classfile.TypeKind;
 import java.lang.classfile.attribute.CodeAttribute;
+import java.lang.classfile.attribute.StackMapFrameInfo;
+import java.lang.classfile.attribute.StackMapTableAttribute;
 import java.lang.classfile.instruction.ArrayLoadInstruction;
 import java.lang.classfile.instruction.ArrayStoreInstruction;
 import java.lang.classfile.instruction.BranchInstruction;
@@ -50,6 +53,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.reflect.AccessFlag;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
@@ -71,6 +75,7 @@ public class MethodAnalyzer {
     private Frame[] frames;
     private List<Frame> codeModelTopologicalOrder;
     private MethodTypeDesc methodTypeDesc;
+    private StackMapTableAttribute stackMapTableAttribute;
 
     MethodAnalyzer() {
         this.ir = new Method();
@@ -91,6 +96,9 @@ public class MethodAnalyzer {
         if (optCode.isPresent()) {
             try {
                 final CodeModel code = optCode.get();
+
+                stackMapTableAttribute = code.findAttribute(Attributes.stackMapTable()).orElse(null);
+
                 step1AnalyzeCFG(code);
                 step2ComputeTopologicalOrder();
                 step3FollowCFGAndInterpret(code);
@@ -182,6 +190,7 @@ public class MethodAnalyzer {
                 if (current instanceof final LabelTarget lt) {
                     final Label label = lt.label();
                     // Search for exception handlers
+                    int startIndex = 0;
                     for (int exceptionIndex = 0; exceptionIndex < code.exceptionHandlers().size(); exceptionIndex++) {
                         final ExceptionCatch c = code.exceptionHandlers().get(exceptionIndex);
 
@@ -198,7 +207,8 @@ public class MethodAnalyzer {
                                         frame = new Frame(newIndex, codeElements.get(newIndex));
                                         frames[newIndex] = frame;
                                     }
-                                    frame.predecessors.add(new CFGEdge(i, new NamedProjection("catch:" + exceptionIndex + ":" + (c.catchType().isPresent() ? c.catchType().get().asSymbol().descriptorString() : "any")), FlowType.FORWARD));
+                                    frame.predecessors.add(new CFGEdge(i, new NamedProjection("catch:" + startIndex + ":" + (c.catchType().isPresent() ? c.catchType().get().asSymbol().descriptorString() : "any")), FlowType.FORWARD));
+                                    startIndex++;
                                 } else {
                                     illegalState("Exception handler target " + target + " is not mapped to an index");
                                 }
@@ -440,6 +450,81 @@ public class MethodAnalyzer {
 
     }
 
+    static ConstantDesc meetTypesOf(final Collection<Value> values) {
+        final List<Value> l = values.stream().toList();
+        final Value first = l.getFirst();
+        if (first.isPrimitive()) {
+            // Make sure all values are of the same type
+            for (int i = 1; i < l.size(); i++) {
+                if (!l.get(i).type.equals(first.type)) {
+                    // Meet not possible
+                    return null;
+                }
+            }
+        } else {
+            // TODO: How can object values be merged?
+        }
+        return first.type;
+    }
+
+    static void mergeFrames(final Frame targetFrame, final MultiInputNode targetNode, final List<Frame> sourceFrames, final Status targetStatus, final int numLocals, final boolean hasBackEdges) {
+        // Se search through all frames and try to join where values match
+        for (int i = 0; i < numLocals; i++) {
+            int foundInFrames = 0;
+            final Set<Value> values = new HashSet<>();
+            for (final Frame frame : sourceFrames) {
+                final Value v = frame.out.locals[i];
+                if (v != null) {
+                    foundInFrames++;
+                    values.add(v);
+                }
+            }
+            // Ok, case 1: the local is not set in all frames
+            if (foundInFrames != sourceFrames.size()) {
+                // We cannot handle this
+                continue;
+            }
+
+            // Case 2: we found multiple values or a back edge. In this case we have to create PHI values
+            if (values.size() > 1 || hasBackEdges) {
+
+                // Make sure all values are of the same type
+                final ConstantDesc type = meetTypesOf(values);
+
+                // We perform this only if the meet is possible
+                if (type != null) {
+                    final PHI phi = targetNode.definePHI(type);
+                    for (final Frame frame : sourceFrames) {
+                        final Value v = frame.out.locals[i];
+                        if (v != null) {
+                            phi.use(v, new PHIUse(FlowType.FORWARD, frame.out.control));
+                        }
+                    }
+
+                    targetStatus.setLocal(i, phi);
+
+                    // We need to skip a slot in case of category2 types
+                    if (TypeUtils.isCategory2(type)) {
+                        i++;
+                    }
+                }
+
+                continue;
+            }
+
+            // Case 3: we found exactly one value which is present in all frames
+            if (values.size() == 1) {
+                final Value value = values.iterator().next();
+                targetStatus.setLocal(i, value);
+
+                // We need to skip a slot in case of category2 types
+                if (TypeUtils.isCategory2(value.type)) {
+                    i++;
+                }
+            }
+        }
+    }
+
     private void step3FollowCFGAndInterpret(final CodeModel code) {
 
         final CodeAttribute cm = (CodeAttribute) code;
@@ -499,9 +584,7 @@ public class MethodAnalyzer {
             posToFrame.put(frame.elementIndex, frame);
         }
 
-        for (int i = 0; i < topologicalOrder.size(); i++) {
-            final Frame frame = topologicalOrder.get(i);
-
+        for (final Frame frame : topologicalOrder) {
             boolean isExceptionHandler = false;
             final CodeElement frameElement = cm.elementList().get(frame.elementIndex);
             if (frameElement instanceof final LabelTarget labelTarget) {
@@ -525,7 +608,6 @@ public class MethodAnalyzer {
                         illegalState("No outgoing status for " + frame.elementIndex);
                     }
                     incomingStatus = outgoing.out.copy();
-                    // TODO: In case of exception handlers we do not have a guaranteed stack, but only the provided exception
 
                     if (incomingStatus.control instanceof TupleNode) {
                         incomingStatus.control = ((TupleNode) incomingStatus.control).getNamedNode(edge.projection().name());
@@ -550,149 +632,138 @@ public class MethodAnalyzer {
                 } else {
 
                     if (isExceptionHandler) {
-                        illegalState("Exception handler with multiple predecessors not supported yet");
-                    }
 
-                    // Eager PHI creation and memory-edge merging
-                    final List<Frame> incomingFrames = new ArrayList<>();
-                    final List<Node> incomingMemories = new ArrayList<>();
-                    boolean hasBackEdges = false;
-                    for (final CFGEdge edge : frame.predecessors) {
-                        // We only respect forward control flows, as phi data propagation for backward
-                        // edges is handled during node parsing of the source instruction, as
-                        // the outgoing status for this node is not computed yet.
-                        if (edge.flowType == FlowType.FORWARD) {
-                            final Frame incomingFrame = posToFrame.get(edge.fromIndex);
-                            if (incomingFrame.out == null) {
-                                illegalState("No outgoing status for " + incomingFrame.elementIndex);
+                        final MultiCatch mergeNode = new MultiCatch("MultiCatch" + frame.elementIndex);
+
+                        Frame guardSource = null;
+
+                        for (final CFGEdge edge : frame.predecessors) {
+                            if (edge.flowType == FlowType.BACKWARD) {
+                                illegalState("Backward control flow illegal for exception handler");
                             }
-                            final Node memory = incomingFrame.out.memory;
-                            if (!incomingMemories.contains(memory)) {
-                                incomingMemories.add(memory);
+                            final Frame source = posToFrame.get(edge.fromIndex);
+                            if (guardSource == null) {
+                                guardSource = source;
                             }
-                            incomingFrames.add(posToFrame.get(edge.fromIndex));
-                        } else {
-                            hasBackEdges = true;
-                        }
-                    }
-
-                    final MultiInputNode target;
-                    if (hasBackEdges) {
-                        target = new LoopHeaderNode("Loop" + frame.elementIndex);
-                    } else {
-                        target = new MergeNode("Merge" + frame.elementIndex);
-                    }
-
-                    for (final CFGEdge edge : frame.predecessors) {
-                        // We only respect forward control flows, as phi data propagation for backward
-                        // edges is handled during node parsing of the source instruction, as
-                        // the outgoing status for this node is not computed yet.
-                        if (edge.flowType == FlowType.FORWARD) {
-                            final Frame incomingFrame = posToFrame.get(edge.fromIndex);
-                            incomingFrame.out.control.controlFlowsTo(target, FlowType.FORWARD);
-                        }
-                    }
-
-                    incomingStatus = new Status(cm.maxLocals());
-
-                    // TODO: In case of exception handlers we do not have a guaranteed stack, but only the provided exception
-
-                    int incomingStackSize = -1;
-                    int incomingExceptionGuards = -1;
-                    for (final Frame fr : incomingFrames) {
-                        if (incomingStackSize == -1) {
-                            incomingStackSize = fr.out.stack.size();
-                        } else if (incomingStackSize != fr.out.stack.size()) {
-                            illegalState("Stack size mismatch for frame at " + frame.elementIndex + " expected " + incomingStackSize + " but got " + fr.out.stack.size());
-                        }
-
-                        // TODO: Fix me
-                        /*if (incomingExceptionGuards == -1) {
-                            incomingExceptionGuards = fr.out.activeExceptionGuards.size();
-                        } else if (incomingExceptionGuards != fr.out.activeExceptionGuards.size()) {
-                            illegalState("Active exception guards mismatch for frame at " + frame.elementIndex + " expected " + incomingExceptionGuards + " but got " + fr.out.activeExceptionGuards.size());
-                        }*/
-                    }
-
-                    if (incomingExceptionGuards != -1) {
-                        // We assume all guards are the same here, no further validation!
-                        incomingStatus.activeExceptionGuards.addAll(incomingFrames.getFirst().out.activeExceptionGuards);
-                    }
-
-                    if (incomingStackSize > 0) {
-                        // Check of we need to do something
-                        for (int stackPos = 0; stackPos < incomingStackSize; stackPos++) {
-                            final List<Value> allValues = new ArrayList<>();
-                            for (final Frame fr : incomingFrames) {
-                                final Value sv = fr.out.stack.get(stackPos);
-                                if (sv != null) {
-                                    if (!allValues.contains(sv)) {
-                                        allValues.add(sv);
-                                    }
+                            if (source.entryPoint instanceof final ExceptionGuard guard) {
+                                final Node handler = guard.getNamedNode(edge.projection.name());
+                                if (!(handler instanceof Catch)) {
+                                    illegalState("Catch handler expected, not " + handler + " for " + edge.projection() + " in " + frame.elementIndex);
                                 }
+                                handler.controlFlowsTo(mergeNode, FlowType.FORWARD);
+                            } else {
+                                illegalState("Exception handler without an exception guard expected, not " + source.entryPoint);
                             }
-                            if (allValues.size() > 1 || hasBackEdges) {
-                                final Value source = allValues.getFirst();
-                                final PHI p = target.definePHI(source.type);
+                        }
 
+                        if (guardSource == null) {
+                            illegalState("No guard source for exception handlers");
+                        }
+
+                        incomingStatus = guardSource.out.copy();
+                        incomingStatus.control = mergeNode;
+                        incomingStatus.stack.clear();
+                        incomingStatus.stack.push(mergeNode.caughtException());
+
+                        frame.in = incomingStatus;
+                    } else {
+                        // Eager PHI creation and memory-edge merging
+                        final List<Frame> incomingFrames = new ArrayList<>();
+                        final List<Node> incomingMemories = new ArrayList<>();
+                        boolean hasBackEdges = false;
+                        for (final CFGEdge edge : frame.predecessors) {
+                            // We only respect forward control flows, as phi data propagation for backward
+                            // edges is handled during node parsing of the source instruction, as
+                            // the outgoing status for this node is not computed yet.
+                            if (edge.flowType == FlowType.FORWARD) {
+                                final Frame incomingFrame = posToFrame.get(edge.fromIndex);
+                                if (incomingFrame.out == null) {
+                                    illegalState("No outgoing status for " + incomingFrame.elementIndex);
+                                }
+                                final Node memory = incomingFrame.out.memory;
+                                if (!incomingMemories.contains(memory)) {
+                                    incomingMemories.add(memory);
+                                }
+                                incomingFrames.add(posToFrame.get(edge.fromIndex));
+                            } else {
+                                hasBackEdges = true;
+                            }
+                        }
+
+                        final MultiInputNode target;
+                        if (hasBackEdges) {
+                            target = new LoopHeaderNode("Loop" + frame.elementIndex);
+                        } else {
+                            target = new MergeNode("Merge" + frame.elementIndex);
+                        }
+
+                        for (final CFGEdge edge : frame.predecessors) {
+                            // We only respect forward control flows, as phi data propagation for backward
+                            // edges is handled during node parsing of the source instruction, as
+                            // the outgoing status for this node is not computed yet.
+                            if (edge.flowType == FlowType.FORWARD) {
+                                final Frame incomingFrame = posToFrame.get(edge.fromIndex);
+                                incomingFrame.out.control.controlFlowsTo(target, FlowType.FORWARD);
+                            }
+                        }
+
+                        incomingStatus = new Status(cm.maxLocals());
+
+                        // TODO: In case of exception handlers we do not have a guaranteed stack, but only the provided exception
+
+                        int incomingStackSize = -1;
+                        for (final Frame fr : incomingFrames) {
+                            if (incomingStackSize == -1) {
+                                incomingStackSize = fr.out.stack.size();
+                            } else if (incomingStackSize != fr.out.stack.size()) {
+                                illegalState("Stack size mismatch for frame at " + frame.elementIndex + " expected " + incomingStackSize + " but got " + fr.out.stack.size());
+                            }
+                        }
+
+                        if (incomingStackSize > 0) {
+                            // Check of we need to do something
+                            for (int stackPos = 0; stackPos < incomingStackSize; stackPos++) {
+                                final List<Value> allValues = new ArrayList<>();
                                 for (final Frame fr : incomingFrames) {
                                     final Value sv = fr.out.stack.get(stackPos);
-                                    p.use(sv, new PHIUse(FlowType.FORWARD, fr.out.control));
-                                }
-
-                                incomingStatus.stack.push(p);
-                          } else {
-                                incomingStatus.stack.push(allValues.getFirst());
-                            }
-                        }
-                    }
-
-                    for (int mergeLocalIndex = 0; mergeLocalIndex < cm.maxLocals(); mergeLocalIndex++) {
-                        final Value source = incomingFrames.getFirst().out.getLocal(mergeLocalIndex);
-                        if (source != null) {
-                            final List<Value> allValues = new ArrayList<>();
-                            allValues.add(source);
-                            for (int incomingIndex = 1; incomingIndex < incomingFrames.size(); incomingIndex++) {
-                                final Value otherValue = incomingFrames.get(incomingIndex).out.getLocal(mergeLocalIndex);
-                                if (otherValue != null && !allValues.contains(otherValue)) {
-                                    allValues.add(otherValue);
-                                }
-                            }
-                            if (allValues.size() > 1 || hasBackEdges) {
-                                final PHI p = target.definePHI(source.type);
-                                for (final Frame incomingFrame : incomingFrames) {
-                                    final Value sv = incomingFrame.out.getLocal(mergeLocalIndex);
-                                    if (sv == null) {
-                                        illegalState("No source value for local " + i + " from " + incomingFrame.elementIndex);
+                                    if (sv != null) {
+                                        if (!allValues.contains(sv)) {
+                                            allValues.add(sv);
+                                        }
                                     }
-                                    p.use(sv, new PHIUse(FlowType.FORWARD, incomingFrame.out.control));
                                 }
-                                incomingStatus.setLocal(mergeLocalIndex, p);
-                            } else {
-                                incomingStatus.setLocal(mergeLocalIndex, allValues.getFirst());
+                                if (allValues.size() > 1 || hasBackEdges) {
+                                    final Value source = allValues.getFirst();
+                                    final PHI p = target.definePHI(source.type);
+
+                                    for (final Frame fr : incomingFrames) {
+                                        final Value sv = fr.out.stack.get(stackPos);
+                                        p.use(sv, new PHIUse(FlowType.FORWARD, fr.out.control));
+                                    }
+
+                                    incomingStatus.stack.push(p);
+                                } else {
+                                    incomingStatus.stack.push(allValues.getFirst());
+                                }
                             }
                         }
-                    }
 
-                    if (frame.codeElement instanceof final LabelTarget lt) {
-                        final List<ExceptionCatch> catchesEndingHere = code.exceptionHandlers().stream().filter(t -> t.tryEnd().equals(lt.label())).toList();
-                        if (!catchesEndingHere.isEmpty()) {
-                            illegalState("Merge at end of exception handler not supported yet");
+                        // Merge local variables
+                        mergeFrames(frame, target, incomingFrames, incomingStatus, cm.maxLocals(), hasBackEdges);
+
+                        if (incomingMemories.size() == 1) {
+                            incomingStatus.memory = incomingMemories.getFirst();
+                        } else {
+                            for (final Node memory : incomingMemories) {
+                                memory.memoryFlowsTo(target);
+                            }
+                            incomingStatus.memory = target;
                         }
-                    }
+                        incomingStatus.control = target;
 
-                    if (incomingMemories.size() == 1) {
-                        incomingStatus.memory = incomingMemories.getFirst();
-                    } else {
-                        for (final Node memory : incomingMemories) {
-                            memory.memoryFlowsTo(target);
-                        }
-                        incomingStatus.memory = target;
+                        frame.in = incomingStatus;
+                        frame.entryPoint = target;
                     }
-                    incomingStatus.control = target;
-
-                    frame.in = incomingStatus;
-                    frame.entryPoint = target;
                 }
             }
 
@@ -718,11 +789,9 @@ public class MethodAnalyzer {
             switch (psi) {
                 case final LabelTarget labelTarget -> visitLabelTarget(codeModel, labelTarget, frame);
                 case final LineNumber lineNumber -> visitLineNumberNode(lineNumber, frame);
-                case final LocalVariable localVariable ->
-                    // Maybe we can use this for debugging?
-                        frame.copyIncomingToOutgoing();
-                case final LocalVariableType localVariableType -> frame.copyIncomingToOutgoing();
-                case final CharacterRange characterRange -> frame.copyIncomingToOutgoing();
+                case final LocalVariable localVariable -> visitLocalVariable(localVariable, frame);
+                case final LocalVariableType localVariableType -> visitLocalVariableType(localVariableType, frame);
+                case final CharacterRange characterRange -> visitCharacterRange(characterRange, frame);
                 case final ExceptionCatch exceptionCatch -> visitExceptionCatch(exceptionCatch, frame);
                 default -> throw new IllegalArgumentException("Not implemented yet : " + psi);
             }
@@ -774,6 +843,18 @@ public class MethodAnalyzer {
         }
     }
 
+    private void visitLocalVariable(final LocalVariable localVariable, final Frame frame) {
+        frame.copyIncomingToOutgoing();
+    }
+
+    private void visitLocalVariableType(final LocalVariableType localVariableType, final Frame frame) {
+        frame.copyIncomingToOutgoing();
+    }
+
+    private void visitCharacterRange(final CharacterRange localVariableType, final Frame frame) {
+        frame.copyIncomingToOutgoing();
+    }
+
     protected void visitLookupSwitchInstruction(final List<SwitchCase> switchCases, final String defaultLabel, final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, 1);
@@ -808,10 +889,36 @@ public class MethodAnalyzer {
         outgoing.control = outgoing.control.controlFlowsTo(node, FlowType.FORWARD);
     }
 
+    private List<ExceptionGuard> exceptionGuardsFromHere(final Node node) {
+        final List<ExceptionGuard> result = new ArrayList<>();
+        searchExceptionGuards(node, result);
+        return result;
+    }
+
+    private void searchExceptionGuards(final Node node, final List<ExceptionGuard> result) {
+        if (node instanceof final ExceptionGuard guard) {
+            if (!result.contains(guard)) {
+                result.add(guard);
+            }
+        }
+        for (final Node.UseEdge edge : node.uses) {
+            if (edge.use() instanceof final ControlFlowUse cfu) {
+                if (cfu.type == FlowType.FORWARD) {
+                    searchExceptionGuards(edge.node(), result);
+                }
+            }
+        }
+    }
+
     @Testbacklog
     protected void visitLabelTarget(final CodeModel codeModel, final LabelTarget node, final Frame frame) {
 
         final Label label = node.label();
+
+        if (stackMapTableAttribute != null) {
+            frame.verificationInfos = stackMapTableAttribute.entries().stream().filter(t -> t.target().equals(label)).toList();
+        }
+
         final List<ExceptionCatch> catchesFromHere = codeModel.exceptionHandlers().stream().filter(t -> t.tryStart().equals(label)).toList();
         final Map<Label, List<ExceptionCatch>> catchesEndingHere = codeModel.exceptionHandlers().stream().filter(t -> t.tryEnd().equals(label)).collect(Collectors.groupingBy(ExceptionCatch::tryStart));
 
@@ -823,8 +930,23 @@ public class MethodAnalyzer {
                 illegalState("Multiple TryCatch ending at the same label not implemented yet");
             }
             final Status outgoing = frame.copyIncomingToOutgoing();
-            // TODO: Find the corresponding exception guard by walking back the control flow graph
-            final ExceptionGuard activeGuard = outgoing.popExceptionGuard();
+
+            final List<ExceptionGuard> guardsFromHere = exceptionGuardsFromHere(outgoing.control);
+            if (guardsFromHere.isEmpty()) {
+                illegalState("No exception guard found for " + outgoing.control);
+            }
+            final String searchLabel = "Guard_" + labelToIndex.get(catchesEndingHere.keySet().iterator().next());
+            // TODO: Find the correct one!
+            ExceptionGuard activeGuard = null;
+            for (final ExceptionGuard g : guardsFromHere) {
+                if (g.startLabel.equals(searchLabel)) {
+                    activeGuard = g;
+                    break;
+                }
+            }
+            if (activeGuard == null) {
+                illegalState("No active exception guard found for " + outgoing.control + " with label " + searchLabel);
+            }
 
             final Node n = new MergeNode("EndOfGuardedBlock" + frame.elementIndex);
             outgoing.control.controlFlowsTo(n, FlowType.FORWARD);
@@ -846,14 +968,13 @@ public class MethodAnalyzer {
             }
         } else {
             final Status outgoing = frame.copyIncomingToOutgoing();
-            final ExceptionGuard n = new ExceptionGuard(catchesFromHere.stream().map(t -> {
+            final ExceptionGuard n = new ExceptionGuard("Guard_" + frame.elementIndex, catchesFromHere.stream().map(t -> {
                 if (t.catchType().isPresent()) {
                     return new ExceptionGuard.Catches(Optional.of(t.catchType().get().asSymbol()));
                 }
                 return new ExceptionGuard.Catches(Optional.empty());
             }).toList());
 
-            outgoing.registerExceptionGuard(n);
             outgoing.control = outgoing.control.controlFlowsTo(n, FlowType.FORWARD);
 
             frame.entryPoint = n;
@@ -1600,13 +1721,16 @@ public class MethodAnalyzer {
                         target.use(v, new PHIUse(FlowType.BACKWARD, jumpSource));
                     }
                 }
+                if (v != null && TypeUtils.isCategory2(v.type)) {
+                    i++;
+                }
             }
 
             if (!outgoing.stack.isEmpty()) {
                 illegalState("Don't know how to handle a back edge with a non empty stack!");
             }
 
-            outgoing.control = outgoing.control.controlFlowsTo(targetFrame.entryPoint, FlowType.BACKWARD);
+            outgoing.control.controlFlowsTo(targetFrame.entryPoint, FlowType.BACKWARD);
         }
     }
 
@@ -2193,6 +2317,7 @@ public class MethodAnalyzer {
         protected Node entryPoint;
         protected Status in;
         protected Status out;
+        protected List<StackMapFrameInfo> verificationInfos;
 
         public Frame(final int elementIndex, final CodeElement codeElement) {
             this.predecessors = new ArrayList<>();
@@ -2216,13 +2341,11 @@ public class MethodAnalyzer {
         protected final Stack<Value> stack;
         protected Node control;
         protected Node memory;
-        protected final Stack<ExceptionGuard> activeExceptionGuards;
 
         protected Status(final int maxLocals) {
             this.locals = new Value[maxLocals];
             this.stack = new Stack<>();
             this.lineNumber = UNDEFINED_LINE_NUMBER;
-            this.activeExceptionGuards = new Stack<>();
         }
 
         protected int numberOfLocals() {
@@ -2254,7 +2377,6 @@ public class MethodAnalyzer {
             result.lineNumber = lineNumber;
             System.arraycopy(locals, 0, result.locals, 0, locals.length);
             result.stack.addAll(stack);
-            result.activeExceptionGuards.addAll(activeExceptionGuards);
             result.control = control;
             result.memory = memory;
             return result;
@@ -2270,17 +2392,6 @@ public class MethodAnalyzer {
 
         protected void push(final Value value) {
             stack.push(value);
-        }
-
-        protected void registerExceptionGuard(final ExceptionGuard guard) {
-            activeExceptionGuards.add(guard);
-        }
-
-        protected ExceptionGuard popExceptionGuard() {
-            if (activeExceptionGuards.isEmpty()) {
-                throw new IllegalStateException("No exception guard to pop!");
-            }
-            return activeExceptionGuards.pop();
         }
     }
 }
