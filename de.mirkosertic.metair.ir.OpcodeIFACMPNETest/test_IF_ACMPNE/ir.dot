@@ -1,6 +1,12 @@
 digraph {
  ordering="in";
  node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#0 Method</td></tr><tr><td port="prj1" bgcolor="yellow">this : Test</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
+ node12[label="#12 ReturnValue : int",shape=box, fillcolor=lightgrey, style=filled];
+ node11 -> node12[headlabel="*0", labeldistance=2];
+ node8 -> node12[labeldistance=2, color=red, fontcolor=red];
+ node0 -> node12[labeldistance=2, color=green, constraint=false];
+ node8[label="#8 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
+ node5:prj6 -> node8[labeldistance=2, color=red, fontcolor=red];
  node5[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="2">#5 If</td></tr><tr><td port="prj7" bgcolor="yellow">false</td><td port="prj6" bgcolor="yellow">true</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
  node4 -> node5[headlabel="*0", labeldistance=2];
  node0 -> node5[labeldistance=2, color=red, fontcolor=red];
@@ -17,12 +23,6 @@ digraph {
  node9 -> node10[headlabel="*0", labeldistance=2];
  node5:prj7 -> node10[labeldistance=2, color=red, fontcolor=red];
  node0 -> node10[labeldistance=2, color=green, constraint=false];
- node8[label="#8 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
- node5:prj6 -> node8[labeldistance=2, color=red, fontcolor=red];
- node12[label="#12 ReturnValue : int",shape=box, fillcolor=lightgrey, style=filled];
- node11 -> node12[headlabel="*0", labeldistance=2];
- node8 -> node12[labeldistance=2, color=red, fontcolor=red];
- node0 -> node12[labeldistance=2, color=green, constraint=false];
  node11[label="#11 int 0",shape=octagon, fillcolor=lightgreen, style=filled];
  node8 -> node11[style=dotted];
  subgraph cluster_0 {
@@ -38,7 +38,6 @@ digraph {
  }
  subgraph cluster_2 {
   color=lightgray;
-  node7;
   node9;
  }
  subgraph cluster_000 {

@@ -7,10 +7,10 @@ digraph debugoutput {
  node2[label="#2 LookupSwitch Order : 2",shape=box, fillcolor=lightgrey, style=filled];
  node2 -> node1[dir="forward" color="green" penwidth="2"];
  node1 -> node2[labeldistance=2, color=red, fontcolor=red];
- node3[label="#3 default Order : 9",shape=box, fillcolor=lightgrey, style=filled];
+ node3[label="#3 case1 Order : 9",shape=box, fillcolor=lightgrey, style=filled];
  node3 -> node2[dir="forward" color="green" penwidth="2"];
  node2 -> node3[labeldistance=2, color=red, fontcolor=red];
- node4[label="#4 case1 Order : 6",shape=box, fillcolor=lightgrey, style=filled];
+ node4[label="#4 default Order : 6",shape=box, fillcolor=lightgrey, style=filled];
  node4 -> node2[dir="forward" color="green" penwidth="2"];
  node2 -> node4[labeldistance=2, color=red, fontcolor=red];
  node5[label="#5 case0 Order : 3",shape=box, fillcolor=lightgrey, style=filled];

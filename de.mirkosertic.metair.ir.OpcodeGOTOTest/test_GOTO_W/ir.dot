@@ -1,14 +1,14 @@
 digraph {
  ordering="in";
  node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#0 Method</td></tr><tr><td port="prj1" bgcolor="yellow">this : Test</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
- node3[label="#3 Φ Test",shape=octagon, fillcolor=orange, style=filled];
- node2 -> node3[style=dotted];
- node0:prj1 -> node3[headlabel="if #0", labeldistance=2, color=blue, constraint=false];
  node2[label="#2 LoopHeader : Loop0",shape=box, fillcolor=lightgrey, style=filled];
  node0 -> node2[labeldistance=2, color=red, fontcolor=red];
  node4 -> node2[labeldistance=2, color=red, fontcolor=red, style=dashed];
  node4[label="#4 Goto",shape=box, fillcolor=lightgrey, style=filled];
  node2 -> node4[labeldistance=2, color=red, fontcolor=red];
+ node3[label="#3 Φ Test",shape=octagon, fillcolor=orange, style=filled];
+ node2 -> node3[style=dotted];
+ node0:prj1 -> node3[headlabel="if #0", labeldistance=2, color=blue, constraint=false];
  subgraph cluster_0 {
   color=lightgray;
   node2;
