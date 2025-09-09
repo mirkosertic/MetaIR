@@ -1,0 +1,35 @@
+
+  - method name: test
+    flags: [PUBLIC]
+    method type: ()V
+    attributes: [Code]
+    code: 
+        max stack: 1
+        max locals: 3
+        attributes: [StackMapTable]
+        stack map frames: 
+            5: {locals: [de/mirkosertic/test/Test], stack: [java/lang/IllegalArgumentException]}
+            11: {locals: [de/mirkosertic/test/Test], stack: [java/lang/RuntimeException]}
+            12: {locals: [de/mirkosertic/test/Test], stack: []}
+        //stack map frame @0: {locals: [de/mirkosertic/test/Test], stack: []}
+        //try block 1 start: {start: 0, end: 2, handler: 5, catch type: java/lang/IllegalArgumentException}
+        0: {opcode: ICONST_3, constant value: 3}
+        1: {opcode: ISTORE_1, slot: 1}
+        //try block 1 end: {start: 0, end: 2, handler: 5, catch type: java/lang/IllegalArgumentException}
+        2: {opcode: GOTO, target: 12}
+        //stack map frame @5: {locals: [de/mirkosertic/test/Test], stack: [java/lang/IllegalArgumentException]}
+        //exception handler 1 start: {start: 0, end: 2, handler: 5, catch type: java/lang/IllegalArgumentException}
+        5: {opcode: POP}
+        //try block 2 start: {start: 6, end: 8, handler: 11, catch type: java/lang/RuntimeException}
+        6: {opcode: ICONST_2, constant value: 2}
+        7: {opcode: ISTORE_2, slot: 2}
+        //try block 2 end: {start: 6, end: 8, handler: 11, catch type: java/lang/RuntimeException}
+        8: {opcode: GOTO, target: 12}
+        //stack map frame @11: {locals: [de/mirkosertic/test/Test], stack: [java/lang/RuntimeException]}
+        //exception handler 2 start: {start: 6, end: 8, handler: 11, catch type: java/lang/RuntimeException}
+        11: {opcode: POP}
+        //stack map frame @12: {locals: [de/mirkosertic/test/Test], stack: []}
+        12: {opcode: RETURN}
+        exception handlers: 
+            handler 1: {start: 0, end: 2, handler: 5, type: java/lang/IllegalArgumentException}
+            handler 2: {start: 6, end: 8, handler: 11, type: java/lang/RuntimeException}

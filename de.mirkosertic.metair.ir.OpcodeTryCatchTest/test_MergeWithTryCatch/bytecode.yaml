@@ -1,0 +1,30 @@
+
+  - method name: test
+    flags: [PUBLIC]
+    method type: ()V
+    attributes: [Code]
+    code: 
+        max stack: 1
+        max locals: 2
+        attributes: [StackMapTable]
+        stack map frames: 
+            5: {locals: [de/mirkosertic/test/Test], stack: []}
+            10: {locals: [de/mirkosertic/test/Test], stack: [java/lang/IllegalArgumentException]}
+            11: {locals: [de/mirkosertic/test/Test], stack: []}
+        //stack map frame @0: {locals: [de/mirkosertic/test/Test], stack: []}
+        0: {opcode: ICONST_0, constant value: 0}
+        1: {opcode: IFEQ, target: 5}
+        4: {opcode: NOP}
+        //stack map frame @5: {locals: [de/mirkosertic/test/Test], stack: []}
+        //try block 1 start: {start: 5, end: 7, handler: 10, catch type: java/lang/IllegalArgumentException}
+        5: {opcode: ICONST_3, constant value: 3}
+        6: {opcode: ISTORE_1, slot: 1}
+        //try block 1 end: {start: 5, end: 7, handler: 10, catch type: java/lang/IllegalArgumentException}
+        7: {opcode: GOTO, target: 11}
+        //stack map frame @10: {locals: [de/mirkosertic/test/Test], stack: [java/lang/IllegalArgumentException]}
+        //exception handler 1 start: {start: 5, end: 7, handler: 10, catch type: java/lang/IllegalArgumentException}
+        10: {opcode: POP}
+        //stack map frame @11: {locals: [de/mirkosertic/test/Test], stack: []}
+        11: {opcode: RETURN}
+        exception handlers: 
+            handler 1: {start: 5, end: 7, handler: 10, type: java/lang/IllegalArgumentException}

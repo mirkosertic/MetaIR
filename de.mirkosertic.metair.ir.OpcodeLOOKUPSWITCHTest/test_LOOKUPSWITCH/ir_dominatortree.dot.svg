@@ -109,8 +109,8 @@
 <!-- node4 -->
 <g id="node5" class="node">
 <title>node4</title>
-<polygon fill="lightgrey" stroke="black" points="504,-255 343,-255 343,-219 504,-219 504,-255"/>
-<text text-anchor="middle" x="423.5" y="-233.3" font-family="Times,serif" font-size="14.00">#4 default Order : 7</text>
+<polygon fill="lightgrey" stroke="black" points="499.5,-255 347.5,-255 347.5,-219 499.5,-219 499.5,-255"/>
+<text text-anchor="middle" x="423.5" y="-233.3" font-family="Times,serif" font-size="14.00">#4 case0 Order : 7</text>
 </g>
 <!-- node3&#45;&gt;node4 -->
 <g id="edge9" class="edge">
@@ -121,8 +121,8 @@
 <!-- node5 -->
 <g id="node6" class="node">
 <title>node5</title>
-<polygon fill="lightgrey" stroke="black" points="678.5,-255 526.5,-255 526.5,-219 678.5,-219 678.5,-255"/>
-<text text-anchor="middle" x="602.5" y="-233.3" font-family="Times,serif" font-size="14.00">#5 case0 Order : 3</text>
+<polygon fill="lightgrey" stroke="black" points="683,-255 522,-255 522,-219 683,-219 683,-255"/>
+<text text-anchor="middle" x="602.5" y="-233.3" font-family="Times,serif" font-size="14.00">#5 default Order : 3</text>
 </g>
 <!-- node3&#45;&gt;node5 -->
 <g id="edge11" class="edge">
@@ -176,7 +176,7 @@
 <g id="node9" class="node">
 <title>node8</title>
 <polygon fill="lightgreen" stroke="black" points="505.61,-83.54 505.61,-98.46 446.38,-109 362.62,-109 303.39,-98.46 303.39,-83.54 362.62,-73 446.38,-73 505.61,-83.54"/>
-<text text-anchor="middle" x="404.5" y="-87.3" font-family="Times,serif" font-size="14.00">#8 int 1 Order : 9</text>
+<text text-anchor="middle" x="404.5" y="-87.3" font-family="Times,serif" font-size="14.00">#8 int 2 Order : 9</text>
 </g>
 <!-- node6&#45;&gt;node8 -->
 <g id="edge17" class="edge">
@@ -200,7 +200,7 @@
 <g id="node11" class="node">
 <title>node10</title>
 <polygon fill="lightgreen" stroke="black" points="739.27,-83.54 739.27,-98.46 676.14,-109 586.86,-109 523.73,-98.46 523.73,-83.54 586.86,-73 676.14,-73 739.27,-83.54"/>
-<text text-anchor="middle" x="631.5" y="-87.3" font-family="Times,serif" font-size="14.00">#10 int 2 Order : 5</text>
+<text text-anchor="middle" x="631.5" y="-87.3" font-family="Times,serif" font-size="14.00">#10 int 1 Order : 5</text>
 </g>
 <!-- node7&#45;&gt;node10 -->
 <g id="edge23" class="edge">

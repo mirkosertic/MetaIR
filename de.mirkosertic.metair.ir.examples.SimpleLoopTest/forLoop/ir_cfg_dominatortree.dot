@@ -11,27 +11,27 @@ digraph debugoutput {
  node3[label="#3 If Order : 3",shape=box, fillcolor=lightgrey, style=filled];
  node3 -> node2[dir="forward" color="green" penwidth="2"];
  node2 -> node3[labeldistance=2, color=red, fontcolor=red];
- node4[label="#4 false Order : 7",shape=box, fillcolor=lightgrey, style=filled];
+ node4[label="#4 true Order : 8",shape=box, fillcolor=lightgrey, style=filled];
  node4 -> node3[dir="forward" color="green" penwidth="2"];
  node3 -> node4[labeldistance=2, color=red, fontcolor=red];
- node5[label="#5 true Order : 4",shape=box, fillcolor=lightgrey, style=filled];
+ node5[label="#5 false Order : 4",shape=box, fillcolor=lightgrey, style=filled];
  node5 -> node3[dir="forward" color="green" penwidth="2"];
  node3 -> node5[labeldistance=2, color=red, fontcolor=red];
- node6[label="#6 ClassInit Order : 8",shape=box, fillcolor=lightgrey, style=filled];
+ node6[label="#6 LabelNode Order : 9",shape=box, fillcolor=lightgrey, style=filled];
  node6 -> node4[dir="forward" color="green" penwidth="2"];
  node4 -> node6[labeldistance=2, color=red, fontcolor=red];
- node7[label="#7 LabelNode Order : 5",shape=box, fillcolor=lightgrey, style=filled];
+ node7[label="#7 ClassInit Order : 5",shape=box, fillcolor=lightgrey, style=filled];
  node7 -> node5[dir="forward" color="green" penwidth="2"];
  node5 -> node7[labeldistance=2, color=red, fontcolor=red];
- node8[label="#8 Invoke static compute : (int)int Order : 9",shape=box, fillcolor=lightgrey, style=filled];
+ node8[label="#8 ReturnValue : int Order : 10",shape=box, fillcolor=lightgrey, style=filled];
  node8 -> node6[dir="forward" color="green" penwidth="2"];
  node6 -> node8[labeldistance=2, color=red, fontcolor=red];
- node9[label="#9 ReturnValue : int Order : 6",shape=box, fillcolor=lightgrey, style=filled];
+ node9[label="#9 Invoke static compute : (int)int Order : 6",shape=box, fillcolor=lightgrey, style=filled];
  node9 -> node7[dir="forward" color="green" penwidth="2"];
  node7 -> node9[labeldistance=2, color=red, fontcolor=red];
- node10[label="#10 Goto Order : 10",shape=box, fillcolor=lightgrey, style=filled];
- node10 -> node8[dir="forward" color="green" penwidth="2"];
- node8 -> node10[labeldistance=2, color=red, fontcolor=red];
+ node10[label="#10 Goto Order : 7",shape=box, fillcolor=lightgrey, style=filled];
+ node10 -> node9[dir="forward" color="green" penwidth="2"];
+ node9 -> node10[labeldistance=2, color=red, fontcolor=red];
  subgraph cluster_000 {
   label = "Legend";
   node [shape=point]

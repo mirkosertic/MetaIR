@@ -7,7 +7,7 @@ digraph debugoutput {
  node2[label="#2 this : Test Order : 1",shape=box, fillcolor=lightgrey, style=filled];
  node2 -> node0[dir="forward" color="green" penwidth="2"];
  node0 -> node2[headlabel="*0", labeldistance=2];
- node3[label="#3 catch : IllegalArgumentException Order : 8",shape=box, fillcolor=lightgrey, style=filled];
+ node3[label="#3 catch : 0 : IllegalArgumentException Order : 8",shape=box, fillcolor=lightgrey, style=filled];
  node3 -> node1[dir="forward" color="green" penwidth="2"];
  node1 -> node3[labeldistance=2, color=red, fontcolor=red];
  node4[label="#4 Catch : IllegalArgumentException Order : 9",shape=box, fillcolor=lightgrey, style=filled];

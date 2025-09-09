@@ -16,12 +16,6 @@ digraph {
  node6[label="#6 New",shape=octagon, fillcolor=orange, style=filled];
  node4 -> node6[headlabel="*0", labeldistance=2];
  node4 -> node6[labeldistance=2, color=green, constraint=false];
- node17[label="#17 GetField : array_field : int[]",shape=octagon, fillcolor=orange, style=filled];
- node6 -> node17[headlabel="*0", labeldistance=2];
- node16 -> node17[labeldistance=2, color=green, constraint=false];
- node16[label="#16 GetField : string_field : String",shape=octagon, fillcolor=orange, style=filled];
- node6 -> node16[headlabel="*0", labeldistance=2];
- node15 -> node16[labeldistance=2, color=green, constraint=false];
  node15[label="#15 GetField : double_field : double",shape=octagon, fillcolor=orange, style=filled];
  node6 -> node15[headlabel="*0", labeldistance=2];
  node14 -> node15[labeldistance=2, color=green, constraint=false];
@@ -66,6 +60,12 @@ digraph {
  node18 -> node19[labeldistance=2, color=red, fontcolor=red];
  node18[label="#18 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
  node7 -> node18[labeldistance=2, color=red, fontcolor=red];
+ node17[label="#17 GetField : array_field : int[]",shape=octagon, fillcolor=orange, style=filled];
+ node6 -> node17[headlabel="*0", labeldistance=2];
+ node16 -> node17[labeldistance=2, color=green, constraint=false];
+ node16[label="#16 GetField : string_field : String",shape=octagon, fillcolor=orange, style=filled];
+ node6 -> node16[headlabel="*0", labeldistance=2];
+ node15 -> node16[labeldistance=2, color=green, constraint=false];
  node5[label="#5 Class MethodInvokeTest",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node5[style=dotted];
  node21[label="#21 ReturnValue : int",shape=box, fillcolor=lightgrey, style=filled];
