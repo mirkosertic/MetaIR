@@ -6,7 +6,7 @@ public class PrimitiveInt extends PrimitiveValue {
 
     public final int value;
 
-    PrimitiveInt(final int value) {
+    public PrimitiveInt(final int value) {
         super(ConstantDescs.CD_int);
         this.value = value;
     }

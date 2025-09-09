@@ -3,6 +3,7 @@ package de.mirkosertic.metair.ir;
 import org.junit.jupiter.api.Test;
 
 import java.lang.constant.ClassDesc;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -10,7 +11,7 @@ public class CaughtExceptionProjectionTest {
 
     @Test
     public void testUsage() {
-        final Catch source = new Catch(ClassDesc.of(Exception.class.getName()), new Method());
+        final Catch source = new Catch(List.of(ClassDesc.of(Exception.class.getName())), new Method());
         final CaughtExceptionProjection projection = new CaughtExceptionProjection(source);
         assertThat(projection.debugDescription()).isEqualTo("exception : Exception");
         assertThat(projection.name()).isEqualTo("exception");

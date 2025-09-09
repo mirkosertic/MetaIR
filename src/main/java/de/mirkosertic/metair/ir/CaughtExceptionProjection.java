@@ -5,13 +5,8 @@ import java.lang.constant.ClassDesc;
 public class CaughtExceptionProjection extends Value implements Projection {
 
     CaughtExceptionProjection(final Catch source) {
-        super(source.exceptionType);
-
-        use(source, new ArgumentUse(0));
-    }
-
-    CaughtExceptionProjection(final MultiCatch source) {
-        super(ClassDesc.of(Exception.class.getName()));
+        // TODO: Do we neet the meet operator here?
+        super(source.exceptionTypes.size() != 1 ? ClassDesc.of(Throwable.class.getName()) : source.exceptionTypes.getFirst());
 
         use(source, new ArgumentUse(0));
     }

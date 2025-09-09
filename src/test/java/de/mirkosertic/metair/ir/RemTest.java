@@ -16,6 +16,9 @@ public class RemTest {
         final PrimitiveInt b = new PrimitiveInt(20);
         final Rem rem = new Rem(ConstantDescs.CD_int, a, b);
 
+        assertThat(rem.arg1).isSameAs(a);
+        assertThat(rem.arg2).isSameAs(b);
+
         assertThat(rem.debugDescription()).isEqualTo("Rem : int");
 
         assertThat(rem.type).isEqualTo(ConstantDescs.CD_int);

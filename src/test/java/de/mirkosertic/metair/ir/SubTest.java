@@ -16,6 +16,9 @@ public class SubTest {
         final PrimitiveInt b = new PrimitiveInt(20);
         final Sub sub = new Sub(ConstantDescs.CD_int, a, b);
 
+        assertThat(sub.arg1).isSameAs(a);
+        assertThat(sub.arg2).isSameAs(b);
+
         assertThat(sub.debugDescription()).isEqualTo("Sub : int");
 
         assertThat(sub.type).isEqualTo(ConstantDescs.CD_int);

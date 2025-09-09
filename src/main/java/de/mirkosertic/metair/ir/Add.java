@@ -4,7 +4,10 @@ import java.lang.constant.ClassDesc;
 
 public class Add extends Value {
 
-    Add(final ClassDesc type, final Value arg1, final Value arg2) {
+    public final Value arg1;
+    public final Value arg2;
+
+    public Add(final ClassDesc type, final Value arg1, final Value arg2) {
         super(type);
 
         if (!arg1.type.equals(type)) {
@@ -16,6 +19,9 @@ public class Add extends Value {
 
         use(arg1, new ArgumentUse(0));
         use(arg2, new ArgumentUse(1));
+
+        this.arg1 = arg1;
+        this.arg2 = arg2;
     }
 
     @Override

@@ -3,11 +3,10 @@ package de.mirkosertic.metair.ir;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class Sequencer {
+public class Sequencer<T extends StructuredControlflowCodeGenerator.GeneratedThing> {
 
     public static class Block {
 
@@ -31,9 +30,9 @@ public class Sequencer {
 
     private final CFGDominatorTree dominatorTree;
 
-    private final StructuredControlflowCodeGenerator codegenerator;
+    private final StructuredControlflowCodeGenerator<T> codegenerator;
 
-    public Sequencer(final Method method, final StructuredControlflowCodeGenerator codegenerator) {
+    public Sequencer(final Method method, final StructuredControlflowCodeGenerator<T> codegenerator) {
         this.dominatorTree = new CFGDominatorTree(method);
         this.codegenerator = codegenerator;
 
@@ -395,7 +394,7 @@ public class Sequencer {
 
     private void visit(final Catch node, final Deque<Block> activeStack, final Function<Node, Node> followUpProcessor) {
 
-        codegenerator.startCatchHandler(node.exceptionType != null ? Optional.of(node.exceptionType) : Optional.empty());
+        codegenerator.startCatchHandler(node.exceptionTypes);
 
         visitDominationTreeOf(followUpProcessor.apply(node), activeStack);
 

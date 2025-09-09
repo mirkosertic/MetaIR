@@ -1,6 +1,5 @@
 package de.mirkosertic.metair.ir;
 
-import de.mirkosertic.metair.ir.test.MetaIRTestExecutor;
 import org.junit.jupiter.api.DynamicContainer;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
@@ -22,11 +21,9 @@ public class SelfParsingProjectTest {
     @Test
     public void testSingleMethod1() {
 
-        final Class<MetaIRTestExecutor> aClass = MetaIRTestExecutor.class;
-
-        final URL resource = aClass.getClassLoader().getResource(aClass.getName().replace('.', File.separatorChar) + ".class");
+        final URL resource = MethodAnalyzer.class.getClassLoader().getResource("de.mirkosertic.metair.ir.MethodAnalyzer$1".replace('.', File.separatorChar) + ".class");
         if (resource == null) {
-            throw new IllegalStateException("Cannot find class file for " + aClass.getName());
+            throw new IllegalStateException("Cannot find class file");
         }
 
         try (final InputStream inputStream = resource.openStream()) {
@@ -36,12 +33,12 @@ public class SelfParsingProjectTest {
             final ClassModel model = cf.parse(data);
 
             for (final MethodModel method : model.methods()) {
-                if ("executeMethod".equals(method.methodName().stringValue())) {
+                if ("<clinit>".equals(method.methodName().stringValue())) {
                     try {
                         final MethodAnalyzer analyzer = new MethodAnalyzer(model.thisClass().asSymbol(), method);
                     } catch (final IllegalParsingStateException e) {
                         final MethodAnalyzer analyzer = e.getAnalyzer();
-                        System.out.println("Failed with testing method " + method.methodName() + " in class " + aClass.getName());
+                        System.out.println("Failed with testing method " + method.methodName() + " in class");
                         System.out.println(method.toDebugString());
 
                         System.out.println();
@@ -50,107 +47,21 @@ public class SelfParsingProjectTest {
 
                         throw e;
                     } catch (final RuntimeException e) {
-                        System.out.println("Failed with testing method " + method.methodName() + " in class " + aClass.getName());
+                        System.out.println("Failed with testing method " + method.methodName() + " in class");
                         System.out.println(method.toDebugString());
                         throw e;
                     }
                 }
             }
         } catch (final IOException e) {
-            throw new RuntimeException("Failed to load class data for " + aClass.getName(), e);
-        }
-
-    }
-
-    @Test
-    public void testSingleMethod2() {
-
-        final Class<CFGDominatorTree> aClass = CFGDominatorTree.class;
-
-        final URL resource = aClass.getClassLoader().getResource(aClass.getName().replace('.', File.separatorChar) + ".class");
-        if (resource == null) {
-            throw new IllegalStateException("Cannot find class file for " + aClass.getName());
-        }
-
-        try (final InputStream inputStream = resource.openStream()) {
-            final byte[] data = inputStream.readAllBytes();
-
-            final ClassFile cf = ClassFile.of();
-            final ClassModel model = cf.parse(data);
-
-            for (final MethodModel method : model.methods()) {
-                if ("computeDominators".equals(method.methodName().stringValue())) {
-                    try {
-                        final MethodAnalyzer analyzer = new MethodAnalyzer(model.thisClass().asSymbol(), method);
-                    } catch (final IllegalParsingStateException e) {
-                        final MethodAnalyzer analyzer = e.getAnalyzer();
-                        System.out.println("Failed with testing method " + method.methodName() + " in class " + aClass.getName());
-                        System.out.println(method.toDebugString());
-
-                        System.out.println();
-
-                        DOTExporter.writeBytecodeCFGTo(analyzer, System.out);
-
-                        throw e;
-                    } catch (final RuntimeException e) {
-                        System.out.println("Failed with testing method " + method.methodName() + " in class " + aClass.getName());
-                        System.out.println(method.toDebugString());
-                        throw e;
-                    }
-                }
-            }
-        } catch (final IOException e) {
-            throw new RuntimeException("Failed to load class data for " + aClass.getName(), e);
-        }
-
-    }
-
-    @Test
-    public void testSingleMethod3() {
-
-        final Class<DFS2> aClass = DFS2.class;
-
-        final URL resource = aClass.getClassLoader().getResource(aClass.getName().replace('.', File.separatorChar) + ".class");
-        if (resource == null) {
-            throw new IllegalStateException("Cannot find class file for " + aClass.getName());
-        }
-
-        try (final InputStream inputStream = resource.openStream()) {
-            final byte[] data = inputStream.readAllBytes();
-
-            final ClassFile cf = ClassFile.of();
-            final ClassModel model = cf.parse(data);
-
-            for (final MethodModel method : model.methods()) {
-                if ("predecessorsOf".equals(method.methodName().stringValue())) {
-                    try {
-                        final MethodAnalyzer analyzer = new MethodAnalyzer(model.thisClass().asSymbol(), method);
-                    } catch (final IllegalParsingStateException e) {
-                        final MethodAnalyzer analyzer = e.getAnalyzer();
-                        System.out.println("Failed with testing method " + method.methodName() + " in class " + aClass.getName());
-                        System.out.println(method.toDebugString());
-
-                        System.out.println();
-
-                        DOTExporter.writeBytecodeCFGTo(analyzer, System.out);
-
-                        throw e;
-                    } catch (final RuntimeException e) {
-                        System.out.println("Failed with testing method " + method.methodName() + " in class " + aClass.getName());
-                        System.out.println(method.toDebugString());
-                        throw e;
-                    }
-                }
-            }
-        } catch (final IOException e) {
-            throw new RuntimeException("Failed to load class data for " + aClass.getName(), e);
+            throw new RuntimeException("Failed to load class data", e);
         }
 
     }
 
     @TestFactory
     public List<DynamicContainer> testAllProjectClasses() {
-        return ReflectionSupport.findAllClassesInPackage("de.mirkosertic", _ -> true, s -> !s.contains("Test") && !s.contains("MethodAnalyzer") && !s.contains("Sequencer")).stream().map(aClass -> {
+        return ReflectionSupport.findAllClassesInPackage("de.mirkosertic", _ -> true, s -> true).stream().map(aClass -> {
 
             final List<DynamicTest> tests = new ArrayList<>();
 

@@ -5,8 +5,13 @@ import java.lang.constant.ConstantDesc;
 
 public class ReturnValue extends Value {
 
+    public final Value value;
+
     ReturnValue(final ConstantDesc type, final Value value) {
         super(type);
+
+        this.value = value;
+
         if (type instanceof final ClassDesc cds) {
             if (cds.isPrimitive() && !value.isPrimitive()) {
                 illegalArgument("Expecting type " + TypeUtils.toString(type) + " as value, got " + TypeUtils.toString(value.type));

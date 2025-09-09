@@ -87,6 +87,18 @@ public abstract class Node {
         return v;
     }
 
+    public boolean isDataUsedMultipleTimes() {
+        int x = 0;
+        for (final Node user : usedBy) {
+            for (final UseEdge edge : user.uses) {
+                if (edge.use() instanceof DataFlowUse && edge.node() == this) {
+                    x++;
+                }
+            }
+        }
+        return x > 1;
+    }
+
     public record UseEdge(Node node, Use use) {
     }
 }

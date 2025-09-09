@@ -76,10 +76,12 @@ public class MethodAnalyzer {
     private List<Frame> codeModelTopologicalOrder;
     private MethodTypeDesc methodTypeDesc;
     private StackMapTableAttribute stackMapTableAttribute;
+    private final Map<Label, List<TryCatchBlock>> tryCatchBlocks;
 
     MethodAnalyzer() {
         this.ir = new Method();
         this.labelToIndex = new HashMap<>();
+        this.tryCatchBlocks = new HashMap<>();
     }
 
     MethodAnalyzer(final MethodTypeDesc methodTypeDesc) {
@@ -99,6 +101,7 @@ public class MethodAnalyzer {
 
                 stackMapTableAttribute = code.findAttribute(Attributes.stackMapTable()).orElse(null);
 
+                step0PrepareTryCatchBlocks(code);
                 step1AnalyzeCFG(code);
                 step2ComputeTopologicalOrder();
                 step3FollowCFGAndInterpret(code);
@@ -107,6 +110,48 @@ public class MethodAnalyzer {
                 throw ex;
             } catch (final RuntimeException ex) {
                 throw new IllegalParsingStateException(this, ex.getMessage(), ex);
+            }
+        }
+    }
+
+    private void step0PrepareTryCatchBlocks(final CodeModel code) {
+        for (final ExceptionCatch exceptionHandler : code.exceptionHandlers()) {
+            final List<TryCatchBlock> blocks = tryCatchBlocks.computeIfAbsent(exceptionHandler.tryStart(), key -> new ArrayList<>());
+
+            // Ad if not already where
+            TryCatchBlock blockToModify = null;
+            for (final TryCatchBlock block : blocks) {
+                if (block.start.equals(exceptionHandler.tryStart()) && block.end.equals(exceptionHandler.tryEnd())) {
+                    blockToModify = block;
+                    break;
+                }
+            }
+
+            if (blockToModify == null) {
+                blockToModify = new TryCatchBlock(exceptionHandler.tryStart(), exceptionHandler.tryEnd());
+                blocks.add(blockToModify);
+                if (blocks.size() > 1) {
+                    illegalState("Multiple try-catch blocks for the same try-catch block range!");
+                }
+            }
+
+            // We try to find the right catch handler
+            CatchHandler handler = null;
+            for (final CatchHandler k : blockToModify.handlers) {
+                if (k.handler.equals(exceptionHandler.handler())) {
+                    handler = k;
+                    break;
+                }
+            }
+            if (handler == null) {
+                handler = new CatchHandler(exceptionHandler.handler());
+                blockToModify.handlers.add(handler);
+            }
+
+            if (exceptionHandler.catchType().isPresent()) {
+                handler.addCaughtException(exceptionHandler.catchType().get().asSymbol());
+            } else {
+                handler.markAsFinally();
             }
         }
     }
@@ -190,27 +235,26 @@ public class MethodAnalyzer {
                 if (current instanceof final LabelTarget lt) {
                     final Label label = lt.label();
                     // Search for exception handlers
-                    int startIndex = 0;
-                    for (int exceptionIndex = 0; exceptionIndex < code.exceptionHandlers().size(); exceptionIndex++) {
-                        final ExceptionCatch c = code.exceptionHandlers().get(exceptionIndex);
-
-                        if (c.tryStart().equals(label)) {
-                            final Label target = c.handler();
-                            if (!target.equals(label)) {
-                                if (labelToIndex.containsKey(target)) {
-                                    final int newIndex = labelToIndex.get(target);
-                                    if (!visited.contains(newIndex)) {
-                                        jobs.add(new CFGAnalysisJob(newIndex, newPath));
+                    final List<TryCatchBlock> blocksFromHere = tryCatchBlocks.get(label);
+                    if (blocksFromHere != null) {
+                        for (final TryCatchBlock block : blocksFromHere) {
+                            for (int k = 0; k < block.handlers.size(); k++) {
+                                final CatchHandler handler = block.handlers.get(k);
+                                if (!handler.finallyHandler && !handler.handler.equals(block.start)) {
+                                    if (labelToIndex.containsKey(handler.handler)) {
+                                        final int newIndex = labelToIndex.get(handler.handler);
+                                        if (!visited.contains(newIndex)) {
+                                            jobs.add(new CFGAnalysisJob(newIndex, newPath));
+                                        }
+                                        Frame frame = frames[newIndex];
+                                        if (frame == null) {
+                                            frame = new Frame(newIndex, codeElements.get(newIndex));
+                                            frames[newIndex] = frame;
+                                        }
+                                        frame.predecessors.add(new CFGEdge(i, new NamedProjection(CatchProjection.nameFor(k, handler.exceptionTypes)), FlowType.FORWARD));
+                                    } else {
+                                        illegalState("Exception handler target " + handler.handler + " is not mapped to an index");
                                     }
-                                    Frame frame = frames[newIndex];
-                                    if (frame == null) {
-                                        frame = new Frame(newIndex, codeElements.get(newIndex));
-                                        frames[newIndex] = frame;
-                                    }
-                                    frame.predecessors.add(new CFGEdge(i, new NamedProjection("catch:" + startIndex + ":" + (c.catchType().isPresent() ? c.catchType().get().asSymbol().descriptorString() : "any")), FlowType.FORWARD));
-                                    startIndex++;
-                                } else {
-                                    illegalState("Exception handler target " + target + " is not mapped to an index");
                                 }
                             }
                         }
@@ -632,40 +676,7 @@ public class MethodAnalyzer {
                 } else {
 
                     if (isExceptionHandler) {
-
-                        final MultiCatch mergeNode = new MultiCatch("MultiCatch" + frame.elementIndex);
-
-                        Frame guardSource = null;
-
-                        for (final CFGEdge edge : frame.predecessors) {
-                            if (edge.flowType == FlowType.BACKWARD) {
-                                illegalState("Backward control flow illegal for exception handler");
-                            }
-                            final Frame source = posToFrame.get(edge.fromIndex);
-                            if (guardSource == null) {
-                                guardSource = source;
-                            }
-                            if (source.entryPoint instanceof final ExceptionGuard guard) {
-                                final Node handler = guard.getNamedNode(edge.projection.name());
-                                if (!(handler instanceof Catch)) {
-                                    illegalState("Catch handler expected, not " + handler + " for " + edge.projection() + " in " + frame.elementIndex);
-                                }
-                                handler.controlFlowsTo(mergeNode, FlowType.FORWARD);
-                            } else {
-                                illegalState("Exception handler without an exception guard expected, not " + source.entryPoint);
-                            }
-                        }
-
-                        if (guardSource == null) {
-                            illegalState("No guard source for exception handlers");
-                        }
-
-                        incomingStatus = guardSource.out.copy();
-                        incomingStatus.control = mergeNode;
-                        incomingStatus.stack.clear();
-                        incomingStatus.stack.push(mergeNode.caughtException());
-
-                        frame.in = incomingStatus;
+                        illegalState("Exception handler with multiple predecessors not supported yet");
                     } else {
                         // Eager PHI creation and memory-edge merging
                         final List<Frame> incomingFrames = new ArrayList<>();
@@ -708,8 +719,6 @@ public class MethodAnalyzer {
                         }
 
                         incomingStatus = new Status(cm.maxLocals());
-
-                        // TODO: In case of exception handlers we do not have a guaranteed stack, but only the provided exception
 
                         int incomingStackSize = -1;
                         for (final Frame fr : incomingFrames) {
@@ -763,6 +772,27 @@ public class MethodAnalyzer {
 
                         frame.in = incomingStatus;
                         frame.entryPoint = target;
+
+                        frame.out = incomingStatus.copy();
+
+                        if (frame.codeElement instanceof final LabelTarget lt) {
+                            final List<TryCatchBlock> catchesFromHere = tryCatchBlocks.get(lt.label());
+                            if (catchesFromHere != null && !catchesFromHere.isEmpty()) {
+
+                                for (final TryCatchBlock catchBlock : catchesFromHere) {
+                                    final List<ExceptionGuard.Catches> catches = new ArrayList<>();
+                                    for (int i = 0; i < catchBlock.handlers.size(); i++) {
+                                        final CatchHandler handler = catchBlock.handlers.get(i);
+                                        if (!handler.finallyHandler) {
+                                            catches.add(new ExceptionGuard.Catches(i, handler.exceptionTypes));
+                                        }
+                                    }
+                                    final ExceptionGuard n = new ExceptionGuard("Guard_" + frame.elementIndex, catches);
+
+                                    frame.out.control = frame.out.control.controlFlowsTo(n, FlowType.FORWARD);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -777,7 +807,9 @@ public class MethodAnalyzer {
                     illegalState("No outgoing or same same as incoming status for " + frameElement);
                 }
             } else {
-                frame.copyIncomingToOutgoing();
+                if (frame.out == null) {
+                    frame.copyIncomingToOutgoing();
+                }
             }
         }
     }
@@ -889,25 +921,23 @@ public class MethodAnalyzer {
         outgoing.control = outgoing.control.controlFlowsTo(node, FlowType.FORWARD);
     }
 
-    private List<ExceptionGuard> exceptionGuardsFromHere(final Node node) {
-        final List<ExceptionGuard> result = new ArrayList<>();
-        searchExceptionGuards(node, result);
-        return result;
-    }
-
-    private void searchExceptionGuards(final Node node, final List<ExceptionGuard> result) {
+    private ExceptionGuard exceptionGuardsFromHere(final Node node, final String label) {
         if (node instanceof final ExceptionGuard guard) {
-            if (!result.contains(guard)) {
-                result.add(guard);
+            if (guard.startLabel.equals(label)) {
+                return guard;
             }
         }
         for (final Node.UseEdge edge : node.uses) {
             if (edge.use() instanceof final ControlFlowUse cfu) {
                 if (cfu.type == FlowType.FORWARD) {
-                    searchExceptionGuards(edge.node(), result);
+                    final ExceptionGuard guard = exceptionGuardsFromHere(edge.node(), label);
+                    if (guard != null) {
+                        return guard;
+                    }
                 }
             }
         }
+        return null;
     }
 
     @Testbacklog
@@ -919,11 +949,11 @@ public class MethodAnalyzer {
             frame.verificationInfos = stackMapTableAttribute.entries().stream().filter(t -> t.target().equals(label)).toList();
         }
 
-        final List<ExceptionCatch> catchesFromHere = codeModel.exceptionHandlers().stream().filter(t -> t.tryStart().equals(label)).toList();
+        final List<TryCatchBlock> catchesFromHere = tryCatchBlocks.get(label);
         final Map<Label, List<ExceptionCatch>> catchesEndingHere = codeModel.exceptionHandlers().stream().filter(t -> t.tryEnd().equals(label)).collect(Collectors.groupingBy(ExceptionCatch::tryStart));
 
         if (!catchesEndingHere.isEmpty()) {
-            if (!catchesFromHere.isEmpty()) {
+            if (catchesFromHere != null && !catchesFromHere.isEmpty()) {
                 illegalState("Not implemented yet here: Label starts and ends an TryCatch at the same time");
             }
             if (catchesEndingHere.size() > 1) {
@@ -931,21 +961,10 @@ public class MethodAnalyzer {
             }
             final Status outgoing = frame.copyIncomingToOutgoing();
 
-            final List<ExceptionGuard> guardsFromHere = exceptionGuardsFromHere(outgoing.control);
-            if (guardsFromHere.isEmpty()) {
-                illegalState("No exception guard found for " + outgoing.control);
-            }
             final String searchLabel = "Guard_" + labelToIndex.get(catchesEndingHere.keySet().iterator().next());
-            // TODO: Find the correct one!
-            ExceptionGuard activeGuard = null;
-            for (final ExceptionGuard g : guardsFromHere) {
-                if (g.startLabel.equals(searchLabel)) {
-                    activeGuard = g;
-                    break;
-                }
-            }
+            final ExceptionGuard activeGuard = exceptionGuardsFromHere(outgoing.control, searchLabel);
             if (activeGuard == null) {
-                illegalState("No active exception guard found for " + outgoing.control + " with label " + searchLabel);
+                illegalState("No exception guard found for " + outgoing.control + " with label " + searchLabel);
             }
 
             final Node n = new MergeNode("EndOfGuardedBlock" + frame.elementIndex);
@@ -956,7 +975,7 @@ public class MethodAnalyzer {
             return;
         }
 
-        if (catchesFromHere.isEmpty()) {
+        if (catchesFromHere == null || catchesFromHere.isEmpty()) {
             final Status outgoing = frame.copyIncomingToOutgoing();
             if (frame.predecessors.size() == 1 && (outgoing.control instanceof LoopHeaderNode || outgoing.control instanceof MergeNode)) {
                 frame.entryPoint = outgoing.control;
@@ -968,16 +987,20 @@ public class MethodAnalyzer {
             }
         } else {
             final Status outgoing = frame.copyIncomingToOutgoing();
-            final ExceptionGuard n = new ExceptionGuard("Guard_" + frame.elementIndex, catchesFromHere.stream().map(t -> {
-                if (t.catchType().isPresent()) {
-                    return new ExceptionGuard.Catches(Optional.of(t.catchType().get().asSymbol()));
+            for (final TryCatchBlock catchBlock : catchesFromHere) {
+                final List<ExceptionGuard.Catches> catches = new ArrayList<>();
+                for (int i = 0; i < catchBlock.handlers.size(); i++) {
+                    final CatchHandler handler = catchBlock.handlers.get(i);
+                    if (!handler.finallyHandler) {
+                        catches.add(new ExceptionGuard.Catches(i, handler.exceptionTypes));
+                    }
                 }
-                return new ExceptionGuard.Catches(Optional.empty());
-            }).toList());
+                final ExceptionGuard n = new ExceptionGuard("Guard_" + frame.elementIndex, catches);
 
-            outgoing.control = outgoing.control.controlFlowsTo(n, FlowType.FORWARD);
+                outgoing.control = outgoing.control.controlFlowsTo(n, FlowType.FORWARD);
 
-            frame.entryPoint = n;
+                frame.entryPoint = n;
+            }
         }
     }
 
@@ -2306,6 +2329,45 @@ public class MethodAnalyzer {
     }
 
     private record CFGAnalysisJob(int startIndex, List<Integer> path) {
+    }
+
+    private static class CatchHandler {
+        private final Label handler;
+        private final List<ClassDesc> exceptionTypes;
+        private boolean finallyHandler;
+
+        public CatchHandler(final Label handler) {
+            this.handler = handler;
+            this.exceptionTypes = new ArrayList<>();
+        }
+
+        public void markAsFinally() {
+            if (exceptionTypes.isEmpty()) {
+                finallyHandler = true;
+            } else {
+                throw new IllegalStateException("Cannot mark a catch handler as finally if it has exception types!");
+            }
+        }
+
+        public void addCaughtException(final ClassDesc classEntry) {
+            if (!finallyHandler) {
+                exceptionTypes.add(classEntry);
+            } else {
+                throw new IllegalStateException("Cannot add an exception type to a finally handler!");
+            }
+        }
+    }
+
+    private static class TryCatchBlock {
+        private final Label start;
+        private final Label end;
+        private final List<CatchHandler> handlers;
+
+        public TryCatchBlock(final Label start, final Label end) {
+            this.start = start;
+            this.end = end;
+            this.handlers = new ArrayList<>();
+        }
     }
 
     public static class Frame {

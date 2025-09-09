@@ -1,14 +1,15 @@
 package de.mirkosertic.metair.ir;
 
 import java.lang.constant.ClassDesc;
+import java.util.List;
 
 public class Catch extends TupleNode {
 
-    public final ClassDesc exceptionType;
+    public final List<ClassDesc> exceptionTypes;
 
-    Catch(final ClassDesc exceptionType, final Node source) {
+    Catch(final List<ClassDesc> exceptionTypes, final Node source) {
 
-        this.exceptionType = exceptionType;
+        this.exceptionTypes = exceptionTypes;
 
         use(source, new ArgumentUse(0));
 
@@ -21,6 +22,16 @@ public class Catch extends TupleNode {
 
     @Override
     public String debugDescription() {
-        return "Catch : " + TypeUtils.toString(exceptionType);
+        final StringBuilder result = new StringBuilder("Catch : ");
+        for (int i = 0; i < exceptionTypes.size(); i++) {
+            if (i > 0) {
+                result.append(", ");
+            }
+            result.append(TypeUtils.toString(exceptionTypes.get(i)));
+        }
+        if (exceptionTypes.isEmpty()) {
+            result.append("any");
+        }
+        return result.toString();
     }
 }

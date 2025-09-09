@@ -3,6 +3,7 @@ package de.mirkosertic.metair.ir;
 import org.junit.jupiter.api.Test;
 
 import java.lang.constant.ClassDesc;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -11,7 +12,7 @@ class CatchTest {
     @Test
     public void testUsage() {
         final Method m = new Method();
-        final Catch c = new Catch(ClassDesc.of(Exception.class.getName()), m);
+        final Catch c = new Catch(List.of(ClassDesc.of(Exception.class.getName())), m);
 
         assertThat(c.debugDescription()).isEqualTo("Catch : Exception");
         assertThat(c.usedBy).hasSize(1);

@@ -16,6 +16,9 @@ public class MulTest {
         final PrimitiveInt b = new PrimitiveInt(20);
         final Mul mul = new Mul(ConstantDescs.CD_int, a, b);
 
+        assertThat(mul.arg1).isSameAs(a);
+        assertThat(mul.arg2).isSameAs(b);
+
         assertThat(mul.debugDescription()).isEqualTo("Mul : int");
 
         assertThat(mul.type).isEqualTo(ConstantDescs.CD_int);

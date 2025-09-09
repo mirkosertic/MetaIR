@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.io.IOException;
 import java.lang.classfile.ClassModel;
 import java.lang.classfile.CodeBuilder;
+import java.lang.classfile.Label;
 import java.lang.classfile.MethodModel;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.ConstantDescs;
@@ -27,9 +28,29 @@ public class OpcodeTryCatchTest {
             codeBuilder.trying(tryHandler -> {
                 tryHandler.iconst_3();
                 tryHandler.istore(1);
-            }, catchHandler -> {
-                catchHandler.catching(ClassDesc.of(IllegalArgumentException.class.getName()), CodeBuilder::pop);
-            });
+            }, catchHandler -> catchHandler.catching(ClassDesc.of(IllegalArgumentException.class.getName()), CodeBuilder::pop));
+            codeBuilder.return_();
+        })));
+        final Optional<MethodModel> method = model.methods().stream().filter(m -> "test".contentEquals(m.methodName())).findFirst();
+        assertThat(method).isPresent();
+
+        testHelper.analyzeAndReport(model, method.get());
+    }
+
+    @Test
+    public void test_SimpleCatchNested(final MetaIRTestHelper testHelper) throws IOException {
+        final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
+            codeBuilder.trying(tryHandler -> {
+                tryHandler.iconst_3();
+                tryHandler.istore(1);
+            }, catchHandler -> catchHandler.catching(ClassDesc.of(IllegalArgumentException.class.getName()), x -> {
+                x.pop();
+                x.trying(b -> {
+                    b.iconst_2();
+                    b.istore(2);
+                }, catchHandlerInner -> catchHandlerInner.catching(ClassDesc.of(RuntimeException.class.getName()), CodeBuilder::pop));
+
+            }));
             codeBuilder.return_();
         })));
         final Optional<MethodModel> method = model.methods().stream().filter(m -> "test".contentEquals(m.methodName())).findFirst();
@@ -44,9 +65,7 @@ public class OpcodeTryCatchTest {
             codeBuilder.trying(tryHandler -> {
                 tryHandler.iconst_3();
                 tryHandler.istore(1);
-            }, catchHandler -> {
-                catchHandler.catchingAll(CodeBuilder::pop);
-            });
+            }, catchHandler -> catchHandler.catchingAll(CodeBuilder::pop));
             codeBuilder.return_();
         })));
         final Optional<MethodModel> method = model.methods().stream().filter(m -> "test".contentEquals(m.methodName())).findFirst();
@@ -62,12 +81,8 @@ public class OpcodeTryCatchTest {
                 tryHandler.iconst_3();
                 tryHandler.istore(1);
             }, catchHandler -> {
-                catchHandler.catching(ClassDesc.of(IllegalArgumentException.class.getName()), builder -> {
-                    builder.astore(2);
-                });
-                catchHandler.catching(ClassDesc.of(RuntimeException.class.getName()), builder -> {
-                    builder.astore(2);
-                });
+                catchHandler.catching(ClassDesc.of(IllegalArgumentException.class.getName()), builder -> builder.astore(2));
+                catchHandler.catching(ClassDesc.of(RuntimeException.class.getName()), builder -> builder.astore(2));
             });
             codeBuilder.return_();
         })));
@@ -77,22 +92,38 @@ public class OpcodeTryCatchTest {
         testHelper.analyzeAndReport(model, method.get());
     }
 
-    /*@Test
+    @Test
     public void test_Multicatch(final MetaIRTestHelper testHelper) throws IOException {
         final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
             codeBuilder.trying(tryHandler -> {
                 tryHandler.iconst_3();
                 tryHandler.istore(1);
-            }, catchHandler -> {
-                catchHandler.catchingMulti(List.of(ClassDesc.of(RuntimeException.class.getName()), ClassDesc.of(IllegalArgumentException.class.getName())), builder -> {
-                    builder.astore(2);
-                });
-            });
+            }, catchHandler -> catchHandler.catchingMulti(List.of(ClassDesc.of(RuntimeException.class.getName()), ClassDesc.of(IllegalArgumentException.class.getName())), builder -> builder.astore(2)));
             codeBuilder.return_();
         })));
         final Optional<MethodModel> method = model.methods().stream().filter(m -> "test".contentEquals(m.methodName())).findFirst();
         assertThat(method).isPresent();
 
         testHelper.analyzeAndReport(model, method.get());
-    }*/
+    }
+
+    @Test
+    public void test_MergeWithTryCatch(final MetaIRTestHelper testHelper) throws IOException  {
+        final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
+            final Label label = codeBuilder.newLabel();
+            codeBuilder.iconst_0();
+            codeBuilder.ifeq(label);
+            codeBuilder.nop();
+            codeBuilder.labelBinding(label);
+            codeBuilder.trying(tryHandler -> {
+                tryHandler.iconst_3();
+                tryHandler.istore(1);
+            }, catchHandler -> catchHandler.catching(ClassDesc.of(IllegalArgumentException.class.getName()), CodeBuilder::pop));
+            codeBuilder.return_();
+        })));
+        final Optional<MethodModel> method = model.methods().stream().filter(m -> "test".contentEquals(m.methodName())).findFirst();
+        assertThat(method).isPresent();
+
+        testHelper.analyzeAndReport(model, method.get());
+    }
 }

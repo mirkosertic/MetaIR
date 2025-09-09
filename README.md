@@ -26,7 +26,6 @@ but were rewritten to be more flexible and extensible.
 - Further examples and documentation: [SeaOfNodes/Simple](https://github.com/SeaOfNodes/Simple)
 
 > * 🚧 Scheduling logic for machine code transformation is under development.
-> * 🚧 Exception handling is under development.
 
 ## Credits
 - An excellent tutorial about the Class-File API: [Build A Compiler With The Java Class-File API by Dr. James Hamilton](https://jameshamilton.eu/programming/build-compiler-java-class-file-api)

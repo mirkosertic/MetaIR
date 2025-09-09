@@ -2,11 +2,10 @@ package de.mirkosertic.metair.ir;
 
 import java.lang.constant.ClassDesc;
 import java.util.List;
-import java.util.Optional;
 
 public class ExceptionGuard extends TupleNode {
 
-    public record Catches(Optional<ClassDesc> catchType) {
+    public record Catches(int index, List<ClassDesc> catchTypes) {
     }
 
     final String startLabel;
@@ -17,14 +16,9 @@ public class ExceptionGuard extends TupleNode {
         this.catches = catches;
         this.startLabel = startLabel;
 
-        for (int i = 0; i < catches.size(); i++) {
-            final Catches catchEntry = catches.get(i);
-            if (catchEntry.catchType().isPresent()) {
-                final ClassDesc catchType = catchEntry.catchType().get();
-                registerAs("catch:" + i + ":" + catchType.descriptorString(), controlFlowsTo(new CatchProjection(i, catchType), FlowType.FORWARD).controlFlowsTo(new Catch(catchType, this), FlowType.FORWARD));
-            } else {
-                registerAs("catch:" + i + ":any", controlFlowsTo(new CatchProjection(i), FlowType.FORWARD).controlFlowsTo(new Catch(ClassDesc.of(Throwable.class.getName()), this), FlowType.FORWARD));
-            }
+        for (final Catches catchEntry : catches) {
+            final CatchProjection projection = new CatchProjection(catchEntry.index, catchEntry.catchTypes);
+            registerAs(projection.name(), controlFlowsTo(projection, FlowType.FORWARD).controlFlowsTo(new Catch(catchEntry.catchTypes, this), FlowType.FORWARD));
         }
         registerAs("default", controlFlowsTo(new ExtractControlFlowProjection("default"), FlowType.FORWARD));
         registerAs("exit", controlFlowsTo(new ExtractControlFlowProjection("exit"), FlowType.FORWARD));
@@ -36,11 +30,8 @@ public class ExceptionGuard extends TupleNode {
 
     public Catch catchProjection(final int index) {
         final Catches catchEntry = catches.get(index);
-        if (catchEntry.catchType().isPresent()) {
-            final ClassDesc catchType = catchEntry.catchType().get();
-            return (Catch) getNamedNode("catch:" + index + ":" + catchType.descriptorString());
-        }
-        return (Catch) getNamedNode("catch:" + index + ":any");
+        final CatchProjection p = new CatchProjection(index, catchEntry.catchTypes);
+        return (Catch) getNamedNode(p.name());
     }
 
     public ExtractControlFlowProjection exitNode() {

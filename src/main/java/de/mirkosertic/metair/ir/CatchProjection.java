@@ -1,28 +1,37 @@
 package de.mirkosertic.metair.ir;
 
 import java.lang.constant.ClassDesc;
+import java.util.List;
 
 public class CatchProjection extends Node implements Projection {
 
     public final int index;
-    public final ClassDesc type;
+    public final List<ClassDesc> exceptionTypes;
 
-    CatchProjection(final int index) {
-        this.index = index;
-        this.type = null;
+    public static String nameFor(final int index, final List<ClassDesc> exceptionTypes) {
+        final StringBuilder result = new StringBuilder("catch : ");
+        result.append(index);
+        result.append(" : ");
+        for (int i = 0; i < exceptionTypes.size(); i++) {
+            if (i > 0) {
+                result.append(", ");
+            }
+            result.append(TypeUtils.toString(exceptionTypes.get(i)));
+        }
+        if (exceptionTypes.isEmpty()) {
+            result.append("any");
+        }
+        return result.toString();
     }
 
-    CatchProjection(final int index, final ClassDesc type) {
+    CatchProjection(final int index, final List<ClassDesc> types) {
         this.index = index;
-        this.type = type;
+        this.exceptionTypes = types;
     }
 
     @Override
     public String name() {
-        if (type == null) {
-            return "any";
-        }
-        return "catch : " + TypeUtils.toString(type);
+        return nameFor(index, exceptionTypes);
     }
 
     @Override
