@@ -1,5 +1,6 @@
 (method (Test this)
   byte[] var0 = (new byte[10])
   var0[0] = ((trunc byte)10)
+  byte var1 = (var0[1])
   return
 )

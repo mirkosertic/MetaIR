@@ -1,9 +1,13 @@
 (method (int arg0)
+  // Label Frame2
   (block loop LoopHeaderNode_2
     int var0 = TODO
     (if (TODO >= var0)
+      // Label Frame17
       return TODO
     (else)
+      SimpleLoopTest var1 = (SimpleLoopTest.class.$init$)
+      int var2 = (var1.compute(var0))
       continue LoopHeaderNode_2
     )
   )

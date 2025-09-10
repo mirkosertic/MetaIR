@@ -2,5 +2,7 @@
   (block ExceptionGuard_1_0
     break ExceptionGuard_1_0
   )
+  // Merge EndOfGuardedBlock4
+  // Label Frame8
   return
 )

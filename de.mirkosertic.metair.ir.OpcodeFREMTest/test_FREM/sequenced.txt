@@ -1,3 +1,4 @@
 (method (Test this)
-  return (2.0 % 2.0)
+  float var0 = (2.0 % 2.0)
+  return var0
 )

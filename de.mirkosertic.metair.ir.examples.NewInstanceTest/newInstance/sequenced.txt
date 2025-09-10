@@ -1,3 +1,6 @@
 (method (NewInstanceTest this)
+  // Label Frame1
+  NewInstanceTest var0 = (NewInstanceTest.class.$init$)
+  void var1 = ((new var0).<init>())
   return
 )

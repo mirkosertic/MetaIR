@@ -1,4 +1,7 @@
 (method (StaticFieldAccessTest this)
+  // Label Frame1
+  StaticFieldAccessTest$Source var0 = (StaticFieldAccessTest$Source.class.$init$)
+  StaticFieldAccessTest$Destination var1 = (StaticFieldAccessTest$Destination.class.$init$)
   StaticFieldAccessTest$Destination.class.long_field = (StaticFieldAccessTest$Source.class.long_field)
   return
 )

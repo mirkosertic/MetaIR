@@ -1,3 +1,5 @@
 (method (InvokeDynamicTest this) (int arg0) (int arg1)
-  return TODO
+  // Label Frame3
+  String var0 = TODO
+  return var0
 )

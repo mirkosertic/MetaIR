@@ -1,5 +1,10 @@
 (method (ArrayTest this)
+  // Label Frame4
+  // Label Frame9
   float[] var0 = (new float[10])
   var0[0] = 10.0
+  float var1 = (var0[1])
+  // Label Frame20
+  // Label Frame25
   return
 )

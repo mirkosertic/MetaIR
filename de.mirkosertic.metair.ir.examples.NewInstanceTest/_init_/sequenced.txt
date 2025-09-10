@@ -1,3 +1,5 @@
 (method (NewInstanceTest this)
+  // Label Frame1
+  void var0 = (this.<init>())
   return
 )

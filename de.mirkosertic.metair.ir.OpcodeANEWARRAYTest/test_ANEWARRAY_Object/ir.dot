@@ -30,15 +30,15 @@ digraph {
  node9 -> node10[labeldistance=2, color=green, constraint=false];
  subgraph cluster_0 {
   color=lightgray;
+  node6;
+  node8;
+ }
+ subgraph cluster_1 {
+  color=lightgray;
   node0;
   node2;
   node3;
   node4;
- }
- subgraph cluster_1 {
-  color=lightgray;
-  node6;
-  node8;
  }
  subgraph cluster_000 {
   label = "Legend";

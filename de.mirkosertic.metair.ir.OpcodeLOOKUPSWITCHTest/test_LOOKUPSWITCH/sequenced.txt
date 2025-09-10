@@ -1,4 +1,6 @@
 (method (Test this)
+  // Label Frame5
   return 2
+  // Label Frame2
   return 1
 )

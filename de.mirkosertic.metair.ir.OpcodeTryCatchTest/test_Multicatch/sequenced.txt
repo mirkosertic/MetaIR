@@ -2,9 +2,12 @@
   (block ExceptionGuard_1_0
     (block ExceptionGuard_1_1
       break ExceptionGuard_1_1
+      // Label Frame7
       break ExceptionGuard_1_0
     )
+    // Merge EndOfGuardedBlock5
     break ExceptionGuard_1_0
   )
+  // Merge Merge9
   return
 )

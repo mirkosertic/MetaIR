@@ -1,8 +1,11 @@
 (method (int arg0) (int arg1) (int arg2)
+  // Label Frame4
+  // Label Frame9
   int[] var0 = (new int[10])
   var0[arg1] = 10
   (block If_4_0
     (if (arg0 == 0)
+      // Label Frame24
       var0[arg2] = 30
       break If_4_0
     (else)
@@ -10,5 +13,7 @@
       break If_4_0
     )
   )
-  return (var0[arg2])
+  // Merge Merge30
+  int var1 = (var0[arg2])
+  return var1
 )

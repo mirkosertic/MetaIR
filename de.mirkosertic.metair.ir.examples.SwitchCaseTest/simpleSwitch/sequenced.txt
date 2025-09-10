@@ -1,5 +1,9 @@
 (method (SwitchCaseTest this) (int arg0)
+  // Label Frame2
+  // Label Frame6
   return 100
+  // Label Frame10
   return 200
+  // Label Frame14
   return 300
 )

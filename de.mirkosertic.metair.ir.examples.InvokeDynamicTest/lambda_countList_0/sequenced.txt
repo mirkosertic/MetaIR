@@ -1,10 +1,14 @@
 (method (int arg0) (Integer arg1)
+  // Label Frame2
+  int var0 = (arg1.intValue())
   (block If_3_0
-    (if (arg0 < (arg1.intValue()))
+    (if (arg0 < var0)
+      // Label Frame10
       break If_3_0
     (else)
       break If_3_0
     )
   )
+  // Merge Merge12
   return TODO
 )

@@ -1,6 +1,11 @@
 (method (FieldAccessTest this)
-  FieldAccessTest$Destination var0 = (new (FieldAccessTest$Destination.class.$init$))
-  FieldAccessTest$Source var1 = (new (FieldAccessTest$Source.class.$init$))
-  var0.short_field = (var1.short_field)
+  // Label Frame1
+  FieldAccessTest$Destination var0 = (FieldAccessTest$Destination.class.$init$)
+  FieldAccessTest$Destination var1 = (new var0)
+  void var2 = (var1.<init>())
+  FieldAccessTest$Source var3 = (FieldAccessTest$Source.class.$init$)
+  FieldAccessTest$Source var4 = (new var3)
+  void var5 = (var4.<init>())
+  var1.short_field = (var4.short_field)
   return
 )

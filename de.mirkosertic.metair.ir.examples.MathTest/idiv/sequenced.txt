@@ -1,3 +1,5 @@
 (method (MathTest this) (int arg0) (int arg1)
-  return (arg0 / arg1)
+  // Label Frame3
+  int var0 = (arg0 / arg1)
+  return var0
 )

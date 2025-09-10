@@ -1,4 +1,9 @@
 (method (MemoryAccessTest this)
+  // Label Frame3
+  // Label Frame8
+  MemoryAccessTest var0 = (MemoryAccessTest.class.$init$)
+  // Label Frame12
+  MemoryAccessTest var1 = (MemoryAccessTest.class.$init$)
   MemoryAccessTest.class.staticmember = (this.instancmember)
   this.instancmember = (MemoryAccessTest.class.staticmember)
   return

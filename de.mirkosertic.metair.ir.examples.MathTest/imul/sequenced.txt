@@ -1,3 +1,4 @@
 (method (MathTest this) (int arg0) (int arg1)
+  // Label Frame3
   return (arg0 * arg1)
 )

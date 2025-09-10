@@ -1,8 +1,12 @@
 (method (SynchronizedTest this)
+  // Label Frame3
   monitorenter this
   (block ExceptionGuard_3_0
+    int var0 = (this.compute(10))
     monitorexit this
     break ExceptionGuard_3_0
   )
+  // Merge EndOfGuardedBlock18
+  // Label Frame27
   return
 )

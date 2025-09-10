@@ -1,4 +1,10 @@
 (method (MethodInvokeTest this)
-  MethodInvokeTest$Source var0 = (new (MethodInvokeTest$Source.class.$init$))
-  return ((MethodInvokeTest.class.$init$).simple_method_return_char((var0.byte_field),(var0.boolean_field),(var0.short_field),(var0.char_field),(var0.int_field),(var0.long_field),(var0.float_field),(var0.double_field),(var0.string_field),(var0.array_field)))
+  // Label Frame2
+  MethodInvokeTest$Source var0 = (MethodInvokeTest$Source.class.$init$)
+  MethodInvokeTest$Source var1 = (new var0)
+  void var2 = (var1.<init>())
+  // Label Frame8
+  MethodInvokeTest var3 = (MethodInvokeTest.class.$init$)
+  int var4 = (var3.simple_method_return_char((var1.byte_field),(var1.boolean_field),(var1.short_field),(var1.char_field),(var1.int_field),(var1.long_field),(var1.float_field),(var1.double_field),(var1.string_field),(var1.array_field)))
+  return var4
 )

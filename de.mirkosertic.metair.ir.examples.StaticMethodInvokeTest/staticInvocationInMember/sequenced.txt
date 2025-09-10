@@ -1,3 +1,6 @@
 (method (StaticMethodInvokeTest this)
-  return ((StaticMethodInvokeTest.class.$init$).compute(10))
+  // Label Frame1
+  StaticMethodInvokeTest var0 = (StaticMethodInvokeTest.class.$init$)
+  int var1 = (var0.compute(10))
+  return var1
 )

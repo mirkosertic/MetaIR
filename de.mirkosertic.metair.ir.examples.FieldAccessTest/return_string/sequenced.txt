@@ -1,4 +1,7 @@
 (method (FieldAccessTest this)
-  FieldAccessTest$Source var0 = (new (FieldAccessTest$Source.class.$init$))
-  return (var0.string_field)
+  // Label Frame1
+  FieldAccessTest$Source var0 = (FieldAccessTest$Source.class.$init$)
+  FieldAccessTest$Source var1 = (new var0)
+  void var2 = (var1.<init>())
+  return (var1.string_field)
 )

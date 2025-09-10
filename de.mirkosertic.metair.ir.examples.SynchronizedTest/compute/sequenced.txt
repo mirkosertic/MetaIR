@@ -1,3 +1,4 @@
 (method (SynchronizedTest this) (int arg0)
+  // Label Frame2
   return (arg0 + 1)
 )

@@ -1,5 +1,6 @@
 (method (Test this)
   (if (null != null)
+    // Label Frame5
     return 0
   (else)
     return 1

@@ -1,3 +1,4 @@
 (method (Test this) (Object arg0)
-  return (arg0 instanceof (String.class.$init$))
+  String var0 = (String.class.$init$)
+  return (arg0 instanceof var0)
 )

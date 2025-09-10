@@ -1,10 +1,13 @@
 (method (int arg0)
+  // Label Frame1
   (block If_2_0
     (if (arg0 != 0)
+      // Label Frame7
       break If_2_0
     (else)
       break If_2_0
     )
   )
+  // Merge Merge9
   return TODO
 )

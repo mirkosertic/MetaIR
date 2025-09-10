@@ -1,5 +1,6 @@
 (method (Test this)
   int[] var0 = (new int[10])
   var0[0] = 2
+  int var1 = (var0[2])
   return
 )
