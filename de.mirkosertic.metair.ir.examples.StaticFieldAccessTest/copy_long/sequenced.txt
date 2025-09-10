@@ -1,0 +1,4 @@
+(method (StaticFieldAccessTest this)
+  StaticFieldAccessTest$Destination.class.long_field = (StaticFieldAccessTest$Source.class.long_field)
+  return
+)

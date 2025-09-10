@@ -1,0 +1,3 @@
+(method (Test this)
+  return ((extend_sign long)0)
+)

@@ -1,0 +1,14 @@
+(method (Test this)
+  (block ExceptionGuard_1_0
+    (block ExceptionGuard_1_1
+      break ExceptionGuard_1_1
+      (block ExceptionGuard_9_0
+        break ExceptionGuard_9_0
+        break ExceptionGuard_1_0
+      )
+      break ExceptionGuard_1_0
+    )
+    break ExceptionGuard_1_0
+  )
+  return
+)

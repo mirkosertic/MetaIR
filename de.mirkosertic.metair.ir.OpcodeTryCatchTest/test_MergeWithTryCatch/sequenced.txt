@@ -1,0 +1,16 @@
+(method (Test this)
+  (block If_1_0
+    (if (0 == 0)
+    (else)
+      break If_1_0
+    )
+  )
+  (block ExceptionGuard_4_0
+    (block ExceptionGuard_4_1
+      break ExceptionGuard_4_1
+      break ExceptionGuard_4_0
+    )
+    break ExceptionGuard_4_0
+  )
+  return
+)

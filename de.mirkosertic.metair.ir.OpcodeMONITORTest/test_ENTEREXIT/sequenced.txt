@@ -1,0 +1,5 @@
+(method (Test this)
+  monitorenter "LOCK"
+  monitorexit "LOCK"
+  return
+)

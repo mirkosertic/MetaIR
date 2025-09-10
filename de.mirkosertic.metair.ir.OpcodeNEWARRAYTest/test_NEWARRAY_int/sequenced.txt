@@ -1,0 +1,5 @@
+(method (Test this)
+  int[] var0 = (new int[10])
+  var0[0] = 2
+  return
+)

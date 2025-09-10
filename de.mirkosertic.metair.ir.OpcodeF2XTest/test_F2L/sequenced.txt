@@ -1,0 +1,3 @@
+(method (Test this)
+  return ((long)2.0)
+)

@@ -1,0 +1,5 @@
+(method (Test this)
+  (block loop LoopHeaderNode_1
+    continue LoopHeaderNode_1
+  )
+)

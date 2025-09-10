@@ -1,0 +1,5 @@
+(method (ArrayTest this)
+  Object[] var0 = (new Object[10])
+  var0[0] = this
+  return
+)

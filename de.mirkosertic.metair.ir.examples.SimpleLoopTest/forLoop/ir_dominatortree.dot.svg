@@ -90,7 +90,7 @@
 <!-- node5 -->
 <g id="node7" class="node">
 <title>node5</title>
-<polygon fill="orange" stroke="black" points="1336.42,-521.54 1336.42,-536.46 1276.13,-547 1190.87,-547 1130.58,-536.46 1130.58,-521.54 1190.87,-511 1276.13,-511 1336.42,-521.54"/>
+<polygon fill="lightgreen" stroke="black" points="1336.42,-521.54 1336.42,-536.46 1276.13,-547 1190.87,-547 1130.58,-536.46 1130.58,-521.54 1190.87,-511 1276.13,-511 1336.42,-521.54"/>
 <text text-anchor="middle" x="1233.5" y="-525.3" font-family="Times,serif" font-size="14.00">#5 Φ int Order : 6</text>
 </g>
 <!-- node1&#45;&gt;node5 -->

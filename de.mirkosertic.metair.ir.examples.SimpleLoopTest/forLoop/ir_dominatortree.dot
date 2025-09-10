@@ -14,7 +14,7 @@ digraph debugoutput {
  node4 -> node0[dir="forward" color="green" penwidth="2"];
  node2 -> node4[labeldistance=2, color=red, fontcolor=red];
  node16 -> node4[labeldistance=2, color=red, fontcolor=red, style=dashed];
- node5[label="#5 Φ int Order : 6",shape=octagon, fillcolor=orange, style=filled];
+ node5[label="#5 Φ int Order : 6",shape=octagon, fillcolor=lightgreen, style=filled];
  node5 -> node0[dir="forward" color="green" penwidth="2"];
  node4 -> node5[style=dotted];
  node1 -> node5[headlabel="if #2", labeldistance=2, color=blue, constraint=false];

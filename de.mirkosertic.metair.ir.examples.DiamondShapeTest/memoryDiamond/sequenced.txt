@@ -1,0 +1,14 @@
+(method (int arg0) (int arg1) (int arg2)
+  int[] var0 = (new int[10])
+  var0[arg1] = 10
+  (block If_4_0
+    (if (arg0 == 0)
+      var0[arg2] = 30
+      break If_4_0
+    (else)
+      var0[arg2] = 20
+      break If_4_0
+    )
+  )
+  return (var0[arg2])
+)

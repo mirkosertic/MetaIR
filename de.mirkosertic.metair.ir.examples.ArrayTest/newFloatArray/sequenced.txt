@@ -1,0 +1,5 @@
+(method (ArrayTest this)
+  float[] var0 = (new float[10])
+  var0[0] = 10.0
+  return
+)

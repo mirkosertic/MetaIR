@@ -1,6 +1,17 @@
 digraph {
  ordering="in";
  node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#0 Method</td></tr><tr><td port="prj1" bgcolor="yellow">this : StaticFieldAccessTest</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
+ node5[label="#5 Class StaticFieldAccessTest$Destination",shape=octagon, fillcolor=lightgreen, style=filled];
+ node0 -> node5[style=dotted];
+ node8[label="#8 PutStaticField : short_field : short",shape=box, fillcolor=lightgrey, style=filled];
+ node5 -> node8[headlabel="*0", labeldistance=2];
+ node6 -> node8[headlabel="*1", labeldistance=2];
+ node7 -> node8[labeldistance=2, color=green, constraint=false];
+ node7 -> node8[labeldistance=2, color=red, fontcolor=red];
+ node7[label="#7 ClassInit",shape=box, fillcolor=lightgrey, style=filled];
+ node5 -> node7[headlabel="*0", labeldistance=2];
+ node6 -> node7[labeldistance=2, color=green, constraint=false];
+ node4 -> node7[labeldistance=2, color=red, fontcolor=red];
  node4[label="#4 ClassInit",shape=box, fillcolor=lightgrey, style=filled];
  node3 -> node4[headlabel="*0", labeldistance=2];
  node0 -> node4[labeldistance=2, color=green, constraint=false];
@@ -12,17 +23,6 @@ digraph {
  node6[label="#6 GetStaticField : short_field : short",shape=octagon, fillcolor=orange, style=filled];
  node3 -> node6[headlabel="*0", labeldistance=2];
  node4 -> node6[labeldistance=2, color=green, constraint=false];
- node8[label="#8 PutStaticField : short_field : short",shape=box, fillcolor=lightgrey, style=filled];
- node5 -> node8[headlabel="*0", labeldistance=2];
- node6 -> node8[headlabel="*1", labeldistance=2];
- node7 -> node8[labeldistance=2, color=green, constraint=false];
- node7 -> node8[labeldistance=2, color=red, fontcolor=red];
- node7[label="#7 ClassInit",shape=box, fillcolor=lightgrey, style=filled];
- node5 -> node7[headlabel="*0", labeldistance=2];
- node6 -> node7[labeldistance=2, color=green, constraint=false];
- node4 -> node7[labeldistance=2, color=red, fontcolor=red];
- node5[label="#5 Class StaticFieldAccessTest$Destination",shape=octagon, fillcolor=lightgreen, style=filled];
- node0 -> node5[style=dotted];
  node9[label="#9 Return",shape=box, fillcolor=lightgrey, style=filled];
  node8 -> node9[labeldistance=2, color=red, fontcolor=red];
  node8 -> node9[labeldistance=2, color=green, constraint=false];

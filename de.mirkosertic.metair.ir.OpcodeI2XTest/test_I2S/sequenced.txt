@@ -1,0 +1,3 @@
+(method (Test this)
+  return ((extend_sign int)((trunc short)0))
+)

@@ -54,7 +54,7 @@
 <!-- node3 -->
 <g id="node5" class="node">
 <title>node3</title>
-<polygon fill="orange" stroke="black" points="275.4,-10.54 275.4,-25.46 210.73,-36 119.27,-36 54.6,-25.46 54.6,-10.54 119.27,0 210.73,0 275.4,-10.54"/>
+<polygon fill="lightgreen" stroke="black" points="275.4,-10.54 275.4,-25.46 210.73,-36 119.27,-36 54.6,-25.46 54.6,-10.54 119.27,0 210.73,0 275.4,-10.54"/>
 <text text-anchor="middle" x="165" y="-14.3" font-family="Times,serif" font-size="14.00">#3 Φ Test Order : 4</text>
 </g>
 <!-- node1&#45;&gt;node3 -->

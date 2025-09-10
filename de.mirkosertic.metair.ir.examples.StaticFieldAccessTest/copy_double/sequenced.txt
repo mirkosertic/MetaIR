@@ -1,0 +1,4 @@
+(method (StaticFieldAccessTest this)
+  StaticFieldAccessTest$Destination.class.double_field = (StaticFieldAccessTest$Source.class.double_field)
+  return
+)

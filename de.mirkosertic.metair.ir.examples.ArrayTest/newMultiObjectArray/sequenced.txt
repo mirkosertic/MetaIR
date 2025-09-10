@@ -1,0 +1,5 @@
+(method (ArrayTest this)
+  Object[][] var0 = TODO
+  var0[0] = (new Object[5])
+  return
+)

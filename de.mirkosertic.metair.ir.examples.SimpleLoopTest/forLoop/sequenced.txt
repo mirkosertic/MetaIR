@@ -1,0 +1,10 @@
+(method (int arg0)
+  (block loop LoopHeaderNode_2
+    int var0 = TODO
+    (if (TODO >= var0)
+      return TODO
+    (else)
+      continue LoopHeaderNode_2
+    )
+  )
+)

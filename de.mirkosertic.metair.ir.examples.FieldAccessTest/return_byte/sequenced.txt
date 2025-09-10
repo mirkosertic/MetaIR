@@ -1,0 +1,4 @@
+(method (FieldAccessTest this)
+  FieldAccessTest$Source var0 = (new (FieldAccessTest$Source.class.$init$))
+  return (var0.byte_field)
+)

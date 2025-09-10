@@ -1,0 +1,3 @@
+(method (ReturnTest this)
+  return 97
+)

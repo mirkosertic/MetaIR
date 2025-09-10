@@ -1,0 +1,7 @@
+(method (Test this)
+  (if (0 == 0)
+    return 0
+  (else)
+    return 1
+  )
+)

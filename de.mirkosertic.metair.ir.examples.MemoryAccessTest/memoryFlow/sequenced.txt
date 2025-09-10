@@ -1,0 +1,5 @@
+(method (MemoryAccessTest this)
+  MemoryAccessTest.class.staticmember = (this.instancmember)
+  this.instancmember = (MemoryAccessTest.class.staticmember)
+  return
+)

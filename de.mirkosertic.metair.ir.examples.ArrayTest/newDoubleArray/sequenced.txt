@@ -1,0 +1,5 @@
+(method (ArrayTest this)
+  double[] var0 = (new double[10])
+  var0[0] = 10.0
+  return
+)

@@ -1,0 +1,3 @@
+(method (int arg0) (int arg1) (int arg2) (int arg3) (int arg4) (long arg5) (float arg6) (double arg7) (String arg8) (int[] arg9)
+  return arg3
+)

@@ -8,7 +8,7 @@ digraph debugoutput {
  node2 -> node0[dir="forward" color="green" penwidth="2"];
  node0 -> node2[labeldistance=2, color=red, fontcolor=red];
  node4 -> node2[labeldistance=2, color=red, fontcolor=red, style=dashed];
- node3[label="#3 Φ Test Order : 4",shape=octagon, fillcolor=orange, style=filled];
+ node3[label="#3 Φ Test Order : 4",shape=octagon, fillcolor=lightgreen, style=filled];
  node3 -> node0[dir="forward" color="green" penwidth="2"];
  node2 -> node3[style=dotted];
  node1 -> node3[headlabel="if #0", labeldistance=2, color=blue, constraint=false];

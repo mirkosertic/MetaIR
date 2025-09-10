@@ -31,7 +31,7 @@
 <!-- node3 -->
 <g id="node2" class="node">
 <title>node3</title>
-<polygon fill="orange" stroke="black" points="171.73,-26.54 171.73,-41.46 135.52,-52 84.31,-52 48.1,-41.46 48.1,-26.54 84.31,-16 135.52,-16 171.73,-26.54"/>
+<polygon fill="lightgreen" stroke="black" points="171.73,-26.54 171.73,-41.46 135.52,-52 84.31,-52 48.1,-41.46 48.1,-26.54 84.31,-16 135.52,-16 171.73,-26.54"/>
 <text text-anchor="middle" x="109.92" y="-30.3" font-family="Times,serif" font-size="14.00">#3 Φ Test</text>
 </g>
 <!-- node0&#45;&gt;node3 -->

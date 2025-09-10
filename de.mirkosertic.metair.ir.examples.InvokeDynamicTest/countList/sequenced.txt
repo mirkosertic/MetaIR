@@ -1,0 +1,3 @@
+(method (InvokeDynamicTest this) (List arg0) (int arg1)
+  return (((arg0.stream()).filter(TODO)).count())
+)

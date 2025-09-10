@@ -1,0 +1,5 @@
+(method (SwitchCaseTest this) (int arg0)
+  return 100
+  return 200
+  return 300
+)

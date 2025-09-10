@@ -1,0 +1,4 @@
+(method (StaticFieldAccessTest this)
+  StaticFieldAccessTest$Destination.class.float_field = (StaticFieldAccessTest$Source.class.float_field)
+  return
+)

@@ -1,0 +1,4 @@
+(method (MethodInvokeTest this)
+  MethodInvokeTest$Source var0 = (new (MethodInvokeTest$Source.class.$init$))
+  return ((MethodInvokeTest.class.$init$).simple_method_return_boolean((var0.byte_field),(var0.boolean_field),(var0.short_field),(var0.char_field),(var0.int_field),(var0.long_field),(var0.float_field),(var0.double_field),(var0.string_field),(var0.array_field)))
+)

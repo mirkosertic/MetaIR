@@ -1,0 +1,5 @@
+(method (Test this)
+  char[] var0 = (new char[10])
+  var0[0] = ((trunc char)10)
+  return
+)

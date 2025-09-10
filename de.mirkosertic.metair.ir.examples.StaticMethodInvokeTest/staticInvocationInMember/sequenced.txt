@@ -1,0 +1,3 @@
+(method (StaticMethodInvokeTest this)
+  return ((StaticMethodInvokeTest.class.$init$).compute(10))
+)

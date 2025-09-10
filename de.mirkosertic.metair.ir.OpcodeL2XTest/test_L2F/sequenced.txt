@@ -1,0 +1,3 @@
+(method (Test this)
+  return ((float)1)
+)

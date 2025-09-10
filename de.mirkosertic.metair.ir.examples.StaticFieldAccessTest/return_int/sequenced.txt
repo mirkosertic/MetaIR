@@ -1,0 +1,3 @@
+(method (StaticFieldAccessTest this)
+  return (StaticFieldAccessTest$Source.class.int_field)
+)

@@ -1,0 +1,3 @@
+(method (TypeTest this)
+  return (new Object[10])
+)

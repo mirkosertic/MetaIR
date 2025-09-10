@@ -1,0 +1,10 @@
+(method (int arg0) (Integer arg1)
+  (block If_3_0
+    (if (arg0 < (arg1.intValue()))
+      break If_3_0
+    (else)
+      break If_3_0
+    )
+  )
+  return TODO
+)

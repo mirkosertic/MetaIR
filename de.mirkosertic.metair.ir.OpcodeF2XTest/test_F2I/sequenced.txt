@@ -1,0 +1,3 @@
+(method (Test this)
+  return ((int)2.0)
+)

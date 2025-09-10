@@ -1,0 +1,3 @@
+(method (MathTest this) (double arg0) (double arg1)
+  return (arg0 * arg1)
+)

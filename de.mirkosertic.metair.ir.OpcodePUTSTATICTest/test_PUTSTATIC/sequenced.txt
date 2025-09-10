@@ -1,0 +1,4 @@
+(method (Test this)
+  String.class.field = 1
+  return
+)

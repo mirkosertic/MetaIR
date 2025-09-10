@@ -1,0 +1,8 @@
+(method (SynchronizedTest this)
+  monitorenter this
+  (block ExceptionGuard_3_0
+    monitorexit this
+    break ExceptionGuard_3_0
+  )
+  return
+)

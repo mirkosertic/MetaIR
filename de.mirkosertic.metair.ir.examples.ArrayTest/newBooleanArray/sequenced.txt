@@ -1,0 +1,5 @@
+(method (ArrayTest this)
+  boolean[] var0 = (new boolean[10])
+  var0[0] = ((trunc boolean)1)
+  return
+)

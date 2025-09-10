@@ -1,0 +1,3 @@
+(method (Test this)
+  return (0 + 1)
+)

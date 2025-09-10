@@ -1,0 +1,3 @@
+(method (InvokeDynamicTest this) (int arg0) (int arg1)
+  return TODO
+)

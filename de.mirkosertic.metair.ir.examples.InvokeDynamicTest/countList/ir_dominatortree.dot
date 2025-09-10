@@ -21,13 +21,13 @@ digraph debugoutput {
  node6[label="#6 MethodHandle : invokeStatic : InvokeDynamicTest.lambda$countList$0 (int,Integer)boolean Order : 7",shape=octagon, fillcolor=lightgreen, style=filled];
  node6 -> node0[dir="forward" color="green" penwidth="2"];
  node0 -> node6[style=dotted];
- node7[label="#7 MethodType : (int)Predicate Order : 6",shape=octagon, fillcolor=lightgreen, style=filled];
+ node7[label="#7 MethodType : (Integer)boolean Order : 6",shape=octagon, fillcolor=lightgreen, style=filled];
  node7 -> node0[dir="forward" color="green" penwidth="2"];
  node0 -> node7[style=dotted];
  node8[label="#8 MethodType : (Object)boolean Order : 5",shape=octagon, fillcolor=lightgreen, style=filled];
  node8 -> node0[dir="forward" color="green" penwidth="2"];
  node0 -> node8[style=dotted];
- node9[label="#9 MethodType : (Integer)boolean Order : 4",shape=octagon, fillcolor=lightgreen, style=filled];
+ node9[label="#9 MethodType : (int)Predicate Order : 4",shape=octagon, fillcolor=lightgreen, style=filled];
  node9 -> node0[dir="forward" color="green" penwidth="2"];
  node0 -> node9[style=dotted];
  node10[label="#10 Class InvokeDynamicTest Order : 2",shape=octagon, fillcolor=lightgreen, style=filled];
@@ -48,10 +48,10 @@ digraph debugoutput {
  node11 -> node14[headlabel="*0", labeldistance=2];
  node13 -> node14[headlabel="*1", labeldistance=2];
  node12 -> node14[headlabel="*2", labeldistance=2];
- node7 -> node14[headlabel="*3", labeldistance=2];
+ node9 -> node14[headlabel="*3", labeldistance=2];
  node8 -> node14[headlabel="*4", labeldistance=2];
  node6 -> node14[headlabel="*5", labeldistance=2];
- node9 -> node14[headlabel="*6", labeldistance=2];
+ node7 -> node14[headlabel="*6", labeldistance=2];
  node15[label="#15 Invoke dynamic test : (int)Predicate Order : 15",shape=box, fillcolor=lightgrey, style=filled];
  node15 -> node0[dir="forward" color="green" penwidth="2"];
  node14 -> node15[headlabel="*0", labeldistance=2];

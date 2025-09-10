@@ -1,0 +1,3 @@
+(method (MethodInvokeTest this)
+  return ((MethodInvokeTest.class.$init$).staticReturnBoolean(1))
+)
