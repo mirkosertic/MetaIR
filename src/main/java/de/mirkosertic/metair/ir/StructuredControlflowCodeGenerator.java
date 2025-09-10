@@ -46,6 +46,30 @@ public abstract class StructuredControlflowCodeGenerator<T extends StructuredCon
 
     public abstract void write(final MonitorExit node);
 
+    public abstract void write(final ClassInitialization node);
+
+    public abstract void write(final Div node);
+
+    public abstract void write(final Rem node);
+
+    public abstract void write(final ArrayLoad node);
+
+    public abstract void write(final InvokeSpecial node);
+
+    public abstract void write(final InvokeInterface node);
+
+    public abstract void write(final InvokeVirtual node);
+
+    public abstract void write(final InvokeStatic node);
+
+    public abstract void write(final InvokeDynamic node);
+
+    public abstract void write(final LabelNode node);
+
+    public abstract void write(final MergeNode node);
+
+    public abstract void write(final CheckCast node);
+
     public abstract void startIfWithTrueBlock(final If node);
 
     public abstract void startIfElseBlock(final If node);
@@ -254,6 +278,17 @@ public abstract class StructuredControlflowCodeGenerator<T extends StructuredCon
 
     public abstract T emitTemporaryVariable(final T value);
 
+    protected final void emitWithTemporary(final Node node, final T value, final Deque<T> evaluationStack) {
+        final T committed = committedToTemporary.get(node);
+        if (committed == null) {
+            final T temporary = emitTemporaryVariable(value);
+            committedToTemporary.put(node, temporary);
+            evaluationStack.push(temporary);
+        } else {
+            evaluationStack.push(committed);
+        }
+    }
+
     protected final void emit(final Node node, final Deque<Node> expressionStack, final Deque<T> evaluationStack) {
         try {
             expressionStack.push(node);
@@ -261,14 +296,7 @@ public abstract class StructuredControlflowCodeGenerator<T extends StructuredCon
             final T result = visit(node, expressionStack, evaluationStack);
 
             if (!node.isConstant() && node.isDataUsedMultipleTimes()) {
-                final T committed = committedToTemporary.get(node);
-                if (committed == null) {
-                    final T temporary = emitTemporaryVariable(result);
-                    committedToTemporary.put(node, temporary);
-                    evaluationStack.push(temporary);
-                } else {
-                    evaluationStack.push(committed);
-                }
+                emitWithTemporary(node, result, evaluationStack);
             } else {
                 evaluationStack.push(result);
             }

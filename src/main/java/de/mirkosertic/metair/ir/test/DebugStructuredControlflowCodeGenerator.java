@@ -5,6 +5,7 @@ import de.mirkosertic.metair.ir.ArrayLength;
 import de.mirkosertic.metair.ir.ArrayLoad;
 import de.mirkosertic.metair.ir.ArrayStore;
 import de.mirkosertic.metair.ir.BitOperation;
+import de.mirkosertic.metair.ir.CheckCast;
 import de.mirkosertic.metair.ir.ClassInitialization;
 import de.mirkosertic.metair.ir.Convert;
 import de.mirkosertic.metair.ir.Div;
@@ -22,7 +23,9 @@ import de.mirkosertic.metair.ir.InvokeInterface;
 import de.mirkosertic.metair.ir.InvokeSpecial;
 import de.mirkosertic.metair.ir.InvokeStatic;
 import de.mirkosertic.metair.ir.InvokeVirtual;
+import de.mirkosertic.metair.ir.LabelNode;
 import de.mirkosertic.metair.ir.LookupSwitch;
+import de.mirkosertic.metair.ir.MergeNode;
 import de.mirkosertic.metair.ir.Method;
 import de.mirkosertic.metair.ir.MonitorEnter;
 import de.mirkosertic.metair.ir.MonitorExit;
@@ -552,6 +555,122 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
     }
 
     @Override
+    public void write(final ClassInitialization node) {
+        final Deque<GeneratedCode> evaluationStack = new ArrayDeque<>();
+
+        final GeneratedCode generatedCode = visit_ClassInitialization(node, new ArrayDeque<>(), evaluationStack);
+
+        emitWithTemporary(node, generatedCode, evaluationStack);
+    }
+
+    @Override
+    public void write(final Div node) {
+        final Deque<GeneratedCode> evaluationStack = new ArrayDeque<>();
+
+        final GeneratedCode generatedCode = visit_Div(node, new ArrayDeque<>(), evaluationStack);
+
+        emitWithTemporary(node, generatedCode, evaluationStack);
+    }
+
+    @Override
+    public void write(final Rem node) {
+        final Deque<GeneratedCode> evaluationStack = new ArrayDeque<>();
+
+        final GeneratedCode generatedCode = visit_Rem(node, new ArrayDeque<>(), evaluationStack);
+
+        emitWithTemporary(node, generatedCode, evaluationStack);
+    }
+
+    @Override
+    public void write(final ArrayLoad node) {
+        final Deque<GeneratedCode> evaluationStack = new ArrayDeque<>();
+
+        final GeneratedCode generatedCode = visit_ArrayLoad(node, new ArrayDeque<>(), evaluationStack);
+
+        emitWithTemporary(node, generatedCode, evaluationStack);
+    }
+
+    @Override
+    public void write(final InvokeSpecial node) {
+        final Deque<GeneratedCode> evaluationStack = new ArrayDeque<>();
+
+        final GeneratedCode generatedCode = visit_InvokeSpecial(node, new ArrayDeque<>(), evaluationStack);
+
+        emitWithTemporary(node, generatedCode, evaluationStack);
+    }
+
+    @Override
+    public void write(final InvokeInterface node) {
+        final Deque<GeneratedCode> evaluationStack = new ArrayDeque<>();
+
+        final GeneratedCode generatedCode = visit_InvokeInterface(node, new ArrayDeque<>(), evaluationStack);
+
+        emitWithTemporary(node, generatedCode, evaluationStack);
+    }
+
+    @Override
+    public void write(final InvokeVirtual node) {
+        final Deque<GeneratedCode> evaluationStack = new ArrayDeque<>();
+
+        final GeneratedCode generatedCode = visit_InvokeVirtual(node, new ArrayDeque<>(), evaluationStack);
+
+        emitWithTemporary(node, generatedCode, evaluationStack);
+    }
+
+    @Override
+    public void write(final InvokeStatic node) {
+        final Deque<GeneratedCode> evaluationStack = new ArrayDeque<>();
+
+        final GeneratedCode generatedCode = visit_InvokeStatic(node, new ArrayDeque<>(), evaluationStack);
+
+        emitWithTemporary(node, generatedCode, evaluationStack);
+    }
+
+    @Override
+    public void write(final InvokeDynamic node) {
+        final Deque<GeneratedCode> evaluationStack = new ArrayDeque<>();
+
+        final GeneratedCode generatedCode = visit_InvokeDynamic(node, new ArrayDeque<>(), evaluationStack);
+
+        emitWithTemporary(node, generatedCode, evaluationStack);
+    }
+
+    @Override
+    public void write(final LabelNode node) {
+        writeIndentation();
+        pw.print("// Label ");
+        pw.println(node.label);
+    }
+
+    @Override
+    public void write(final MergeNode node) {
+        writeIndentation();
+        pw.print("// Merge ");
+        pw.println(node.label);
+    }
+
+    @Override
+    public void write(final CheckCast node) {
+        final Deque<GeneratedCode> evaluationStack = new ArrayDeque<>();
+
+        emit(node.arg0, new ArrayDeque<>(), evaluationStack);
+        emit(node.arg1, new ArrayDeque<>(), evaluationStack);
+
+        if (evaluationStack.size() != 2) {
+            throw new IllegalStateException("Expected exactly two values on the stack, but got " + evaluationStack.size());
+        }
+
+        final GeneratedCode arg1 = evaluationStack.pop();
+        final GeneratedCode arg0 = evaluationStack.pop();
+
+        writeIndentation();
+        pw.print("typecheck ");
+        pw.print(arg0);
+        pw.print(" is instance of ");
+        pw.println(arg1);
+    }
+
+    @Override
     public GeneratedCode emitTemporaryVariable(final GeneratedCode value) {
         final String varname = "var" + temporaryVariablesCounter++;
 
@@ -581,7 +700,6 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
     }
 
     // CFG - Generation
-
 
     @Override
     public void begin(final Method method) {

@@ -72,12 +72,12 @@ public class Sequencer<T extends StructuredControlflowCodeGenerator.GeneratedThi
                         break;
                     }
                     case final LabelNode labelNode: {
-                        // TODO
+                        codegenerator.write(labelNode);
                         current = followUpProcessor.apply(current);
                         break;
                     }
                     case final MergeNode mergeNode: {
-                        // TODO
+                        codegenerator.write(mergeNode);
                         current = followUpProcessor.apply(current);
                         break;
                     }
@@ -87,12 +87,12 @@ public class Sequencer<T extends StructuredControlflowCodeGenerator.GeneratedThi
                         break;
                     }
                     case final ArrayLoad arrayLoad: {
-                        // TODO
+                        codegenerator.write(arrayLoad);
                         current = followUpProcessor.apply(current);
                         break;
                     }
                     case final ClassInitialization classInitialization: {
-                        // TODO
+                        codegenerator.write(classInitialization);
                         current = followUpProcessor.apply(current);
                         break;
                     }
@@ -107,37 +107,37 @@ public class Sequencer<T extends StructuredControlflowCodeGenerator.GeneratedThi
                         break;
                     }
                     case final Div div: {
-                        // TODO
+                        codegenerator.write(div);
                         current = followUpProcessor.apply(current);
                         break;
                     }
                     case final Rem rem: {
-                        // TODO
+                        codegenerator.write(rem);
                         current = followUpProcessor.apply(current);
                         break;
                     }
                     case final InvokeSpecial invokeSpecial: {
-                        // TODO
+                        codegenerator.write(invokeSpecial);
                         current = followUpProcessor.apply(current);
                         break;
                     }
                     case final InvokeStatic invokeStatic: {
-                        // TODO
+                        codegenerator.write(invokeStatic);
                         current = followUpProcessor.apply(current);
                         break;
                     }
                     case final InvokeInterface invokeInterface: {
-                        // TODO
+                        codegenerator.write(invokeInterface);
                         current = followUpProcessor.apply(current);
                         break;
                     }
                     case final InvokeVirtual invokeVirtual: {
-                        // TODO
+                        codegenerator.write(invokeVirtual);
                         current = followUpProcessor.apply(current);
                         break;
                     }
                     case final InvokeDynamic invokeDynamic: {
-                        // TODO
+                        codegenerator.write(invokeDynamic);
                         current = followUpProcessor.apply(current);
                         break;
                     }
@@ -152,7 +152,7 @@ public class Sequencer<T extends StructuredControlflowCodeGenerator.GeneratedThi
                         break;
                     }
                     case final CheckCast checkCast: {
-                        // TODO
+                        codegenerator.write(checkCast);
                         current = followUpProcessor.apply(current);
                         break;
                     }
@@ -162,7 +162,7 @@ public class Sequencer<T extends StructuredControlflowCodeGenerator.GeneratedThi
                         break;
                     }
                     case final ExtractControlFlowProjection extractControlFlowProjection: {
-                        // TODO
+                        // Do nothing here
                         current = followUpProcessor.apply(current);
                         break;
                     }
