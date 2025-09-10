@@ -1,5 +1,6 @@
 package de.mirkosertic.metair.ir;
 
+import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
 import org.junit.jupiter.api.Test;
 
 import java.lang.constant.ConstantDescs;
@@ -16,6 +17,9 @@ public class ArrayLoadTest {
         final Value index = new PrimitiveInt(0);
         final ArrayLoad load = new ArrayLoad(ConstantDescs.CD_byte.arrayType(), a, index);
 
+        assertThat(load.arg0).isSameAs(a);
+        assertThat(load.arg1).isSameAs(index);
+
         assertThat(load.debugDescription()).isEqualTo("ArrayLoad : byte");
 
         assertThat(load).isInstanceOf(Value.class);
@@ -27,6 +31,8 @@ public class ArrayLoadTest {
         assertThat(load.uses.get(1).node()).isSameAs(index);
         assertThat(load.uses.get(1).use()).isEqualTo(new ArgumentUse(1));
         assertThat(load.isConstant()).isFalse();
+
+        assertThat(MetaIRTestHelper.toDebugExpression(load)).isEqualTo("((new byte[10])[0])");
     }
 
     @Test

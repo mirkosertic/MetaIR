@@ -13,7 +13,9 @@ public class NewArrayTest {
     @Test
     public void testUsage() {
         final Value size = new PrimitiveInt(10);
-        final Value a = new NewArray(ConstantDescs.CD_byte, size);
+        final NewArray a = new NewArray(ConstantDescs.CD_byte, size);
+
+        assertThat(a.arg0).isSameAs(size);
 
         assertThat(a.debugDescription()).isEqualTo("NewArray : byte[]");
 

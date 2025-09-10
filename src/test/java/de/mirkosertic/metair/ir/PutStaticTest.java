@@ -16,6 +16,9 @@ public class PutStaticTest {
         final PrimitiveInt value = new PrimitiveInt(10);
         final PutStatic put = new PutStatic(target, "fieldname", ConstantDescs.CD_int, value);
 
+        assertThat(put.arg0).isSameAs(target);
+        assertThat(put.arg1).isSameAs(value);
+
         assertThat(target.usedBy).containsExactly(put);
 
         assertThat(put.uses).hasSize(2);

@@ -9,13 +9,14 @@ public class ReferenceTest extends Value {
     }
 
     public final Operation operation;
+    public final Value arg0;
 
     ReferenceTest(final Operation operation, final Value a) {
         super(ConstantDescs.CD_int);
 
         this.operation = operation;
 
-        use(a, new ArgumentUse(0));
+        this.arg0 = use(a, new ArgumentUse(0));
     }
 
     @Override

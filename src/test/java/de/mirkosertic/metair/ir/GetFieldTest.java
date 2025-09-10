@@ -1,5 +1,6 @@
 package de.mirkosertic.metair.ir;
 
+import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
 import org.junit.jupiter.api.Test;
 
 import java.lang.constant.ConstantDescs;
@@ -15,6 +16,8 @@ public class GetFieldTest {
         final Value v = new StringConstant("Hello");
         final GetField get = new GetField(ConstantDescs.CD_String, ConstantDescs.CD_int, "field", v);
 
+        assertThat(get.arg0).isSameAs(v);
+
         assertThat(v.usedBy).containsExactly(get);
 
         assertThat(get.uses).hasSize(1);
@@ -23,6 +26,8 @@ public class GetFieldTest {
 
         assertThat(get.debugDescription()).isEqualTo("GetField : field : int");
         assertThat(get.isConstant()).isFalse();
+
+        assertThat(MetaIRTestHelper.toDebugExpression(get)).isEqualTo("(\"Hello\".field)");
     }
 
     @Test

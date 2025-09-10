@@ -1,5 +1,6 @@
 package de.mirkosertic.metair.ir;
 
+import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
 import org.junit.jupiter.api.Test;
 
 import java.lang.constant.ConstantDescs;
@@ -14,6 +15,9 @@ public class InstanceOfTest {
         final PrimitiveInt b = new PrimitiveInt(20);
         final InstanceOf cc = new InstanceOf(a, b);
 
+        assertThat(cc.arg0).isSameAs(a);
+        assertThat(cc.arg1).isSameAs(b);
+
         assertThat(cc.debugDescription()).isEqualTo("InstanceOf");
         assertThat(cc.type).isEqualTo(ConstantDescs.CD_int);
         assertThat(cc).isInstanceOf(Value.class);
@@ -25,5 +29,7 @@ public class InstanceOfTest {
         assertThat(cc.uses.get(0).use()).isEqualTo(new ArgumentUse(0));
         assertThat(cc.uses.get(1).node()).isSameAs(b);
         assertThat(cc.uses.get(1).use()).isEqualTo(new ArgumentUse(1));
+
+        assertThat(MetaIRTestHelper.toDebugExpression(cc)).isEqualTo("(10 instanceof 20)");
     }
 }

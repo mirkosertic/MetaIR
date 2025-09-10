@@ -1,5 +1,6 @@
 package de.mirkosertic.metair.ir;
 
+import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
 import org.junit.jupiter.api.Test;
 
 import java.lang.constant.ConstantDescs;
@@ -15,6 +16,8 @@ public class ArrayLengthTest {
         final Value a = new NewArray(ConstantDescs.CD_byte, new PrimitiveInt(10));
         final ArrayLength len = new ArrayLength(a);
 
+        assertThat(len.arg0).isSameAs(a);
+
         assertThat(len.debugDescription()).isEqualTo("ArrayLength");
 
         assertThat(len).isInstanceOf(Value.class);
@@ -23,6 +26,8 @@ public class ArrayLengthTest {
         assertThat(len.uses.getFirst().node()).isSameAs(a);
         assertThat(len.uses.getFirst().use()).isEqualTo(new ArgumentUse(0));
         assertThat(len.isConstant()).isFalse();
+
+        assertThat(MetaIRTestHelper.toDebugExpression(len)).isEqualTo("(new byte[10]).length");
     }
 
     @Test

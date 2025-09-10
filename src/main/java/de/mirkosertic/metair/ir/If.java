@@ -5,8 +5,10 @@ public class If extends ConditionalNode {
     public static final String TRUE = "true";
     public static final String FALSE = "false";
 
+    public final Value arg0;
+
     If(final Value condition) {
-        use(condition, new ArgumentUse(0));
+        this.arg0 = use(condition, new ArgumentUse(0));
 
         registerAs(TRUE, controlFlowsTo(new ExtractControlFlowProjection(TRUE), FlowType.FORWARD));
         registerAs(FALSE, controlFlowsTo(new ExtractControlFlowProjection(FALSE), FlowType.FORWARD));

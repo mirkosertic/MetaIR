@@ -1,5 +1,6 @@
 package de.mirkosertic.metair.ir;
 
+import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
 import org.junit.jupiter.api.Test;
 
 import java.lang.constant.ConstantDescs;
@@ -13,6 +14,8 @@ public class ClassInitializationTest {
         final RuntimeclassReference cr = new RuntimeclassReference(ConstantDescs.CD_String);
         final ClassInitialization ci = new ClassInitialization(cr);
 
+        assertThat(ci.arg0).isSameAs(cr);
+
         assertThat(ci.debugDescription()).isEqualTo("ClassInit");
 
         assertThat(ci.uses.size()).isEqualTo(1);
@@ -20,5 +23,7 @@ public class ClassInitializationTest {
         assertThat(ci.uses.getFirst().use()).isEqualTo(new ArgumentUse(0));
         assertThat(ci.usedBy).isEmpty();
         assertThat(ci.isConstant()).isFalse();
+
+        assertThat(MetaIRTestHelper.toDebugExpression(ci)).isEqualTo("(String.class.$init$)");
     }
 }

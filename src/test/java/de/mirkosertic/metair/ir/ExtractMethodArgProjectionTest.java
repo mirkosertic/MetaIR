@@ -22,5 +22,7 @@ public class ExtractMethodArgProjectionTest {
         assertThat(a.uses.getFirst().use()).isEqualTo(new ArgumentUse(1));
         assertThat(a.debugDescription()).isEqualTo("arg1 : String");
         assertThat(a.name()).isEqualTo("arg1");
+
+        assertThat(a.isConstant()).isTrue();
     }
 }

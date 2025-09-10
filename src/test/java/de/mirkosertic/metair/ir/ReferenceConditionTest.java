@@ -1,5 +1,6 @@
 package de.mirkosertic.metair.ir;
 
+import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
 import org.junit.jupiter.api.Test;
 
 import java.lang.constant.ConstantDescs;
@@ -14,6 +15,9 @@ public class ReferenceConditionTest {
         final StringConstant b = new StringConstant("20");
         final ReferenceCondition referenceCondition = new ReferenceCondition(ReferenceCondition.Operation.EQ, a, b);
 
+        assertThat(referenceCondition.arg0).isSameAs(a);
+        assertThat(referenceCondition.arg1).isSameAs(b);
+
         assertThat(referenceCondition.debugDescription()).isEqualTo("ReferenceCondition : EQ");
 
         assertThat(referenceCondition.type).isEqualTo(ConstantDescs.CD_int);
@@ -27,6 +31,8 @@ public class ReferenceConditionTest {
         assertThat(referenceCondition.uses.get(1).node()).isSameAs(b);
         assertThat(referenceCondition.uses.get(1).use()).isEqualTo(new ArgumentUse(1));
         assertThat(referenceCondition.isConstant()).isFalse();
+
+        assertThat(MetaIRTestHelper.toDebugExpression(referenceCondition)).isEqualTo("(\"10\" == \"20\")");
     }
 
 }

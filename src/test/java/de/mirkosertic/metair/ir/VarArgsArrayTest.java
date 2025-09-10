@@ -1,5 +1,6 @@
 package de.mirkosertic.metair.ir;
 
+import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
 import org.junit.jupiter.api.Test;
 
 import java.lang.constant.ConstantDescs;
@@ -11,8 +12,10 @@ public class VarArgsArrayTest {
 
     @Test
     public void testUsage() {
-        final Value size = new PrimitiveInt(10);
-        final Value a = new VarArgsArray(ConstantDescs.CD_byte, List.of(size));
+        final Value elem = new PrimitiveInt(10);
+        final Value a = new VarArgsArray(ConstantDescs.CD_byte, List.of(elem));
+
+        assertThat(a.arguments()).containsExactly(elem);
 
         assertThat(a.debugDescription()).isEqualTo("VarArgsArray : byte[]");
 
@@ -20,9 +23,11 @@ public class VarArgsArrayTest {
 
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).isEmpty();
-        assertThat(size.usedBy).containsExactly(a);
+        assertThat(elem.usedBy).containsExactly(a);
         assertThat(a.uses.size()).isEqualTo(1);
-        assertThat(a.uses.getFirst().node()).isSameAs(size);
+        assertThat(a.uses.getFirst().node()).isSameAs(elem);
         assertThat(a.uses.getFirst().use()).isEqualTo(new ArgumentUse(0));
+
+        assertThat(MetaIRTestHelper.toDebugExpression(a)).isEqualTo("(new byte{10})");
     }
 }

@@ -1,5 +1,6 @@
 package de.mirkosertic.metair.ir;
 
+import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
 import org.junit.jupiter.api.Test;
 
 import java.lang.constant.ConstantDescs;
@@ -24,5 +25,7 @@ public class InvokeInterfaceTest {
         assertThat(a.isConstant()).isFalse();
 
         assertThat(a.debugDescription()).isEqualTo("Invoke interface bar : (int)void");
+
+        assertThat(MetaIRTestHelper.toDebugExpression(a)).isEqualTo("(\"hello\".bar(10))");
     }
 }

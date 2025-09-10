@@ -2,7 +2,7 @@ package de.mirkosertic.metair.ir;
 
 import java.lang.constant.ClassDesc;
 
-public class ExtractThisRefProjection extends Value implements Projection {
+public class ExtractThisRefProjection extends ConstantValue implements Projection {
 
     ExtractThisRefProjection(final ClassDesc type, final Method source) {
         super(type);

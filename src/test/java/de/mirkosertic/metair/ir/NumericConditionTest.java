@@ -1,5 +1,6 @@
 package de.mirkosertic.metair.ir;
 
+import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
 import org.junit.jupiter.api.Test;
 
 import java.lang.constant.ConstantDescs;
@@ -14,6 +15,9 @@ public class NumericConditionTest {
         final PrimitiveInt b = new PrimitiveInt(20);
         final NumericCondition numericCondition = new NumericCondition(NumericCondition.Operation.GE, a, b);
 
+        assertThat(numericCondition.arg0).isSameAs(a);
+        assertThat(numericCondition.arg1).isSameAs(b);
+
         assertThat(numericCondition.debugDescription()).isEqualTo("NumericCondition : GE");
 
         assertThat(numericCondition.type).isEqualTo(ConstantDescs.CD_int);
@@ -27,6 +31,8 @@ public class NumericConditionTest {
         assertThat(numericCondition.uses.get(1).node()).isSameAs(b);
         assertThat(numericCondition.uses.get(1).use()).isEqualTo(new ArgumentUse(1));
         assertThat(numericCondition.isConstant()).isFalse();
+
+        assertThat(MetaIRTestHelper.toDebugExpression(numericCondition)).isEqualTo("(10 >= 20)");
     }
 
 }

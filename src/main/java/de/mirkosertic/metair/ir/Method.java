@@ -5,7 +5,9 @@ import java.lang.constant.ClassDesc;
 import java.lang.constant.ConstantDesc;
 import java.lang.constant.MethodHandleDesc;
 import java.lang.constant.MethodTypeDesc;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Method extends TupleNode {
@@ -14,7 +16,10 @@ public class Method extends TupleNode {
     private final Map<MethodTypeDesc, MethodType> methodtypeReferences;
     private final Map<MethodHandleDesc, MethodHandle> methodHandles;
 
+    public final List<Value> methodArguments;
+
     Method() {
+        this.methodArguments = new ArrayList<>();
         this.runtimeclassReferences = new HashMap<>();
         this.methodtypeReferences = new HashMap<>();
         this.methodHandles = new HashMap<>();
@@ -49,12 +54,18 @@ public class Method extends TupleNode {
     public ExtractThisRefProjection defineThisRef(final ClassDesc type) {
         final ExtractThisRefProjection n = new ExtractThisRefProjection(type, this);
         registerAs(n.name(), n);
+
+        methodArguments.add(n);
+
         return n;
     }
 
     public ExtractMethodArgProjection defineMethodArgument(final ConstantDesc type, final int index) {
         final ExtractMethodArgProjection n = new ExtractMethodArgProjection(type, this, index);
         registerAs(n.name(), n);
+
+        methodArguments.add(n);
+
         return n;
     }
 

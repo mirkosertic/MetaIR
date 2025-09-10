@@ -1,5 +1,6 @@
 package de.mirkosertic.metair.ir;
 
+import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
 import org.junit.jupiter.api.Test;
 
 import java.lang.constant.ConstantDescs;
@@ -13,6 +14,8 @@ public class GetStaticTest {
         final RuntimeclassReference v = new RuntimeclassReference(ConstantDescs.CD_String);
         final GetStatic get = new GetStatic(v, "fieldname", ConstantDescs.CD_int);
 
+        assertThat(get.arg0).isSameAs(v);
+
         assertThat(v.usedBy).containsExactly(get);
 
         assertThat(get.uses).hasSize(1);
@@ -24,5 +27,7 @@ public class GetStaticTest {
         assertThat(get.debugDescription()).isEqualTo("GetStaticField : fieldname : int");
         assertThat(get.fieldName).isEqualTo("fieldname");
         assertThat(get.isConstant()).isFalse();
+
+        assertThat(MetaIRTestHelper.toDebugExpression(get)).isEqualTo("(String.class.fieldname)");
     }
 }

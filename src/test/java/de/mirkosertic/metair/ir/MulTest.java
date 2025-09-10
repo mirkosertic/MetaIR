@@ -1,5 +1,6 @@
 package de.mirkosertic.metair.ir;
 
+import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
 import org.junit.jupiter.api.Test;
 
 import java.lang.constant.ConstantDescs;
@@ -31,6 +32,8 @@ public class MulTest {
         assertThat(mul.uses.get(1).node()).isSameAs(b);
         assertThat(mul.uses.get(1).use()).isEqualTo(new ArgumentUse(1));
         assertThat(mul.isConstant()).isFalse();
+
+        assertThat(MetaIRTestHelper.toDebugExpression(mul)).isEqualTo("(10 * 20)");
     }
 
     @Test

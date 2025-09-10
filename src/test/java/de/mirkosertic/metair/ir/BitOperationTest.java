@@ -1,5 +1,6 @@
 package de.mirkosertic.metair.ir;
 
+import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
 import org.junit.jupiter.api.Test;
 
 import java.lang.constant.ConstantDescs;
@@ -16,6 +17,8 @@ public class BitOperationTest {
         final PrimitiveInt b = new PrimitiveInt(20);
         final BitOperation bit = new BitOperation(ConstantDescs.CD_int, BitOperation.Operation.AND, a, b);
 
+        assertThat(bit.arg0).isSameAs(a);
+        assertThat(bit.arg1).isSameAs(b);
         assertThat(bit.debugDescription()).isEqualTo("BitOperation : AND(int)");
 
         assertThat(bit.type).isEqualTo(ConstantDescs.CD_int);
@@ -28,6 +31,8 @@ public class BitOperationTest {
         assertThat(bit.uses.get(1).node()).isSameAs(b);
         assertThat(bit.uses.get(1).use()).isEqualTo(new ArgumentUse(1));
         assertThat(bit.isConstant()).isFalse();
+
+        assertThat(MetaIRTestHelper.toDebugExpression(bit)).isEqualTo("(10 & 20)");
     }
 
     @Test

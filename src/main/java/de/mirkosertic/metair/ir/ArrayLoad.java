@@ -5,7 +5,8 @@ import java.lang.constant.ConstantDescs;
 
 public class ArrayLoad extends Value {
 
-    public final ClassDesc arrayType;
+    public final Value arg0;
+    public final Value arg1;
 
     ArrayLoad(final ClassDesc arrayType, final Value array, final Value index) {
         super(arrayType.componentType());
@@ -18,10 +19,8 @@ public class ArrayLoad extends Value {
             illegalArgument("Cannot store to non int index of type " + TypeUtils.toString(index.type));
         }
 
-        this.arrayType = arrayType;
-
-        use(array, new ArgumentUse(0));
-        use(index, new ArgumentUse(1));
+        this.arg0 = use(array, new ArgumentUse(0));
+        this.arg1 = use(index, new ArgumentUse(1));
     }
 
     @Override

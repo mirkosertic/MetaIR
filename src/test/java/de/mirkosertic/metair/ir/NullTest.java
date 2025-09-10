@@ -1,5 +1,6 @@
 package de.mirkosertic.metair.ir;
 
+import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
 import org.junit.jupiter.api.Test;
 
 import java.lang.constant.ConstantDescs;
@@ -18,6 +19,8 @@ public class NullTest {
         assertThat(a.uses).isEmpty();
         assertThat(a.isConstant()).isTrue();
         assertThat(a.debugDescription()).isEqualTo("null");
+
+        assertThat(MetaIRTestHelper.toDebugExpression(a)).isEqualTo("null");
     }
 
 }

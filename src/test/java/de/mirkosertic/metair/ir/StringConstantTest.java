@@ -1,5 +1,6 @@
 package de.mirkosertic.metair.ir;
 
+import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
 import org.junit.jupiter.api.Test;
 
 import java.lang.constant.ConstantDescs;
@@ -19,5 +20,7 @@ public class StringConstantTest {
         assertThat(a.isConstant()).isTrue();
         assertThat(a.debugDescription()).isEqualTo("String : hello");
         assertThat(a.value).isEqualTo("hello");
+
+        assertThat(MetaIRTestHelper.toDebugExpression(a)).isEqualTo("\"hello\"");
     }
 }

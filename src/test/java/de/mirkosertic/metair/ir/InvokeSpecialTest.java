@@ -1,5 +1,6 @@
 package de.mirkosertic.metair.ir;
 
+import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
 import org.junit.jupiter.api.Test;
 
 import java.lang.constant.ConstantDescs;
@@ -27,6 +28,8 @@ public class InvokeSpecialTest {
         assertThat(a.isConstant()).isFalse();
 
         assertThat(a.debugDescription()).isEqualTo("Invoke special bar : (int)void");
+
+        assertThat(MetaIRTestHelper.toDebugExpression(a)).isEqualTo("(\"hello\".bar(10))");
     }
 
     @Test

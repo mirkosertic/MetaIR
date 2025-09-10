@@ -21,5 +21,7 @@ public class ExtractThisRefProjectionTest {
         assertThat(a.uses.getFirst().use()).isEqualTo(new ArgumentUse(0));
         assertThat(a.debugDescription()).isEqualTo("this : String");
         assertThat(a.name()).isEqualTo("this");
+
+        assertThat(a.isConstant()).isTrue();
     }
 }

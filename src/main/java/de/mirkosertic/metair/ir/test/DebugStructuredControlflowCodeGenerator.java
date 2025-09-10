@@ -1,0 +1,901 @@
+package de.mirkosertic.metair.ir.test;
+
+import de.mirkosertic.metair.ir.Add;
+import de.mirkosertic.metair.ir.ArrayLength;
+import de.mirkosertic.metair.ir.ArrayLoad;
+import de.mirkosertic.metair.ir.ArrayStore;
+import de.mirkosertic.metair.ir.BitOperation;
+import de.mirkosertic.metair.ir.ClassInitialization;
+import de.mirkosertic.metair.ir.Convert;
+import de.mirkosertic.metair.ir.Div;
+import de.mirkosertic.metair.ir.ExceptionGuard;
+import de.mirkosertic.metair.ir.Extend;
+import de.mirkosertic.metair.ir.ExtractMethodArgProjection;
+import de.mirkosertic.metair.ir.ExtractThisRefProjection;
+import de.mirkosertic.metair.ir.GetField;
+import de.mirkosertic.metair.ir.GetStatic;
+import de.mirkosertic.metair.ir.Goto;
+import de.mirkosertic.metair.ir.If;
+import de.mirkosertic.metair.ir.InstanceOf;
+import de.mirkosertic.metair.ir.InvokeDynamic;
+import de.mirkosertic.metair.ir.InvokeInterface;
+import de.mirkosertic.metair.ir.InvokeSpecial;
+import de.mirkosertic.metair.ir.InvokeStatic;
+import de.mirkosertic.metair.ir.InvokeVirtual;
+import de.mirkosertic.metair.ir.LookupSwitch;
+import de.mirkosertic.metair.ir.Method;
+import de.mirkosertic.metair.ir.MonitorEnter;
+import de.mirkosertic.metair.ir.MonitorExit;
+import de.mirkosertic.metair.ir.Mul;
+import de.mirkosertic.metair.ir.Negate;
+import de.mirkosertic.metair.ir.New;
+import de.mirkosertic.metair.ir.NewArray;
+import de.mirkosertic.metair.ir.NewMultiArray;
+import de.mirkosertic.metair.ir.Node;
+import de.mirkosertic.metair.ir.Null;
+import de.mirkosertic.metair.ir.NumericCondition;
+import de.mirkosertic.metair.ir.PHI;
+import de.mirkosertic.metair.ir.PrimitiveDouble;
+import de.mirkosertic.metair.ir.PrimitiveFloat;
+import de.mirkosertic.metair.ir.PrimitiveInt;
+import de.mirkosertic.metair.ir.PrimitiveLong;
+import de.mirkosertic.metair.ir.Projection;
+import de.mirkosertic.metair.ir.PutField;
+import de.mirkosertic.metair.ir.PutStatic;
+import de.mirkosertic.metair.ir.ReferenceCondition;
+import de.mirkosertic.metair.ir.ReferenceTest;
+import de.mirkosertic.metair.ir.Rem;
+import de.mirkosertic.metair.ir.Return;
+import de.mirkosertic.metair.ir.ReturnValue;
+import de.mirkosertic.metair.ir.RuntimeclassReference;
+import de.mirkosertic.metair.ir.Sequencer;
+import de.mirkosertic.metair.ir.StringConstant;
+import de.mirkosertic.metair.ir.StructuredControlflowCodeGenerator;
+import de.mirkosertic.metair.ir.Sub;
+import de.mirkosertic.metair.ir.TableSwitch;
+import de.mirkosertic.metair.ir.Throw;
+import de.mirkosertic.metair.ir.Truncate;
+import de.mirkosertic.metair.ir.TypeUtils;
+import de.mirkosertic.metair.ir.Value;
+import de.mirkosertic.metair.ir.VarArgsArray;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.lang.constant.ClassDesc;
+import java.lang.constant.ConstantDesc;
+import java.lang.constant.ConstantDescs;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
+
+public class DebugStructuredControlflowCodeGenerator extends StructuredControlflowCodeGenerator<DebugStructuredControlflowCodeGenerator.GeneratedCode> {
+
+    public record GeneratedCode(ConstantDesc type, String value) implements GeneratedThing {
+
+        @Override
+        public String toString() {
+            return value;
+        }
+    }
+
+    private final StringWriter sw;
+    private final PrintWriter pw;
+    private int temporaryVariablesCounter;
+    private int indentationLevel = 0;
+
+    public DebugStructuredControlflowCodeGenerator() {
+        this.sw = new StringWriter();
+        this.pw = new PrintWriter(sw);
+        this.temporaryVariablesCounter = 0;
+    }
+
+    private void writeIndentation() {
+        for (int i = 0; i < indentationLevel; i++) {
+            pw.print("  ");
+        }
+    }
+
+    // Expression generation
+
+    @Override
+    public GeneratedCode visit_PrimitiveInt(final PrimitiveInt node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        return new GeneratedCode(ConstantDescs.CD_int, Integer.toString(node.value));
+    }
+
+    @Override
+    public GeneratedCode visit_PrimitiveLong(final PrimitiveLong node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        return new GeneratedCode(ConstantDescs.CD_long, Long.toString(node.value));
+    }
+
+    @Override
+    public GeneratedCode visit_PrimitiveFloat(final PrimitiveFloat node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        return new GeneratedCode(ConstantDescs.CD_float, Float.toString(node.value));
+    }
+
+    @Override
+    public GeneratedCode visit_PrimitiveDouble(final PrimitiveDouble node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        return new GeneratedCode(ConstantDescs.CD_double, Double.toString(node.value));
+    }
+
+    @Override
+    public GeneratedCode visit_Add(final Add node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        emit(node.arg1, expressionStack, evaluationStack);
+        emit(node.arg2, expressionStack, evaluationStack);
+
+        final GeneratedCode arg2 = evaluationStack.pop();
+        final GeneratedCode arg1 = evaluationStack.pop();
+
+        return new GeneratedCode(node.type, "(" + arg1 + " + " + arg2 + ")");
+    }
+
+    @Override
+    public GeneratedCode visit_Div(final Div node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        emit(node.arg1, expressionStack, evaluationStack);
+        emit(node.arg2, expressionStack, evaluationStack);
+
+        final GeneratedCode arg2 = evaluationStack.pop();
+        final GeneratedCode arg1 = evaluationStack.pop();
+
+        return new GeneratedCode(node.type, "(" + arg1 + " / " + arg2 + ")");
+    }
+
+    @Override
+    public GeneratedCode visit_Mul(final Mul node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        emit(node.arg1, expressionStack, evaluationStack);
+        emit(node.arg2, expressionStack, evaluationStack);
+
+        final GeneratedCode arg2 = evaluationStack.pop();
+        final GeneratedCode arg1 = evaluationStack.pop();
+
+        return new GeneratedCode(node.type, "(" + arg1 + " * " + arg2 + ")");
+    }
+
+    @Override
+    public GeneratedCode visit_Sub(final Sub node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        emit(node.arg1, expressionStack, evaluationStack);
+        emit(node.arg2, expressionStack, evaluationStack);
+
+        final GeneratedCode arg2 = evaluationStack.pop();
+        final GeneratedCode arg1 = evaluationStack.pop();
+
+        return new GeneratedCode(node.type, "(" + arg1 + " - " + arg2 + ")");
+    }
+
+    @Override
+    public GeneratedCode visit_Rem(final Rem node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        emit(node.arg1, expressionStack, evaluationStack);
+        emit(node.arg2, expressionStack, evaluationStack);
+
+        final GeneratedCode arg2 = evaluationStack.pop();
+        final GeneratedCode arg1 = evaluationStack.pop();
+
+        return new GeneratedCode(node.type, "(" + arg1 + " % " + arg2 + ")");
+    }
+
+    @Override
+    public GeneratedCode visit_ExtractThisRefProjection(final ExtractThisRefProjection node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        return new GeneratedCode(node.type, node.name());
+    }
+
+    @Override
+    public GeneratedCode visit_ExtractMethodArgProjection(final ExtractMethodArgProjection node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        return new GeneratedCode(node.type, node.name());
+    }
+
+    @Override
+    public GeneratedCode visit_StringConstant(final StringConstant node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        return new GeneratedCode(ConstantDescs.CD_String, "\"" + node.value + "\"");
+    }
+
+    @Override
+    public GeneratedCode visit_Null(final Null node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        return new GeneratedCode(ConstantDescs.CD_Object, "null");
+    }
+
+    @Override
+    public GeneratedCode visit_Negate(final Negate node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        emit(node.arg0, expressionStack, evaluationStack);
+
+        final GeneratedCode arg1 = evaluationStack.pop();
+        return new GeneratedCode(node.type, "(-" + arg1 + ")");
+    }
+
+    @Override
+    public GeneratedCode visit_ArrayLength(final ArrayLength node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        emit(node.arg0, expressionStack, evaluationStack);
+
+        final GeneratedCode arg1 = evaluationStack.pop();
+
+        return new GeneratedCode(node.type, arg1 + ".length");
+    }
+
+    @Override
+    public GeneratedCode visit_NewArray(final NewArray node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        emit(node.arg0, expressionStack, evaluationStack);
+
+        final GeneratedCode arg1 = evaluationStack.pop();
+
+        return new GeneratedCode(node.type, "(new " + TypeUtils.toString(((ClassDesc) node.type).componentType()) + "[" + arg1 + "])");
+    }
+
+    @Override
+    public GeneratedCode visit_ArrayLoad(final ArrayLoad node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        emit(node.arg0, expressionStack, evaluationStack);
+        emit(node.arg1, expressionStack, evaluationStack);
+
+        final GeneratedCode arg2 = evaluationStack.pop();
+        final GeneratedCode arg1 = evaluationStack.pop();
+
+        return new GeneratedCode(node.type, "(" + arg1 + "[" + arg2 + "])");
+    }
+
+    @Override
+    public GeneratedCode visit_BitOperation(final BitOperation node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        emit(node.arg0, expressionStack, evaluationStack);
+        emit(node.arg1, expressionStack, evaluationStack);
+
+        final GeneratedCode arg2 = evaluationStack.pop();
+        final GeneratedCode arg1 = evaluationStack.pop();
+
+        return switch (node.operation) {
+            case AND -> new GeneratedCode(node.type, "(" + arg1 + " & " + arg2 + ")");
+            case OR -> new GeneratedCode(node.type, "(" + arg1 + " | " + arg2 + ")");
+            case XOR -> new GeneratedCode(node.type, "(" + arg1 + " ^ " + arg2 + ")");
+            case SHL -> new GeneratedCode(node.type, "(" + arg1 + " << " + arg2 + ")");
+            case SHR -> new GeneratedCode(node.type, "(" + arg1 + " >>" + arg2 + ")");
+            case USHR -> new GeneratedCode(node.type, "(" + arg1 + " >>>" + arg2 + ")");
+        };
+    }
+
+    @Override
+    public GeneratedCode visit_GetField(final GetField node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        emit(node.arg0, expressionStack, evaluationStack);
+
+        final GeneratedCode arg1 = evaluationStack.pop();
+
+        return new GeneratedCode(node.type, "(" + arg1 + "." + node.fieldName + ")");
+    }
+
+    @Override
+    public GeneratedCode visit_GetStatic(final GetStatic node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        emit(node.arg0, expressionStack, evaluationStack);
+
+        final GeneratedCode arg1 = evaluationStack.pop();
+
+        return new GeneratedCode(node.type, "(" + arg1 + "." + node.fieldName + ")");
+    }
+
+    @Override
+    public GeneratedCode visit_RuntimeClassReference(final RuntimeclassReference node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        return new GeneratedCode(node.type, TypeUtils.toString(node.type) + ".class");
+    }
+
+    @Override
+    public GeneratedCode visit_ReferenceCondition(final ReferenceCondition node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        emit(node.arg0, expressionStack, evaluationStack);
+        emit(node.arg1, expressionStack, evaluationStack);
+
+        final GeneratedCode arg2 = evaluationStack.pop();
+        final GeneratedCode arg1 = evaluationStack.pop();
+
+        return switch (node.operation) {
+            case EQ -> new GeneratedCode(node.type, "(" + arg1 + " == " + arg2 + ")");
+            case NE -> new GeneratedCode(node.type, "(" + arg1 + " != " + arg2 + ")");
+        };
+    }
+
+    @Override
+    public GeneratedCode visit_ReferenceTest(final ReferenceTest node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        emit(node.arg0, expressionStack, evaluationStack);
+
+        final GeneratedCode arg1 = evaluationStack.pop();
+
+        return switch (node.operation) {
+            case NULL -> new GeneratedCode(node.type, "(" + arg1 + " == null)");
+            case NONNULL -> new GeneratedCode(node.type, "(" + arg1 + " != null)");
+        };
+    }
+
+    @Override
+    public GeneratedCode visit_New(final New node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        emit(node.arg0, expressionStack, evaluationStack);
+
+        final GeneratedCode arg1 = evaluationStack.pop();
+
+        return new GeneratedCode(node.type, "(new " + arg1 + ")");
+    }
+
+    @Override
+    public GeneratedCode visit_NumericCondition(final NumericCondition node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        emit(node.arg0, expressionStack, evaluationStack);
+        emit(node.arg1, expressionStack, evaluationStack);
+
+        final GeneratedCode arg2 = evaluationStack.pop();
+        final GeneratedCode arg1 = evaluationStack.pop();
+
+        return switch (node.operation) {
+            case EQ -> new GeneratedCode(node.type, "(" + arg1 + " == " + arg2 + ")");
+            case NE -> new GeneratedCode(node.type, "(" + arg1 + " != " + arg2 + ")");
+            case GT -> new GeneratedCode(node.type, "(" + arg1 + " > " + arg2 + ")");
+            case GE -> new GeneratedCode(node.type, "(" + arg1 + " >= " + arg2 + ")");
+            case LT -> new GeneratedCode(node.type, "(" + arg1 + " < " + arg2 + ")");
+            case LE -> new GeneratedCode(node.type, "(" + arg1 + " <= " + arg2 + ")");
+        };
+    }
+
+    @Override
+    public GeneratedCode visit_VarArgsArray(final VarArgsArray node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+
+        final List<Node> argumwens = node.arguments();
+        for (final Node arg : argumwens) {
+            emit(arg, expressionStack, evaluationStack);
+        }
+
+        List<GeneratedCode> content = new ArrayList<>();
+        for (int i = 0; i < argumwens.size(); i++) {
+            content.add(evaluationStack.pop());
+        }
+
+        content = content.reversed();
+
+        final StringBuilder result = new StringBuilder("(new " + TypeUtils.toString(((ClassDesc) node.type).componentType()) + "{");
+        for (int i = 0; i < content.size(); i++) {
+            if (i > 0) {
+                result.append(",");
+            }
+            result.append(content.get(i));
+        }
+        result.append("})");
+
+        return new GeneratedCode(node.type, result.toString());
+    }
+
+    @Override
+    public GeneratedCode visit_Convert(final Convert node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        emit(node.arg0, expressionStack, evaluationStack);
+
+        final GeneratedCode arg1 = evaluationStack.pop();
+
+        return new GeneratedCode(node.type, "((" + TypeUtils.toString(node.type) + ")" + arg1 + ")");
+    }
+
+    @Override
+    public GeneratedCode visit_InstanceOf(final InstanceOf node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        emit(node.arg0, expressionStack, evaluationStack);
+        emit(node.arg1, expressionStack, evaluationStack);
+
+        final GeneratedCode arg2 = evaluationStack.pop();
+        final GeneratedCode arg1 = evaluationStack.pop();
+
+        return new GeneratedCode(node.type, "(" + arg1 + " instanceof " + arg2 + ")");
+    }
+
+    @Override
+    public GeneratedCode visit_Truncate(final Truncate node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        emit(node.arg0, expressionStack, evaluationStack);
+
+        final GeneratedCode arg1 = evaluationStack.pop();
+
+        return new GeneratedCode(node.type, "((trunc " + TypeUtils.toString(node.type) + ")" + arg1 + ")");
+    }
+
+    @Override
+    public GeneratedCode visit_Extend(final Extend node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        emit(node.arg0, expressionStack, evaluationStack);
+
+        final GeneratedCode arg1 = evaluationStack.pop();
+
+        return switch (node.extendType) {
+            case SIGN -> new GeneratedCode(node.type, "((extend_sign " + TypeUtils.toString(node.type) + ")" + arg1 + ")");
+            case ZERO -> new GeneratedCode(node.type, "((extend_zero " + TypeUtils.toString(node.type) + ")" + arg1 + ")");
+        };
+    }
+
+    @Override
+    public GeneratedCode visit_ClassInitialization(final ClassInitialization node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        emit(node.arg0, expressionStack, evaluationStack);
+
+        final GeneratedCode arg1 = evaluationStack.pop();
+
+        return new GeneratedCode(node.type, "(" + arg1 + ".$init$)");
+    }
+
+    @Override
+    public GeneratedCode visit_InvokeInterface(final InvokeInterface node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+
+        final List<Node> argumwens = node.arguments();
+        for (final Node arg : argumwens) {
+            emit(arg, expressionStack, evaluationStack);
+        }
+
+        List<GeneratedCode> content = new ArrayList<>();
+        for (int i = 0; i < argumwens.size(); i++) {
+            content.add(evaluationStack.pop());
+        }
+
+        content = content.reversed();
+
+        final StringBuilder result = new StringBuilder("(");
+        result.append(content.getFirst());
+        result.append(".");
+        result.append(node.name);
+        result.append("(");
+
+        for (int i = 1; i < content.size(); i++) {
+            if (i > 1) {
+                result.append(",");
+            }
+            result.append(content.get(i));
+        }
+
+        result.append("))");
+
+        return new GeneratedCode(node.type, result.toString());
+    }
+
+    @Override
+    public GeneratedCode visit_InvokeSpecial(final InvokeSpecial node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+
+        final List<Node> argumwens = node.arguments();
+        for (final Node arg : argumwens) {
+            emit(arg, expressionStack, evaluationStack);
+        }
+
+        List<GeneratedCode> content = new ArrayList<>();
+        for (int i = 0; i < argumwens.size(); i++) {
+            content.add(evaluationStack.pop());
+        }
+
+        content = content.reversed();
+
+        final StringBuilder result = new StringBuilder("(");
+        result.append(content.getFirst());
+        result.append(".");
+        result.append(node.name);
+        result.append("(");
+
+        for (int i = 1; i < content.size(); i++) {
+            if (i > 1) {
+                result.append(",");
+            }
+            result.append(content.get(i));
+        }
+
+        result.append("))");
+
+        return new GeneratedCode(node.type, result.toString());
+    }
+
+    @Override
+    public GeneratedCode visit_InvokeVirtual(final InvokeVirtual node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+
+        final List<Node> argumwens = node.arguments();
+        for (final Node arg : argumwens) {
+            emit(arg, expressionStack, evaluationStack);
+        }
+
+        List<GeneratedCode> content = new ArrayList<>();
+        for (int i = 0; i < argumwens.size(); i++) {
+            content.add(evaluationStack.pop());
+        }
+
+        content = content.reversed();
+
+        final StringBuilder result = new StringBuilder("(");
+        result.append(content.getFirst());
+        result.append(".");
+        result.append(node.name);
+        result.append("(");
+
+        for (int i = 1; i < content.size(); i++) {
+            if (i > 1) {
+                result.append(",");
+            }
+            result.append(content.get(i));
+        }
+
+        result.append("))");
+
+        return new GeneratedCode(node.type, result.toString());
+    }
+
+    @Override
+    public GeneratedCode visit_InvokeStatic(final InvokeStatic node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+
+        final List<Node> argumwens = node.arguments();
+        for (final Node arg : argumwens) {
+            emit(arg, expressionStack, evaluationStack);
+        }
+
+        List<GeneratedCode> content = new ArrayList<>();
+        for (int i = 0; i < argumwens.size(); i++) {
+            content.add(evaluationStack.pop());
+        }
+
+        content = content.reversed();
+
+        final StringBuilder result = new StringBuilder("(");
+        result.append(content.getFirst());
+        result.append(".");
+        result.append(node.name);
+        result.append("(");
+
+        for (int i = 1; i < content.size(); i++) {
+            if (i > 1) {
+                result.append(",");
+            }
+            result.append(content.get(i));
+        }
+
+        result.append("))");
+
+        return new GeneratedCode(node.type, result.toString());
+    }
+
+    @Override
+    public GeneratedCode visit_NewMultiArray(final NewMultiArray node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        // TODO:
+        return new GeneratedCode(node.type, "TODO");
+    }
+
+    @Override
+    public GeneratedCode visit_InvokeDynamic(final InvokeDynamic node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        // TODO:
+        return new GeneratedCode(node.type, "TODO");
+    }
+
+    @Override
+    public GeneratedCode visit_PHI(final PHI node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        // TODO:
+        return new GeneratedCode(node.type, "TODO");
+    }
+
+    @Override
+    public GeneratedCode emitTemporaryVariable(final GeneratedCode value) {
+        final String varname = "var" + temporaryVariablesCounter++;
+
+        writeIndentation();
+
+        pw.print(TypeUtils.toString(value.type));
+        pw.print(" ");
+        pw.print(varname);
+        pw.print(" = ");
+        pw.print(value);
+        pw.print(System.lineSeparator());
+
+        return new GeneratedCode(value.type, varname);
+    }
+
+    @Override
+    public void emitFinally(final GeneratedCode result) {
+        writeIndentation();
+        pw.println(result.value);
+    }
+
+    @Override
+    public String toString() {
+        pw.flush();
+        sw.flush();
+        return sw.toString().trim().replace(System.lineSeparator(), "\n");
+    }
+
+    // CFG - Generation
+
+
+    @Override
+    public void begin(final Method method) {
+        writeIndentation();
+        pw.print("(method");
+
+        for (final Value arg : method.methodArguments) {
+            if (arg instanceof final Projection proj) {
+                pw.print(" (");
+                pw.print(TypeUtils.toString(arg.type));
+                pw.print(" ");
+                pw.print(proj.name());
+                pw.print(")");
+            } else throw new IllegalArgumentException("Unknown argument type " + arg.getClass());
+        }
+        pw.println();
+        indentationLevel++;
+    }
+
+    @Override
+    public void writeBreakTo(final String label) {
+        writeIndentation();
+        pw.print("break ");
+        pw.print(label);
+        pw.println();
+    }
+
+    @Override
+    public void writeContinueTo(final String label) {
+        writeIndentation();
+        pw.print("continue ");
+        pw.print(label);
+        pw.println();
+    }
+
+    @Override
+    public void finishBlock(final Sequencer.Block block) {
+        indentationLevel--;
+        writeIndentation();
+        pw.println(")");
+    }
+
+    @Override
+    public void startBlock(final Sequencer.Block b) {
+        writeIndentation();
+        pw.print("(block ");
+        if (b.type == Sequencer.Block.Type.LOOP) {
+            pw.print("loop ");
+        }
+        pw.print(b.label);
+        pw.println();
+        indentationLevel++;
+    }
+
+    @Override
+    public void startIfWithTrueBlock(final If node) {
+        final Deque<GeneratedCode> stack = new ArrayDeque<>();
+        emit(node.arg0, new ArrayDeque<>(), stack);
+
+        if (stack.size() != 1) {
+            throw new IllegalStateException("Expected exactly one value on the stack, but got " + stack.size());
+        }
+
+        writeIndentation();
+        pw.print("(if ");
+        pw.print(stack.pop().value);
+        pw.println();
+
+        indentationLevel++;
+    }
+
+    @Override
+    public void startIfElseBlock(final If node) {
+        indentationLevel--;
+        writeIndentation();
+        pw.println("(else)");
+
+        indentationLevel++;
+    }
+
+    @Override
+    public void finishIfBlock() {
+        indentationLevel--;
+        writeIndentation();
+        pw.println(")");
+    }
+
+    @Override
+    public void write(final Return node) {
+        writeIndentation();
+        pw.println("return");
+    }
+
+    @Override
+    public void write(final ReturnValue node) {
+
+        final Deque<GeneratedCode> stack = new ArrayDeque<>();
+        emit(node.arg0, new ArrayDeque<>(), stack);
+
+        if (stack.size() != 1) {
+            throw new IllegalStateException("Expected exactly one value on the stack, but got " + stack.size());
+        }
+
+        writeIndentation();
+        pw.print("return ");
+        pw.print(stack.pop().value);
+        pw.println();
+    }
+
+    @Override
+    public void write(final ArrayStore node) {
+        final Deque<GeneratedCode> stack = new ArrayDeque<>();
+        emit(node.arg0, new ArrayDeque<>(), stack);
+        emit(node.arg1, new ArrayDeque<>(), stack);
+        emit(node.arg2, new ArrayDeque<>(), stack);
+
+        if (stack.size() != 3) {
+            throw new IllegalStateException("Expected exactly three values on the stack, but got " + stack.size());
+        }
+
+        final GeneratedCode arg2 = stack.pop();
+        final GeneratedCode arg1 = stack.pop();
+        final GeneratedCode arg0 = stack.pop();
+
+        writeIndentation();
+        pw.print(arg0.value);
+        pw.print("[");
+        pw.print(arg1.value);
+        pw.print("] = ");
+        pw.print(arg2.value);
+        pw.println();
+    }
+
+    @Override
+    public void write(final PutStatic node) {
+        final Deque<GeneratedCode> stack = new ArrayDeque<>();
+        emit(node.arg0, new ArrayDeque<>(), stack);
+        emit(node.arg1, new ArrayDeque<>(), stack);
+
+        if (stack.size() != 2) {
+            throw new IllegalStateException("Expected exactly two values on the stack, but got " + stack.size());
+        }
+
+        final GeneratedCode arg1 = stack.pop();
+        final GeneratedCode arg0 = stack.pop();
+
+        writeIndentation();
+        pw.print(arg0.value);
+        pw.print(".");
+        pw.print(node.fieldName);
+        pw.print(" = ");
+        pw.print(arg1.value);
+        pw.println();
+    }
+
+    @Override
+    public void write(final PutField node) {
+        final Deque<GeneratedCode> stack = new ArrayDeque<>();
+        emit(node.arg0, new ArrayDeque<>(), stack);
+        emit(node.arg1, new ArrayDeque<>(), stack);
+
+        if (stack.size() != 2) {
+            throw new IllegalStateException("Expected exactly two values on the stack, but got " + stack.size());
+        }
+
+        final GeneratedCode arg1 = stack.pop();
+        final GeneratedCode arg0 = stack.pop();
+
+        writeIndentation();
+        pw.print(arg0.value);
+        pw.print(".");
+        pw.print(node.fieldName);
+        pw.print(" = ");
+        pw.print(arg1.value);
+        pw.println();
+    }
+
+    @Override
+    public void write(final MonitorEnter node) {
+        final Deque<GeneratedCode> stack = new ArrayDeque<>();
+        emit(node.arg0, new ArrayDeque<>(), stack);
+
+        if (stack.size() != 1) {
+            throw new IllegalStateException("Expected exactly one value on the stack, but got " + stack.size());
+        }
+
+        final GeneratedCode arg0 = stack.pop();
+
+        writeIndentation();
+        pw.print("monitorenter ");
+        pw.println(arg0.value);
+    }
+
+    @Override
+    public void write(final MonitorExit node) {
+        final Deque<GeneratedCode> stack = new ArrayDeque<>();
+        emit(node.arg0, new ArrayDeque<>(), stack);
+
+        if (stack.size() != 1) {
+            throw new IllegalStateException("Expected exactly one value on the stack, but got " + stack.size());
+        }
+
+        final GeneratedCode arg0 = stack.pop();
+
+        writeIndentation();
+        pw.print("monitorexit ");
+        pw.println(arg0.value);
+    }
+
+    @Override
+    public void write(final Goto node) {
+        // TODO
+    }
+
+    @Override
+    public void write(final Throw node) {
+        final Deque<GeneratedCode> stack = new ArrayDeque<>();
+        emit(node.arg0, new ArrayDeque<>(), stack);
+
+        if (stack.size() != 1) {
+            throw new IllegalStateException("Expected exactly one value on the stack, but got " + stack.size());
+        }
+
+        final GeneratedCode arg0 = stack.pop();
+
+        writeIndentation();
+        pw.print("throw ");
+        pw.println(arg0.value);
+    }
+
+    @Override
+    public void startLookupSwitch(final LookupSwitch node) {
+        // TODO
+    }
+
+    @Override
+    public void writeSwitchCase(final int key) {
+        // TODO
+    }
+
+    @Override
+    public void finishSwitchCase() {
+        // TODO
+    }
+
+    @Override
+    public void writeSwitchDefaultCase() {
+        // TODO
+    }
+
+    @Override
+    public void finishSwitchDefault() {
+        // TODO
+    }
+
+    @Override
+    public void finishLookupSwitch() {
+        // TODO
+    }
+
+    @Override
+    public void startTableSwitch(final TableSwitch node) {
+        // TODO
+    }
+
+    @Override
+    public void startTableSwitchDefaultBlock() {
+        // TODO
+    }
+
+    @Override
+    public void finishTableSwitchDefaultBlock() {
+        // TODO
+    }
+
+    @Override
+    public void finishTableSwitch() {
+        // TODO
+    }
+
+    @Override
+    public void startTryCatch(final ExceptionGuard node) {
+        // TODO
+    }
+
+    @Override
+    public void startCatchBlock() {
+        // TODO
+    }
+
+    @Override
+    public void startCatchHandler(final List<ClassDesc> exceptionTypes) {
+        // TODO
+    }
+
+    @Override
+    public void writeRethrowException() {
+        // TODO
+    }
+
+    @Override
+    public void finishCatchHandler() {
+        // TODO
+    }
+
+    @Override
+    public void finishTryCatch() {
+        // TODO
+    }
+
+    @Override
+    public void finished() {
+        indentationLevel--;
+        writeIndentation();
+        pw.println(")");
+    }
+}

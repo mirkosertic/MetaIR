@@ -4,6 +4,8 @@ import java.lang.constant.ConstantDescs;
 
 public class ArrayLength extends Value {
 
+    public final Value arg0;
+
     ArrayLength(final Value array) {
         super(ConstantDescs.CD_int);
 
@@ -11,7 +13,7 @@ public class ArrayLength extends Value {
             illegalArgument("Cannot get array length of non array of type " + TypeUtils.toString(array.type));
         }
 
-        use(array, new ArgumentUse(0));
+        this.arg0 = use(array, new ArgumentUse(0));
     }
 
     @Override

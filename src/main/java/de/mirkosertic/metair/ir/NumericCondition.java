@@ -9,14 +9,16 @@ public class NumericCondition extends Value {
     }
 
     public final Operation operation;
+    public final Value arg0;
+    public final Value arg1;
 
     NumericCondition(final Operation operation, final Value a, final Value b) {
         super(ConstantDescs.CD_int);
 
         this.operation = operation;
 
-        use(a, new ArgumentUse(0));
-        use(b, new ArgumentUse(1));
+        this.arg0 = use(a, new ArgumentUse(0));
+        this.arg1 = use(b, new ArgumentUse(1));
     }
 
     @Override

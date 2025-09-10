@@ -13,6 +13,8 @@ public class IfTest {
         final NumericCondition numericCondition = new NumericCondition(NumericCondition.Operation.GE, a, b);
         final If iff = new If(numericCondition);
 
+        assertThat(iff.arg0).isSameAs(numericCondition);
+
         assertThat(a.usedBy).containsExactly(numericCondition);
         assertThat(b.usedBy).containsExactly(numericCondition);
         assertThat(iff.uses.size()).isEqualTo(1);

@@ -6,6 +6,9 @@ import java.lang.constant.ConstantDescs;
 public class ArrayStore extends Node {
 
     public final ClassDesc arrayType;
+    public final Value arg0;
+    public final Value arg1;
+    public final Value arg2;
 
     ArrayStore(final Value array, final Value index, final Value value) {
         if (!array.isArray()) {
@@ -22,9 +25,9 @@ public class ArrayStore extends Node {
             illegalArgument("Cannot store non " + TypeUtils.toString(arrayType.componentType()) + " value " + TypeUtils.toString(value.type) + " to array of type " + TypeUtils.toString(array.type));
         }
 
-        use(array, new ArgumentUse(0));
-        use(index, new ArgumentUse(1));
-        use(value, new ArgumentUse(2));
+        this.arg0 = use(array, new ArgumentUse(0));
+        this.arg1 = use(index, new ArgumentUse(1));
+        this.arg2 = use(value, new ArgumentUse(2));
     }
 
     @Override

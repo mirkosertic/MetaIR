@@ -1,5 +1,6 @@
 package de.mirkosertic.metair.ir;
 
+import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
 import org.junit.jupiter.api.Test;
 
 import java.lang.constant.ConstantDescs;
@@ -13,6 +14,8 @@ public class NewTest {
         final RuntimeclassReference ri = new RuntimeclassReference(ConstantDescs.CD_String);
         final New a = new New(ri);
 
+        assertThat(a.arg0).isSameAs(ri);
+
         assertThat(a.type).isEqualTo(ConstantDescs.CD_String);
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).isEmpty();
@@ -21,5 +24,7 @@ public class NewTest {
         assertThat(a.uses.getFirst().use()).isEqualTo(new ArgumentUse(0));
         assertThat(a.isConstant()).isFalse();
         assertThat(a.debugDescription()).isEqualTo("New");
+
+        assertThat(MetaIRTestHelper.toDebugExpression(a)).isEqualTo("(new String.class)");
     }
 }

@@ -8,11 +8,11 @@ import java.lang.constant.ConstantDescs;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class YAMLStructuredControlflowCodeGeneratorTest {
+class DebugStructuredControlflowCodeGeneratorTest {
 
     @Test
     public void test_evaluate_PrimitiveInteger() {
-        final YAMLStructuredControlflowCodeGenerator generator = new YAMLStructuredControlflowCodeGenerator();
+        final DebugStructuredControlflowCodeGenerator generator = new DebugStructuredControlflowCodeGenerator();
 
         generator.emit(new PrimitiveInt(10));
         final String result = generator.toString();
@@ -22,7 +22,7 @@ class YAMLStructuredControlflowCodeGeneratorTest {
 
     @Test
     public void test_evaluate_add_PrimitiveInteger() {
-        final YAMLStructuredControlflowCodeGenerator generator = new YAMLStructuredControlflowCodeGenerator();
+        final DebugStructuredControlflowCodeGenerator generator = new DebugStructuredControlflowCodeGenerator();
 
         generator.emit(new Add(ConstantDescs.CD_int, new PrimitiveInt(10), new PrimitiveInt(20)));
         final String result = generator.toString();
@@ -32,7 +32,7 @@ class YAMLStructuredControlflowCodeGeneratorTest {
 
     @Test
     public void test_evaluate_add_PrimitiveInteger_nested() {
-        final YAMLStructuredControlflowCodeGenerator generator = new YAMLStructuredControlflowCodeGenerator();
+        final DebugStructuredControlflowCodeGenerator generator = new DebugStructuredControlflowCodeGenerator();
 
         generator.emit(new Add(ConstantDescs.CD_int, new PrimitiveInt(10), new Add(ConstantDescs.CD_int, new PrimitiveInt(20), new PrimitiveInt(30))));
         final String result = generator.toString();
@@ -42,7 +42,7 @@ class YAMLStructuredControlflowCodeGeneratorTest {
 
     @Test
     public void test_evaluate_add_PrimitiveInteger_nested2() {
-        final YAMLStructuredControlflowCodeGenerator generator = new YAMLStructuredControlflowCodeGenerator();
+        final DebugStructuredControlflowCodeGenerator generator = new DebugStructuredControlflowCodeGenerator();
 
         final Add nestedAdd = new Add(ConstantDescs.CD_int, new PrimitiveInt(10), new PrimitiveInt(20));
         generator.emit(new Add(ConstantDescs.CD_int, nestedAdd, nestedAdd));

@@ -17,6 +17,10 @@ public class ArrayStoreTest {
         final Value value = new PrimitiveInt(42);
         final ArrayStore store = new ArrayStore(a, index, value);
 
+        assertThat(store.arg0).isSameAs(a);
+        assertThat(store.arg1).isSameAs(index);
+        assertThat(store.arg2).isSameAs(value);
+
         assertThat(store.debugDescription()).isEqualTo("ArrayStore : int[]");
 
         assertThat(a.usedBy).containsExactly(store);

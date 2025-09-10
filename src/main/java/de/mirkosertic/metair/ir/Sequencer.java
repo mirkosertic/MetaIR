@@ -37,6 +37,8 @@ public class Sequencer<T extends StructuredControlflowCodeGenerator.GeneratedThi
         this.codegenerator = codegenerator;
 
         visitDominationTreeOf(method, new ArrayDeque<>());
+
+        codegenerator.finished();
     }
 
     private void visitDominationTreeOf(final Node startNode, final Deque<Block> activeStack) {
@@ -80,7 +82,7 @@ public class Sequencer<T extends StructuredControlflowCodeGenerator.GeneratedThi
                         break;
                     }
                     case final ArrayStore arrayStore: {
-                        // TODO
+                        codegenerator.write(arrayStore);
                         current = followUpProcessor.apply(current);
                         break;
                     }
@@ -95,12 +97,12 @@ public class Sequencer<T extends StructuredControlflowCodeGenerator.GeneratedThi
                         break;
                     }
                     case final PutStatic putStatic: {
-                        // TODO
+                        codegenerator.write(putStatic);
                         current = followUpProcessor.apply(current);
                         break;
                     }
                     case final PutField putField: {
-                        // TODO
+                        codegenerator.write(putField);
                         current = followUpProcessor.apply(current);
                         break;
                     }
@@ -140,12 +142,12 @@ public class Sequencer<T extends StructuredControlflowCodeGenerator.GeneratedThi
                         break;
                     }
                     case final MonitorEnter monitorEnter: {
-                        // TODO
+                        codegenerator.write(monitorEnter);
                         current = followUpProcessor.apply(current);
                         break;
                     }
                     case final MonitorExit monitorExit: {
-                        // TODO
+                        codegenerator.write(monitorExit);
                         current = followUpProcessor.apply(current);
                         break;
                     }
@@ -227,7 +229,7 @@ public class Sequencer<T extends StructuredControlflowCodeGenerator.GeneratedThi
         }
 
         while (activeStack.size() > startHeight) {
-            codegenerator.finishBlock(activeStack.pop(), activeStack.isEmpty());
+            codegenerator.finishBlock(activeStack.pop());
         }
     }
 
@@ -288,13 +290,13 @@ public class Sequencer<T extends StructuredControlflowCodeGenerator.GeneratedThi
         for (int i = orderedBlocks.size() - 1; i >= 0; i--) {
             final Node target = orderedBlocks.get(i);
 
-            codegenerator.finishBlock(activeStack.pop(), activeStack.isEmpty());
+            codegenerator.finishBlock(activeStack.pop());
 
             visitDominationTreeOf(target, activeStack);
         }
 
         if (isLoopHeader) {
-            codegenerator.finishBlock(activeStack.pop(), activeStack.isEmpty());
+            codegenerator.finishBlock(activeStack.pop());
         }
     }
 

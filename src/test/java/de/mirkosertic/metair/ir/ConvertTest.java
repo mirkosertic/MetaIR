@@ -1,5 +1,6 @@
 package de.mirkosertic.metair.ir;
 
+import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
 import org.junit.jupiter.api.Test;
 
 import java.lang.constant.ConstantDescs;
@@ -15,6 +16,8 @@ public class ConvertTest {
         final PrimitiveInt a = new PrimitiveInt(10);
         final Convert convert = new Convert(ConstantDescs.CD_byte, a, ConstantDescs.CD_int);
 
+        assertThat(convert.arg0).isSameAs(a);
+
         assertThat(convert.debugDescription()).isEqualTo("Convert : int to byte");
 
         assertThat(convert.type).isEqualTo(ConstantDescs.CD_byte);
@@ -23,6 +26,8 @@ public class ConvertTest {
         assertThat(convert.uses.size()).isEqualTo(1);
         assertThat(convert.uses.getFirst().node()).isSameAs(a);
         assertThat(convert.uses.getFirst().use()).isEqualTo(new ArgumentUse(0));
+
+        assertThat(MetaIRTestHelper.toDebugExpression(convert)).isEqualTo("((byte)10)");
     }
 
     @Test

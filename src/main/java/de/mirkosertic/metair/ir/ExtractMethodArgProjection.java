@@ -2,7 +2,7 @@ package de.mirkosertic.metair.ir;
 
 import java.lang.constant.ConstantDesc;
 
-public class ExtractMethodArgProjection extends Value implements Projection {
+public class ExtractMethodArgProjection extends ConstantValue implements Projection {
 
     private final int index;
 
