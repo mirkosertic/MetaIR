@@ -32,17 +32,17 @@ digraph {
  node0 -> node14[labeldistance=2, color=green, constraint=false];
  subgraph cluster_0 {
   color=lightgray;
-  node8;
-  node12;
+  node11;
+  node13;
  }
  subgraph cluster_1 {
   color=lightgray;
-  node10;
+  node8;
+  node12;
  }
  subgraph cluster_2 {
   color=lightgray;
-  node11;
-  node13;
+  node10;
  }
  subgraph cluster_3 {
   color=lightgray;

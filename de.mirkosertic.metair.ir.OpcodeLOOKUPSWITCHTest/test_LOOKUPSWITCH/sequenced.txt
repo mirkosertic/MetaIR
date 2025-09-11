@@ -1,6 +1,12 @@
 (method (Test this)
-  // Label Frame5
-  return 2
-  // Label Frame2
-  return 1
+  lookupswitch(0) (
+    case(0) (
+      // Label Frame5
+      return 2
+    )
+    default (
+      // Label Frame2
+      return 1
+    )
+  )
 )

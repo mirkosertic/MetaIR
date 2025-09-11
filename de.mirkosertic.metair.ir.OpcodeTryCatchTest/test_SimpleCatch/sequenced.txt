@@ -1,13 +1,15 @@
 (method (Test this)
   (block ExceptionGuard_1_0
-    (block ExceptionGuard_1_1
-      break ExceptionGuard_1_1
-      // Label Frame6
+    (try 
       break ExceptionGuard_1_0
+      (catch $ex as IllegalArgumentException
+        // Label Frame6
+        throw $ex
+      )
+      rethrowifnotcaught $ex
     )
-    // Merge EndOfGuardedBlock4
-    break ExceptionGuard_1_0
   )
-  // Merge Merge8
+  // Merge EndOfGuardedBlock4
+  // Label Frame8
   return
 )

@@ -9,7 +9,7 @@
         attributes: [StackMapTable]
         stack map frames: 
             5: {locals: [de/mirkosertic/test/Test], stack: [java/lang/IllegalArgumentException]}
-            6: {locals: [de/mirkosertic/test/Test], stack: []}
+            6: {locals: [de/mirkosertic/test/Test, int], stack: []}
         //stack map frame @0: {locals: [de/mirkosertic/test/Test], stack: []}
         //try block 1 start: {start: 0, end: 2, handler: 5, catch type: java/lang/IllegalArgumentException}
         0: {opcode: ICONST_3, constant value: 3}
@@ -18,8 +18,8 @@
         2: {opcode: GOTO, target: 6}
         //stack map frame @5: {locals: [de/mirkosertic/test/Test], stack: [java/lang/IllegalArgumentException]}
         //exception handler 1 start: {start: 0, end: 2, handler: 5, catch type: java/lang/IllegalArgumentException}
-        5: {opcode: POP}
-        //stack map frame @6: {locals: [de/mirkosertic/test/Test], stack: []}
+        5: {opcode: ATHROW}
+        //stack map frame @6: {locals: [de/mirkosertic/test/Test, int], stack: []}
         6: {opcode: RETURN}
         exception handlers: 
             handler 1: {start: 0, end: 2, handler: 5, type: java/lang/IllegalArgumentException}

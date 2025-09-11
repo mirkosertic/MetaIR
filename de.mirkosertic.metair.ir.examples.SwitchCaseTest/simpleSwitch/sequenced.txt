@@ -1,9 +1,17 @@
 (method (SwitchCaseTest this) (int arg0)
   // Label Frame2
-  // Label Frame6
-  return 100
-  // Label Frame10
-  return 200
-  // Label Frame14
-  return 300
+  lookupswitch(arg0) (
+    case(0) (
+      // Label Frame6
+      return 100
+    )
+    case(1) (
+      // Label Frame10
+      return 200
+    )
+    default (
+      // Label Frame14
+      return 300
+    )
+  )
 )

@@ -1,5 +1,5 @@
 (method (InvokeDynamicTest this) (int arg0) (int arg1)
   // Label Frame3
-  String var0 = TODO
+  String var0 = invokedynamic_makeConcatWithConstants((StringConcatFactory.class.makeConcatWithConstants((InvokeDynamicTest.class.in(InvokeDynamicTest.class)),"makeConcatWithConstants",methodType((String)(int((int(),"hello  world ",(new Object{}))),arg0,arg1))
   return var0
 )
