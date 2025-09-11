@@ -5,6 +5,7 @@ import de.mirkosertic.metair.ir.ArrayLength;
 import de.mirkosertic.metair.ir.ArrayLoad;
 import de.mirkosertic.metair.ir.ArrayStore;
 import de.mirkosertic.metair.ir.BitOperation;
+import de.mirkosertic.metair.ir.CaughtExceptionProjection;
 import de.mirkosertic.metair.ir.CheckCast;
 import de.mirkosertic.metair.ir.ClassInitialization;
 import de.mirkosertic.metair.ir.Convert;
@@ -27,6 +28,8 @@ import de.mirkosertic.metair.ir.LabelNode;
 import de.mirkosertic.metair.ir.LookupSwitch;
 import de.mirkosertic.metair.ir.MergeNode;
 import de.mirkosertic.metair.ir.Method;
+import de.mirkosertic.metair.ir.MethodHandle;
+import de.mirkosertic.metair.ir.MethodType;
 import de.mirkosertic.metair.ir.MonitorEnter;
 import de.mirkosertic.metair.ir.MonitorExit;
 import de.mirkosertic.metair.ir.Mul;
@@ -67,6 +70,8 @@ import java.io.StringWriter;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.ConstantDesc;
 import java.lang.constant.ConstantDescs;
+import java.lang.constant.MethodHandleDesc;
+import java.lang.constant.MethodTypeDesc;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -544,14 +549,72 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
 
     @Override
     public GeneratedCode visit_InvokeDynamic(final InvokeDynamic node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
-        // TODO:
-        return new GeneratedCode(node.type, "TODO");
+        final List<Node> argumwens = node.arguments();
+        for (final Node arg : argumwens) {
+            emit(arg, expressionStack, evaluationStack);
+        }
+
+        List<GeneratedCode> content = new ArrayList<>();
+        for (int i = 0; i < argumwens.size(); i++) {
+            content.add(evaluationStack.pop());
+        }
+
+        content = content.reversed();
+
+        final StringBuilder result = new StringBuilder("invokedynamic_");
+        result.append(node.name);
+        result.append("(");
+
+        for (int i = 0; i < content.size(); i++) {
+            if (i > 0) {
+                result.append(",");
+            }
+            result.append(content.get(i));
+        }
+
+        result.append("))");
+
+        return new GeneratedCode(node.type, result.toString());
     }
 
     @Override
     public GeneratedCode visit_PHI(final PHI node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
         // TODO:
         return new GeneratedCode(node.type, "TODO");
+    }
+
+    @Override
+    public GeneratedCode visit_MethodType(final MethodType node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+
+        final MethodTypeDesc desc = (MethodTypeDesc) node.type;
+
+        final StringBuilder result = new StringBuilder("methodType(");
+        result.append("(");
+        result.append(TypeUtils.toString(desc.returnType()));
+        result.append(")");
+        for (int i = 0; i < desc.parameterCount(); i++) {
+            result.append("(");
+            result.append(TypeUtils.toString(desc.parameterType(i)));
+            result.append("(");
+        }
+        result.append(")");
+
+        return new GeneratedCode(node.type, result.toString());
+    }
+
+    @Override
+    public GeneratedCode visit_MethodHandle(final MethodHandle node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+
+        final MethodHandleDesc desc = (MethodHandleDesc) node.type;
+
+        final String result = "methodHandle(" + desc.toString() + ")";
+
+        return new GeneratedCode(node.type, result);
+    }
+
+    @Override
+    public GeneratedCode visit_CaughtExceptionProjection(final CaughtExceptionProjection node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+        return new GeneratedCode(node.type, "$ex");
     }
 
     @Override
@@ -932,82 +995,159 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
 
     @Override
     public void startLookupSwitch(final LookupSwitch node) {
-        // TODO
+        final Deque<GeneratedCode> stack = new ArrayDeque<>();
+        emit(node.arg0, new ArrayDeque<>(), stack);
+
+        if (stack.size() != 1) {
+            throw new IllegalStateException("Expected exactly one value on the stack, but got " + stack.size());
+        }
+
+        final GeneratedCode arg0 = stack.pop();
+
+        writeIndentation();
+        pw.print("lookupswitch(");
+        pw.print(arg0.value);
+        pw.println(") (");
+
+        indentationLevel++;
     }
 
     @Override
     public void writeSwitchCase(final int key) {
-        // TODO
+        writeIndentation();
+        pw.print("case(");
+        pw.print(key);
+        pw.println(") (");
+
+        indentationLevel++;
     }
 
     @Override
     public void finishSwitchCase() {
-        // TODO
+        indentationLevel--;
+        writeIndentation();
+
+        pw.println(")");
     }
 
     @Override
     public void writeSwitchDefaultCase() {
-        // TODO
+        writeIndentation();
+
+        pw.println("default (");
+
+        indentationLevel++;
     }
 
     @Override
     public void finishSwitchDefault() {
-        // TODO
+        indentationLevel--;
+        writeIndentation();
+
+        pw.println(")");
     }
 
     @Override
     public void finishLookupSwitch() {
-        // TODO
+        indentationLevel--;
+        writeIndentation();
+        pw.println(")");
     }
 
     @Override
     public void startTableSwitch(final TableSwitch node) {
-        // TODO
+        final Deque<GeneratedCode> stack = new ArrayDeque<>();
+        emit(node.arg0, new ArrayDeque<>(), stack);
+
+        if (stack.size() != 1) {
+            throw new IllegalStateException("Expected exactly one value on the stack, but got " + stack.size());
+        }
+
+        final GeneratedCode arg0 = stack.pop();
+
+        writeIndentation();
+        pw.print("tableswitch(");
+        pw.print(arg0.value);
+        pw.print(",low=");
+        pw.print(node.lowValue);
+        pw.print(",high=");
+        pw.print(node.highValue);
+        pw.println(") (");
+
+        indentationLevel++;
     }
 
     @Override
     public void startTableSwitchDefaultBlock() {
-        // TODO
+        writeIndentation();
+
+        pw.println("default (");
+
+        indentationLevel++;
     }
 
     @Override
     public void finishTableSwitchDefaultBlock() {
-        // TODO
+        indentationLevel--;
+        writeIndentation();
+
+        pw.println(")");
     }
 
     @Override
     public void finishTableSwitch() {
-        // TODO
+        indentationLevel--;
+        writeIndentation();
+        pw.println(")");
     }
 
     @Override
     public void startTryCatch(final ExceptionGuard node) {
-        // TODO
+        writeIndentation();
+        pw.println("(try ");
+        indentationLevel++;
     }
 
     @Override
     public void startCatchBlock() {
-        // TODO
     }
 
     @Override
     public void startCatchHandler(final List<ClassDesc> exceptionTypes) {
-        // TODO
+        writeIndentation();
+        if (exceptionTypes.isEmpty()) {
+            pw.println("(catch-all as $ex");
+        } else {
+            pw.print("(catch $ex as ");
+            for (int i = 0; i < exceptionTypes.size(); i++) {
+                if (i >0) {
+                    pw.print(",");
+                }
+                pw.print(TypeUtils.toString(exceptionTypes.get(i)));
+            }
+            pw.println();
+        }
+        indentationLevel++;
     }
 
     @Override
     public void writeRethrowException() {
-        // TODO
+        writeIndentation();
+        pw.println("rethrowifnotcaught $ex");
     }
 
     @Override
     public void finishCatchHandler() {
-        // TODO
+        indentationLevel--;
+        writeIndentation();
+        pw.println(")");
     }
 
     @Override
     public void finishTryCatch() {
-        // TODO
+        indentationLevel--;
+        writeIndentation();
+        pw.println(")");
     }
 
     @Override

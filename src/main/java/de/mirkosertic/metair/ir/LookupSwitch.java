@@ -8,13 +8,15 @@ public class LookupSwitch extends ConditionalNode {
     public final List<Integer> cases;
     public final String defaultLabel;
 
+    public final Value arg0;
+
     LookupSwitch(final Value value, final String defaultLabel, final List<Integer> cases) {
 
         if (!value.type.equals(ConstantDescs.CD_int)) {
             illegalArgument("Cannot use non int value of type " + TypeUtils.toString(value.type) + " as switch value");
         }
 
-        use(value, new ArgumentUse(0));
+        this.arg0 = use(value, new ArgumentUse(0));
 
         this.cases = cases;
         this.defaultLabel = defaultLabel;

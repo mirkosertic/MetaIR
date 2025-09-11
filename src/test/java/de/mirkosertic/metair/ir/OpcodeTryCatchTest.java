@@ -28,7 +28,7 @@ public class OpcodeTryCatchTest {
             codeBuilder.trying(tryHandler -> {
                 tryHandler.iconst_3();
                 tryHandler.istore(1);
-            }, catchHandler -> catchHandler.catching(ClassDesc.of(IllegalArgumentException.class.getName()), CodeBuilder::pop));
+            }, catchHandler -> catchHandler.catching(ClassDesc.of(IllegalArgumentException.class.getName()), CodeBuilder::athrow));
             codeBuilder.return_();
         })));
         final Optional<MethodModel> method = model.methods().stream().filter(m -> "test".contentEquals(m.methodName())).findFirst();

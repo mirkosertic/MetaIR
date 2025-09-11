@@ -14,6 +14,9 @@ class LookupSwitchTest {
     public void  testUsage() {
         final Value value = new PrimitiveInt(10);
         final LookupSwitch a = new LookupSwitch(value, "defaultlabel", List.of(20));
+
+        assertThat(a.arg0).isSameAs(value);
+
         assertThat(a.uses).hasSize(1);
         assertThat(a.uses.getFirst().node()).isSameAs(value);
         assertThat(a.uses.getFirst().use()).isEqualTo(new ArgumentUse(0));

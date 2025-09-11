@@ -187,6 +187,12 @@ public abstract class StructuredControlflowCodeGenerator<T extends StructuredCon
 
     public abstract T visit_PHI(final PHI node, final Deque<Node> expressionStack, final Deque<T> evaluationStack);
 
+    public abstract T visit_MethodType(final MethodType node, final Deque<Node> expressionStack, final Deque<T> evaluationStack);
+
+    public abstract T visit_MethodHandle(final MethodHandle node, final Deque<Node> expressionStack, final Deque<T> evaluationStack);
+
+    public abstract T visit_CaughtExceptionProjection(final CaughtExceptionProjection node, final Deque<Node> expressionStack, final Deque<T> evaluationStack);
+
     public abstract void emitFinally(final T result);
 
     private T visit(final Node node, final Deque<Node> expressionStack, final Deque<T> evaluationStack) {
@@ -271,6 +277,12 @@ public abstract class StructuredControlflowCodeGenerator<T extends StructuredCon
             return visit_InvokeDynamic(invokeDynamic, expressionStack, evaluationStack);
         } else if (node instanceof final PHI phi) {
             return visit_PHI(phi, expressionStack, evaluationStack);
+        } else if (node instanceof final MethodType methodType) {
+            return visit_MethodType(methodType, expressionStack, evaluationStack);
+        } else if (node instanceof final MethodHandle methodHandle) {
+            return visit_MethodHandle(methodHandle, expressionStack, evaluationStack);
+        } else if (node instanceof final CaughtExceptionProjection caughtExceptionProjection) {
+            return visit_CaughtExceptionProjection(caughtExceptionProjection, expressionStack, evaluationStack);
         }
 
         throw new IllegalArgumentException("Unsupported node " + node+ " of type " + node.getClass());
