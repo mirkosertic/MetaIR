@@ -235,7 +235,7 @@ public final class DOTExporter {
             final Node id = tree.idom.get(n);
             if (id != n) {
                 ps.print(" node" + tree.preOrder.indexOf(n) + " -> node" + tree.preOrder.indexOf(id) + "[dir=\"forward\"");
-                ps.print(" color=\"green\" penwidth=\"2\"");
+                ps.print(" color=\"fuchsia\" penwidth=\"2\"");
                 ps.println("];");
             }
 
@@ -248,11 +248,16 @@ public final class DOTExporter {
                 if (useEdge.use() instanceof final PHIUse phiUse) {
                     ps.print("[");
                     ps.print("headlabel=\"if #" + tree.preOrder.indexOf(phiUse.origin) + "\", labeldistance=2, color=blue, constraint=false");
+                    if (phiUse.type == FlowType.BACKWARD) {
+                        ps.print(", style=dashed");
+                    }
                     ps.print("]");
                 } else if (useEdge.use() instanceof DataFlowUse) {
                     ps.print("[");
                     ps.print("headlabel=\"*" + n.uses.indexOf(useEdge) + "\", labeldistance=2");
                     ps.print("]");
+                } else if (useEdge.use() instanceof MemoryUse) {
+                    ps.print("[labeldistance=2, color=green, constraint=false]");
                 } else if (useEdge.use() instanceof DefinedByUse) {
                     ps.print("[");
                     ps.print("style=dotted");
@@ -286,13 +291,16 @@ public final class DOTExporter {
                    d5 [style = invis];
                    d6 [style = invis];
                    d7 [style = invis];
+                   d8 [style = invis];
+                   d9 [style = invis];
                   }
                   c0 -> c1 [label="Control flow", style=solid, color=red]
                   c2 -> c3 [label="Control flow back edge", style=dashed, color=red]
                   d0 -> d1 [label="Data flow"]
                   d2 -> d3 [label="Declaration", style=dotted]
                   d4 -> d5 [label="PHI Data flow", color=blue]
-                  d6 -> d7 [label="Dominance", color=green]
+                  d6 -> d7 [label="Memory flow", color=green]
+                  d8 -> d9 [label="Dominance", color=fuchsia, style=solid]
                  }
                 """);
         ps.println("}");
@@ -310,7 +318,7 @@ public final class DOTExporter {
             final Node id = tree.idom.get(n);
             if (id != n) {
                 ps.print(" node" + tree.preOrder.indexOf(n) + " -> node" + tree.preOrder.indexOf(id) + "[dir=\"forward\"");
-                ps.print(" color=\"green\" penwidth=\"2\"");
+                ps.print(" color=\"fuchsia\" penwidth=\"2\"");
                 ps.println("];");
             }
 
@@ -339,9 +347,13 @@ public final class DOTExporter {
                    c1 [style = invis];
                    c2 [style = invis];
                    c3 [style = invis];
+                   d8 [style = invis];
+                   d9 [style = invis];
+                   
                   }
                   c0 -> c1 [label="Control flow", style=solid, color=red]
                   c2 -> c3 [label="Control flow back edge", style=dashed, color=red]
+                  d8 -> d9 [label="Dominance", color=fuchsia, style=solid]
                  }
                 """);
         ps.println("}");
