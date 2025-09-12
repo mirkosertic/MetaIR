@@ -2,50 +2,50 @@ digraph debugoutput {
  ordering="in";
  node0[label="#0 Method Order : 0",shape=box, fillcolor=lightgrey, style=filled];
  node1[label="#1 this : Test Order : 7",shape=box, fillcolor=lightgrey, style=filled];
- node1 -> node0[dir="forward" color="green" penwidth="2"];
+ node1 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node0 -> node1[headlabel="*0", labeldistance=2];
  node2[label="#2 int 0 Order : 4",shape=octagon, fillcolor=lightgreen, style=filled];
- node2 -> node0[dir="forward" color="green" penwidth="2"];
+ node2 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node0 -> node2[style=dotted];
  node3[label="#3 int 10 Order : 3",shape=octagon, fillcolor=lightgreen, style=filled];
- node3 -> node0[dir="forward" color="green" penwidth="2"];
+ node3 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node0 -> node3[style=dotted];
  node4[label="#4 NewArray : short[] Order : 5",shape=octagon, fillcolor=orange, style=filled];
- node4 -> node0[dir="forward" color="green" penwidth="2"];
+ node4 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node3 -> node4[headlabel="*0", labeldistance=2];
- node0 -> node4;
+ node0 -> node4[labeldistance=2, color=green, constraint=false];
  node5[label="#5 int 10 Order : 1",shape=octagon, fillcolor=lightgreen, style=filled];
- node5 -> node0[dir="forward" color="green" penwidth="2"];
+ node5 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node0 -> node5[style=dotted];
  node6[label="#6 ArrayLength Order : 6",shape=octagon, fillcolor=orange, style=filled];
- node6 -> node4[dir="forward" color="green" penwidth="2"];
+ node6 -> node4[dir="forward" color="fuchsia" penwidth="2"];
  node4 -> node6[headlabel="*0", labeldistance=2];
  node7[label="#7 Truncate : short Order : 2",shape=octagon, fillcolor=orange, style=filled];
- node7 -> node5[dir="forward" color="green" penwidth="2"];
+ node7 -> node5[dir="forward" color="fuchsia" penwidth="2"];
  node5 -> node7[headlabel="*0", labeldistance=2];
  node8[label="#8 ArrayStore : short[] Order : 8",shape=box, fillcolor=lightgrey, style=filled];
- node8 -> node0[dir="forward" color="green" penwidth="2"];
+ node8 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node4 -> node8[headlabel="*0", labeldistance=2];
  node2 -> node8[headlabel="*1", labeldistance=2];
  node7 -> node8[headlabel="*2", labeldistance=2];
- node4 -> node8;
+ node4 -> node8[labeldistance=2, color=green, constraint=false];
  node0 -> node8[labeldistance=2, color=red, fontcolor=red];
  node9[label="#9 int 2 Order : 9",shape=octagon, fillcolor=lightgreen, style=filled];
- node9 -> node8[dir="forward" color="green" penwidth="2"];
+ node9 -> node8[dir="forward" color="fuchsia" penwidth="2"];
  node8 -> node9[style=dotted];
  node10[label="#10 ArrayLoad : short Order : 10",shape=box, fillcolor=lightgrey, style=filled];
- node10 -> node0[dir="forward" color="green" penwidth="2"];
+ node10 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node4 -> node10[headlabel="*0", labeldistance=2];
  node9 -> node10[headlabel="*1", labeldistance=2];
- node8 -> node10;
+ node8 -> node10[labeldistance=2, color=green, constraint=false];
  node8 -> node10[labeldistance=2, color=red, fontcolor=red];
  node11[label="#11 Extend : SIGN int Order : 12",shape=octagon, fillcolor=orange, style=filled];
- node11 -> node10[dir="forward" color="green" penwidth="2"];
+ node11 -> node10[dir="forward" color="fuchsia" penwidth="2"];
  node10 -> node11[headlabel="*0", labeldistance=2];
  node12[label="#12 Return Order : 11",shape=box, fillcolor=lightgrey, style=filled];
- node12 -> node10[dir="forward" color="green" penwidth="2"];
+ node12 -> node10[dir="forward" color="fuchsia" penwidth="2"];
  node10 -> node12[labeldistance=2, color=red, fontcolor=red];
- node10 -> node12;
+ node10 -> node12[labeldistance=2, color=green, constraint=false];
  subgraph cluster_000 {
   label = "Legend";
   node [shape=point]
@@ -63,13 +63,16 @@ digraph debugoutput {
    d5 [style = invis];
    d6 [style = invis];
    d7 [style = invis];
+   d8 [style = invis];
+   d9 [style = invis];
   }
   c0 -> c1 [label="Control flow", style=solid, color=red]
   c2 -> c3 [label="Control flow back edge", style=dashed, color=red]
   d0 -> d1 [label="Data flow"]
   d2 -> d3 [label="Declaration", style=dotted]
   d4 -> d5 [label="PHI Data flow", color=blue]
-  d6 -> d7 [label="Dominance", color=green]
+  d6 -> d7 [label="Memory flow", color=green]
+  d8 -> d9 [label="Dominance", color=fuchsia, style=solid]
  }
 
 }

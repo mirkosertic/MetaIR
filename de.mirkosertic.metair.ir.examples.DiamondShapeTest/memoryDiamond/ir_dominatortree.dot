@@ -2,97 +2,97 @@ digraph debugoutput {
  ordering="in";
  node0[label="#0 Method Order : 0",shape=box, fillcolor=lightgrey, style=filled];
  node1[label="#1 arg1 : int Order : 8",shape=box, fillcolor=lightgrey, style=filled];
- node1 -> node0[dir="forward" color="green" penwidth="2"];
+ node1 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node0 -> node1[headlabel="*0", labeldistance=2];
  node2[label="#2 arg2 : int Order : 7",shape=box, fillcolor=lightgrey, style=filled];
- node2 -> node0[dir="forward" color="green" penwidth="2"];
+ node2 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node0 -> node2[headlabel="*0", labeldistance=2];
  node3[label="#3 arg0 : int Order : 6",shape=box, fillcolor=lightgrey, style=filled];
- node3 -> node0[dir="forward" color="green" penwidth="2"];
+ node3 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node0 -> node3[headlabel="*0", labeldistance=2];
  node4[label="#4 LabelNode Order : 1",shape=box, fillcolor=lightgrey, style=filled];
- node4 -> node0[dir="forward" color="green" penwidth="2"];
+ node4 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node0 -> node4[labeldistance=2, color=red, fontcolor=red];
  node5[label="#5 LabelNode Order : 4",shape=box, fillcolor=lightgrey, style=filled];
- node5 -> node4[dir="forward" color="green" penwidth="2"];
+ node5 -> node4[dir="forward" color="fuchsia" penwidth="2"];
  node4 -> node5[labeldistance=2, color=red, fontcolor=red];
  node6[label="#6 int 10 Order : 2",shape=octagon, fillcolor=lightgreen, style=filled];
- node6 -> node4[dir="forward" color="green" penwidth="2"];
+ node6 -> node4[dir="forward" color="fuchsia" penwidth="2"];
  node4 -> node6[style=dotted];
  node7[label="#7 NewArray : int[] Order : 3",shape=octagon, fillcolor=orange, style=filled];
- node7 -> node0[dir="forward" color="green" penwidth="2"];
+ node7 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node6 -> node7[headlabel="*0", labeldistance=2];
- node0 -> node7;
+ node0 -> node7[labeldistance=2, color=green, constraint=false];
  node8[label="#8 int 10 Order : 5",shape=octagon, fillcolor=lightgreen, style=filled];
- node8 -> node5[dir="forward" color="green" penwidth="2"];
+ node8 -> node5[dir="forward" color="fuchsia" penwidth="2"];
  node5 -> node8[style=dotted];
  node9[label="#9 ArrayStore : int[] Order : 9",shape=box, fillcolor=lightgrey, style=filled];
- node9 -> node0[dir="forward" color="green" penwidth="2"];
+ node9 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node7 -> node9[headlabel="*0", labeldistance=2];
  node1 -> node9[headlabel="*1", labeldistance=2];
  node8 -> node9[headlabel="*2", labeldistance=2];
- node7 -> node9;
+ node7 -> node9[labeldistance=2, color=green, constraint=false];
  node5 -> node9[labeldistance=2, color=red, fontcolor=red];
  node10[label="#10 int 0 Order : 10",shape=octagon, fillcolor=lightgreen, style=filled];
- node10 -> node9[dir="forward" color="green" penwidth="2"];
+ node10 -> node9[dir="forward" color="fuchsia" penwidth="2"];
  node9 -> node10[style=dotted];
  node11[label="#11 NumericCondition : EQ Order : 11",shape=octagon, fillcolor=orange, style=filled];
- node11 -> node0[dir="forward" color="green" penwidth="2"];
+ node11 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node3 -> node11[headlabel="*0", labeldistance=2];
  node10 -> node11[headlabel="*1", labeldistance=2];
  node12[label="#12 If Order : 12",shape=box, fillcolor=lightgrey, style=filled];
- node12 -> node0[dir="forward" color="green" penwidth="2"];
+ node12 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node11 -> node12[headlabel="*0", labeldistance=2];
  node9 -> node12[labeldistance=2, color=red, fontcolor=red];
  node13[label="#13 true Order : 15",shape=box, fillcolor=lightgrey, style=filled];
- node13 -> node12[dir="forward" color="green" penwidth="2"];
+ node13 -> node12[dir="forward" color="fuchsia" penwidth="2"];
  node12 -> node13[labeldistance=2, color=red, fontcolor=red];
  node14[label="#14 false Order : 13",shape=box, fillcolor=lightgrey, style=filled];
- node14 -> node12[dir="forward" color="green" penwidth="2"];
+ node14 -> node12[dir="forward" color="fuchsia" penwidth="2"];
  node12 -> node14[labeldistance=2, color=red, fontcolor=red];
  node15[label="#15 LabelNode Order : 16",shape=box, fillcolor=lightgrey, style=filled];
- node15 -> node13[dir="forward" color="green" penwidth="2"];
+ node15 -> node13[dir="forward" color="fuchsia" penwidth="2"];
  node13 -> node15[labeldistance=2, color=red, fontcolor=red];
  node16[label="#16 int 20 Order : 14",shape=octagon, fillcolor=lightgreen, style=filled];
- node16 -> node14[dir="forward" color="green" penwidth="2"];
+ node16 -> node14[dir="forward" color="fuchsia" penwidth="2"];
  node14 -> node16[style=dotted];
  node17[label="#17 ArrayStore : int[] Order : 18",shape=box, fillcolor=lightgrey, style=filled];
- node17 -> node0[dir="forward" color="green" penwidth="2"];
+ node17 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node7 -> node17[headlabel="*0", labeldistance=2];
  node2 -> node17[headlabel="*1", labeldistance=2];
  node16 -> node17[headlabel="*2", labeldistance=2];
- node9 -> node17;
+ node9 -> node17[labeldistance=2, color=green, constraint=false];
  node14 -> node17[labeldistance=2, color=red, fontcolor=red];
  node18[label="#18 int 30 Order : 17",shape=octagon, fillcolor=lightgreen, style=filled];
- node18 -> node15[dir="forward" color="green" penwidth="2"];
+ node18 -> node15[dir="forward" color="fuchsia" penwidth="2"];
  node15 -> node18[style=dotted];
  node19[label="#19 ArrayStore : int[] Order : 20",shape=box, fillcolor=lightgrey, style=filled];
- node19 -> node0[dir="forward" color="green" penwidth="2"];
+ node19 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node7 -> node19[headlabel="*0", labeldistance=2];
  node2 -> node19[headlabel="*1", labeldistance=2];
  node18 -> node19[headlabel="*2", labeldistance=2];
- node9 -> node19;
+ node9 -> node19[labeldistance=2, color=green, constraint=false];
  node15 -> node19[labeldistance=2, color=red, fontcolor=red];
  node20[label="#20 Goto Order : 19",shape=box, fillcolor=lightgrey, style=filled];
- node20 -> node17[dir="forward" color="green" penwidth="2"];
+ node20 -> node17[dir="forward" color="fuchsia" penwidth="2"];
  node17 -> node20[labeldistance=2, color=red, fontcolor=red];
  node21[label="#21 Merge : Merge30 Order : 21",shape=box, fillcolor=lightgrey, style=filled];
- node21 -> node0[dir="forward" color="green" penwidth="2"];
+ node21 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node20 -> node21[labeldistance=2, color=red, fontcolor=red];
  node19 -> node21[labeldistance=2, color=red, fontcolor=red];
- node17 -> node21;
- node19 -> node21;
+ node17 -> node21[labeldistance=2, color=green, constraint=false];
+ node19 -> node21[labeldistance=2, color=green, constraint=false];
  node22[label="#22 ArrayLoad : int Order : 22",shape=box, fillcolor=lightgrey, style=filled];
- node22 -> node0[dir="forward" color="green" penwidth="2"];
+ node22 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node7 -> node22[headlabel="*0", labeldistance=2];
  node2 -> node22[headlabel="*1", labeldistance=2];
- node21 -> node22;
+ node21 -> node22[labeldistance=2, color=green, constraint=false];
  node21 -> node22[labeldistance=2, color=red, fontcolor=red];
  node23[label="#23 ReturnValue : int Order : 23",shape=box, fillcolor=lightgrey, style=filled];
- node23 -> node22[dir="forward" color="green" penwidth="2"];
+ node23 -> node22[dir="forward" color="fuchsia" penwidth="2"];
  node22 -> node23[headlabel="*0", labeldistance=2];
  node22 -> node23[labeldistance=2, color=red, fontcolor=red];
- node22 -> node23;
+ node22 -> node23[labeldistance=2, color=green, constraint=false];
  subgraph cluster_000 {
   label = "Legend";
   node [shape=point]
@@ -110,13 +110,16 @@ digraph debugoutput {
    d5 [style = invis];
    d6 [style = invis];
    d7 [style = invis];
+   d8 [style = invis];
+   d9 [style = invis];
   }
   c0 -> c1 [label="Control flow", style=solid, color=red]
   c2 -> c3 [label="Control flow back edge", style=dashed, color=red]
   d0 -> d1 [label="Data flow"]
   d2 -> d3 [label="Declaration", style=dotted]
   d4 -> d5 [label="PHI Data flow", color=blue]
-  d6 -> d7 [label="Dominance", color=green]
+  d6 -> d7 [label="Memory flow", color=green]
+  d8 -> d9 [label="Dominance", color=fuchsia, style=solid]
  }
 
 }

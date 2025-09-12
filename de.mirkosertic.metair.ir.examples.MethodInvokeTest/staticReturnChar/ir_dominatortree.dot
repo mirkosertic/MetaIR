@@ -2,16 +2,16 @@ digraph debugoutput {
  ordering="in";
  node0[label="#0 Method Order : 0",shape=box, fillcolor=lightgrey, style=filled];
  node1[label="#1 arg0 : int Order : 2",shape=box, fillcolor=lightgrey, style=filled];
- node1 -> node0[dir="forward" color="green" penwidth="2"];
+ node1 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node0 -> node1[headlabel="*0", labeldistance=2];
  node2[label="#2 LabelNode Order : 1",shape=box, fillcolor=lightgrey, style=filled];
- node2 -> node0[dir="forward" color="green" penwidth="2"];
+ node2 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node0 -> node2[labeldistance=2, color=red, fontcolor=red];
  node3[label="#3 ReturnValue : int Order : 3",shape=box, fillcolor=lightgrey, style=filled];
- node3 -> node0[dir="forward" color="green" penwidth="2"];
+ node3 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node1 -> node3[headlabel="*0", labeldistance=2];
  node2 -> node3[labeldistance=2, color=red, fontcolor=red];
- node0 -> node3;
+ node0 -> node3[labeldistance=2, color=green, constraint=false];
  subgraph cluster_000 {
   label = "Legend";
   node [shape=point]
@@ -29,13 +29,16 @@ digraph debugoutput {
    d5 [style = invis];
    d6 [style = invis];
    d7 [style = invis];
+   d8 [style = invis];
+   d9 [style = invis];
   }
   c0 -> c1 [label="Control flow", style=solid, color=red]
   c2 -> c3 [label="Control flow back edge", style=dashed, color=red]
   d0 -> d1 [label="Data flow"]
   d2 -> d3 [label="Declaration", style=dotted]
   d4 -> d5 [label="PHI Data flow", color=blue]
-  d6 -> d7 [label="Dominance", color=green]
+  d6 -> d7 [label="Memory flow", color=green]
+  d8 -> d9 [label="Dominance", color=fuchsia, style=solid]
  }
 
 }

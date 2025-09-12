@@ -2,38 +2,38 @@ digraph debugoutput {
  ordering="in";
  node0[label="#0 Method Order : 0",shape=box, fillcolor=lightgrey, style=filled];
  node1[label="#1 ExceptionGuard Order : 1",shape=box, fillcolor=lightgrey, style=filled];
- node1 -> node0[dir="forward" color="green" penwidth="2"];
+ node1 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node0 -> node1[labeldistance=2, color=red, fontcolor=red];
  node2[label="#2 catch : 0 : IllegalArgumentException Order : 8",shape=box, fillcolor=lightgrey, style=filled];
- node2 -> node1[dir="forward" color="green" penwidth="2"];
+ node2 -> node1[dir="forward" color="fuchsia" penwidth="2"];
  node1 -> node2[labeldistance=2, color=red, fontcolor=red];
  node3[label="#3 default Order : 3",shape=box, fillcolor=lightgrey, style=filled];
- node3 -> node1[dir="forward" color="green" penwidth="2"];
+ node3 -> node1[dir="forward" color="fuchsia" penwidth="2"];
  node1 -> node3[labeldistance=2, color=red, fontcolor=red];
  node4[label="#4 exit Order : 2",shape=box, fillcolor=lightgrey, style=filled];
- node4 -> node1[dir="forward" color="green" penwidth="2"];
+ node4 -> node1[dir="forward" color="fuchsia" penwidth="2"];
  node1 -> node4[labeldistance=2, color=red, fontcolor=red];
  node5[label="#5 Catch : IllegalArgumentException Order : 9",shape=box, fillcolor=lightgrey, style=filled];
- node5 -> node2[dir="forward" color="green" penwidth="2"];
+ node5 -> node2[dir="forward" color="fuchsia" penwidth="2"];
  node2 -> node5[labeldistance=2, color=red, fontcolor=red];
  node6[label="#6 Merge : EndOfGuardedBlock4 Order : 4",shape=box, fillcolor=lightgrey, style=filled];
- node6 -> node1[dir="forward" color="green" penwidth="2"];
+ node6 -> node1[dir="forward" color="fuchsia" penwidth="2"];
  node3 -> node6[labeldistance=2, color=red, fontcolor=red];
  node4 -> node6[labeldistance=2, color=red, fontcolor=red];
  node7[label="#7 LabelNode Order : 10",shape=box, fillcolor=lightgrey, style=filled];
- node7 -> node5[dir="forward" color="green" penwidth="2"];
+ node7 -> node5[dir="forward" color="fuchsia" penwidth="2"];
  node5 -> node7[labeldistance=2, color=red, fontcolor=red];
  node8[label="#8 Goto Order : 5",shape=box, fillcolor=lightgrey, style=filled];
- node8 -> node6[dir="forward" color="green" penwidth="2"];
+ node8 -> node6[dir="forward" color="fuchsia" penwidth="2"];
  node6 -> node8[labeldistance=2, color=red, fontcolor=red];
  node9[label="#9 Throw Order : 11",shape=box, fillcolor=lightgrey, style=filled];
- node9 -> node7[dir="forward" color="green" penwidth="2"];
+ node9 -> node7[dir="forward" color="fuchsia" penwidth="2"];
  node7 -> node9[labeldistance=2, color=red, fontcolor=red];
  node10[label="#10 LabelNode Order : 6",shape=box, fillcolor=lightgrey, style=filled];
- node10 -> node8[dir="forward" color="green" penwidth="2"];
+ node10 -> node8[dir="forward" color="fuchsia" penwidth="2"];
  node8 -> node10[labeldistance=2, color=red, fontcolor=red];
  node11[label="#11 Return Order : 7",shape=box, fillcolor=lightgrey, style=filled];
- node11 -> node10[dir="forward" color="green" penwidth="2"];
+ node11 -> node10[dir="forward" color="fuchsia" penwidth="2"];
  node10 -> node11[labeldistance=2, color=red, fontcolor=red];
  subgraph cluster_000 {
   label = "Legend";
@@ -44,9 +44,13 @@ digraph debugoutput {
    c1 [style = invis];
    c2 [style = invis];
    c3 [style = invis];
+   d8 [style = invis];
+   d9 [style = invis];
+
   }
   c0 -> c1 [label="Control flow", style=solid, color=red]
   c2 -> c3 [label="Control flow back edge", style=dashed, color=red]
+  d8 -> d9 [label="Dominance", color=fuchsia, style=solid]
  }
 
 }
