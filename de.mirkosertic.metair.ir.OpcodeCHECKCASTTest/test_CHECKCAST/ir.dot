@@ -7,15 +7,15 @@ digraph {
  node0 -> node3[labeldistance=2, color=green, constraint=false];
  node2[label="#2 Class String",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node2[style=dotted];
- node6[label="#6 Return",shape=box, fillcolor=lightgrey, style=filled];
- node5 -> node6[labeldistance=2, color=red, fontcolor=red];
- node3 -> node6[labeldistance=2, color=green, constraint=false];
  node5[label="#5 CheckCast",shape=box, fillcolor=lightgrey, style=filled];
  node4 -> node5[headlabel="*0", labeldistance=2];
  node3 -> node5[headlabel="*1", labeldistance=2];
  node3 -> node5[labeldistance=2, color=red, fontcolor=red];
  node4[label="#4 String : Test",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node4[style=dotted];
+ node6[label="#6 Return",shape=box, fillcolor=lightgrey, style=filled];
+ node5 -> node6[labeldistance=2, color=red, fontcolor=red];
+ node3 -> node6[labeldistance=2, color=green, constraint=false];
  subgraph cluster_0 {
   color=lightgray;
   node0;

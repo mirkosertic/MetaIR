@@ -1,11 +1,13 @@
 digraph {
  ordering="in";
  node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#0 Method</td></tr><tr><td port="prj1" bgcolor="yellow">this : Test</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
+ node4[label="#4 int 10",shape=octagon, fillcolor=lightgreen, style=filled];
+ node0 -> node4[style=dotted];
  node5[label="#5 NewArray : float[]",shape=octagon, fillcolor=orange, style=filled];
  node4 -> node5[headlabel="*0", labeldistance=2];
  node0 -> node5[labeldistance=2, color=green, constraint=false];
- node4[label="#4 int 10",shape=octagon, fillcolor=lightgreen, style=filled];
- node0 -> node4[style=dotted];
+ node7[label="#7 ArrayLength",shape=octagon, fillcolor=orange, style=filled];
+ node5 -> node7[headlabel="*0", labeldistance=2];
  node9[label="#9 ArrayLoad : float",shape=box, fillcolor=lightgrey, style=filled];
  node5 -> node9[headlabel="*0", labeldistance=2];
  node8 -> node9[headlabel="*1", labeldistance=2];
@@ -26,8 +28,6 @@ digraph {
  node10[label="#10 Return",shape=box, fillcolor=lightgrey, style=filled];
  node9 -> node10[labeldistance=2, color=red, fontcolor=red];
  node9 -> node10[labeldistance=2, color=green, constraint=false];
- node7[label="#7 ArrayLength",shape=octagon, fillcolor=orange, style=filled];
- node5 -> node7[headlabel="*0", labeldistance=2];
  subgraph cluster_0 {
   color=lightgray;
   node0;

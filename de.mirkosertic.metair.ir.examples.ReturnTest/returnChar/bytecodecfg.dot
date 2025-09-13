@@ -1,7 +1,7 @@
 digraph {
  ordering="in";
  node0[label="#0 LocalVariable[name=this, slot=0, type=Lde/mirkosertic/metair/ir/examples/ReturnTest;] Order: 0", shape=box, fillcolor=lightgrey, style=filled];
- node1[label="#1 Label[context=CodeModel[id=1230701703], bci=0] Order: 1", shape=box, fillcolor=lightgrey, style=filled];
+ node1[label="#1 Label[context=CodeModel[id=908084672], bci=0] Order: 1", shape=box, fillcolor=lightgrey, style=filled];
  node2[label="#2 LineNumber[line=17] Order: 2", shape=box, fillcolor=lightgrey, style=filled];
  node3[label="#3 ArgumentConstant[OP=BIPUSH, val=97] Order: 3", shape=box, fillcolor=lightgrey, style=filled];
  node4[label="#4 Return[OP=IRETURN] Order: 4", shape=box, fillcolor=lightgrey, style=filled];
