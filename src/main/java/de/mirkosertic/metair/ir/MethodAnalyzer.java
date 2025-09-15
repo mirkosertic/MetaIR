@@ -115,42 +115,44 @@ public class MethodAnalyzer {
 
     private void step0PrepareTryCatchBlocks(final CodeModel code) {
         for (final ExceptionCatch exceptionHandler : code.exceptionHandlers()) {
-            final List<TryCatchBlock> blocks = tryCatchBlocks.computeIfAbsent(exceptionHandler.tryStart(), key -> new ArrayList<>());
+            if (exceptionHandler.tryStart() != exceptionHandler.handler()) {
+                final List<TryCatchBlock> blocks = tryCatchBlocks.computeIfAbsent(exceptionHandler.tryStart(), key -> new ArrayList<>());
 
-            // Ad if not already where
-            TryCatchBlock blockToModify = null;
-            for (final TryCatchBlock block : blocks) {
-                if (block.start.equals(exceptionHandler.tryStart()) && block.end.equals(exceptionHandler.tryEnd())) {
-                    blockToModify = block;
-                    break;
+                // Ad if not already where
+                TryCatchBlock blockToModify = null;
+                for (final TryCatchBlock block : blocks) {
+                    if (block.start.equals(exceptionHandler.tryStart()) && block.end.equals(exceptionHandler.tryEnd())) {
+                        blockToModify = block;
+                        break;
+                    }
                 }
-            }
 
-            if (blockToModify == null) {
-                blockToModify = new TryCatchBlock(exceptionHandler.tryStart(), exceptionHandler.tryEnd());
-                blocks.add(blockToModify);
-                if (blocks.size() > 1) {
-                    illegalState("Multiple try-catch blocks for the same try-catch block range!");
+                if (blockToModify == null) {
+                    blockToModify = new TryCatchBlock(exceptionHandler.tryStart(), exceptionHandler.tryEnd());
+                    blocks.add(blockToModify);
+                    if (blocks.size() > 1) {
+                        illegalState("Multiple try-catch blocks for the same try-catch block range!");
+                    }
                 }
-            }
 
-            // We try to find the right catch handler
-            CatchHandler handler = null;
-            for (final CatchHandler k : blockToModify.handlers) {
-                if (k.handler.equals(exceptionHandler.handler())) {
-                    handler = k;
-                    break;
+                // We try to find the right catch handler
+                CatchHandler handler = null;
+                for (final CatchHandler k : blockToModify.handlers) {
+                    if (k.handler.equals(exceptionHandler.handler())) {
+                        handler = k;
+                        break;
+                    }
                 }
-            }
-            if (handler == null) {
-                handler = new CatchHandler(exceptionHandler.handler());
-                blockToModify.handlers.add(handler);
-            }
+                if (handler == null) {
+                    handler = new CatchHandler(exceptionHandler.handler());
+                    blockToModify.handlers.add(handler);
+                }
 
-            if (exceptionHandler.catchType().isPresent()) {
-                handler.addCaughtException(exceptionHandler.catchType().get().asSymbol());
-            } else {
-                handler.markAsFinally();
+                if (exceptionHandler.catchType().isPresent()) {
+                    handler.addCaughtException(exceptionHandler.catchType().get().asSymbol());
+                } else {
+                    handler.markAsFinally();
+                }
             }
         }
     }
@@ -239,21 +241,19 @@ public class MethodAnalyzer {
                         for (final TryCatchBlock block : blocksFromHere) {
                             for (int k = 0; k < block.handlers.size(); k++) {
                                 final CatchHandler handler = block.handlers.get(k);
-                                if (!handler.finallyHandler && !handler.handler.equals(block.start)) {
-                                    if (labelToIndex.containsKey(handler.handler)) {
-                                        final int newIndex = labelToIndex.get(handler.handler);
-                                        if (!visited.contains(newIndex)) {
-                                            jobs.add(new CFGAnalysisJob(newIndex, newPath));
-                                        }
-                                        Frame frame = frames[newIndex];
-                                        if (frame == null) {
-                                            frame = new Frame(newIndex, codeElements.get(newIndex));
-                                            frames[newIndex] = frame;
-                                        }
-                                        frame.predecessors.add(new FrameCFGEdge(i, new FrameNamedProjection(CatchProjection.nameFor(k, handler.exceptionTypes)), FlowType.FORWARD));
-                                    } else {
-                                        illegalState("Exception handler target " + handler.handler + " is not mapped to an index");
+                                if (labelToIndex.containsKey(handler.handler)) {
+                                    final int newIndex = labelToIndex.get(handler.handler);
+                                    if (!visited.contains(newIndex)) {
+                                        jobs.add(new CFGAnalysisJob(newIndex, newPath));
                                     }
+                                    Frame frame = frames[newIndex];
+                                    if (frame == null) {
+                                        frame = new Frame(newIndex, codeElements.get(newIndex));
+                                        frames[newIndex] = frame;
+                                    }
+                                    frame.predecessors.add(new FrameCFGEdge(i, new FrameNamedProjection(CatchProjection.nameFor(k, handler.exceptionTypes)), FlowType.FORWARD));
+                                } else {
+                                    illegalState("Exception handler target " + handler.handler + " is not mapped to an index");
                                 }
                             }
                         }
@@ -854,9 +854,7 @@ public class MethodAnalyzer {
                                     final List<ExceptionGuard.Catches> catches = new ArrayList<>();
                                     for (int i = 0; i < catchBlock.handlers.size(); i++) {
                                         final CatchHandler handler = catchBlock.handlers.get(i);
-                                        if (!handler.finallyHandler) {
-                                            catches.add(new ExceptionGuard.Catches(i, handler.exceptionTypes));
-                                        }
+                                        catches.add(new ExceptionGuard.Catches(i, handler.exceptionTypes));
                                     }
                                     final ExceptionGuard n = new ExceptionGuard("Guard_" + frame.elementIndex, catches);
 
@@ -872,7 +870,7 @@ public class MethodAnalyzer {
                 // This is the thing we need to interpret
 
                 // Interpret the node
-                visitNode(code, frameElement, frame);
+                visitNode(frameElement, frame);
 
                 if (frame.out == null || frame.out == incomingStatus) {
                     illegalState("No outgoing or same same as incoming status for " + frameElement);
@@ -888,12 +886,12 @@ public class MethodAnalyzer {
     private void step5PeepholeOptimizations() {
     }
 
-    private void visitNode(final CodeModel codeModel, final CodeElement node, final Frame frame) {
+    private void visitNode(final CodeElement node, final Frame frame) {
 
         if (node instanceof final PseudoInstruction psi) {
             // Pseudo Instructions
             switch (psi) {
-                case final LabelTarget labelTarget -> visitLabelTarget(codeModel, labelTarget, frame);
+                case final LabelTarget labelTarget -> visitLabelTarget(labelTarget, frame);
                 case final LineNumber lineNumber -> visitLineNumberNode(lineNumber, frame);
                 case final LocalVariable localVariable -> visitLocalVariable(localVariable, frame);
                 case final LocalVariableType localVariableType -> visitLocalVariableType(localVariableType, frame);
@@ -1015,7 +1013,7 @@ public class MethodAnalyzer {
     }
 
     @Testbacklog
-    protected void visitLabelTarget(final CodeModel codeModel, final LabelTarget node, final Frame frame) {
+    protected void visitLabelTarget(final LabelTarget node, final Frame frame) {
 
         final Label label = node.label();
 
@@ -1024,7 +1022,7 @@ public class MethodAnalyzer {
         }
 
         final List<TryCatchBlock> catchesFromHere = tryCatchBlocks.get(label);
-        final Map<Label, List<ExceptionCatch>> catchesEndingHere = codeModel.exceptionHandlers().stream().filter(t -> t.tryEnd().equals(label)).collect(Collectors.groupingBy(ExceptionCatch::tryStart));
+        final List<TryCatchBlock> catchesEndingHere = tryCatchBlocks.values().stream().flatMap(Collection::stream).filter(t -> t.end.equals(label)).toList();
 
         if (!catchesEndingHere.isEmpty()) {
             if (catchesFromHere != null && !catchesFromHere.isEmpty()) {
@@ -1035,7 +1033,7 @@ public class MethodAnalyzer {
             }
             final Status outgoing = frame.copyIncomingToOutgoing();
 
-            final String searchLabel = "Guard_" + labelToIndex.get(catchesEndingHere.keySet().iterator().next());
+            final String searchLabel = "Guard_" + labelToIndex.get(catchesEndingHere.getFirst().start);
             final ExceptionGuard activeGuard = exceptionGuardsFromHere(outgoing.control, searchLabel);
             if (activeGuard == null) {
                 illegalState("No exception guard found for " + outgoing.control + " with label " + searchLabel);
@@ -1065,9 +1063,7 @@ public class MethodAnalyzer {
                 final List<ExceptionGuard.Catches> catches = new ArrayList<>();
                 for (int i = 0; i < catchBlock.handlers.size(); i++) {
                     final CatchHandler handler = catchBlock.handlers.get(i);
-                    if (!handler.finallyHandler) {
-                        catches.add(new ExceptionGuard.Catches(i, handler.exceptionTypes));
-                    }
+                    catches.add(new ExceptionGuard.Catches(i, handler.exceptionTypes));
                 }
                 final ExceptionGuard n = new ExceptionGuard("Guard_" + frame.elementIndex, catches);
 
@@ -1933,7 +1929,7 @@ public class MethodAnalyzer {
         final PutField put = new PutField(owner, fieldType, fieldName, target, v);
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(put);
-        //outgoing.control = outgoing.control.controlFlowsTo(put, FlowType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(put, FlowType.FORWARD);
     }
 
     private void parse_GETSTATIC(final ClassDesc owner, final ClassDesc fieldType, final String fieldName, final Frame frame) {
@@ -2310,7 +2306,7 @@ public class MethodAnalyzer {
         final ArrayStore store = new ArrayStore(array, index, new Truncate(arrayType.componentType(), value));
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(store);
-        //outgoing.control = outgoing.control.controlFlowsTo(store, FlowType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(store, FlowType.FORWARD);
     }
 
     private void parse_ASTORE_X(final Frame frame, final ClassDesc arrayType) {
@@ -2324,7 +2320,7 @@ public class MethodAnalyzer {
         final ArrayStore store = new ArrayStore(array, index, value);
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(store);
-        //outgoing.control = outgoing.control.controlFlowsTo(store, FlowType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(store, FlowType.FORWARD);
     }
 
     private void parse_AASTORE(final Frame frame) {
@@ -2338,7 +2334,7 @@ public class MethodAnalyzer {
         final ArrayStore store = new ArrayStore(array, index, value);
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(store);
-        //outgoing.control = outgoing.control.controlFlowsTo(store, FlowType.FORWARD);
+        outgoing.control = outgoing.control.controlFlowsTo(store, FlowType.FORWARD);
     }
 
     private void parse_ALOAD_X_INTEXTENDED(final Frame frame, final Extend.ExtendType type) {

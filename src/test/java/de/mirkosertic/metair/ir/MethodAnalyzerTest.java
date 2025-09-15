@@ -465,11 +465,11 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
-                assertThat(frame.out.control).isInstanceOf(LabelNode.class);
+                assertThat(frame.out.control).isInstanceOf(ArrayStore.class);
                 assertThat(frame.out.memory).isInstanceOf(ArrayStore.class);
 
                 final ArrayStore as = (ArrayStore) frame.out.memory;
-                assertThat(as.uses).hasSize(4);
+                assertThat(as.uses).hasSize(5);
                 assertThat(as.uses.get(0).node()).isSameAs(array);
                 assertThat(as.uses.get(1).node()).isSameAs(index);
                 assertThat(as.uses.get(2).node()).isSameAs(value);
@@ -507,11 +507,11 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
-                assertThat(frame.out.control).isInstanceOf(LabelNode.class);
+                assertThat(frame.out.control).isInstanceOf(ArrayStore.class);
                 assertThat(frame.out.memory).isInstanceOf(ArrayStore.class);
 
                 final ArrayStore as = (ArrayStore) frame.out.memory;
-                assertThat(as.uses).hasSize(4);
+                assertThat(as.uses).hasSize(5);
                 assertThat(as.uses.get(0).node()).isSameAs(array);
                 assertThat(as.uses.get(1).node()).isSameAs(index);
                 assertThat(as.uses.get(2).node()).isInstanceOf(Truncate.class);
@@ -557,11 +557,11 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
-                assertThat(frame.out.control).isInstanceOf(LabelNode.class);
+                assertThat(frame.out.control).isInstanceOf(ArrayStore.class);
                 assertThat(frame.out.memory).isInstanceOf(ArrayStore.class);
 
                 final ArrayStore as = (ArrayStore) frame.out.memory;
-                assertThat(as.uses).hasSize(4);
+                assertThat(as.uses).hasSize(5);
                 assertThat(as.uses.get(0).node()).isSameAs(array);
                 assertThat(as.uses.get(1).node()).isSameAs(index);
                 assertThat(as.uses.get(2).node()).isInstanceOf(Truncate.class);
@@ -586,11 +586,11 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
-                assertThat(frame.out.control).isInstanceOf(LabelNode.class);
+                assertThat(frame.out.control).isInstanceOf(ArrayStore.class);
                 assertThat(frame.out.memory).isInstanceOf(ArrayStore.class);
 
                 final ArrayStore as = (ArrayStore) frame.out.memory;
-                assertThat(as.uses).hasSize(4);
+                assertThat(as.uses).hasSize(5);
                 assertThat(as.uses.get(0).node()).isSameAs(array);
                 assertThat(as.uses.get(1).node()).isSameAs(index);
                 assertThat(as.uses.get(2).node()).isInstanceOf(Truncate.class);
@@ -615,11 +615,11 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
-                assertThat(frame.out.control).isInstanceOf(LabelNode.class);
+                assertThat(frame.out.control).isInstanceOf(ArrayStore.class);
                 assertThat(frame.out.memory).isInstanceOf(ArrayStore.class);
 
                 final ArrayStore as = (ArrayStore) frame.out.memory;
-                assertThat(as.uses).hasSize(4);
+                assertThat(as.uses).hasSize(5);
                 assertThat(as.uses.get(0).node()).isSameAs(array);
                 assertThat(as.uses.get(1).node()).isSameAs(index);
                 assertThat(as.uses.get(2).node()).isSameAs(value);
@@ -657,11 +657,11 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
-                assertThat(frame.out.control).isInstanceOf(LabelNode.class);
+                assertThat(frame.out.control).isInstanceOf(ArrayStore.class);
                 assertThat(frame.out.memory).isInstanceOf(ArrayStore.class);
 
                 final ArrayStore as = (ArrayStore) frame.out.memory;
-                assertThat(as.uses).hasSize(4);
+                assertThat(as.uses).hasSize(5);
                 assertThat(as.uses.get(0).node()).isSameAs(array);
                 assertThat(as.uses.get(1).node()).isSameAs(index);
                 assertThat(as.uses.get(2).node()).isSameAs(value);
@@ -686,11 +686,11 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
-                assertThat(frame.out.control).isInstanceOf(LabelNode.class);
+                assertThat(frame.out.control).isInstanceOf(ArrayStore.class);
                 assertThat(frame.out.memory).isInstanceOf(ArrayStore.class);
 
                 final ArrayStore as = (ArrayStore) frame.out.memory;
-                assertThat(as.uses).hasSize(4);
+                assertThat(as.uses).hasSize(5);
                 assertThat(as.uses.get(0).node()).isSameAs(array);
                 assertThat(as.uses.get(1).node()).isSameAs(index);
                 assertThat(as.uses.get(2).node()).isSameAs(value);
@@ -715,11 +715,11 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
-                assertThat(frame.out.control).isInstanceOf(LabelNode.class);
+                assertThat(frame.out.control).isInstanceOf(ArrayStore.class);
                 assertThat(frame.out.memory).isInstanceOf(ArrayStore.class);
 
                 final ArrayStore as = (ArrayStore) frame.out.memory;
-                assertThat(as.uses).hasSize(4);
+                assertThat(as.uses).hasSize(5);
                 assertThat(as.uses.get(0).node()).isSameAs(array);
                 assertThat(as.uses.get(1).node()).isSameAs(index);
                 assertThat(as.uses.get(2).node()).isSameAs(value);
@@ -958,11 +958,11 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
-                assertThat(frame.out.control).isInstanceOf(LabelNode.class);
+                assertThat(frame.out.control).isInstanceOf(PutField.class);
                 assertThat(frame.out.memory).isInstanceOf(PutField.class);
 
                 final PutField put = (PutField) frame.out.memory;
-                assertThat(put.uses).hasSize(3);
+                assertThat(put.uses).hasSize(4);
                 assertThat(put.uses.get(0).node()).isSameAs(target);
                 assertThat(put.uses.get(0).use()).isEqualTo(new ArgumentUse(0));
                 assertThat(put.uses.get(1).node()).isSameAs(value);
