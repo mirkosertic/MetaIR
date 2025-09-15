@@ -50,10 +50,9 @@ digraph debugoutput {
  node6 -> node12[headlabel="*0", labeldistance=2];
  node11 -> node12[headlabel="*1", labeldistance=2];
  node11 -> node12[labeldistance=2, color=green, constraint=false];
- node10 -> node12[labeldistance=2, color=red, fontcolor=red];
  node13[label="#13 Return Order : 13",shape=box, fillcolor=lightgrey, style=filled];
- node13 -> node12[dir="forward" color="fuchsia" penwidth="2"];
- node12 -> node13[labeldistance=2, color=red, fontcolor=red];
+ node13 -> node0[dir="forward" color="fuchsia" penwidth="2"];
+ node10 -> node13[labeldistance=2, color=red, fontcolor=red];
  node12 -> node13[labeldistance=2, color=green, constraint=false];
  subgraph cluster_000 {
   label = "Legend";

@@ -8,6 +8,7 @@
       break If_2_0
     )
   )
+  int phi0 = <<uninitialized>>
   // Merge Merge9
-  return TODO
+  return phi0
 )

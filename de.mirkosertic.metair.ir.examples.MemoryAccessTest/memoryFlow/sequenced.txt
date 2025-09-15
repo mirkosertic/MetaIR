@@ -5,6 +5,5 @@
   // Label Frame12
   MemoryAccessTest var1 = (MemoryAccessTest.class.$init$)
   MemoryAccessTest.class.staticmember = (this.instancmember)
-  this.instancmember = (MemoryAccessTest.class.staticmember)
   return
 )

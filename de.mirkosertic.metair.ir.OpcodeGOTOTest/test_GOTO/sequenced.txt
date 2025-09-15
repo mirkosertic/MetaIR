@@ -1,4 +1,5 @@
 (method (Test this)
+  Test phi0 = <<uninitialized>>
   (block loop LoopHeaderNode_1
     continue LoopHeaderNode_1
   )

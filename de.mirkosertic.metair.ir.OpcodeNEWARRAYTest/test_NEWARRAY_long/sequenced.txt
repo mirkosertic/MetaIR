@@ -1,6 +1,3 @@
 (method (Test this)
-  long[] var0 = (new long[10])
-  var0[0] = 2
-  long var1 = (var0[2])
   return
 )

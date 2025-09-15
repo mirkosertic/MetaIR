@@ -5,10 +5,15 @@ digraph {
  node2[label="#2 NewMultiArray[OP=MULTIANEWARRAY, type=java/lang/String[2]] Order: 2", shape=box, fillcolor=lightgrey, style=filled];
  node3[label="#3 Store[OP=ASTORE_1, slot=1] Order: 3", shape=box, fillcolor=lightgrey, style=filled];
  node4[label="#4 Return[OP=RETURN] Order: 4", shape=box, fillcolor=lightgrey, style=filled];
+ node0 -> node0[color=fuchsia];
  node0 -> node1[color=red];
+ node1 -> node0[color=fuchsia];
  node1 -> node2[color=red];
+ node2 -> node1[color=fuchsia];
  node2 -> node3[color=red];
+ node3 -> node2[color=fuchsia];
  node3 -> node4[color=red];
+ node4 -> node3[color=fuchsia];
  subgraph cluster_000 {
   label = "Legend";
   node [shape=point]

@@ -1,14 +1,16 @@
 (method (int arg0) (int arg1) (int arg2) (int arg3)
   // Label Frame6
+  int phi0 = <<uninitialized>>
   (block If_2_0
-    (if (arg1 <= arg0)
+    (if (arg0 <= arg1)
       // Label Frame16
       break If_2_0
     (else)
       // Label Frame14
+      phi0 = arg2
       break If_2_0
     )
   )
   // Merge Merge20
-  return TODO
+  return phi0
 )

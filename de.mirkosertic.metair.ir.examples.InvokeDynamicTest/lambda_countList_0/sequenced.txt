@@ -2,13 +2,14 @@
   // Label Frame2
   int var0 = (arg1.intValue())
   (block If_3_0
-    (if (arg0 < var0)
+    (if (var0 < arg0)
       // Label Frame10
       break If_3_0
     (else)
       break If_3_0
     )
   )
+  int phi1 = <<uninitialized>>
   // Merge Merge12
-  return TODO
+  return phi1
 )

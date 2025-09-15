@@ -1,18 +1,25 @@
 digraph {
  ordering="in";
  node0[label="#0 LocalVariable[name=this, slot=0, type=Lde/mirkosertic/metair/ir/examples/StaticFieldAccessTest;] Order: 0", shape=box, fillcolor=lightgrey, style=filled];
- node1[label="#1 Label[context=CodeModel[id=1431710377], bci=0] Order: 1", shape=box, fillcolor=lightgrey, style=filled];
+ node1[label="#1 Label[context=CodeModel[id=1700721442], bci=0] Order: 1", shape=box, fillcolor=lightgrey, style=filled];
  node2[label="#2 LineNumber[line=67] Order: 2", shape=box, fillcolor=lightgrey, style=filled];
  node3[label="#3 Field[OP=GETSTATIC, field=de/mirkosertic/metair/ir/examples/StaticFieldAccessTest$Source.string_field:Ljava/lang/String;] Order: 3", shape=box, fillcolor=lightgrey, style=filled];
  node4[label="#4 Field[OP=PUTSTATIC, field=de/mirkosertic/metair/ir/examples/StaticFieldAccessTest$Destination.string_field:Ljava/lang/String;] Order: 4", shape=box, fillcolor=lightgrey, style=filled];
  node5[label="#5 LineNumber[line=68] Order: 5", shape=box, fillcolor=lightgrey, style=filled];
  node6[label="#6 Return[OP=RETURN] Order: 6", shape=box, fillcolor=lightgrey, style=filled];
+ node0 -> node0[color=fuchsia];
  node0 -> node1[color=red];
+ node1 -> node0[color=fuchsia];
  node1 -> node2[color=red];
+ node2 -> node1[color=fuchsia];
  node2 -> node3[color=red];
+ node3 -> node2[color=fuchsia];
  node3 -> node4[color=red];
+ node4 -> node3[color=fuchsia];
  node4 -> node5[color=red];
+ node5 -> node4[color=fuchsia];
  node5 -> node6[color=red];
+ node6 -> node5[color=fuchsia];
  subgraph cluster_000 {
   label = "Legend";
   node [shape=point]

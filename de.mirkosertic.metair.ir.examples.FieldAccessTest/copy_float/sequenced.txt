@@ -6,6 +6,5 @@
   FieldAccessTest$Source var3 = (FieldAccessTest$Source.class.$init$)
   FieldAccessTest$Source var4 = (new var3)
   void var5 = (var4.<init>())
-  var1.float_field = (var4.float_field)
   return
 )

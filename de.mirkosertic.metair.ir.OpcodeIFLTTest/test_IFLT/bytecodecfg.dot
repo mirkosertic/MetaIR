@@ -4,15 +4,22 @@ digraph {
  node1[label="#1 Branch[OP=IFLT] Order: 1", shape=box, fillcolor=lightgrey, style=filled];
  node2[label="#2 UnboundIntrinsicConstantInstruction[op=ICONST_1] Order: 2", shape=box, fillcolor=lightgrey, style=filled];
  node3[label="#3 Return[OP=IRETURN] Order: 3", shape=box, fillcolor=lightgrey, style=filled];
- node4[label="#4 Label[context=CodeModel[id=1237922005], bci=6] Order: 4", shape=box, fillcolor=lightgrey, style=filled];
+ node4[label="#4 Label[context=CodeModel[id=1922078812], bci=6] Order: 4", shape=box, fillcolor=lightgrey, style=filled];
  node5[label="#5 UnboundIntrinsicConstantInstruction[op=ICONST_0] Order: 5", shape=box, fillcolor=lightgrey, style=filled];
  node6[label="#6 Return[OP=IRETURN] Order: 6", shape=box, fillcolor=lightgrey, style=filled];
+ node0 -> node0[color=fuchsia];
  node0 -> node1[color=red];
+ node1 -> node0[color=fuchsia];
  node1 -> node2[color=red];
+ node2 -> node1[color=fuchsia];
  node2 -> node3[color=red];
+ node3 -> node2[color=fuchsia];
  node1 -> node4[color=red];
+ node4 -> node1[color=fuchsia];
  node4 -> node5[color=red];
+ node5 -> node4[color=fuchsia];
  node5 -> node6[color=red];
+ node6 -> node5[color=fuchsia];
  subgraph cluster_000 {
   label = "Legend";
   node [shape=point]

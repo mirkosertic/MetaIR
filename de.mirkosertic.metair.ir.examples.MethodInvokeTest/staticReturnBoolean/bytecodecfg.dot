@@ -1,27 +1,38 @@
 digraph {
  ordering="in";
  node0[label="#0 LocalVariable[name=bool, slot=0, type=Z] Order: 0", shape=box, fillcolor=lightgrey, style=filled];
- node1[label="#1 Label[context=CodeModel[id=401891515], bci=0] Order: 1", shape=box, fillcolor=lightgrey, style=filled];
+ node1[label="#1 Label[context=CodeModel[id=930317866], bci=0] Order: 1", shape=box, fillcolor=lightgrey, style=filled];
  node2[label="#2 LineNumber[line=111] Order: 2", shape=box, fillcolor=lightgrey, style=filled];
  node3[label="#3 Load[OP=ILOAD_0, slot=0] Order: 3", shape=box, fillcolor=lightgrey, style=filled];
  node4[label="#4 Branch[OP=IFNE] Order: 4", shape=box, fillcolor=lightgrey, style=filled];
  node5[label="#5 UnboundIntrinsicConstantInstruction[op=ICONST_1] Order: 5", shape=box, fillcolor=lightgrey, style=filled];
  node6[label="#6 Branch[OP=GOTO] Order: 6", shape=box, fillcolor=lightgrey, style=filled];
- node7[label="#7 Label[context=CodeModel[id=401891515], bci=8] Order: 7", shape=box, fillcolor=lightgrey, style=filled];
+ node7[label="#7 Label[context=CodeModel[id=930317866], bci=8] Order: 7", shape=box, fillcolor=lightgrey, style=filled];
  node8[label="#8 UnboundIntrinsicConstantInstruction[op=ICONST_0] Order: 8", shape=box, fillcolor=lightgrey, style=filled];
- node9[label="#9 Label[context=CodeModel[id=401891515], bci=9] Order: 9", shape=box, fillcolor=lightgrey, style=filled];
+ node9[label="#9 Label[context=CodeModel[id=930317866], bci=9] Order: 9", shape=box, fillcolor=lightgrey, style=filled];
  node10[label="#10 Return[OP=IRETURN] Order: 10", shape=box, fillcolor=lightgrey, style=filled];
+ node0 -> node0[color=fuchsia];
  node0 -> node1[color=red];
+ node1 -> node0[color=fuchsia];
  node1 -> node2[color=red];
+ node2 -> node1[color=fuchsia];
  node2 -> node3[color=red];
+ node3 -> node2[color=fuchsia];
  node3 -> node4[color=red];
+ node4 -> node3[color=fuchsia];
  node4 -> node5[color=red];
+ node5 -> node4[color=fuchsia];
  node5 -> node6[color=red];
+ node6 -> node5[color=fuchsia];
  node4 -> node7[color=red];
+ node7 -> node4[color=fuchsia];
  node7 -> node8[color=red];
+ node8 -> node7[color=fuchsia];
  node6 -> node9[color=red];
  node8 -> node9[color=red];
+ node9 -> node4[color=fuchsia];
  node9 -> node10[color=red];
+ node10 -> node9[color=fuchsia];
  subgraph cluster_000 {
   label = "Legend";
   node [shape=point]

@@ -1,9 +1,6 @@
 (method (ArrayTest this)
   // Label Frame4
   // Label Frame9
-  short[] var0 = (new short[10])
-  var0[0] = ((trunc short)10)
-  short var1 = (var0[1])
   // Label Frame20
   // Label Frame25
   return

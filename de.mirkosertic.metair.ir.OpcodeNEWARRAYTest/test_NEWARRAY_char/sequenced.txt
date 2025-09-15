@@ -1,6 +1,3 @@
 (method (Test this)
-  char[] var0 = (new char[10])
-  var0[0] = ((trunc char)10)
-  char var1 = (var0[1])
   return
 )

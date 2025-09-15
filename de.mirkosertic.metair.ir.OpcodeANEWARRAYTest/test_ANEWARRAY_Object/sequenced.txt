@@ -1,6 +1,3 @@
 (method (Test this)
-  Object[] var0 = (new Object[10])
-  var0[0] = null
-  Object var1 = (var0[1])
   return
 )

@@ -1,16 +1,22 @@
 digraph {
  ordering="in";
  node0[label="#0 LocalVariable[name=this, slot=0, type=Lde/mirkosertic/metair/ir/examples/MethodInvokeTest;] Order: 0", shape=box, fillcolor=lightgrey, style=filled];
- node1[label="#1 Label[context=CodeModel[id=1801422599], bci=0] Order: 1", shape=box, fillcolor=lightgrey, style=filled];
+ node1[label="#1 Label[context=CodeModel[id=1921553024], bci=0] Order: 1", shape=box, fillcolor=lightgrey, style=filled];
  node2[label="#2 LineNumber[line=139] Order: 2", shape=box, fillcolor=lightgrey, style=filled];
  node3[label="#3 ArgumentConstant[OP=BIPUSH, val=10] Order: 3", shape=box, fillcolor=lightgrey, style=filled];
  node4[label="#4 Invoke[OP=INVOKESTATIC, m=de/mirkosertic/metair/ir/examples/MethodInvokeTest.staticReturnChar(C)C] Order: 4", shape=box, fillcolor=lightgrey, style=filled];
  node5[label="#5 Return[OP=IRETURN] Order: 5", shape=box, fillcolor=lightgrey, style=filled];
+ node0 -> node0[color=fuchsia];
  node0 -> node1[color=red];
+ node1 -> node0[color=fuchsia];
  node1 -> node2[color=red];
+ node2 -> node1[color=fuchsia];
  node2 -> node3[color=red];
+ node3 -> node2[color=fuchsia];
  node3 -> node4[color=red];
+ node4 -> node3[color=fuchsia];
  node4 -> node5[color=red];
+ node5 -> node4[color=fuchsia];
  subgraph cluster_000 {
   label = "Legend";
   node [shape=point]

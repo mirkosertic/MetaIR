@@ -6,11 +6,17 @@ digraph {
  node3[label="#3 UnboundStackInstruction[op=POP] Order: 3", shape=box, fillcolor=lightgrey, style=filled];
  node4[label="#4 UnboundStackInstruction[op=POP] Order: 4", shape=box, fillcolor=lightgrey, style=filled];
  node5[label="#5 Return[OP=RETURN] Order: 5", shape=box, fillcolor=lightgrey, style=filled];
+ node0 -> node0[color=fuchsia];
  node0 -> node1[color=red];
+ node1 -> node0[color=fuchsia];
  node1 -> node2[color=red];
+ node2 -> node1[color=fuchsia];
  node2 -> node3[color=red];
+ node3 -> node2[color=fuchsia];
  node3 -> node4[color=red];
+ node4 -> node3[color=fuchsia];
  node4 -> node5[color=red];
+ node5 -> node4[color=fuchsia];
  subgraph cluster_000 {
   label = "Legend";
   node [shape=point]
