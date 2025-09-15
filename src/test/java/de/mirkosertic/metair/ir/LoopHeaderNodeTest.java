@@ -14,7 +14,7 @@ public class LoopHeaderNodeTest {
 
         assertThat(node.uses).isEmpty();
         assertThat(node.usedBy).isEmpty();
-        assertThat(node).isInstanceOf(MultiInputNode.class);
+        assertThat(node).isInstanceOf(Node.class);
         assertThat(node.isConstant()).isFalse();
     }
 }

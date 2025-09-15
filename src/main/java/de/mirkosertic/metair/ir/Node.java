@@ -1,5 +1,6 @@
 package de.mirkosertic.metair.ir;
 
+import java.lang.constant.ConstantDesc;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -88,6 +89,12 @@ public abstract class Node {
         return v;
     }
 
+    public PHI definePHI(final ConstantDesc type) {
+        final PHI p = new PHI(type);
+        p.use(this, DefinedByUse.INSTANCE);
+        return p;
+    }
+
     public boolean isDataUsedMultipleTimes() {
         int x = 0;
         for (final Node user : usedBy) {
@@ -101,7 +108,19 @@ public abstract class Node {
     }
 
     public List<Node> arguments() {
-        return uses.stream().filter(e -> e.use() instanceof ArgumentUse).map(x -> x.node).toList();
+        return uses.stream().filter(e -> e.use instanceof ArgumentUse).map(x -> x.node).toList();
+    }
+
+    public List<Node> definitions() {
+        final List<Node> result = new ArrayList<>();
+        for (final Node user : usedBy) {
+            for (final UseEdge edge : user.uses) {
+                if (edge.use() instanceof DefinedByUse && edge.node() == this) {
+                    result.add(user);
+                }
+            }
+        }
+        return result;
     }
 
     public record UseEdge(Node node, Use use) {

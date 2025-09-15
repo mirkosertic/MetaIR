@@ -1,6 +1,6 @@
 package de.mirkosertic.metair.ir;
 
-public class LoopHeaderNode extends MultiInputNode {
+public class LoopHeaderNode extends Node {
 
     public final String label;
 

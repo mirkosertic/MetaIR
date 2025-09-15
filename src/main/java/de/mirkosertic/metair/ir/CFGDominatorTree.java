@@ -110,7 +110,7 @@ public class CFGDominatorTree {
     }
 
     /**
-     * Check wheter a node dominates another one.
+     * Check whether a node dominates another one.
      *
      * @return true, if <code>dominator</code> dominates <code>dominated</code> w.r.t to the entry node
      */

@@ -68,15 +68,18 @@ public class Sequencer<T extends StructuredControlflowCodeGenerator.GeneratedThi
                 switch (current) {
                     case final Method method: {
                         codegenerator.begin(method);
+                        codegenerator.writePHINodesFor(method);
                         current = followUpProcessor.apply(current);
                         break;
                     }
                     case final LabelNode labelNode: {
+                        codegenerator.writePHINodesFor(labelNode);
                         codegenerator.write(labelNode);
                         current = followUpProcessor.apply(current);
                         break;
                     }
                     case final MergeNode mergeNode: {
+                        codegenerator.writePHINodesFor(mergeNode);
                         codegenerator.write(mergeNode);
                         current = followUpProcessor.apply(current);
                         break;
@@ -179,8 +182,14 @@ public class Sequencer<T extends StructuredControlflowCodeGenerator.GeneratedThi
                         break;
                     }
                      case final Goto gto: {
-                        codegenerator.write(gto);
-                        current = followUpProcessor.apply(current);
+                        codegenerator.writePreGoto(gto);
+                        final Node next = gto.getJumpTarget();
+                        if (dominatorTree.getIDom(next) == current) {
+                            current = next;
+                        } else {
+                            generateGOTO(current, next, activeStack);
+                            current = null;
+                        }
                         break;
                     }
                     case final Throw th: {
@@ -191,29 +200,34 @@ public class Sequencer<T extends StructuredControlflowCodeGenerator.GeneratedThi
                     }
                     case final If iff: {
                         // Special-Case : branching
+                        codegenerator.writePHINodesFor(iff);
                         visit(iff, activeStack);
                         current = null;
                         break;
                     }
                     case final LookupSwitch lookupSwitch: {
                         // Special-Case : branching
+                        codegenerator.writePHINodesFor(lookupSwitch);
                         visit(lookupSwitch, activeStack);
                         current = null;
                         break;
                     }
                     case final TableSwitch tableSwitch: {
                         // Special-Case : branching
+                        codegenerator.writePHINodesFor(tableSwitch);
                         visit(tableSwitch, activeStack);
                         current = null;
                         break;
                     }
                     case final LoopHeaderNode loopHeaderNode: {
                         // Special-Case : looping
+                        codegenerator.writePHINodesFor(loopHeaderNode);
                         visit(loopHeaderNode, activeStack, followUpProcessor);
                         current = null;
                         break;
                     }
                     case final ExceptionGuard exceptionGuard: {
+                        codegenerator.writePHINodesFor(exceptionGuard);
                         visit(exceptionGuard, activeStack);
                         current = null;
                         break;
@@ -236,11 +250,11 @@ public class Sequencer<T extends StructuredControlflowCodeGenerator.GeneratedThi
     private void generateGOTO(final Node currentNode, final Node target, final Deque<Block> activeStack) {
         for (final Block b : activeStack) {
             if (b.breakLeadsTo == target) {
-                codegenerator.writeBreakTo(b.label);
+                codegenerator.writeBreakTo(b.label, currentNode, target);
                 return;
             }
             if (b.continueLeadsTo == target) {
-                codegenerator.writeContinueTo(b.label);
+                codegenerator.writeContinueTo(b.label, currentNode, target);
                 return;
             }
         }

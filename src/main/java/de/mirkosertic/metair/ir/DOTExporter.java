@@ -349,7 +349,7 @@ public final class DOTExporter {
                    c3 [style = invis];
                    d8 [style = invis];
                    d9 [style = invis];
-                   
+                
                   }
                   c0 -> c1 [label="Control flow", style=solid, color=red]
                   c2 -> c3 [label="Control flow back edge", style=dashed, color=red]
@@ -369,8 +369,8 @@ public final class DOTExporter {
         if (optCode.isPresent()) {
             final CodeModel code = optCode.get();
 
-            final MethodAnalyzer.Frame[] frames = analyzer.getFrames();
-            final List<MethodAnalyzer.Frame> topologicalOrder = analyzer.getCodeModelTopologicalOrder();
+            final Frame[] frames = analyzer.getFrames();
+            final List<Frame> topologicalOrder = analyzer.getCodeModelTopologicalOrder();
 
             final List<CodeElement> elements = code.elementList();
             for (int i = 0; i < elements.size(); i++) {
@@ -393,9 +393,9 @@ public final class DOTExporter {
             }
 
             for (int elementIndex = 0; elementIndex < frames.length; elementIndex++) {
-                final MethodAnalyzer.Frame frame = frames[elementIndex];
+                final Frame frame = frames[elementIndex];
                 if (frame != null) {
-                    for (final MethodAnalyzer.CFGEdge edge : frame.predecessors) {
+                    for (final FrameCFGEdge edge : frame.predecessors) {
                         ps.print(" node");
                         ps.print(edge.fromIndex());
                         ps.print(" -> node");
@@ -405,6 +405,13 @@ public final class DOTExporter {
                             ps.print(", style=dotted");
                         }
                         ps.println("];");
+                    }
+                    if (frame.immediateDominator != null) {
+                        ps.print(" node");
+                        ps.print(elementIndex);
+                        ps.print(" -> node");
+                        ps.print(topologicalOrder.indexOf(frame.immediateDominator));
+                        ps.println("[color=fuchsia];");
                     }
                 }
             }

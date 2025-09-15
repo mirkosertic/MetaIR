@@ -48,7 +48,7 @@ public class MethodAnalyzerTest {
         @Test
         public void checkAssertMinimumStackSize() {
             try {
-                final MethodAnalyzer.Status status = new MethodAnalyzer.Status(1);
+                final Status status = new Status(1);
                 analyzer.assertMinimumStackSize(status, 10);
                 fail("Exception expected");
             } catch (final IllegalParsingStateException ex) {
@@ -65,7 +65,7 @@ public class MethodAnalyzerTest {
         @Test
         public void checkAssertEmptyStack() {
             try {
-                final MethodAnalyzer.Status status = new MethodAnalyzer.Status(1);
+                final Status status = new Status(1);
                 status.push(new PrimitiveInt(10));
                 analyzer.assertEmptyStack(status);
                 fail("Exception expected");
@@ -86,9 +86,9 @@ public class MethodAnalyzerTest {
 
         @Test
         public void initialStatus() {
-            final MethodAnalyzer.Status status = new MethodAnalyzer.Status(3);
+            final Status status = new Status(3);
             assertThat(status.stack).isEmpty();
-            assertThat(status.lineNumber).isEqualTo(MethodAnalyzer.Status.UNDEFINED_LINE_NUMBER);
+            assertThat(status.lineNumber).isEqualTo(Status.UNDEFINED_LINE_NUMBER);
             assertThat(status.control).isNull();
             assertThat(status.memory).isNull();
             assertThat(status.numberOfLocals()).isEqualTo(3);
@@ -100,14 +100,14 @@ public class MethodAnalyzerTest {
         @Test
         public void failOnEmptyStack() {
             assertThatExceptionOfType(EmptyStackException.class).isThrownBy(() -> {
-                final MethodAnalyzer.Status status = new MethodAnalyzer.Status(3);
+                final Status status = new Status(3);
                 status.stack.pop();
             });
         }
 
         @Test
         public void copy() {
-            final MethodAnalyzer.Status status = new MethodAnalyzer.Status(3);
+            final Status status = new Status(3);
             status.lineNumber = 10;
             status.memory = new LabelNode("mem");
             status.control = new LabelNode("control");
@@ -124,7 +124,7 @@ public class MethodAnalyzerTest {
             assertThat(((PrimitiveInt) status.stack.get(1)).value).isEqualTo(20);
             assertThat(((PrimitiveInt) status.stack.get(2)).value).isEqualTo(30);
 
-            final MethodAnalyzer.Status copy = status.copy();
+            final Status copy = status.copy();
             assertThat(copy.stack).hasSize(3);
             assertThat(((PrimitiveInt) status.stack.get(0)).value).isEqualTo(10);
             assertThat(((PrimitiveInt) status.stack.get(1)).value).isEqualTo(20);
@@ -141,7 +141,7 @@ public class MethodAnalyzerTest {
         @Test
         public void illegalStoreNextToEach() {
             assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
-                final MethodAnalyzer.Status copy = new MethodAnalyzer.Status(10);
+                final Status copy = new Status(10);
                 copy.setLocal(0, new PrimitiveLong(1));
                 copy.setLocal(1, new PrimitiveInt(1));
             }).withMessage("Slot 0 is already set to a category 2 value, so cannot set slot 1");
@@ -150,7 +150,7 @@ public class MethodAnalyzerTest {
         @Test
         public void illegalReadNextToEach() {
             assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
-                final MethodAnalyzer.Status copy = new MethodAnalyzer.Status(10);
+                final Status copy = new Status(10);
                 copy.setLocal(0, new PrimitiveLong(1));
                 copy.getLocal(1);
             }).withMessage("Slot 0 is already set to a category 2 value, so cannot read slot 1");
@@ -173,8 +173,8 @@ public class MethodAnalyzerTest {
             @Test
             public void tableswitch_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(10);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -190,8 +190,8 @@ public class MethodAnalyzerTest {
             @Test
             public void lookupswitch_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(10);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -206,8 +206,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void baload() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -221,20 +221,19 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.control).isInstanceOf(ArrayLoad.class);
+                assertThat(frame.out.control).isInstanceOf(LabelNode.class);
                 assertThat(frame.out.memory).isInstanceOf(ArrayLoad.class);
 
                 final Extend al = (Extend) frame.out.stack.getFirst();
                 assertThat(al.uses).hasSize(1);
-                assertThat(al.uses.getFirst().node()).isSameAs(frame.out.control);
                 assertThat(al.type).isEqualTo(ConstantDescs.CD_int);
                 assertThat(al.extendType).isEqualTo(Extend.ExtendType.SIGN);
             }
 
             @Test
             public void caload() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -248,20 +247,19 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.control).isInstanceOf(ArrayLoad.class);
+                assertThat(frame.out.control).isInstanceOf(LabelNode.class);
                 assertThat(frame.out.memory).isInstanceOf(ArrayLoad.class);
 
                 final Extend al = (Extend) frame.out.stack.getFirst();
                 assertThat(al.uses).hasSize(1);
-                assertThat(al.uses.getFirst().node()).isSameAs(frame.out.control);
                 assertThat(al.type).isEqualTo(ConstantDescs.CD_int);
                 assertThat(al.extendType).isEqualTo(Extend.ExtendType.ZERO);
             }
 
             @Test
             public void saload() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -275,20 +273,19 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.control).isInstanceOf(ArrayLoad.class);
+                assertThat(frame.out.control).isInstanceOf(LabelNode.class);
                 assertThat(frame.out.memory).isInstanceOf(ArrayLoad.class);
 
                 final Extend al = (Extend) frame.out.stack.getFirst();
                 assertThat(al.uses).hasSize(1);
-                assertThat(al.uses.getFirst().node()).isSameAs(frame.out.control);
                 assertThat(al.type).isEqualTo(ConstantDescs.CD_int);
                 assertThat(al.extendType).isEqualTo(Extend.ExtendType.SIGN);
             }
 
             @Test
             public void iaload() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -302,11 +299,11 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.control).isInstanceOf(ArrayLoad.class);
+                assertThat(frame.out.control).isInstanceOf(LabelNode.class);
                 assertThat(frame.out.memory).isInstanceOf(ArrayLoad.class);
 
                 final ArrayLoad al = (ArrayLoad) frame.out.stack.getFirst();
-                assertThat(al.uses).hasSize(4);
+                assertThat(al.uses).hasSize(3);
                 assertThat(al.uses.get(0).node()).isSameAs(array);
                 assertThat(al.uses.get(1).node()).isSameAs(index);
                 assertThat(al.type).isEqualTo(ConstantDescs.CD_int);
@@ -315,8 +312,8 @@ public class MethodAnalyzerTest {
             @Test
             public void iaload_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(10);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -327,8 +324,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void laload() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -342,11 +339,11 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.control).isInstanceOf(ArrayLoad.class);
+                assertThat(frame.out.control).isInstanceOf(LabelNode.class);
                 assertThat(frame.out.memory).isInstanceOf(ArrayLoad.class);
 
                 final ArrayLoad al = (ArrayLoad) frame.out.stack.getFirst();
-                assertThat(al.uses).hasSize(4);
+                assertThat(al.uses).hasSize(3);
                 assertThat(al.uses.get(0).node()).isSameAs(array);
                 assertThat(al.uses.get(1).node()).isSameAs(index);
                 assertThat(al.type).isEqualTo(ConstantDescs.CD_long);
@@ -354,8 +351,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void faload() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -369,11 +366,11 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.control).isInstanceOf(ArrayLoad.class);
+                assertThat(frame.out.control).isInstanceOf(LabelNode.class);
                 assertThat(frame.out.memory).isInstanceOf(ArrayLoad.class);
 
                 final ArrayLoad al = (ArrayLoad) frame.out.stack.getFirst();
-                assertThat(al.uses).hasSize(4);
+                assertThat(al.uses).hasSize(3);
                 assertThat(al.uses.get(0).node()).isSameAs(array);
                 assertThat(al.uses.get(1).node()).isSameAs(index);
                 assertThat(al.type).isEqualTo(ConstantDescs.CD_float);
@@ -381,8 +378,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void daload() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -396,11 +393,11 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.control).isInstanceOf(ArrayLoad.class);
+                assertThat(frame.out.control).isInstanceOf(LabelNode.class);
                 assertThat(frame.out.memory).isInstanceOf(ArrayLoad.class);
 
                 final ArrayLoad al = (ArrayLoad) frame.out.stack.getFirst();
-                assertThat(al.uses).hasSize(4);
+                assertThat(al.uses).hasSize(3);
                 assertThat(al.uses.get(0).node()).isSameAs(array);
                 assertThat(al.uses.get(1).node()).isSameAs(index);
                 assertThat(al.type).isEqualTo(ConstantDescs.CD_double);
@@ -408,8 +405,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void aaload() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -423,11 +420,11 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.control).isInstanceOf(ArrayLoad.class);
+                assertThat(frame.out.control).isInstanceOf(LabelNode.class);
                 assertThat(frame.out.memory).isInstanceOf(ArrayLoad.class);
 
                 final ArrayLoad al = (ArrayLoad) frame.out.stack.getFirst();
-                assertThat(al.uses).hasSize(4);
+                assertThat(al.uses).hasSize(3);
                 assertThat(al.uses.get(0).node()).isSameAs(array);
                 assertThat(al.uses.get(1).node()).isSameAs(index);
             }
@@ -435,8 +432,8 @@ public class MethodAnalyzerTest {
             @Test
             public void aaload_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(10);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -451,8 +448,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void aastore() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -468,11 +465,11 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
-                assertThat(frame.out.control).isInstanceOf(ArrayStore.class);
+                assertThat(frame.out.control).isInstanceOf(LabelNode.class);
                 assertThat(frame.out.memory).isInstanceOf(ArrayStore.class);
 
                 final ArrayStore as = (ArrayStore) frame.out.memory;
-                assertThat(as.uses).hasSize(5);
+                assertThat(as.uses).hasSize(4);
                 assertThat(as.uses.get(0).node()).isSameAs(array);
                 assertThat(as.uses.get(1).node()).isSameAs(index);
                 assertThat(as.uses.get(2).node()).isSameAs(value);
@@ -481,8 +478,8 @@ public class MethodAnalyzerTest {
             @Test
             public void aastore_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(10);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -493,8 +490,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void castore() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -510,11 +507,11 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
-                assertThat(frame.out.control).isInstanceOf(ArrayStore.class);
+                assertThat(frame.out.control).isInstanceOf(LabelNode.class);
                 assertThat(frame.out.memory).isInstanceOf(ArrayStore.class);
 
                 final ArrayStore as = (ArrayStore) frame.out.memory;
-                assertThat(as.uses).hasSize(5);
+                assertThat(as.uses).hasSize(4);
                 assertThat(as.uses.get(0).node()).isSameAs(array);
                 assertThat(as.uses.get(1).node()).isSameAs(index);
                 assertThat(as.uses.get(2).node()).isInstanceOf(Truncate.class);
@@ -523,8 +520,8 @@ public class MethodAnalyzerTest {
             @Test
             public void castore_fail_wrongvalue() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(10);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -543,8 +540,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void bastore() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -560,11 +557,11 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
-                assertThat(frame.out.control).isInstanceOf(ArrayStore.class);
+                assertThat(frame.out.control).isInstanceOf(LabelNode.class);
                 assertThat(frame.out.memory).isInstanceOf(ArrayStore.class);
 
                 final ArrayStore as = (ArrayStore) frame.out.memory;
-                assertThat(as.uses).hasSize(5);
+                assertThat(as.uses).hasSize(4);
                 assertThat(as.uses.get(0).node()).isSameAs(array);
                 assertThat(as.uses.get(1).node()).isSameAs(index);
                 assertThat(as.uses.get(2).node()).isInstanceOf(Truncate.class);
@@ -572,8 +569,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void sastore() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -589,11 +586,11 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
-                assertThat(frame.out.control).isInstanceOf(ArrayStore.class);
+                assertThat(frame.out.control).isInstanceOf(LabelNode.class);
                 assertThat(frame.out.memory).isInstanceOf(ArrayStore.class);
 
                 final ArrayStore as = (ArrayStore) frame.out.memory;
-                assertThat(as.uses).hasSize(5);
+                assertThat(as.uses).hasSize(4);
                 assertThat(as.uses.get(0).node()).isSameAs(array);
                 assertThat(as.uses.get(1).node()).isSameAs(index);
                 assertThat(as.uses.get(2).node()).isInstanceOf(Truncate.class);
@@ -601,8 +598,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void iastore() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -618,11 +615,11 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
-                assertThat(frame.out.control).isInstanceOf(ArrayStore.class);
+                assertThat(frame.out.control).isInstanceOf(LabelNode.class);
                 assertThat(frame.out.memory).isInstanceOf(ArrayStore.class);
 
                 final ArrayStore as = (ArrayStore) frame.out.memory;
-                assertThat(as.uses).hasSize(5);
+                assertThat(as.uses).hasSize(4);
                 assertThat(as.uses.get(0).node()).isSameAs(array);
                 assertThat(as.uses.get(1).node()).isSameAs(index);
                 assertThat(as.uses.get(2).node()).isSameAs(value);
@@ -631,8 +628,8 @@ public class MethodAnalyzerTest {
             @Test
             public void iastore_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(10);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -643,8 +640,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void lastore() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -660,11 +657,11 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
-                assertThat(frame.out.control).isInstanceOf(ArrayStore.class);
+                assertThat(frame.out.control).isInstanceOf(LabelNode.class);
                 assertThat(frame.out.memory).isInstanceOf(ArrayStore.class);
 
                 final ArrayStore as = (ArrayStore) frame.out.memory;
-                assertThat(as.uses).hasSize(5);
+                assertThat(as.uses).hasSize(4);
                 assertThat(as.uses.get(0).node()).isSameAs(array);
                 assertThat(as.uses.get(1).node()).isSameAs(index);
                 assertThat(as.uses.get(2).node()).isSameAs(value);
@@ -672,8 +669,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void fastore() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -689,11 +686,11 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
-                assertThat(frame.out.control).isInstanceOf(ArrayStore.class);
+                assertThat(frame.out.control).isInstanceOf(LabelNode.class);
                 assertThat(frame.out.memory).isInstanceOf(ArrayStore.class);
 
                 final ArrayStore as = (ArrayStore) frame.out.memory;
-                assertThat(as.uses).hasSize(5);
+                assertThat(as.uses).hasSize(4);
                 assertThat(as.uses.get(0).node()).isSameAs(array);
                 assertThat(as.uses.get(1).node()).isSameAs(index);
                 assertThat(as.uses.get(2).node()).isSameAs(value);
@@ -701,8 +698,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dastore() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -718,11 +715,11 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
-                assertThat(frame.out.control).isInstanceOf(ArrayStore.class);
+                assertThat(frame.out.control).isInstanceOf(LabelNode.class);
                 assertThat(frame.out.memory).isInstanceOf(ArrayStore.class);
 
                 final ArrayStore as = (ArrayStore) frame.out.memory;
-                assertThat(as.uses).hasSize(5);
+                assertThat(as.uses).hasSize(4);
                 assertThat(as.uses.get(0).node()).isSameAs(array);
                 assertThat(as.uses.get(1).node()).isSameAs(index);
                 assertThat(as.uses.get(2).node()).isSameAs(value);
@@ -735,8 +732,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void invokestatic() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -754,8 +751,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void invokespecial() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -775,8 +772,8 @@ public class MethodAnalyzerTest {
             @Test
             public void invokespecial_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(10);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -787,8 +784,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void invokevirtual() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -808,8 +805,8 @@ public class MethodAnalyzerTest {
             @Test
             public void invokesvirtual_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(10);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -820,8 +817,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void invokeinterface() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -841,8 +838,8 @@ public class MethodAnalyzerTest {
             @Test
             public void invokeinterface_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(10);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -857,8 +854,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void iinc() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -877,8 +874,8 @@ public class MethodAnalyzerTest {
             @Test
             public void iinc_fail_null() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(10);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -890,8 +887,8 @@ public class MethodAnalyzerTest {
             @Test
             public void iinc_fail_wrongtype() {
                 assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(10);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -909,8 +906,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void putstatic() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -934,8 +931,8 @@ public class MethodAnalyzerTest {
             @Test
             public void putstatic_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(10);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -946,8 +943,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void putfield() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -961,11 +958,11 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
-                assertThat(frame.out.control).isInstanceOf(PutField.class);
+                assertThat(frame.out.control).isInstanceOf(LabelNode.class);
                 assertThat(frame.out.memory).isInstanceOf(PutField.class);
 
                 final PutField put = (PutField) frame.out.memory;
-                assertThat(put.uses).hasSize(4);
+                assertThat(put.uses).hasSize(3);
                 assertThat(put.uses.get(0).node()).isSameAs(target);
                 assertThat(put.uses.get(0).use()).isEqualTo(new ArgumentUse(0));
                 assertThat(put.uses.get(1).node()).isSameAs(value);
@@ -975,8 +972,8 @@ public class MethodAnalyzerTest {
             @Test
             public void putfield_fail_stacksize() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(10);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -987,8 +984,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void getfield() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1010,8 +1007,8 @@ public class MethodAnalyzerTest {
             @Test
             public void getfield_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(10);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -1022,8 +1019,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void getstatic() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1047,8 +1044,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void athrow() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1069,8 +1066,8 @@ public class MethodAnalyzerTest {
             @Test
             public void athrow_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(10);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -1085,8 +1082,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void multiarray_dim1() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1105,8 +1102,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void multiarray_dim2() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1127,8 +1124,8 @@ public class MethodAnalyzerTest {
             @Test
             public void multiarray_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(10);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -1143,8 +1140,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void newObjectArray() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1164,8 +1161,8 @@ public class MethodAnalyzerTest {
             @Test
             public void newObjectArray_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(10);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -1176,8 +1173,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void newByteArray() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1197,8 +1194,8 @@ public class MethodAnalyzerTest {
             @Test
             public void newByteArray_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(10);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -1209,8 +1206,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void newCharArray() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1229,8 +1226,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void newShortArray() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1249,8 +1246,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void newBooleanArray() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1269,8 +1266,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void newIntArray() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1289,8 +1286,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void newLongArray() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1309,8 +1306,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void newFloatArray() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1329,8 +1326,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void newDoubleArray() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1354,8 +1351,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void nop() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1374,8 +1371,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void astore() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1395,8 +1392,8 @@ public class MethodAnalyzerTest {
             @Test
             public void astore_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(10);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -1408,8 +1405,8 @@ public class MethodAnalyzerTest {
             @Test
             public void astore_fail_wrongtype() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(10);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -1422,8 +1419,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void astore_0() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1442,8 +1439,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void astore_1() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1462,8 +1459,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void astore_2() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1482,8 +1479,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void astore_3() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1502,8 +1499,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void istore() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1522,8 +1519,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void istore_w() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1543,8 +1540,8 @@ public class MethodAnalyzerTest {
             @Test
             public void istore_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(10);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -1556,8 +1553,8 @@ public class MethodAnalyzerTest {
             @Test
             public void istore_fail_wrongtype() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(10);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -1570,8 +1567,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void istore_0() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1590,8 +1587,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void istore_1() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1610,8 +1607,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void istore_2() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1630,8 +1627,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void istore_3() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1650,8 +1647,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void lstore() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1670,8 +1667,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void lstore_w() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1690,8 +1687,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void lstore_0() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1710,8 +1707,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void lstore_1() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1730,8 +1727,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void lstore_2() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1750,8 +1747,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void lstore_3() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1770,8 +1767,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void fstore() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1790,8 +1787,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void fstore_w() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1810,8 +1807,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void fstore_0() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1830,8 +1827,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void fstore_1() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1850,8 +1847,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void fstore_2() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1870,8 +1867,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void fstore_3() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1890,8 +1887,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dstore() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1910,8 +1907,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dstore_w() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1930,8 +1927,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dstore_0() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1950,8 +1947,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dstore_1() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1970,8 +1967,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dstore_2() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -1990,8 +1987,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dstore_3() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2014,8 +2011,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void iload() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2035,8 +2032,8 @@ public class MethodAnalyzerTest {
             @Test
             public void iload_fail_wrong_type() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(10);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -2050,8 +2047,8 @@ public class MethodAnalyzerTest {
             @Test
             public void iload_fail_null() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(10);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -2062,8 +2059,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void iload_0() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2082,8 +2079,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void iload_w() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2102,8 +2099,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void iload_1() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2122,8 +2119,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void iload_2() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2142,8 +2139,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void iload_3() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2162,8 +2159,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void lload() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2182,8 +2179,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void lload_w() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2202,8 +2199,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void lload_0() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2222,8 +2219,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void lload_1() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2242,8 +2239,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void lload_2() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2262,8 +2259,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void lload_3() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2282,8 +2279,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void fload() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2302,8 +2299,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void fload_w() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2322,8 +2319,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void fload_0() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2342,8 +2339,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void fload_1() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2362,8 +2359,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void fload_2() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2382,8 +2379,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void fload_3() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2402,8 +2399,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dload() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2422,8 +2419,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dload_w() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2442,8 +2439,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dload_0() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2462,8 +2459,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dload_1() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2482,8 +2479,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dload_2() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2502,8 +2499,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dload_3() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2522,8 +2519,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void aload() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2543,8 +2540,8 @@ public class MethodAnalyzerTest {
             @Test
             public void aload_fail_primitive() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(10);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -2558,8 +2555,8 @@ public class MethodAnalyzerTest {
             @Test
             public void aload_fail_null() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(10);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(10);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -2570,8 +2567,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void aload_0() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2590,8 +2587,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void aload_1() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2610,8 +2607,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void aload_2() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2630,8 +2627,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void aload_3() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(10);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(10);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2655,8 +2652,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void new_() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2679,8 +2676,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dup2_x2_form4() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2701,8 +2698,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dup2_x2_form3() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2726,8 +2723,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dup2_x2_form2() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2750,8 +2747,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dup2_x2_form1() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2777,8 +2774,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dup2_x1_form2() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2800,8 +2797,8 @@ public class MethodAnalyzerTest {
             @Test
             public void dup2_x1_form2_fail_wrongstack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(0);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -2814,8 +2811,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dup2_x1_form1() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2840,8 +2837,8 @@ public class MethodAnalyzerTest {
             @Test
             public void dup2_x1_form1_fail_wrongstack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(0);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -2855,8 +2852,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dup_x2_form2() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2878,8 +2875,8 @@ public class MethodAnalyzerTest {
             @Test
             public void dup_x2_form2_fail_wrongstack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(0);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -2892,8 +2889,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dup_x2_form1() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2917,8 +2914,8 @@ public class MethodAnalyzerTest {
             @Test
             public void dup_x2_form1_fail_wrongstack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(0);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -2932,8 +2929,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dup_x1() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2955,8 +2952,8 @@ public class MethodAnalyzerTest {
             @Test
             public void dup_x1_fail_stacksize() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(0);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -2969,8 +2966,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dup2_form2() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -2989,8 +2986,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dup2_form1() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3013,8 +3010,8 @@ public class MethodAnalyzerTest {
             @Test
             public void dup2_form1_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(0);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -3027,8 +3024,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void swap() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3048,8 +3045,8 @@ public class MethodAnalyzerTest {
             @Test
             public void swap_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(0);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -3060,8 +3057,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dup() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3080,8 +3077,8 @@ public class MethodAnalyzerTest {
             @Test
             public void dup_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(0);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -3092,8 +3089,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void pop() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3110,8 +3107,8 @@ public class MethodAnalyzerTest {
             @Test
             public void pop_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(0);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -3122,8 +3119,8 @@ public class MethodAnalyzerTest {
             @Test
             public void pop2_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(0);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -3134,8 +3131,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void pop2_long() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3151,8 +3148,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void pop2_int() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3170,8 +3167,8 @@ public class MethodAnalyzerTest {
             @Test
             public void pop2_int_fail() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(0);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -3188,8 +3185,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void monitorEnter() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3210,8 +3207,8 @@ public class MethodAnalyzerTest {
             @Test
             public void monitorEnter_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(0);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -3221,8 +3218,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void monitorExit() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3243,8 +3240,8 @@ public class MethodAnalyzerTest {
             @Test
             public void monitorExit_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(0);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -3259,8 +3256,8 @@ public class MethodAnalyzerTest {
             @Test
             public void checkcast_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(0);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -3273,8 +3270,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void checkCast() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3289,8 +3286,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void instanceOf() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3310,8 +3307,8 @@ public class MethodAnalyzerTest {
             @Test
             public void i2c_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(0);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -3325,8 +3322,8 @@ public class MethodAnalyzerTest {
             @Test
             public void i2c_fail_wrongtyoe() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(0);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -3339,8 +3336,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void i2b() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3357,8 +3354,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void i2c() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3375,8 +3372,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void i2s() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3393,8 +3390,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void i2l() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3412,8 +3409,8 @@ public class MethodAnalyzerTest {
             @Test
             public void i2l_fail_wrongtype() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(0);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -3427,8 +3424,8 @@ public class MethodAnalyzerTest {
             @Test
             public void i2l_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(0);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -3439,8 +3436,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void i2f() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3457,8 +3454,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void i2d() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3475,8 +3472,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void l2i() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3493,8 +3490,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void l2f() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3511,8 +3508,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void l2d() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3529,8 +3526,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void f2i() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3547,8 +3544,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void f2l() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3565,8 +3562,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void f2d() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3583,8 +3580,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void d2i() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3601,8 +3598,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void d2l() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3619,8 +3616,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void d2f() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3641,8 +3638,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void aconst_null() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3657,8 +3654,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void sipush() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3673,8 +3670,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void bipush() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3689,8 +3686,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void iconst_m1() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3705,8 +3702,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void iconst_0() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3721,8 +3718,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void iconst_1() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3737,8 +3734,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void iconst_2() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3753,8 +3750,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void iconst_3() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3769,8 +3766,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void iconst_4() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3785,8 +3782,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void iconst_5() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3801,8 +3798,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void lconst_0() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3817,8 +3814,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void lconst_1() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3833,8 +3830,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void fconst_0() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3849,8 +3846,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void fconst_1() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3865,8 +3862,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void fconst_2() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3881,8 +3878,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dconst_0() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3897,8 +3894,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dconst_1() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3917,8 +3914,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void ldc_String() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3933,8 +3930,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void ldc_int() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3949,8 +3946,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void ldc_long() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3965,8 +3962,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void ldc_float() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3981,8 +3978,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void ldc_double() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -3997,8 +3994,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void ldc_Class() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -4013,8 +4010,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void notImplemented() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -4030,8 +4027,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void fcmpg() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -4060,8 +4057,8 @@ public class MethodAnalyzerTest {
             @Test
             public void fcmpg_fail_emmptystack() {
                 assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(0);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -4072,8 +4069,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void fcmpl() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -4101,8 +4098,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dcmpg() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -4130,8 +4127,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dcmpl() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -4159,8 +4156,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void lcmp() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -4189,8 +4186,8 @@ public class MethodAnalyzerTest {
             @Test
             public void arraylength_fail_emptystack() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(0);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -4203,8 +4200,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void arrayLength() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -4219,8 +4216,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void ineg() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -4235,8 +4232,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void lneg() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -4251,8 +4248,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void fneg() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -4267,8 +4264,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dneg() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -4283,8 +4280,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void isub() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -4311,8 +4308,8 @@ public class MethodAnalyzerTest {
             @Test
             public void isub_fail_emptystack() {
                 assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(0);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -4323,8 +4320,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void lsub() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -4350,8 +4347,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void fsub() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -4377,8 +4374,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dsub() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -4404,8 +4401,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void iadd() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -4432,8 +4429,8 @@ public class MethodAnalyzerTest {
             @Test
             public void iadd_fail_emptystack() {
                 assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(0);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -4444,8 +4441,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void ladd() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -4471,8 +4468,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void fadd() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -4498,8 +4495,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dadd() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -4529,8 +4526,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void areturn() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -4546,8 +4543,8 @@ public class MethodAnalyzerTest {
             @Test
             public void areturn_fail_empty_stack() {
                 assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(0);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -4558,8 +4555,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void return_() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -4574,8 +4571,8 @@ public class MethodAnalyzerTest {
             @Test
             public void return_fail_emptystack() {
                 Assertions.assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(0);
                     frame.in.push(new PrimitiveInt(10));
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
@@ -4588,8 +4585,8 @@ public class MethodAnalyzerTest {
             @Test
             public void ireturn_fail_emptystack() {
                 Assertions.assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(0);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
@@ -4600,8 +4597,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void ireturn() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -4616,8 +4613,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void dreturn() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -4632,8 +4629,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void freturn() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -4648,8 +4645,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void lreturn() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -4664,8 +4661,8 @@ public class MethodAnalyzerTest {
 
             @Test
             public void ireturn_with_truncation() {
-                final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                frame.in = new MethodAnalyzer.Status(0);
+                final Frame frame = new Frame(0, null);
+                frame.in = new Status(0);
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
@@ -4681,8 +4678,8 @@ public class MethodAnalyzerTest {
             @Test
             public void ireturn_with_truncation_fail_wrongtype() {
                 assertThatExceptionOfType(IllegalParsingStateException.class).isThrownBy(() -> {
-                    final MethodAnalyzer.Frame frame = new MethodAnalyzer.Frame(0, null);
-                    frame.in = new MethodAnalyzer.Status(0);
+                    final Frame frame = new Frame(0, null);
+                    frame.in = new Status(0);
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 

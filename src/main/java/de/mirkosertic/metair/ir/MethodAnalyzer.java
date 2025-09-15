@@ -10,7 +10,6 @@ import java.lang.classfile.Opcode;
 import java.lang.classfile.PseudoInstruction;
 import java.lang.classfile.TypeKind;
 import java.lang.classfile.attribute.CodeAttribute;
-import java.lang.classfile.attribute.StackMapFrameInfo;
 import java.lang.classfile.attribute.StackMapTableAttribute;
 import java.lang.classfile.instruction.ArrayLoadInstruction;
 import java.lang.classfile.instruction.ArrayStoreInstruction;
@@ -63,7 +62,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
-import java.util.Stack;
 import java.util.stream.Collectors;
 
 public class MethodAnalyzer {
@@ -104,8 +102,9 @@ public class MethodAnalyzer {
                 step0PrepareTryCatchBlocks(code);
                 step1AnalyzeCFG(code);
                 step2ComputeTopologicalOrder();
-                step3FollowCFGAndInterpret(code);
-                step4PeepholeOptimizations();
+                step3ComputeFrameDominators();
+                step4FollowCFGAndInterpret(code);
+                step5PeepholeOptimizations();
             } catch (final IllegalParsingStateException ex) {
                 throw ex;
             } catch (final RuntimeException ex) {
@@ -251,7 +250,7 @@ public class MethodAnalyzer {
                                             frame = new Frame(newIndex, codeElements.get(newIndex));
                                             frames[newIndex] = frame;
                                         }
-                                        frame.predecessors.add(new CFGEdge(i, new NamedProjection(CatchProjection.nameFor(k, handler.exceptionTypes)), FlowType.FORWARD));
+                                        frame.predecessors.add(new FrameCFGEdge(i, new FrameNamedProjection(CatchProjection.nameFor(k, handler.exceptionTypes)), FlowType.FORWARD));
                                     } else {
                                         illegalState("Exception handler target " + handler.handler + " is not mapped to an index");
                                     }
@@ -279,7 +278,7 @@ public class MethodAnalyzer {
                                     frame = new Frame(newIndex, codeElements.get(newIndex));
                                     frames[newIndex] = frame;
                                 }
-                                frame.predecessors.add(new CFGEdge(i, NamedProjection.DEFAULT, flowType));
+                                frame.predecessors.add(new FrameCFGEdge(i, FrameNamedProjection.DEFAULT, flowType));
                                 break;
                             } else {
                                 illegalState("Unconditional branch to " + branch.target() + " which is not mapped to an index");
@@ -303,7 +302,7 @@ public class MethodAnalyzer {
                                     frame = new Frame(newIndex, codeElements.get(newIndex));
                                     frames[newIndex] = frame;
                                 }
-                                frame.predecessors.add(new CFGEdge(i, new NamedProjection("true"), flowType));
+                                frame.predecessors.add(new FrameCFGEdge(i, new FrameNamedProjection("true"), flowType));
                             } else {
                                 illegalState("Conditional branch to " + branch.target() + " which is not mapped to an index");
                             }
@@ -328,7 +327,7 @@ public class MethodAnalyzer {
                                     frame = new Frame(newIndex, codeElements.get(newIndex));
                                     frames[newIndex] = frame;
                                 }
-                                frame.predecessors.add(new CFGEdge(i, new NamedProjection("case" + j), flowType));
+                                frame.predecessors.add(new FrameCFGEdge(i, new FrameNamedProjection("case" + j), flowType));
                             } else {
                                 illegalState("Case branch to " + target + " which is not mapped to an index");
                             }
@@ -349,7 +348,7 @@ public class MethodAnalyzer {
                                 frame = new Frame(newIndex, codeElements.get(newIndex));
                                 frames[newIndex] = frame;
                             }
-                            frame.predecessors.add(new CFGEdge(i, new NamedProjection("default"), flowType));
+                            frame.predecessors.add(new FrameCFGEdge(i, new FrameNamedProjection("default"), flowType));
                         } else {
                             illegalState("Default branch to " + target + " which is not mapped to an index");
                         }
@@ -375,7 +374,7 @@ public class MethodAnalyzer {
                                     frame = new Frame(newIndex, codeElements.get(newIndex));
                                     frames[newIndex] = frame;
                                 }
-                                frame.predecessors.add(new CFGEdge(i, new NamedProjection("case" + j), flowType));
+                                frame.predecessors.add(new FrameCFGEdge(i, new FrameNamedProjection("case" + j), flowType));
                             } else {
                                 illegalState("Case branch to " + target + " which is not mapped to an index");
                             }
@@ -396,7 +395,7 @@ public class MethodAnalyzer {
                                 frame = new Frame(newIndex, codeElements.get(newIndex));
                                 frames[newIndex] = frame;
                             }
-                            frame.predecessors.add(new CFGEdge(i, new NamedProjection("default"), flowType));
+                            frame.predecessors.add(new FrameCFGEdge(i, new FrameNamedProjection("default"), flowType));
                         } else {
                             illegalState("Default branch to " + target + " which is not mapped to an index");
                         }
@@ -425,9 +424,9 @@ public class MethodAnalyzer {
                 }
                 // This is a regular forward flow
                 if (current instanceof BranchInstruction) {
-                    nextFrame.predecessors.add(new CFGEdge(i, new NamedProjection("false"), FlowType.FORWARD));
+                    nextFrame.predecessors.add(new FrameCFGEdge(i, new FrameNamedProjection("false"), FlowType.FORWARD));
                 } else {
-                    nextFrame.predecessors.add(new CFGEdge(i, NamedProjection.DEFAULT, FlowType.FORWARD));
+                    nextFrame.predecessors.add(new FrameCFGEdge(i, FrameNamedProjection.DEFAULT, FlowType.FORWARD));
                 }
 
                 if (visited.contains(i + 1)) {
@@ -454,8 +453,8 @@ public class MethodAnalyzer {
             for (final Frame frame : frames) {
                 // Maybe null due to unreachable statements in bytecode
                 if (frame != null) {
-                    for (final CFGEdge edge : frame.predecessors) {
-                        if (edge.fromIndex == currentNode.elementIndex && edge.flowType == FlowType.FORWARD) {
+                    for (final FrameCFGEdge edge : frame.predecessors) {
+                        if (edge.fromIndex() == currentNode.elementIndex && edge.flowType() == FlowType.FORWARD) {
                             forwardNodes.add(frame);
                         }
                     }
@@ -494,6 +493,55 @@ public class MethodAnalyzer {
 
     }
 
+    private void step3ComputeFrameDominators() {
+        final Frame firstElement = codeModelTopologicalOrder.getFirst();
+        firstElement.immediateDominator = firstElement;
+
+        boolean changed;
+        do {
+            changed = false;
+            for (final Frame v : codeModelTopologicalOrder) {
+                if (v.equals(firstElement))
+                    continue;
+
+                final Frame oldIdom = v.immediateDominator;
+                Frame newIdom = null;
+
+                for (final FrameCFGEdge edge : v.predecessors) {
+                     final Frame sourceNode = frames[edge.fromIndex()];
+
+                    if (sourceNode.immediateDominator == null)
+                        /* not yet analyzed */ continue;
+                    if (newIdom == null) {
+                        /* If we only have one (defined) predecessor pre, IDom(v) = pre */
+                        newIdom = sourceNode;
+                    } else {
+                        /* compute the intersection of all defined predecessors of v */
+                        newIdom = intersectIDoms(sourceNode, newIdom);
+                    }
+                }
+                if (newIdom == null) {
+                    throw new AssertionError("newIDom == null !, for " + v);
+                }
+                if (!newIdom.equals(oldIdom)) {
+                    changed = true;
+                    v.immediateDominator = newIdom;
+                }
+            }
+        } while (changed);
+    }
+
+    private Frame intersectIDoms(Frame v1, Frame v2) {
+        while (v1 != v2) {
+            if (codeModelTopologicalOrder.indexOf(v1) < codeModelTopologicalOrder.indexOf(v2)) {
+                v2 = v2.immediateDominator;
+            } else {
+                v1 = v1.immediateDominator;
+            }
+        }
+        return v1;
+    }
+
     static ConstantDesc meetTypesOf(final Collection<Value> values) {
         final List<Value> l = values.stream().toList();
         final Value first = l.getFirst();
@@ -511,8 +559,31 @@ public class MethodAnalyzer {
         return first.type;
     }
 
-    static void mergeFrames(final Frame targetFrame, final MultiInputNode targetNode, final List<Frame> sourceFrames, final Status targetStatus, final int numLocals, final boolean hasBackEdges) {
+    void mergeFrames(final Frame targetFrame, final Node targetNode, final List<Frame> sourceFrames, final Status targetStatus, final int numLocals, final boolean hasBackEdges) {
         // Se search through all frames and try to join where values match
+        Frame dominatorFrame = targetFrame.immediateDominator;
+        if (dominatorFrame == null) {
+            illegalState("dominatorFrame == null !, for frame with index " + targetFrame.elementIndex);
+        }
+        // Walk up the dominator frame till we find something we can work with
+        while (dominatorFrame != null && dominatorFrame.entryPoint == null && dominatorFrame.immediateDominator != dominatorFrame) {
+            dominatorFrame = dominatorFrame.immediateDominator;
+        }
+        if (dominatorFrame == null) {
+            illegalState("dominatorFrame == null while searching for node!, for frame with index " + targetFrame.elementIndex);
+        }
+        Node phiOwner = null;
+        if (dominatorFrame.entryPoint == null) {
+            if (dominatorFrame.indexInTopologicalOrder == 0) {
+                // Callback in case we didn't find a label or something else on the way and end at the first frame of the cfg (which per definition dominates itself)
+                phiOwner = ir;
+            } else {
+                illegalState("dominatorFrame.entrypoint == null while searching for node!, for frame with index " + targetFrame.elementIndex);
+            }
+        } else {
+            phiOwner = dominatorFrame.entryPoint;
+        }
+
         for (int i = 0; i < numLocals; i++) {
             int foundInFrames = 0;
             final Set<Value> values = new HashSet<>();
@@ -537,7 +608,7 @@ public class MethodAnalyzer {
 
                 // We perform this only if the meet is possible
                 if (type != null) {
-                    final PHI phi = targetNode.definePHI(type);
+                    final PHI phi = phiOwner.definePHI(type);
                     for (final Frame frame : sourceFrames) {
                         final Value v = frame.out.locals[i];
                         if (v != null) {
@@ -569,7 +640,7 @@ public class MethodAnalyzer {
         }
     }
 
-    private void step3FollowCFGAndInterpret(final CodeModel code) {
+    private void step4FollowCFGAndInterpret(final CodeModel code) {
 
         final CodeAttribute cm = (CodeAttribute) code;
 
@@ -643,8 +714,8 @@ public class MethodAnalyzer {
                     illegalState("No predecessors for " + frame.elementIndex);
                 }
                 if (frame.predecessors.size() == 1) {
-                    final CFGEdge edge = frame.predecessors.getFirst();
-                    final Frame outgoing = posToFrame.get(edge.fromIndex);
+                    final FrameCFGEdge edge = frame.predecessors.getFirst();
+                    final Frame outgoing = posToFrame.get(edge.fromIndex());
                     if (outgoing == null) {
                         illegalState("No outgoing frame for " + frame.elementIndex);
                     }
@@ -655,10 +726,10 @@ public class MethodAnalyzer {
 
                     if (incomingStatus.control instanceof TupleNode) {
                         incomingStatus.control = ((TupleNode) incomingStatus.control).getNamedNode(edge.projection().name());
-                    } else if (NamedProjection.DEFAULT.equals(edge.projection)) {
+                    } else if (FrameNamedProjection.DEFAULT.equals(edge.projection())) {
                         // No nothing in this case, we just keep the incoming control node
                     } else {
-                        illegalState("Unknown projection type " + edge.projection + " or unsupported node : " + incomingStatus.control);
+                        illegalState("Unknown projection type " + edge.projection() + " or unsupported node : " + incomingStatus.control);
                     }
 
                     if (isExceptionHandler) {
@@ -682,12 +753,12 @@ public class MethodAnalyzer {
                         final List<Frame> incomingFrames = new ArrayList<>();
                         final List<Node> incomingMemories = new ArrayList<>();
                         boolean hasBackEdges = false;
-                        for (final CFGEdge edge : frame.predecessors) {
+                        for (final FrameCFGEdge edge : frame.predecessors) {
                             // We only respect forward control flows, as phi data propagation for backward
                             // edges is handled during node parsing of the source instruction, as
                             // the outgoing status for this node is not computed yet.
-                            if (edge.flowType == FlowType.FORWARD) {
-                                final Frame incomingFrame = posToFrame.get(edge.fromIndex);
+                            if (edge.flowType() == FlowType.FORWARD) {
+                                final Frame incomingFrame = posToFrame.get(edge.fromIndex());
                                 if (incomingFrame.out == null) {
                                     illegalState("No outgoing status for " + incomingFrame.elementIndex);
                                 }
@@ -695,25 +766,25 @@ public class MethodAnalyzer {
                                 if (!incomingMemories.contains(memory)) {
                                     incomingMemories.add(memory);
                                 }
-                                incomingFrames.add(posToFrame.get(edge.fromIndex));
+                                incomingFrames.add(posToFrame.get(edge.fromIndex()));
                             } else {
                                 hasBackEdges = true;
                             }
                         }
 
-                        final MultiInputNode target;
+                        final Node target;
                         if (hasBackEdges) {
                             target = new LoopHeaderNode("Loop" + frame.elementIndex);
                         } else {
                             target = new MergeNode("Merge" + frame.elementIndex);
                         }
 
-                        for (final CFGEdge edge : frame.predecessors) {
+                        for (final FrameCFGEdge edge : frame.predecessors) {
                             // We only respect forward control flows, as phi data propagation for backward
                             // edges is handled during node parsing of the source instruction, as
                             // the outgoing status for this node is not computed yet.
-                            if (edge.flowType == FlowType.FORWARD) {
-                                final Frame incomingFrame = posToFrame.get(edge.fromIndex);
+                            if (edge.flowType() == FlowType.FORWARD) {
+                                final Frame incomingFrame = posToFrame.get(edge.fromIndex());
                                 incomingFrame.out.control.controlFlowsTo(target, FlowType.FORWARD);
                             }
                         }
@@ -812,6 +883,9 @@ public class MethodAnalyzer {
                 }
             }
         }
+    }
+
+    private void step5PeepholeOptimizations() {
     }
 
     private void visitNode(final CodeModel codeModel, final CodeElement node, final Frame frame) {
@@ -1641,13 +1715,14 @@ public class MethodAnalyzer {
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, 2);
 
-        final Value v1 = outgoing.pop();
         final Value v2 = outgoing.pop();
+        final Value v1 = outgoing.pop();
 
         final NumericCondition numericCondition = new NumericCondition(op, v1, v2);
         final If next = new If(numericCondition);
 
         outgoing.control = outgoing.control.controlFlowsTo(next, FlowType.FORWARD);
+        outgoing.memory = outgoing.memory.memoryFlowsTo(next);
         frame.entryPoint = next;
 
         final int codeElementIndex = labelToIndex.get(node.target());
@@ -1671,6 +1746,7 @@ public class MethodAnalyzer {
         final If next = new If(numericCondition);
 
         outgoing.control = outgoing.control.controlFlowsTo(next, FlowType.FORWARD);
+        outgoing.memory = outgoing.memory.memoryFlowsTo(next);
         frame.entryPoint = next;
 
         final int codeElementIndex = labelToIndex.get(node.target());
@@ -1694,6 +1770,7 @@ public class MethodAnalyzer {
         final If next = new If(referenceCondition);
 
         outgoing.control = outgoing.control.controlFlowsTo(next, FlowType.FORWARD);
+        outgoing.memory = outgoing.memory.memoryFlowsTo(next);
         frame.entryPoint = next;
 
         final int codeElementIndex = labelToIndex.get(node.target());
@@ -1718,6 +1795,7 @@ public class MethodAnalyzer {
         final If next = new If(condition);
 
         outgoing.control = outgoing.control.controlFlowsTo(next, FlowType.FORWARD);
+        outgoing.memory = outgoing.memory.memoryFlowsTo(next);
         frame.entryPoint = next;
 
         final int codeElementIndex = labelToIndex.get(node.target());
@@ -1855,7 +1933,7 @@ public class MethodAnalyzer {
         final PutField put = new PutField(owner, fieldType, fieldName, target, v);
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(put);
-        outgoing.control = outgoing.control.controlFlowsTo(put, FlowType.FORWARD);
+        //outgoing.control = outgoing.control.controlFlowsTo(put, FlowType.FORWARD);
     }
 
     private void parse_GETSTATIC(final ClassDesc owner, final ClassDesc fieldType, final String fieldName, final Frame frame) {
@@ -2232,7 +2310,7 @@ public class MethodAnalyzer {
         final ArrayStore store = new ArrayStore(array, index, new Truncate(arrayType.componentType(), value));
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(store);
-        outgoing.control = outgoing.control.controlFlowsTo(store, FlowType.FORWARD);
+        //outgoing.control = outgoing.control.controlFlowsTo(store, FlowType.FORWARD);
     }
 
     private void parse_ASTORE_X(final Frame frame, final ClassDesc arrayType) {
@@ -2246,7 +2324,7 @@ public class MethodAnalyzer {
         final ArrayStore store = new ArrayStore(array, index, value);
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(store);
-        outgoing.control = outgoing.control.controlFlowsTo(store, FlowType.FORWARD);
+        //outgoing.control = outgoing.control.controlFlowsTo(store, FlowType.FORWARD);
     }
 
     private void parse_AASTORE(final Frame frame) {
@@ -2260,7 +2338,7 @@ public class MethodAnalyzer {
         final ArrayStore store = new ArrayStore(array, index, value);
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(store);
-        outgoing.control = outgoing.control.controlFlowsTo(store, FlowType.FORWARD);
+        //outgoing.control = outgoing.control.controlFlowsTo(store, FlowType.FORWARD);
     }
 
     private void parse_ALOAD_X_INTEXTENDED(final Frame frame, final Extend.ExtendType type) {
@@ -2277,7 +2355,7 @@ public class MethodAnalyzer {
         final Value value = new Extend(ConstantDescs.CD_int, type, load);
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(load);
-        outgoing.control = outgoing.control.controlFlowsTo(load, FlowType.FORWARD);
+        //outgoing.control = outgoing.control.controlFlowsTo(load, FlowType.FORWARD);
         outgoing.push(value);
     }
 
@@ -2289,7 +2367,7 @@ public class MethodAnalyzer {
         final Value array = outgoing.pop();
         final Value value = new ArrayLoad(arrayType, array, index);
         outgoing.memory = outgoing.memory.memoryFlowsTo(value);
-        outgoing.control = outgoing.control.controlFlowsTo(value, FlowType.FORWARD);
+        //outgoing.control = outgoing.control.controlFlowsTo(value, FlowType.FORWARD);
         outgoing.push(value);
     }
 
@@ -2304,7 +2382,7 @@ public class MethodAnalyzer {
 
         final Value value = new ArrayLoad(arrayType, array, index);
         outgoing.memory = outgoing.memory.memoryFlowsTo(value);
-        outgoing.control = outgoing.control.controlFlowsTo(value, FlowType.FORWARD);
+        //outgoing.control = outgoing.control.controlFlowsTo(value, FlowType.FORWARD);
         outgoing.push(value);
     }
 
@@ -2316,16 +2394,6 @@ public class MethodAnalyzer {
 
     public Method ir() {
         return ir;
-    }
-
-    private void step4PeepholeOptimizations() {
-    }
-
-    public record NamedProjection(String name) {
-        public static final NamedProjection DEFAULT = new NamedProjection("default");
-    }
-
-    public record CFGEdge(int fromIndex, NamedProjection projection, FlowType flowType) {
     }
 
     private record CFGAnalysisJob(int startIndex, List<Integer> path) {
@@ -2367,93 +2435,6 @@ public class MethodAnalyzer {
             this.start = start;
             this.end = end;
             this.handlers = new ArrayList<>();
-        }
-    }
-
-    public static class Frame {
-
-        protected final CodeElement codeElement;
-        protected final List<CFGEdge> predecessors;
-        protected final int elementIndex;
-        protected int indexInTopologicalOrder;
-        protected Node entryPoint;
-        protected Status in;
-        protected Status out;
-        protected List<StackMapFrameInfo> verificationInfos;
-
-        public Frame(final int elementIndex, final CodeElement codeElement) {
-            this.predecessors = new ArrayList<>();
-            this.elementIndex = elementIndex;
-            this.indexInTopologicalOrder = -1;
-            this.codeElement = codeElement;
-        }
-
-        public Status copyIncomingToOutgoing() {
-            out = in.copy();
-            return out;
-        }
-    }
-
-    public static class Status {
-
-        protected final static int UNDEFINED_LINE_NUMBER = -1;
-
-        protected int lineNumber;
-        private final Value[] locals;
-        protected final Stack<Value> stack;
-        protected Node control;
-        protected Node memory;
-
-        protected Status(final int maxLocals) {
-            this.locals = new Value[maxLocals];
-            this.stack = new Stack<>();
-            this.lineNumber = UNDEFINED_LINE_NUMBER;
-        }
-
-        protected int numberOfLocals() {
-            return locals.length;
-        }
-
-        protected Value getLocal(final int slot) {
-            if (slot > 0) {
-                if (locals[slot - 1] != null && TypeUtils.isCategory2(locals[slot - 1].type)) {
-                    // This is an illegal state!
-                    throw new IllegalStateException("Slot " + (slot - 1) + " is already set to a category 2 value, so cannot read slot " + slot);
-                }
-            }
-            return locals[slot];
-        }
-
-        protected void setLocal(final int slot, final Value value) {
-            locals[slot] = value;
-            if (slot > 0) {
-                if (locals[slot - 1] != null && TypeUtils.isCategory2(locals[slot - 1].type)) {
-                    // This is an illegal state!
-                    throw new IllegalStateException("Slot " + (slot - 1) + " is already set to a category 2 value, so cannot set slot " + slot);
-                }
-            }
-        }
-
-        protected Status copy() {
-            final Status result = new Status(locals.length);
-            result.lineNumber = lineNumber;
-            System.arraycopy(locals, 0, result.locals, 0, locals.length);
-            result.stack.addAll(stack);
-            result.control = control;
-            result.memory = memory;
-            return result;
-        }
-
-        protected Value pop() {
-            return stack.pop();
-        }
-
-        protected Value peek() {
-            return stack.peek();
-        }
-
-        protected void push(final Value value) {
-            stack.push(value);
         }
     }
 }

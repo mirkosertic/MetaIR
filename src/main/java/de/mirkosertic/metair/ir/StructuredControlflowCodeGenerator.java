@@ -22,17 +22,19 @@ public abstract class StructuredControlflowCodeGenerator<T extends StructuredCon
 
     public abstract void startBlock(final Sequencer.Block b);
 
-    public abstract void writeBreakTo(final String label);
+    public abstract void writeBreakTo(final String label, final Node currentNode, final Node targetNode);
 
-    public abstract void writeContinueTo(final String label);
+    public abstract void writeContinueTo(final String label, final Node currentNode, final Node targetNode);
 
     public abstract void finishBlock(final Sequencer.Block block);
+
+    public abstract void writePHINodesFor(final Node node);
 
     public abstract void write(final Return node);
 
     public abstract void write(final ReturnValue node);
 
-    public abstract void write(final Goto node);
+    public abstract void writePreGoto(final Goto node);
 
     public abstract void write(final Throw node);
 
@@ -288,17 +290,25 @@ public abstract class StructuredControlflowCodeGenerator<T extends StructuredCon
         throw new IllegalArgumentException("Unsupported node " + node+ " of type " + node.getClass());
     }
 
-    public abstract T emitTemporaryVariable(final T value);
+    public abstract T emitTemporaryVariable(final String prefix, final T value);
 
-    protected final void emitWithTemporary(final Node node, final T value, final Deque<T> evaluationStack) {
+    protected final void emitWithTemporary(final String prefix, final Node node, final T value, final Deque<T> evaluationStack) {
         final T committed = committedToTemporary.get(node);
         if (committed == null) {
-            final T temporary = emitTemporaryVariable(value);
+            final T temporary = emitTemporaryVariable(prefix, value);
             committedToTemporary.put(node, temporary);
             evaluationStack.push(temporary);
         } else {
             evaluationStack.push(committed);
         }
+    }
+
+    protected final void emitWithTemporary(final Node node, final T value, final Deque<T> evaluationStack) {
+        emitWithTemporary("var", node, value, evaluationStack);
+    }
+
+    protected T commitedTemporaryFor(final Node node) {
+        return committedToTemporary.get(node);
     }
 
     protected final void emit(final Node node, final Deque<Node> expressionStack, final Deque<T> evaluationStack) {

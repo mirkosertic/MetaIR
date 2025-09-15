@@ -75,7 +75,9 @@ import java.lang.constant.MethodTypeDesc;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class DebugStructuredControlflowCodeGenerator extends StructuredControlflowCodeGenerator<DebugStructuredControlflowCodeGenerator.GeneratedCode> {
 
@@ -91,11 +93,13 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
     private final PrintWriter pw;
     private int temporaryVariablesCounter;
     private int indentationLevel = 0;
+    private final Set<PHI> phiNodes;
 
     public DebugStructuredControlflowCodeGenerator() {
         this.sw = new StringWriter();
         this.pw = new PrintWriter(sw);
         this.temporaryVariablesCounter = 0;
+        this.phiNodes = new HashSet<>();
     }
 
     private void writeIndentation() {
@@ -734,8 +738,8 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
     }
 
     @Override
-    public GeneratedCode emitTemporaryVariable(final GeneratedCode value) {
-        final String varname = "var" + temporaryVariablesCounter++;
+    public GeneratedCode emitTemporaryVariable(final String prefix, final GeneratedCode value) {
+        final String varname = prefix + temporaryVariablesCounter++;
 
         writeIndentation();
 
@@ -783,7 +787,7 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
     }
 
     @Override
-    public void writeBreakTo(final String label) {
+    public void writeBreakTo(final String label, final Node currentNode, final Node targetNode) {
         writeIndentation();
         pw.print("break ");
         pw.print(label);
@@ -791,7 +795,7 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
     }
 
     @Override
-    public void writeContinueTo(final String label) {
+    public void writeContinueTo(final String label, final Node currentNode, final Node targetNode) {
         writeIndentation();
         pw.print("continue ");
         pw.print(label);
@@ -973,8 +977,32 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
     }
 
     @Override
-    public void write(final Goto node) {
-        // TODO
+    public void writePreGoto(final Goto node) {
+
+        for (final PHI phi : phiNodes) {
+            final Node value = phi.initExpressionFor(node);
+            if (value != null) {
+
+                final GeneratedCode var = commitedTemporaryFor(phi);
+                if (var == null) {
+                    throw new IllegalStateException("No temporary variable for phi " + phi);
+                }
+
+                final Deque<GeneratedCode> stack = new ArrayDeque<>();
+                emit(value, new ArrayDeque<>(), stack);
+
+                if (stack.size() != 1) {
+                    throw new IllegalStateException("Expected exactly one value on the stack, but got " + stack.size());
+                }
+
+                final GeneratedCode arg0 = stack.pop();
+
+                writeIndentation();
+                pw.print(var.value);
+                pw.print(" = ");
+                pw.println(arg0.value);
+            }
+        }
     }
 
     @Override
@@ -1155,5 +1183,29 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
         indentationLevel--;
         writeIndentation();
         pw.println(")");
+    }
+
+    @Override
+    public void writePHINodesFor(final Node node) {
+        for (final Node defs : node.definitions()) {
+            if (defs instanceof final PHI phi) {
+                final Node initializedByThis = phi.initExpressionFor(node);
+                if (initializedByThis == null) {
+                    emitWithTemporary("phi", phi, new GeneratedCode(phi.type, "<<uninitialized>>"), new ArrayDeque<>());
+                } else {
+                    final Deque<GeneratedCode> stack = new ArrayDeque<>();
+                    emit(initializedByThis, new ArrayDeque<>(), stack);
+
+                    if (stack.size() != 1) {
+                        throw new IllegalStateException("Expected exactly one value on the stack, but got " + stack.size());
+                    }
+
+                    final GeneratedCode arg0 = stack.pop();
+
+                    emitWithTemporary("phi", phi, arg0, new ArrayDeque<>());
+                }
+                phiNodes.add(phi);
+            }
+        }
     }
 }

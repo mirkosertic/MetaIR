@@ -1,6 +1,6 @@
 package de.mirkosertic.metair.ir;
 
-public class MergeNode extends MultiInputNode {
+public class MergeNode extends Node {
 
     public final String label;
 
