@@ -1,8 +1,18 @@
 (method (Test this)
   (block ExceptionGuard_1_0
+    (block ExceptionGuard_1_1
+      (try 
+        break ExceptionGuard_1_1
+        (catch-all as $ex
+          // Label Frame6
+          break ExceptionGuard_1_0
+        )
+        rethrowifnotcaught $ex
+      )
+    )
+    // Merge EndOfGuardedBlock4
     break ExceptionGuard_1_0
   )
-  // Merge EndOfGuardedBlock4
-  // Label Frame8
+  // Merge Merge8
   return
 )

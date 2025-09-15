@@ -32,7 +32,7 @@
 <g id="node2" class="node">
 <title>node3</title>
 <polygon fill="lightgreen" stroke="black" points="137.5,-156.54 137.5,-171.46 102.06,-182 51.94,-182 16.5,-171.46 16.5,-156.54 51.94,-146 102.06,-146 137.5,-156.54"/>
-<text text-anchor="middle" x="77" y="-160.3" font-family="Times,serif" font-size="14.00">#3 long 1</text>
+<text text-anchor="middle" x="77" y="-160.3" font-family="Times,serif" font-size="14.00">#3 long 0</text>
 </g>
 <!-- node0&#45;&gt;node3 -->
 <g id="edge1" class="edge">
@@ -44,7 +44,7 @@
 <g id="node4" class="node">
 <title>node2</title>
 <polygon fill="lightgreen" stroke="black" points="276.5,-156.54 276.5,-171.46 241.06,-182 190.94,-182 155.5,-171.46 155.5,-156.54 190.94,-146 241.06,-146 276.5,-156.54"/>
-<text text-anchor="middle" x="216" y="-160.3" font-family="Times,serif" font-size="14.00">#2 long 0</text>
+<text text-anchor="middle" x="216" y="-160.3" font-family="Times,serif" font-size="14.00">#2 long 1</text>
 </g>
 <!-- node0&#45;&gt;node2 -->
 <g id="edge4" class="edge">
@@ -77,11 +77,11 @@
 <text text-anchor="middle" x="197" y="-87.3" font-family="Times,serif" font-size="14.00">#4 Add : long</text>
 </g>
 <!-- node3&#45;&gt;node4 -->
-<g id="edge3" class="edge">
+<g id="edge2" class="edge">
 <title>node3&#45;&gt;node4</title>
 <path fill="none" stroke="black" d="M104.53,-146.71C120.68,-137.16 141.31,-124.95 158.99,-114.49"/>
 <polygon fill="black" stroke="black" points="161.1,-117.31 167.92,-109.2 157.54,-111.28 161.1,-117.31"/>
-<text text-anchor="middle" x="156.63" y="-122.01" font-family="Times,serif" font-size="14.00">*1</text>
+<text text-anchor="middle" x="156.63" y="-122.01" font-family="Times,serif" font-size="14.00">*0</text>
 </g>
 <!-- node4&#45;&gt;node5 -->
 <g id="edge5" class="edge">
@@ -91,11 +91,11 @@
 <text text-anchor="middle" x="236.77" y="-51.67" font-family="Times,serif" font-size="14.00">*0</text>
 </g>
 <!-- node2&#45;&gt;node4 -->
-<g id="edge2" class="edge">
+<g id="edge3" class="edge">
 <title>node2&#45;&gt;node4</title>
 <path fill="none" stroke="black" d="M211.4,-145.81C209.23,-137.7 206.59,-127.84 204.17,-118.78"/>
 <polygon fill="black" stroke="black" points="207.52,-117.78 201.56,-109.03 200.76,-119.59 207.52,-117.78"/>
-<text text-anchor="middle" x="214.41" y="-120.65" font-family="Times,serif" font-size="14.00">*0</text>
+<text text-anchor="middle" x="214.41" y="-120.65" font-family="Times,serif" font-size="14.00">*1</text>
 </g>
 <!-- c0 -->
 <!-- c1 -->

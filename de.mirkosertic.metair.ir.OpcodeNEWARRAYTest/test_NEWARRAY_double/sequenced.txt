@@ -1,3 +1,5 @@
 (method (Test this)
+  double[] var0 = (new double[10])
+  var0[0] = 2.0
   return
 )

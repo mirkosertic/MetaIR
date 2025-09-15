@@ -12,8 +12,8 @@ digraph debugoutput {
  node0 -> node3[style=dotted];
  node4[label="#4 Div : float Order : 4",shape=octagon, fillcolor=orange, style=filled];
  node4 -> node0[dir="forward" color="fuchsia" penwidth="2"];
- node3 -> node4[headlabel="*0", labeldistance=2];
- node2 -> node4[headlabel="*1", labeldistance=2];
+ node2 -> node4[headlabel="*0", labeldistance=2];
+ node3 -> node4[headlabel="*1", labeldistance=2];
  node0 -> node4[labeldistance=2, color=red, fontcolor=red];
  node5[label="#5 ReturnValue : float Order : 5",shape=box, fillcolor=lightgrey, style=filled];
  node5 -> node0[dir="forward" color="fuchsia" penwidth="2"];

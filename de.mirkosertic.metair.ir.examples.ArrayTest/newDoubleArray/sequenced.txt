@@ -1,6 +1,8 @@
 (method (ArrayTest this)
   // Label Frame4
   // Label Frame9
+  double[] var0 = (new double[10])
+  var0[0] = 10.0
   // Label Frame20
   // Label Frame25
   return

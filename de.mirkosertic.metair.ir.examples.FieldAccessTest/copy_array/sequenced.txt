@@ -6,5 +6,6 @@
   FieldAccessTest$Source var3 = (FieldAccessTest$Source.class.$init$)
   FieldAccessTest$Source var4 = (new var3)
   void var5 = (var4.<init>())
+  var1.array_field = (var4.array_field)
   return
 )

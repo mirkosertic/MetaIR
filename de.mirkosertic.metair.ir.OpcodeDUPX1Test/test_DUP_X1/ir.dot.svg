@@ -32,7 +32,7 @@
 <g id="node2" class="node">
 <title>node3</title>
 <polygon fill="lightgreen" stroke="black" points="121.52,-26.54 121.52,-41.46 90.76,-52 47.24,-52 16.48,-41.46 16.48,-26.54 47.24,-16 90.76,-16 121.52,-26.54"/>
-<text text-anchor="middle" x="69" y="-30.3" font-family="Times,serif" font-size="14.00">#3 int 2</text>
+<text text-anchor="middle" x="69" y="-30.3" font-family="Times,serif" font-size="14.00">#3 int 1</text>
 </g>
 <!-- node0&#45;&gt;node3 -->
 <g id="edge1" class="edge">
@@ -44,7 +44,7 @@
 <g id="node3" class="node">
 <title>node2</title>
 <polygon fill="lightgreen" stroke="black" points="245.52,-26.54 245.52,-41.46 214.76,-52 171.24,-52 140.48,-41.46 140.48,-26.54 171.24,-16 214.76,-16 245.52,-26.54"/>
-<text text-anchor="middle" x="193" y="-30.3" font-family="Times,serif" font-size="14.00">#2 int 1</text>
+<text text-anchor="middle" x="193" y="-30.3" font-family="Times,serif" font-size="14.00">#2 int 2</text>
 </g>
 <!-- node0&#45;&gt;node2 -->
 <g id="edge2" class="edge">

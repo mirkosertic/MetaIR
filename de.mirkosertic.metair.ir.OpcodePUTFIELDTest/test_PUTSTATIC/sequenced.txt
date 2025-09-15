@@ -1,3 +1,4 @@
 (method (Test this)
+  "Test".field = 1
   return
 )

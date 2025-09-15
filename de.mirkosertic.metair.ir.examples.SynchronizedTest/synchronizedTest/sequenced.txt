@@ -2,9 +2,18 @@
   // Label Frame3
   monitorenter this
   (block ExceptionGuard_3_0
-    int var0 = (this.compute(10))
-    monitorexit this
-    break ExceptionGuard_3_0
+    (try 
+      int var0 = (this.compute(10))
+      monitorexit this
+      break ExceptionGuard_3_0
+      (catch-all as $ex
+        // Label Frame20
+        monitorexit this
+        // Label Frame24
+        throw $ex
+      )
+      rethrowifnotcaught $ex
+    )
   )
   // Merge EndOfGuardedBlock18
   // Label Frame27

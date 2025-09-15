@@ -1,3 +1,5 @@
 (method (Test this)
+  Object[] var0 = (new Object[10])
+  var0[0] = null
   return
 )

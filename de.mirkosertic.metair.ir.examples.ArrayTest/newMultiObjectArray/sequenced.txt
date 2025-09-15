@@ -1,6 +1,8 @@
 (method (ArrayTest this)
   // Label Frame4
   // Label Frame10
+  Object[][] var0 = TODO
+  var0[0] = (new Object[5])
   // Label Frame22
   // Label Frame27
   return

@@ -1,3 +1,5 @@
 (method (Test this)
+  short[] var0 = (new short[10])
+  var0[0] = ((trunc short)10)
   return
 )
