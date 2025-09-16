@@ -36,10 +36,9 @@ public abstract class Node {
         return target;
     }
 
-    protected <T extends Node> T use(final T v, final Use use) {
+    protected void use(final Node v, final Use use) {
         uses.add(new UseEdge(v, use));
         v.usedBy.add(this);
-        return v;
     }
 
     public Node memoryFlowsTo(final Node target) {

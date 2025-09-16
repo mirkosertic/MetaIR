@@ -15,9 +15,6 @@ public class ReferenceConditionTest {
         final StringConstant b = new StringConstant("20");
         final ReferenceCondition referenceCondition = new ReferenceCondition(ReferenceCondition.Operation.EQ, a, b);
 
-        assertThat(referenceCondition.arg0).isSameAs(a);
-        assertThat(referenceCondition.arg1).isSameAs(b);
-
         assertThat(referenceCondition.debugDescription()).isEqualTo("ReferenceCondition : EQ");
 
         assertThat(referenceCondition.type).isEqualTo(ConstantDescs.CD_int);

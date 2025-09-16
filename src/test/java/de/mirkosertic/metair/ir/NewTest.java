@@ -14,8 +14,6 @@ public class NewTest {
         final RuntimeclassReference ri = new RuntimeclassReference(ConstantDescs.CD_String);
         final New a = new New(ri);
 
-        assertThat(a.arg0).isSameAs(ri);
-
         assertThat(a.type).isEqualTo(ConstantDescs.CD_String);
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).isEmpty();

@@ -5,7 +5,6 @@ import java.lang.constant.ClassDesc;
 public class GetField extends Value {
 
     public final ClassDesc owner;
-    public final Value arg0;
     public final String fieldName;
 
     GetField(final ClassDesc owner, final ClassDesc fieldType, final String fieldName, final Value source) {
@@ -18,7 +17,7 @@ public class GetField extends Value {
         this.owner = owner;
         this.fieldName = fieldName;
 
-        this.arg0 = use(source, new ArgumentUse(0));
+        use(source, new ArgumentUse(0));
     }
 
     @Override

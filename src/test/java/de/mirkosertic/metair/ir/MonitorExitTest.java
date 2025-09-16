@@ -13,8 +13,6 @@ public class MonitorExitTest {
         final StringConstant a = new StringConstant("LOCK");
         final MonitorExit monitor = new MonitorExit(a);
 
-        assertThat(monitor.arg0).isSameAs(a);
-
         assertThat(monitor.debugDescription()).isEqualTo("MonitorExit");
 
         assertThat(a).isInstanceOf(Value.class);

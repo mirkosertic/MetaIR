@@ -16,8 +16,6 @@ public class ConvertTest {
         final PrimitiveInt a = new PrimitiveInt(10);
         final Convert convert = new Convert(ConstantDescs.CD_byte, a, ConstantDescs.CD_int);
 
-        assertThat(convert.arg0).isSameAs(a);
-
         assertThat(convert.debugDescription()).isEqualTo("Convert : int to byte");
 
         assertThat(convert.type).isEqualTo(ConstantDescs.CD_byte);

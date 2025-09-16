@@ -8,9 +8,6 @@ public class PutStatic extends Node {
     public final String fieldName;
     public final ClassDesc fieldType;
 
-    public final Value arg0;
-    public final Value arg1;
-
     PutStatic(final RuntimeclassReference target, final String fieldName, final ClassDesc fieldType, final Value value) {
         this.fieldName = fieldName;
         this.fieldType = fieldType;
@@ -25,9 +22,8 @@ public class PutStatic extends Node {
             }
         }
 
-
-        this.arg0 = use(target, new ArgumentUse(0));
-        this.arg1 = use(value, new ArgumentUse(1));
+        use(target, new ArgumentUse(0));
+        use(value, new ArgumentUse(1));
     }
 
     @Override

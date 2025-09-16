@@ -10,15 +10,13 @@ public class TableSwitch extends ConditionalNode {
     public final List<Integer> cases;
     public final String defaultLabel;
 
-    public final Value arg0;
-
     TableSwitch(final Value value, final int lowValue, final int highValue, final String defaultLabel, final List<Integer> cases) {
 
         if (!value.type.equals(ConstantDescs.CD_int)) {
             illegalArgument("Cannot use non int value of type " + TypeUtils.toString(value.type) + " as switch value");
         }
 
-        this.arg0 = use(value, new ArgumentUse(0));
+        use(value, new ArgumentUse(0));
 
         this.lowValue = lowValue;
         this.highValue = highValue;

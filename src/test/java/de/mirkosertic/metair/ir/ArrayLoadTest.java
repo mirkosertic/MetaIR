@@ -17,9 +17,6 @@ public class ArrayLoadTest {
         final Value index = new PrimitiveInt(0);
         final ArrayLoad load = new ArrayLoad(ConstantDescs.CD_byte.arrayType(), a, index);
 
-        assertThat(load.arg0).isSameAs(a);
-        assertThat(load.arg1).isSameAs(index);
-
         assertThat(load.debugDescription()).isEqualTo("ArrayLoad : byte");
 
         assertThat(load).isInstanceOf(Value.class);

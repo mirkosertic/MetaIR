@@ -14,8 +14,6 @@ class ExtendTest {
         final Value v = new PrimitiveInt(10);
         final Extend a = new Extend(ConstantDescs.CD_long, Extend.ExtendType.SIGN, v);
 
-        assertThat(a.arg0).isSameAs(v);
-
         assertThat(a.type).isEqualTo(ConstantDescs.CD_long);
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).isEmpty();

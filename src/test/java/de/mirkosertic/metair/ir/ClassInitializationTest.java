@@ -14,8 +14,6 @@ public class ClassInitializationTest {
         final RuntimeclassReference cr = new RuntimeclassReference(ConstantDescs.CD_String);
         final ClassInitialization ci = new ClassInitialization(cr);
 
-        assertThat(ci.arg0).isSameAs(cr);
-
         assertThat(ci.debugDescription()).isEqualTo("ClassInit");
 
         assertThat(ci.uses.size()).isEqualTo(1);

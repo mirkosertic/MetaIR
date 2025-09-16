@@ -14,8 +14,6 @@ public class GetStaticTest {
         final RuntimeclassReference v = new RuntimeclassReference(ConstantDescs.CD_String);
         final GetStatic get = new GetStatic(v, "fieldname", ConstantDescs.CD_int);
 
-        assertThat(get.arg0).isSameAs(v);
-
         assertThat(v.usedBy).containsExactly(get);
 
         assertThat(get.uses).hasSize(1);

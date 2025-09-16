@@ -16,9 +16,6 @@ public class PutFieldTest {
         final PrimitiveInt value = new PrimitiveInt(10);
         final PutField put = new PutField(ConstantDescs.CD_String, ConstantDescs.CD_int, "fieldname", target, value);
 
-        assertThat(put.arg0).isSameAs(target);
-        assertThat(put.arg1).isSameAs(value);
-
         assertThat(target.usedBy).containsExactly(put);
 
         assertThat(put.uses).hasSize(2);

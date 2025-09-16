@@ -132,8 +132,8 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
 
     @Override
     public GeneratedCode visit_Add(final Add node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
-        emit(node.arg1, expressionStack, evaluationStack);
-        emit(node.arg2, expressionStack, evaluationStack);
+
+        emitArguments(node, 2, expressionStack, evaluationStack);
 
         final GeneratedCode arg2 = evaluationStack.pop();
         final GeneratedCode arg1 = evaluationStack.pop();
@@ -143,8 +143,8 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
 
     @Override
     public GeneratedCode visit_Div(final Div node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
-        emit(node.arg1, expressionStack, evaluationStack);
-        emit(node.arg2, expressionStack, evaluationStack);
+
+        emitArguments(node, 2, expressionStack, evaluationStack);
 
         final GeneratedCode arg2 = evaluationStack.pop();
         final GeneratedCode arg1 = evaluationStack.pop();
@@ -154,8 +154,8 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
 
     @Override
     public GeneratedCode visit_Mul(final Mul node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
-        emit(node.arg1, expressionStack, evaluationStack);
-        emit(node.arg2, expressionStack, evaluationStack);
+
+        emitArguments(node, 2, expressionStack, evaluationStack);
 
         final GeneratedCode arg2 = evaluationStack.pop();
         final GeneratedCode arg1 = evaluationStack.pop();
@@ -165,8 +165,8 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
 
     @Override
     public GeneratedCode visit_Sub(final Sub node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
-        emit(node.arg1, expressionStack, evaluationStack);
-        emit(node.arg2, expressionStack, evaluationStack);
+
+        emitArguments(node, 2, expressionStack, evaluationStack);
 
         final GeneratedCode arg2 = evaluationStack.pop();
         final GeneratedCode arg1 = evaluationStack.pop();
@@ -176,8 +176,8 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
 
     @Override
     public GeneratedCode visit_Rem(final Rem node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
-        emit(node.arg1, expressionStack, evaluationStack);
-        emit(node.arg2, expressionStack, evaluationStack);
+
+        emitArguments(node, 2, expressionStack, evaluationStack);
 
         final GeneratedCode arg2 = evaluationStack.pop();
         final GeneratedCode arg1 = evaluationStack.pop();
@@ -207,7 +207,8 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
 
     @Override
     public GeneratedCode visit_Negate(final Negate node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
-        emit(node.arg0, expressionStack, evaluationStack);
+
+        emitArguments(node, 1, expressionStack, evaluationStack);
 
         final GeneratedCode arg1 = evaluationStack.pop();
         return new GeneratedCode(node.type, "(-" + arg1 + ")");
@@ -215,7 +216,8 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
 
     @Override
     public GeneratedCode visit_ArrayLength(final ArrayLength node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
-        emit(node.arg0, expressionStack, evaluationStack);
+
+        emitArguments(node, 1, expressionStack, evaluationStack);
 
         final GeneratedCode arg1 = evaluationStack.pop();
 
@@ -224,7 +226,8 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
 
     @Override
     public GeneratedCode visit_NewArray(final NewArray node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
-        emit(node.arg0, expressionStack, evaluationStack);
+
+        emitArguments(node, 1, expressionStack, evaluationStack);
 
         final GeneratedCode arg1 = evaluationStack.pop();
 
@@ -233,8 +236,8 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
 
     @Override
     public GeneratedCode visit_ArrayLoad(final ArrayLoad node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
-        emit(node.arg0, expressionStack, evaluationStack);
-        emit(node.arg1, expressionStack, evaluationStack);
+
+        emitArguments(node, 2, expressionStack, evaluationStack);
 
         final GeneratedCode arg2 = evaluationStack.pop();
         final GeneratedCode arg1 = evaluationStack.pop();
@@ -244,8 +247,8 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
 
     @Override
     public GeneratedCode visit_BitOperation(final BitOperation node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
-        emit(node.arg0, expressionStack, evaluationStack);
-        emit(node.arg1, expressionStack, evaluationStack);
+
+        emitArguments(node, 2, expressionStack, evaluationStack);
 
         final GeneratedCode arg2 = evaluationStack.pop();
         final GeneratedCode arg1 = evaluationStack.pop();
@@ -262,7 +265,8 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
 
     @Override
     public GeneratedCode visit_GetField(final GetField node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
-        emit(node.arg0, expressionStack, evaluationStack);
+
+        emitArguments(node, 1, expressionStack, evaluationStack);
 
         final GeneratedCode arg1 = evaluationStack.pop();
 
@@ -271,7 +275,8 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
 
     @Override
     public GeneratedCode visit_GetStatic(final GetStatic node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
-        emit(node.arg0, expressionStack, evaluationStack);
+
+        emitArguments(node, 1, expressionStack, evaluationStack);
 
         final GeneratedCode arg1 = evaluationStack.pop();
 
@@ -285,8 +290,8 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
 
     @Override
     public GeneratedCode visit_ReferenceCondition(final ReferenceCondition node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
-        emit(node.arg0, expressionStack, evaluationStack);
-        emit(node.arg1, expressionStack, evaluationStack);
+
+        emitArguments(node, 2, expressionStack, evaluationStack);
 
         final GeneratedCode arg2 = evaluationStack.pop();
         final GeneratedCode arg1 = evaluationStack.pop();
@@ -299,7 +304,8 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
 
     @Override
     public GeneratedCode visit_ReferenceTest(final ReferenceTest node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
-        emit(node.arg0, expressionStack, evaluationStack);
+
+        emitArguments(node, 1, expressionStack, evaluationStack);
 
         final GeneratedCode arg1 = evaluationStack.pop();
 
@@ -311,7 +317,8 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
 
     @Override
     public GeneratedCode visit_New(final New node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
-        emit(node.arg0, expressionStack, evaluationStack);
+
+        emitArguments(node, 1, expressionStack, evaluationStack);
 
         final GeneratedCode arg1 = evaluationStack.pop();
 
@@ -320,8 +327,8 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
 
     @Override
     public GeneratedCode visit_NumericCondition(final NumericCondition node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
-        emit(node.arg0, expressionStack, evaluationStack);
-        emit(node.arg1, expressionStack, evaluationStack);
+
+        emitArguments(node, 2, expressionStack, evaluationStack);
 
         final GeneratedCode arg2 = evaluationStack.pop();
         final GeneratedCode arg1 = evaluationStack.pop();
@@ -365,7 +372,8 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
 
     @Override
     public GeneratedCode visit_Convert(final Convert node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
-        emit(node.arg0, expressionStack, evaluationStack);
+
+        emitArguments(node, 1, expressionStack, evaluationStack);
 
         final GeneratedCode arg1 = evaluationStack.pop();
 
@@ -374,8 +382,8 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
 
     @Override
     public GeneratedCode visit_InstanceOf(final InstanceOf node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
-        emit(node.arg0, expressionStack, evaluationStack);
-        emit(node.arg1, expressionStack, evaluationStack);
+
+        emitArguments(node, 2, expressionStack, evaluationStack);
 
         final GeneratedCode arg2 = evaluationStack.pop();
         final GeneratedCode arg1 = evaluationStack.pop();
@@ -385,7 +393,8 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
 
     @Override
     public GeneratedCode visit_Truncate(final Truncate node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
-        emit(node.arg0, expressionStack, evaluationStack);
+
+        emitArguments(node, 1, expressionStack, evaluationStack);
 
         final GeneratedCode arg1 = evaluationStack.pop();
 
@@ -394,7 +403,8 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
 
     @Override
     public GeneratedCode visit_Extend(final Extend node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
-        emit(node.arg0, expressionStack, evaluationStack);
+
+        emitArguments(node, 1, expressionStack, evaluationStack);
 
         final GeneratedCode arg1 = evaluationStack.pop();
 
@@ -406,7 +416,8 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
 
     @Override
     public GeneratedCode visit_ClassInitialization(final ClassInitialization node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
-        emit(node.arg0, expressionStack, evaluationStack);
+
+        emitArguments(node, 1, expressionStack, evaluationStack);
 
         final GeneratedCode arg1 = evaluationStack.pop();
 
@@ -720,8 +731,7 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
     public void write(final CheckCast node) {
         final Deque<GeneratedCode> evaluationStack = new ArrayDeque<>();
 
-        emit(node.arg0, new ArrayDeque<>(), evaluationStack);
-        emit(node.arg1, new ArrayDeque<>(), evaluationStack);
+        emitArguments(node, 2, new ArrayDeque<>(), evaluationStack);
 
         if (evaluationStack.size() != 2) {
             throw new IllegalStateException("Expected exactly two values on the stack, but got " + evaluationStack.size());
@@ -824,7 +834,8 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
     @Override
     public void startIfWithTrueBlock(final If node) {
         final Deque<GeneratedCode> stack = new ArrayDeque<>();
-        emit(node.arg0, new ArrayDeque<>(), stack);
+
+        emitArguments(node, 1, new ArrayDeque<>(), stack);
 
         if (stack.size() != 1) {
             throw new IllegalStateException("Expected exactly one value on the stack, but got " + stack.size());
@@ -862,9 +873,9 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
 
     @Override
     public void write(final ReturnValue node) {
-
         final Deque<GeneratedCode> stack = new ArrayDeque<>();
-        emit(node.arg0, new ArrayDeque<>(), stack);
+
+        emitArguments(node, 1, new ArrayDeque<>(), stack);
 
         if (stack.size() != 1) {
             throw new IllegalStateException("Expected exactly one value on the stack, but got " + stack.size());
@@ -879,9 +890,8 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
     @Override
     public void write(final ArrayStore node) {
         final Deque<GeneratedCode> stack = new ArrayDeque<>();
-        emit(node.arg0, new ArrayDeque<>(), stack);
-        emit(node.arg1, new ArrayDeque<>(), stack);
-        emit(node.arg2, new ArrayDeque<>(), stack);
+
+        emitArguments(node, 3, new ArrayDeque<>(), stack);
 
         if (stack.size() != 3) {
             throw new IllegalStateException("Expected exactly three values on the stack, but got " + stack.size());
@@ -903,8 +913,8 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
     @Override
     public void write(final PutStatic node) {
         final Deque<GeneratedCode> stack = new ArrayDeque<>();
-        emit(node.arg0, new ArrayDeque<>(), stack);
-        emit(node.arg1, new ArrayDeque<>(), stack);
+
+        emitArguments(node, 2, new ArrayDeque<>(), stack);
 
         if (stack.size() != 2) {
             throw new IllegalStateException("Expected exactly two values on the stack, but got " + stack.size());
@@ -925,8 +935,8 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
     @Override
     public void write(final PutField node) {
         final Deque<GeneratedCode> stack = new ArrayDeque<>();
-        emit(node.arg0, new ArrayDeque<>(), stack);
-        emit(node.arg1, new ArrayDeque<>(), stack);
+
+        emitArguments(node, 2, new ArrayDeque<>(), stack);
 
         if (stack.size() != 2) {
             throw new IllegalStateException("Expected exactly two values on the stack, but got " + stack.size());
@@ -947,7 +957,8 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
     @Override
     public void write(final MonitorEnter node) {
         final Deque<GeneratedCode> stack = new ArrayDeque<>();
-        emit(node.arg0, new ArrayDeque<>(), stack);
+
+        emitArguments(node, 1, new ArrayDeque<>(), stack);
 
         if (stack.size() != 1) {
             throw new IllegalStateException("Expected exactly one value on the stack, but got " + stack.size());
@@ -963,7 +974,8 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
     @Override
     public void write(final MonitorExit node) {
         final Deque<GeneratedCode> stack = new ArrayDeque<>();
-        emit(node.arg0, new ArrayDeque<>(), stack);
+
+        emitArguments(node, 1, new ArrayDeque<>(), stack);
 
         if (stack.size() != 1) {
             throw new IllegalStateException("Expected exactly one value on the stack, but got " + stack.size());
@@ -1008,7 +1020,8 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
     @Override
     public void write(final Throw node) {
         final Deque<GeneratedCode> stack = new ArrayDeque<>();
-        emit(node.arg0, new ArrayDeque<>(), stack);
+
+        emitArguments(node, 1, new ArrayDeque<>(), stack);
 
         if (stack.size() != 1) {
             throw new IllegalStateException("Expected exactly one value on the stack, but got " + stack.size());
@@ -1024,7 +1037,8 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
     @Override
     public void startLookupSwitch(final LookupSwitch node) {
         final Deque<GeneratedCode> stack = new ArrayDeque<>();
-        emit(node.arg0, new ArrayDeque<>(), stack);
+
+        emitArguments(node, 1, new ArrayDeque<>(), stack);
 
         if (stack.size() != 1) {
             throw new IllegalStateException("Expected exactly one value on the stack, but got " + stack.size());
@@ -1085,7 +1099,8 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
     @Override
     public void startTableSwitch(final TableSwitch node) {
         final Deque<GeneratedCode> stack = new ArrayDeque<>();
-        emit(node.arg0, new ArrayDeque<>(), stack);
+
+        emitArguments(node, 1, new ArrayDeque<>(), stack);
 
         if (stack.size() != 1) {
             throw new IllegalStateException("Expected exactly one value on the stack, but got " + stack.size());

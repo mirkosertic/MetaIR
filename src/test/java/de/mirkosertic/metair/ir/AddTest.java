@@ -17,9 +17,6 @@ public class AddTest {
         final PrimitiveInt b = new PrimitiveInt(20);
         final Add add = new Add(ConstantDescs.CD_int, a, b);
 
-        assertThat(add.arg1).isSameAs(a);
-        assertThat(add.arg2).isSameAs(b);
-
         assertThat(add.debugDescription()).isEqualTo("Add : int");
 
         assertThat(add.type).isEqualTo(ConstantDescs.CD_int);

@@ -15,8 +15,6 @@ public class ReturnValueTest {
         final PrimitiveInt iv = new PrimitiveInt(10);
         final ReturnValue ret = new ReturnValue(ConstantDescs.CD_int, iv);
 
-        assertThat(ret.arg0).isSameAs(iv);
-
         assertThat(ret.debugDescription()).isEqualTo("ReturnValue : int");
         assertThat(ret.uses.size()).isEqualTo(1);
         assertThat(ret.uses.getFirst().node()).isSameAs(iv);

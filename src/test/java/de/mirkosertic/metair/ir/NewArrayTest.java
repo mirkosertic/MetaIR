@@ -15,8 +15,6 @@ public class NewArrayTest {
         final Value size = new PrimitiveInt(10);
         final NewArray a = new NewArray(ConstantDescs.CD_byte, size);
 
-        assertThat(a.arg0).isSameAs(size);
-
         assertThat(a.debugDescription()).isEqualTo("NewArray : byte[]");
 
         assertThat(a.type).isEqualTo(ConstantDescs.CD_byte.arrayType());

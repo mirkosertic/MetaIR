@@ -311,6 +311,16 @@ public abstract class StructuredControlflowCodeGenerator<T extends StructuredCon
         return committedToTemporary.get(node);
     }
 
+    protected final void emitArguments(final Node node, final int expectedSize, final Deque<Node> expressionStack, final Deque<T> evaluationStack) {
+        final List<Node> arguments = node.arguments();
+        if (arguments.size() != expectedSize) {
+            throw new IllegalArgumentException("Expected " + expectedSize + " arguments, but got " + arguments.size());
+        }
+        for (final Node argument : arguments) {
+            emit(argument, expressionStack, evaluationStack);
+        }
+    }
+
     protected final void emit(final Node node, final Deque<Node> expressionStack, final Deque<T> evaluationStack) {
         try {
             expressionStack.push(node);

@@ -16,8 +16,6 @@ public class GetFieldTest {
         final Value v = new StringConstant("Hello");
         final GetField get = new GetField(ConstantDescs.CD_String, ConstantDescs.CD_int, "field", v);
 
-        assertThat(get.arg0).isSameAs(v);
-
         assertThat(v.usedBy).containsExactly(get);
 
         assertThat(get.uses).hasSize(1);

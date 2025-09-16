@@ -16,8 +16,6 @@ public class NegateTest {
         final PrimitiveInt a = new PrimitiveInt(10);
         final Negate negate = new Negate(ConstantDescs.CD_int, a);
 
-        assertThat(negate.arg0).isSameAs(a);
-
         assertThat(negate.debugDescription()).isEqualTo("Negate : int");
 
         assertThat(negate.type).isEqualTo(ConstantDescs.CD_int);

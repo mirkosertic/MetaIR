@@ -16,8 +16,6 @@ public class ArrayLengthTest {
         final Value a = new NewArray(ConstantDescs.CD_byte, new PrimitiveInt(10));
         final ArrayLength len = new ArrayLength(a);
 
-        assertThat(len.arg0).isSameAs(a);
-
         assertThat(len.debugDescription()).isEqualTo("ArrayLength");
 
         assertThat(len).isInstanceOf(Value.class);

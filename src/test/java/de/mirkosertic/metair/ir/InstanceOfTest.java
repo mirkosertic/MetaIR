@@ -15,9 +15,6 @@ public class InstanceOfTest {
         final PrimitiveInt b = new PrimitiveInt(20);
         final InstanceOf cc = new InstanceOf(a, b);
 
-        assertThat(cc.arg0).isSameAs(a);
-        assertThat(cc.arg1).isSameAs(b);
-
         assertThat(cc.debugDescription()).isEqualTo("InstanceOf");
         assertThat(cc.type).isEqualTo(ConstantDescs.CD_int);
         assertThat(cc).isInstanceOf(Value.class);

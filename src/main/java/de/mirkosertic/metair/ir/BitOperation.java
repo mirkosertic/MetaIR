@@ -9,8 +9,6 @@ public class BitOperation extends Value {
     }
 
     public final Operation operation;
-    public final Value arg0;
-    public final Value arg1;
 
     BitOperation(final ClassDesc type, final Operation operation, final Value arg1, final Value arg2) {
         super(type);
@@ -23,8 +21,8 @@ public class BitOperation extends Value {
         }
 
         this.operation = operation;
-        this.arg0 = use(arg1, new ArgumentUse(0));
-        this.arg1 = use(arg2, new ArgumentUse(1));
+        use(arg1, new ArgumentUse(0));
+        use(arg2, new ArgumentUse(1));
     }
 
     @Override

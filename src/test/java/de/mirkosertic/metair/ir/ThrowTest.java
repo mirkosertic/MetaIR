@@ -13,8 +13,6 @@ public class ThrowTest {
         final StringConstant a = new StringConstant("LOCK");
         final Throw tr = new Throw(a);
 
-        assertThat(tr.arg0).isSameAs(a);
-
         assertThat(tr.debugDescription()).isEqualTo("Throw");
 
         assertThat(a).isInstanceOf(Value.class);

@@ -13,8 +13,6 @@ public class MonitorEnterTest {
         final StringConstant a = new StringConstant("LOCK");
         final MonitorEnter monitor = new MonitorEnter(a);
 
-        assertThat(monitor.arg0).isSameAs(a);
-
         assertThat(monitor.debugDescription()).isEqualTo("MonitorEnter");
 
         assertThat(a).isInstanceOf(Value.class);

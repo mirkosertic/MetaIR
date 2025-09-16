@@ -17,9 +17,6 @@ public class DivTest {
         final PrimitiveInt b = new PrimitiveInt(20);
         final Div div = new Div(ConstantDescs.CD_int, a, b);
 
-        assertThat(div.arg1).isSameAs(a);
-        assertThat(div.arg2).isSameAs(b);
-
         assertThat(div.debugDescription()).isEqualTo("Div : int");
 
         assertThat(div.type).isEqualTo(ConstantDescs.CD_int);

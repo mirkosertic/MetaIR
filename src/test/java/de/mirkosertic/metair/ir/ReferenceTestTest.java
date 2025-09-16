@@ -14,8 +14,6 @@ public class ReferenceTestTest {
         final StringConstant a = new StringConstant("10");
         final ReferenceTest referenceCondition = new ReferenceTest(ReferenceTest.Operation.NONNULL, a);
 
-        assertThat(referenceCondition.arg0).isSameAs(a);
-
         assertThat(referenceCondition.debugDescription()).isEqualTo("ReferenceTest : NONNULL");
 
         assertThat(referenceCondition.type).isEqualTo(ConstantDescs.CD_int);

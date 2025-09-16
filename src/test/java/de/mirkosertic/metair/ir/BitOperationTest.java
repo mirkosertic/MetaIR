@@ -17,8 +17,6 @@ public class BitOperationTest {
         final PrimitiveInt b = new PrimitiveInt(20);
         final BitOperation bit = new BitOperation(ConstantDescs.CD_int, BitOperation.Operation.AND, a, b);
 
-        assertThat(bit.arg0).isSameAs(a);
-        assertThat(bit.arg1).isSameAs(b);
         assertThat(bit.debugDescription()).isEqualTo("BitOperation : AND(int)");
 
         assertThat(bit.type).isEqualTo(ConstantDescs.CD_int);

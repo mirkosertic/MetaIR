@@ -12,9 +12,6 @@ public class CheckCastTest {
         final PrimitiveInt b = new PrimitiveInt(20);
         final CheckCast cc = new CheckCast(a, b);
 
-        assertThat(cc.arg0).isSameAs(a);
-        assertThat(cc.arg1).isSameAs(b);
-
         assertThat(cc.debugDescription()).isEqualTo("CheckCast");
 
         assertThat(a.usedBy).containsExactly(cc);

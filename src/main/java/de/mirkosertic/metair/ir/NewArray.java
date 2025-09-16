@@ -5,8 +5,6 @@ import java.lang.constant.ConstantDescs;
 
 public class NewArray extends Value {
 
-    public final Value arg0;
-
     NewArray(final ClassDesc componentType, final Value length) {
         super(componentType.arrayType());
 
@@ -14,7 +12,7 @@ public class NewArray extends Value {
             illegalArgument("Array length must be int, but was " + TypeUtils.toString(length.type));
         }
 
-        this.arg0 = use(length, new ArgumentUse(0));
+        use(length, new ArgumentUse(0));
     }
 
     @Override

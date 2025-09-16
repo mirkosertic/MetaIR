@@ -15,8 +15,6 @@ class TableSwitchTest {
         final Value value = new PrimitiveInt(10);
         final TableSwitch a = new TableSwitch(value, 1, 10, "defaultlabel", List.of(20));
 
-        assertThat(a.arg0).isSameAs(value);
-
         assertThat(a.lowValue).isEqualTo(1);
         assertThat(a.highValue).isEqualTo(10);
         assertThat(a.uses).hasSize(1);

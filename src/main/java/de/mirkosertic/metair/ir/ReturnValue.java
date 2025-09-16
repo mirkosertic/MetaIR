@@ -5,8 +5,6 @@ import java.lang.constant.ConstantDesc;
 
 public class ReturnValue extends Value {
 
-    public final Value arg0;
-
     ReturnValue(final ConstantDesc type, final Value value) {
         super(type);
 
@@ -19,7 +17,7 @@ public class ReturnValue extends Value {
             }
         }
 
-        this.arg0 = use(value, new ArgumentUse(0));
+        use(value, new ArgumentUse(0));
     }
 
     @Override
