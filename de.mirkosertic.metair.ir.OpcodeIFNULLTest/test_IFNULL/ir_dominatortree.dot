@@ -14,7 +14,6 @@ digraph debugoutput {
  node4 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node3 -> node4[headlabel="*0", labeldistance=2];
  node0 -> node4[labeldistance=2, color=red, fontcolor=red];
- node0 -> node4[labeldistance=2, color=green, constraint=false];
  node5[label="#5 false Order : 8",shape=box, fillcolor=lightgrey, style=filled];
  node5 -> node4[dir="forward" color="fuchsia" penwidth="2"];
  node4 -> node5[labeldistance=2, color=red, fontcolor=red];
@@ -25,10 +24,10 @@ digraph debugoutput {
  node7 -> node5[dir="forward" color="fuchsia" penwidth="2"];
  node5 -> node7[style=dotted];
  node8[label="#8 ReturnValue : int Order : 10",shape=box, fillcolor=lightgrey, style=filled];
- node8 -> node4[dir="forward" color="fuchsia" penwidth="2"];
+ node8 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node7 -> node8[headlabel="*0", labeldistance=2];
  node5 -> node8[labeldistance=2, color=red, fontcolor=red];
- node4 -> node8[labeldistance=2, color=green, constraint=false];
+ node0 -> node8[labeldistance=2, color=green, constraint=false];
  node9[label="#9 LabelNode Order : 5",shape=box, fillcolor=lightgrey, style=filled];
  node9 -> node6[dir="forward" color="fuchsia" penwidth="2"];
  node6 -> node9[labeldistance=2, color=red, fontcolor=red];
@@ -36,10 +35,10 @@ digraph debugoutput {
  node10 -> node9[dir="forward" color="fuchsia" penwidth="2"];
  node9 -> node10[style=dotted];
  node11[label="#11 ReturnValue : int Order : 7",shape=box, fillcolor=lightgrey, style=filled];
- node11 -> node4[dir="forward" color="fuchsia" penwidth="2"];
+ node11 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node10 -> node11[headlabel="*0", labeldistance=2];
  node9 -> node11[labeldistance=2, color=red, fontcolor=red];
- node4 -> node11[labeldistance=2, color=green, constraint=false];
+ node0 -> node11[labeldistance=2, color=green, constraint=false];
  subgraph cluster_000 {
   label = "Legend";
   node [shape=point]

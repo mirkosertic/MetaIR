@@ -4,12 +4,12 @@ digraph debugoutput {
  node1[label="#1 this : FieldAccessTest Order : 3",shape=box, fillcolor=lightgrey, style=filled];
  node1 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node0 -> node1[headlabel="*0", labeldistance=2];
- node2[label="#2 LabelNode Order : 2",shape=box, fillcolor=lightgrey, style=filled];
+ node2[label="#2 LabelNode Order : 1",shape=box, fillcolor=lightgrey, style=filled];
  node2 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node0 -> node2[labeldistance=2, color=red, fontcolor=red];
- node3[label="#3 Class FieldAccessTest$Source Order : 1",shape=octagon, fillcolor=lightgreen, style=filled];
- node3 -> node0[dir="forward" color="fuchsia" penwidth="2"];
- node0 -> node3[style=dotted];
+ node3[label="#3 Class FieldAccessTest$Source Order : 2",shape=octagon, fillcolor=lightgreen, style=filled];
+ node3 -> node2[dir="forward" color="fuchsia" penwidth="2"];
+ node2 -> node3[style=dotted];
  node4[label="#4 ClassInit Order : 4",shape=box, fillcolor=lightgrey, style=filled];
  node4 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node3 -> node4[headlabel="*0", labeldistance=2];
