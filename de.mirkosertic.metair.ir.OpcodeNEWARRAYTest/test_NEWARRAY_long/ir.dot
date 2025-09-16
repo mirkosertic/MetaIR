@@ -6,6 +6,10 @@ digraph {
  node4[label="#4 NewArray : long[]",shape=octagon, fillcolor=orange, style=filled];
  node3 -> node4[headlabel="*0", labeldistance=2];
  node0 -> node4[labeldistance=2, color=green, constraint=false];
+ node9[label="#9 ArrayLoad : long",shape=box, fillcolor=lightgrey, style=filled];
+ node4 -> node9[headlabel="*0", labeldistance=2];
+ node8 -> node9[headlabel="*1", labeldistance=2];
+ node6 -> node9[labeldistance=2, color=green, constraint=false];
  node6[label="#6 ArrayStore : long[]",shape=box, fillcolor=lightgrey, style=filled];
  node4 -> node6[headlabel="*0", labeldistance=2];
  node2 -> node6[headlabel="*1", labeldistance=2];
@@ -16,28 +20,24 @@ digraph {
  node0 -> node5[style=dotted];
  node2[label="#2 int 0",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node2[style=dotted];
- node8[label="#8 int 2",shape=octagon, fillcolor=lightgreen, style=filled];
- node6 -> node8[style=dotted];
- node9[label="#9 ArrayLoad : long",shape=box, fillcolor=lightgrey, style=filled];
- node4 -> node9[headlabel="*0", labeldistance=2];
- node8 -> node9[headlabel="*1", labeldistance=2];
- node6 -> node9[labeldistance=2, color=green, constraint=false];
  node10[label="#10 Return",shape=box, fillcolor=lightgrey, style=filled];
  node6 -> node10[labeldistance=2, color=red, fontcolor=red];
  node9 -> node10[labeldistance=2, color=green, constraint=false];
+ node8[label="#8 int 2",shape=octagon, fillcolor=lightgreen, style=filled];
+ node6 -> node8[style=dotted];
  node7[label="#7 ArrayLength",shape=octagon, fillcolor=orange, style=filled];
  node4 -> node7[headlabel="*0", labeldistance=2];
  subgraph cluster_0 {
+  color=lightgray;
+  node6;
+  node8;
+ }
+ subgraph cluster_1 {
   color=lightgray;
   node0;
   node2;
   node3;
   node5;
- }
- subgraph cluster_1 {
-  color=lightgray;
-  node6;
-  node8;
  }
  subgraph cluster_000 {
   label = "Legend";

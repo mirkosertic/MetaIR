@@ -32,7 +32,7 @@
 <g id="node2" class="node">
 <title>node3</title>
 <polygon fill="lightgreen" stroke="black" points="171.26,-156.54 171.26,-171.46 140.49,-182 96.98,-182 66.21,-171.46 66.21,-156.54 96.98,-146 140.49,-146 171.26,-156.54"/>
-<text text-anchor="middle" x="118.73" y="-160.3" font-family="Times,serif" font-size="14.00">#3 int 1</text>
+<text text-anchor="middle" x="118.73" y="-160.3" font-family="Times,serif" font-size="14.00">#3 int 0</text>
 </g>
 <!-- node0&#45;&gt;node3 -->
 <g id="edge1" class="edge">
@@ -44,7 +44,7 @@
 <g id="node4" class="node">
 <title>node2</title>
 <polygon fill="lightgreen" stroke="black" points="295.26,-156.54 295.26,-171.46 264.49,-182 220.98,-182 190.21,-171.46 190.21,-156.54 220.98,-146 264.49,-146 295.26,-156.54"/>
-<text text-anchor="middle" x="242.73" y="-160.3" font-family="Times,serif" font-size="14.00">#2 int 0</text>
+<text text-anchor="middle" x="242.73" y="-160.3" font-family="Times,serif" font-size="14.00">#2 int 1</text>
 </g>
 <!-- node0&#45;&gt;node2 -->
 <g id="edge4" class="edge">
@@ -77,11 +77,11 @@
 <text text-anchor="middle" x="147.73" y="-87.3" font-family="Times,serif" font-size="14.00">#4 BitOperation : SHR(int)</text>
 </g>
 <!-- node3&#45;&gt;node4 -->
-<g id="edge3" class="edge">
+<g id="edge2" class="edge">
 <title>node3&#45;&gt;node4</title>
 <path fill="none" stroke="black" d="M125.75,-145.81C129.1,-137.62 133.18,-127.62 136.92,-118.48"/>
 <polygon fill="black" stroke="black" points="140.24,-119.61 140.78,-109.03 133.76,-116.96 140.24,-119.61"/>
-<text text-anchor="middle" x="141.75" y="-125.31" font-family="Times,serif" font-size="14.00">*1</text>
+<text text-anchor="middle" x="141.75" y="-125.31" font-family="Times,serif" font-size="14.00">*0</text>
 </g>
 <!-- node4&#45;&gt;node5 -->
 <g id="edge5" class="edge">
@@ -91,11 +91,11 @@
 <text text-anchor="middle" x="209.15" y="-50.05" font-family="Times,serif" font-size="14.00">*0</text>
 </g>
 <!-- node2&#45;&gt;node4 -->
-<g id="edge2" class="edge">
+<g id="edge3" class="edge">
 <title>node2&#45;&gt;node4</title>
 <path fill="none" stroke="black" d="M220.22,-146.17C207.86,-136.94 192.35,-125.34 178.85,-115.25"/>
 <polygon fill="black" stroke="black" points="180.85,-112.38 170.75,-109.2 176.66,-117.99 180.85,-112.38"/>
-<text text-anchor="middle" x="190.32" y="-109.58" font-family="Times,serif" font-size="14.00">*0</text>
+<text text-anchor="middle" x="190.32" y="-109.58" font-family="Times,serif" font-size="14.00">*1</text>
 </g>
 <!-- c0 -->
 <!-- c1 -->

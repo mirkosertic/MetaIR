@@ -1,0 +1,19 @@
+(method (int arg0) (int arg1) (int arg2)
+  // Label Frame5
+  int phi0 = arg1
+  int phi1 = arg2
+  int phi2 = arg0
+  int phi3 = 10
+  int phi4 = 0
+  // Label Frame9
+  (block loop LoopHeaderNode_3
+    (if (phi4 >= phi2)
+      // Label Frame29
+      return phi2
+    (else)
+      phi3 = (phi3 + ((phi4 + phi0) + phi1))
+      phi4 = (phi4 + 1)
+      continue LoopHeaderNode_3
+    )
+  )
+)

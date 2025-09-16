@@ -1,14 +1,14 @@
 digraph {
  ordering="in";
  node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#0 Method</td></tr><tr><td port="prj1" bgcolor="yellow">this : MethodInvokeTest</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
- node2[label="#2 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
- node0 -> node2[labeldistance=2, color=red, fontcolor=red];
- node3[label="#3 Class MethodInvokeTest$Source",shape=octagon, fillcolor=lightgreen, style=filled];
- node2 -> node3[style=dotted];
  node4[label="#4 ClassInit",shape=box, fillcolor=lightgrey, style=filled];
  node3 -> node4[headlabel="*0", labeldistance=2];
  node2 -> node4[labeldistance=2, color=red, fontcolor=red];
  node0 -> node4[labeldistance=2, color=green, constraint=false];
+ node2[label="#2 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
+ node0 -> node2[labeldistance=2, color=red, fontcolor=red];
+ node3[label="#3 Class MethodInvokeTest$Source",shape=octagon, fillcolor=lightgreen, style=filled];
+ node2 -> node3[style=dotted];
  node5[label="#5 New",shape=octagon, fillcolor=orange, style=filled];
  node4 -> node5[headlabel="*0", labeldistance=2];
  node4 -> node5[labeldistance=2, color=green, constraint=false];
@@ -39,8 +39,6 @@ digraph {
  node5 -> node6[labeldistance=2, color=green, constraint=false];
  node17[label="#17 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
  node6 -> node17[labeldistance=2, color=red, fontcolor=red];
- node18[label="#18 Class MethodInvokeTest",shape=octagon, fillcolor=lightgreen, style=filled];
- node17 -> node18[style=dotted];
  node19[label="#19 ClassInit",shape=box, fillcolor=lightgrey, style=filled];
  node18 -> node19[headlabel="*0", labeldistance=2];
  node16 -> node19[labeldistance=2, color=green, constraint=false];
@@ -72,15 +70,17 @@ digraph {
  node20 -> node21[headlabel="*0", labeldistance=2];
  node20 -> node21[labeldistance=2, color=red, fontcolor=red];
  node20 -> node21[labeldistance=2, color=green, constraint=false];
+ node18[label="#18 Class MethodInvokeTest",shape=octagon, fillcolor=lightgreen, style=filled];
+ node17 -> node18[style=dotted];
  subgraph cluster_0 {
-  color=lightgray;
-  node17;
-  node18;
- }
- subgraph cluster_1 {
   color=lightgray;
   node2;
   node3;
+ }
+ subgraph cluster_1 {
+  color=lightgray;
+  node17;
+  node18;
  }
  subgraph cluster_000 {
   label = "Legend";

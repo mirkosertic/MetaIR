@@ -7,10 +7,10 @@ digraph debugoutput {
  node2[label="#2 catch : 0 : IllegalArgumentException Order : 8",shape=box, fillcolor=lightgrey, style=filled];
  node2 -> node1[dir="forward" color="fuchsia" penwidth="2"];
  node1 -> node2[labeldistance=2, color=red, fontcolor=red];
- node3[label="#3 default Order : 3",shape=box, fillcolor=lightgrey, style=filled];
+ node3[label="#3 exit Order : 3",shape=box, fillcolor=lightgrey, style=filled];
  node3 -> node1[dir="forward" color="fuchsia" penwidth="2"];
  node1 -> node3[labeldistance=2, color=red, fontcolor=red];
- node4[label="#4 exit Order : 2",shape=box, fillcolor=lightgrey, style=filled];
+ node4[label="#4 default Order : 2",shape=box, fillcolor=lightgrey, style=filled];
  node4 -> node1[dir="forward" color="fuchsia" penwidth="2"];
  node1 -> node4[labeldistance=2, color=red, fontcolor=red];
  node5[label="#5 Catch : IllegalArgumentException Order : 9",shape=box, fillcolor=lightgrey, style=filled];
@@ -18,8 +18,8 @@ digraph debugoutput {
  node2 -> node5[labeldistance=2, color=red, fontcolor=red];
  node6[label="#6 Merge : EndOfGuardedBlock4 Order : 4",shape=box, fillcolor=lightgrey, style=filled];
  node6 -> node1[dir="forward" color="fuchsia" penwidth="2"];
- node3 -> node6[labeldistance=2, color=red, fontcolor=red];
  node4 -> node6[labeldistance=2, color=red, fontcolor=red];
+ node3 -> node6[labeldistance=2, color=red, fontcolor=red];
  node7[label="#7 LabelNode Order : 10",shape=box, fillcolor=lightgrey, style=filled];
  node7 -> node5[dir="forward" color="fuchsia" penwidth="2"];
  node5 -> node7[labeldistance=2, color=red, fontcolor=red];

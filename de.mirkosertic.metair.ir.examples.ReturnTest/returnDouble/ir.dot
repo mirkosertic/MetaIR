@@ -3,12 +3,12 @@ digraph {
  node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#0 Method</td></tr><tr><td port="prj1" bgcolor="yellow">this : ReturnTest</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
  node2[label="#2 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
  node0 -> node2[labeldistance=2, color=red, fontcolor=red];
- node3[label="#3 double 10.0",shape=octagon, fillcolor=lightgreen, style=filled];
- node2 -> node3[style=dotted];
  node4[label="#4 ReturnValue : double",shape=box, fillcolor=lightgrey, style=filled];
  node3 -> node4[headlabel="*0", labeldistance=2];
  node2 -> node4[labeldistance=2, color=red, fontcolor=red];
  node0 -> node4[labeldistance=2, color=green, constraint=false];
+ node3[label="#3 double 10.0",shape=octagon, fillcolor=lightgreen, style=filled];
+ node2 -> node3[style=dotted];
  subgraph cluster_0 {
   color=lightgray;
   node2;

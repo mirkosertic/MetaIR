@@ -1,0 +1,46 @@
+
+  - method name: forLoop
+    flags: [PUBLIC, STATIC]
+    method type: (III)I
+    attributes: [Code]
+    code: 
+        max stack: 3
+        max locals: 5
+        attributes: [LineNumberTable, LocalVariableTable, StackMapTable]
+        line numbers: 
+          - {start: 0, line number: 9}
+          - {start: 3, line number: 10}
+          - {start: 12, line number: 11}
+          - {start: 21, line number: 10}
+          - {start: 27, line number: 13}
+        local variables: 
+          - {start: 6, end: 27, slot: 4, name: i, type: I}
+          - {start: 0, end: 29, slot: 0, name: a, type: I}
+          - {start: 0, end: 29, slot: 1, name: b, type: I}
+          - {start: 0, end: 29, slot: 2, name: c, type: I}
+          - {start: 3, end: 29, slot: 3, name: j, type: I}
+        stack map frames: 
+            6: {locals: [int, int, int, int, int], stack: []}
+            27: {locals: [int, int, int, int], stack: []}
+        //stack map frame @0: {locals: [int, int, int], stack: []}
+        0: {opcode: BIPUSH, constant value: 10}
+        2: {opcode: ISTORE_3, slot: 3}
+        3: {opcode: ICONST_0, constant value: 0}
+        4: {opcode: ISTORE, slot: 4}
+        //stack map frame @6: {locals: [int, int, int, int, int], stack: []}
+        6: {opcode: ILOAD, slot: 4, type: I, variable name: i}
+        8: {opcode: ILOAD_0, slot: 0, type: I, variable name: a}
+        9: {opcode: IF_ICMPGE, target: 27}
+        12: {opcode: ILOAD_3, slot: 3, type: I, variable name: j}
+        13: {opcode: ILOAD, slot: 4, type: I, variable name: i}
+        15: {opcode: ILOAD_1, slot: 1, type: I, variable name: b}
+        16: {opcode: IADD}
+        17: {opcode: ILOAD_2, slot: 2, type: I, variable name: c}
+        18: {opcode: IADD}
+        19: {opcode: IADD}
+        20: {opcode: ISTORE_3, slot: 3, type: I, variable name: j}
+        21: {opcode: IINC, slot: 4, const: 1, type: I, variable name: i}
+        24: {opcode: GOTO, target: 6}
+        //stack map frame @27: {locals: [int, int, int, int], stack: []}
+        27: {opcode: ILOAD_0, slot: 0, type: I, variable name: a}
+        28: {opcode: IRETURN}
