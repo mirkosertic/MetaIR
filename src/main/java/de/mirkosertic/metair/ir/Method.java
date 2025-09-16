@@ -12,7 +12,6 @@ import java.util.Map;
 
 public class Method extends TupleNode {
 
-    private final Map<ClassDesc, RuntimeclassReference> runtimeclassReferences;
     private final Map<MethodTypeDesc, MethodType> methodtypeReferences;
     private final Map<MethodHandleDesc, MethodHandle> methodHandles;
 
@@ -20,19 +19,10 @@ public class Method extends TupleNode {
 
     Method() {
         this.methodArguments = new ArrayList<>();
-        this.runtimeclassReferences = new HashMap<>();
         this.methodtypeReferences = new HashMap<>();
         this.methodHandles = new HashMap<>();
 
         registerAs("default", this);
-    }
-
-    public RuntimeclassReference defineRuntimeclassReference(final ClassDesc type) {
-        return runtimeclassReferences.computeIfAbsent(type, key -> {
-            final RuntimeclassReference r = new RuntimeclassReference(key);
-            r.use(Method.this, DefinedByUse.INSTANCE);
-            return r;
-        });
     }
 
     public MethodType defineMethodType(final MethodTypeDesc type) {

@@ -1,9 +1,12 @@
 package de.mirkosertic.metair.ir;
 
+import java.lang.constant.ClassDesc;
 import java.lang.constant.ConstantDesc;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public abstract class Node {
@@ -20,10 +23,12 @@ public abstract class Node {
     // Incoming uses
     protected final List<UseEdge> uses;
     protected final Set<Node> usedBy;
+    private final Map<ClassDesc, RuntimeclassReference> runtimeclassReferences;
 
     protected Node() {
         this.uses = new ArrayList<>();
         this.usedBy = new HashSet<>();
+        this.runtimeclassReferences = new HashMap<>();
     }
 
     public Node controlFlowsTo(final Node target, final FlowType type) {
@@ -93,6 +98,14 @@ public abstract class Node {
         final PHI p = new PHI(type);
         p.use(this, DefinedByUse.INSTANCE);
         return p;
+    }
+
+    public RuntimeclassReference defineRuntimeclassReference(final ClassDesc type) {
+        return runtimeclassReferences.computeIfAbsent(type, key -> {
+            final RuntimeclassReference r = new RuntimeclassReference(key);
+            r.use(this, DefinedByUse.INSTANCE);
+            return r;
+        });
     }
 
     public boolean isDataUsedMultipleTimes() {

@@ -59,6 +59,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
@@ -444,22 +445,30 @@ public class MethodAnalyzer {
         currentPath.add(frames[0]);
         final Set<Frame> marked = new HashSet<>();
         marked.add(frames[0]);
-        while (!currentPath.isEmpty()) {
-            final Frame currentNode = currentPath.peek();
-            final List<Frame> forwardNodes = new ArrayList<>();
 
-            // This could be improved if we have to successor list directly...
-            final Frame[] frames = getFrames();
-            for (final Frame frame : frames) {
-                // Maybe null due to unreachable statements in bytecode
-                if (frame != null) {
-                    for (final FrameCFGEdge edge : frame.predecessors) {
-                        if (edge.fromIndex() == currentNode.elementIndex && edge.flowType() == FlowType.FORWARD) {
-                            forwardNodes.add(frame);
+        final Map<Frame, List<Frame>> successors = new HashMap<>();
+        for (final Frame frame : frames) {
+            if (frame != null) {
+
+                for (final FrameCFGEdge edge : frame.predecessors) {
+                    if (edge.flowType() == FlowType.FORWARD) {
+                        final Frame fromFrame = frames[edge.fromIndex()];
+                        if (fromFrame == null) {
+                            illegalState("fromFrame == null !, for " + edge);
                         }
+                        final List<Frame> successorsList = successors.computeIfAbsent(fromFrame, k -> new ArrayList<>());
+                        successorsList.add(frame);
                     }
                 }
             }
+        }
+
+        while (!currentPath.isEmpty()) {
+            final Frame currentNode = currentPath.peek();
+
+            final List<Frame> forwardNodes;
+
+            forwardNodes = Objects.requireNonNullElseGet(successors.get(currentNode), ArrayList::new);
 
             // We sort by index in the code model to make this reproducible...
             forwardNodes.sort(Comparator.comparingInt(o -> o.elementIndex));
@@ -701,7 +710,7 @@ public class MethodAnalyzer {
 
         for (final Frame frame : topologicalOrder) {
             boolean isExceptionHandler = false;
-            final CodeElement frameElement = cm.elementList().get(frame.elementIndex);
+            final CodeElement frameElement = frame.codeElement;
             if (frameElement instanceof final LabelTarget labelTarget) {
                 // Check is this is an exception handler
                 isExceptionHandler = exceptionHandlers.contains(labelTarget.label());
@@ -1225,7 +1234,7 @@ public class MethodAnalyzer {
         }
         final List<Value> bootstrapArguments = new ArrayList<>();
 
-        final Value invokerType = ir.defineRuntimeclassReference(owner);
+        final Value invokerType = outgoing.control.defineRuntimeclassReference(owner);
         final ClassDesc lookupOwner = ClassDesc.of(MethodHandles.Lookup.class.getName());
 
         // Default bootstrap arguments
@@ -1256,7 +1265,7 @@ public class MethodAnalyzer {
                 break;
             }
         }
-        final Value bootstrapInvocation = new InvokeStatic(bootstrapMethod.owner(), ir.defineRuntimeclassReference(bootstrapMethod.owner()), bootstrapMethod.methodName(), bootstrapMethodType, bootstrapArguments);
+        final Value bootstrapInvocation = new InvokeStatic(bootstrapMethod.owner(), outgoing.control.defineRuntimeclassReference(bootstrapMethod.owner()), bootstrapMethod.methodName(), bootstrapMethodType, bootstrapArguments);
 
         final List<Value> dynamicArguments = new ArrayList<>();
         for (int i = 0; i < expectedarguments; i++) {
@@ -1635,7 +1644,7 @@ public class MethodAnalyzer {
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, args.length);
 
-        final RuntimeclassReference runtimeClass = ir.defineRuntimeclassReference(owner);
+        final RuntimeclassReference runtimeClass = outgoing.control.defineRuntimeclassReference(owner);
         final ClassInitialization init = new ClassInitialization(runtimeClass);
 
         final List<Value> arguments = new ArrayList<>();
@@ -1718,7 +1727,6 @@ public class MethodAnalyzer {
         final If next = new If(numericCondition);
 
         outgoing.control = outgoing.control.controlFlowsTo(next, FlowType.FORWARD);
-        outgoing.memory = outgoing.memory.memoryFlowsTo(next);
         frame.entryPoint = next;
 
         final int codeElementIndex = labelToIndex.get(node.target());
@@ -1742,7 +1750,6 @@ public class MethodAnalyzer {
         final If next = new If(numericCondition);
 
         outgoing.control = outgoing.control.controlFlowsTo(next, FlowType.FORWARD);
-        outgoing.memory = outgoing.memory.memoryFlowsTo(next);
         frame.entryPoint = next;
 
         final int codeElementIndex = labelToIndex.get(node.target());
@@ -1766,7 +1773,6 @@ public class MethodAnalyzer {
         final If next = new If(referenceCondition);
 
         outgoing.control = outgoing.control.controlFlowsTo(next, FlowType.FORWARD);
-        outgoing.memory = outgoing.memory.memoryFlowsTo(next);
         frame.entryPoint = next;
 
         final int codeElementIndex = labelToIndex.get(node.target());
@@ -1791,7 +1797,6 @@ public class MethodAnalyzer {
         final If next = new If(condition);
 
         outgoing.control = outgoing.control.controlFlowsTo(next, FlowType.FORWARD);
-        outgoing.memory = outgoing.memory.memoryFlowsTo(next);
         frame.entryPoint = next;
 
         final int codeElementIndex = labelToIndex.get(node.target());
@@ -1856,7 +1861,7 @@ public class MethodAnalyzer {
             case final Long l -> control.definePrimitiveLong(l);
             case final Float f -> control.definePrimitiveFloat(f);
             case final Double d -> control.definePrimitiveDouble(d);
-            case final ClassDesc classDesc -> ir.defineRuntimeclassReference(classDesc);
+            case final ClassDesc classDesc -> control.defineRuntimeclassReference(classDesc);
             case final MethodTypeDesc mtd -> ir.defineMethodType(mtd);
             case final MethodHandleDesc mh -> ir.defineMethodHandle(mh);
             case null, default -> {
@@ -1935,7 +1940,7 @@ public class MethodAnalyzer {
     private void parse_GETSTATIC(final ClassDesc owner, final ClassDesc fieldType, final String fieldName, final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
 
-        final RuntimeclassReference ri = ir.defineRuntimeclassReference(owner);
+        final RuntimeclassReference ri = outgoing.control.defineRuntimeclassReference(owner);
         final ClassInitialization init = new ClassInitialization(ri);
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(init);
@@ -1948,11 +1953,11 @@ public class MethodAnalyzer {
     }
 
     private void parse_PUTSTATIC(final ClassDesc owner, final ClassDesc fieldType, final String fieldName, final Frame frame) {
-        final RuntimeclassReference ri = ir.defineRuntimeclassReference(owner);
-        final ClassInitialization init = new ClassInitialization(ri);
-
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, 1);
+
+        final RuntimeclassReference ri = outgoing.control.defineRuntimeclassReference(owner);
+        final ClassInitialization init = new ClassInitialization(ri);
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(init);
 
@@ -1965,10 +1970,10 @@ public class MethodAnalyzer {
     }
 
     private void parse_NEW(final ClassDesc type, final Frame frame) {
-        final RuntimeclassReference ri = ir.defineRuntimeclassReference(type);
-        final ClassInitialization init = new ClassInitialization(ri);
-
         final Status outgoing = frame.copyIncomingToOutgoing();
+
+        final RuntimeclassReference ri = outgoing.control.defineRuntimeclassReference(type);
+        final ClassInitialization init = new ClassInitialization(ri);
 
         final New n = new New(init);
 
@@ -2025,7 +2030,7 @@ public class MethodAnalyzer {
         final Status outgoing = frame.copyIncomingToOutgoing();
 
         final Value objectToCheck = outgoing.peek();
-        final RuntimeclassReference expectedType = ir.defineRuntimeclassReference(typeToCheck);
+        final RuntimeclassReference expectedType = outgoing.control.defineRuntimeclassReference(typeToCheck);
 
         final ClassInitialization classInit = new ClassInitialization(expectedType);
         outgoing.control = outgoing.control.controlFlowsTo(classInit, FlowType.FORWARD);
@@ -2039,7 +2044,7 @@ public class MethodAnalyzer {
         assertMinimumStackSize(outgoing, 1);
 
         final Value objectToCheck = outgoing.pop();
-        final RuntimeclassReference expectedType = ir.defineRuntimeclassReference(typeToCheck);
+        final RuntimeclassReference expectedType = outgoing.control.defineRuntimeclassReference(typeToCheck);
 
         final ClassInitialization classInit = new ClassInitialization(expectedType);
         outgoing.control = outgoing.control.controlFlowsTo(classInit, FlowType.FORWARD);
