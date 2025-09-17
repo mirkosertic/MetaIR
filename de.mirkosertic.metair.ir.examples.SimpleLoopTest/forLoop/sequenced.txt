@@ -1,14 +1,13 @@
 (method (int arg0)
   int phi0 = 0
-  int phi1 = arg0
   // Label Frame2
   (block loop LoopHeaderNode_2
-    (if (phi0 >= phi1)
+    (if (phi0 >= arg0)
       // Label Frame17
-      return phi1
+      return arg0
     (else)
-      SimpleLoopTest var2 = (SimpleLoopTest.class.$init$)
-      int var3 = (var2.compute(phi0))
+      SimpleLoopTest var1 = (SimpleLoopTest.class.$init$)
+      int var2 = (var1.compute(phi0))
       phi0 = (phi0 + 1)
       continue LoopHeaderNode_2
     )

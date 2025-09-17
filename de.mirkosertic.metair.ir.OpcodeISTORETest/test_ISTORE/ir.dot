@@ -3,11 +3,11 @@ digraph {
  node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#0 Method</td></tr><tr><td port="prj1" bgcolor="yellow">this : Test</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
  node9[label="#9 int 0",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node9[style=dotted];
+ node8[label="#8 int 0",shape=octagon, fillcolor=lightgreen, style=filled];
+ node0 -> node8[style=dotted];
  node10[label="#10 Return",shape=box, fillcolor=lightgrey, style=filled];
  node0 -> node10[labeldistance=2, color=red, fontcolor=red];
  node0 -> node10[labeldistance=2, color=green, constraint=false];
- node8[label="#8 int 0",shape=octagon, fillcolor=lightgreen, style=filled];
- node0 -> node8[style=dotted];
  node7[label="#7 int 0",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node7[style=dotted];
  node6[label="#6 int 0",shape=octagon, fillcolor=lightgreen, style=filled];
