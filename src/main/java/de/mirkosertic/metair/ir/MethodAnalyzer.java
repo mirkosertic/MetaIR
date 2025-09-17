@@ -105,7 +105,8 @@ public class MethodAnalyzer {
                 step2ComputeTopologicalOrder();
                 step3ComputeFrameDominators();
                 step4FollowCFGAndInterpret(code);
-                step5PeepholeOptimizations();
+                step5RemoveSingularPHIs(code);
+                step6PeepholeOptimizations();
             } catch (final IllegalParsingStateException ex) {
                 throw ex;
             } catch (final RuntimeException ex) {
@@ -892,7 +893,35 @@ public class MethodAnalyzer {
         }
     }
 
-    private void step5PeepholeOptimizations() {
+    private void step5RemoveSingularPHIs(final CodeModel code) {
+        final List<Node> nodes = new DFS2(ir, true).getTopologicalOrder();
+        for (final Node node : nodes) {
+            for (final Node n : new ArrayList<>(node.usedBy)) {
+                if (n instanceof final PHI phi) {
+                    final List<Node.UseEdge> phiUses = phi.uses.stream().filter(t -> t.use() instanceof PHIUse).toList();
+                    if (phiUses.size() == 1) {
+                        // We found a singular candidate
+                        final Node singularValue = phiUses.getFirst().node();
+                        singularValue.usedBy.remove(phi);
+
+                        for (final Node userOfPhi : phi.usedBy) {
+                            singularValue.usedBy.add(userOfPhi);
+
+                            for (final Node.UseEdge edge : userOfPhi.uses) {
+                                if (edge.node == phi) {
+                                    edge.node = singularValue;
+                                }
+                            }
+                        }
+
+                        phi.uses.stream().filter(t -> t.use() instanceof DefinedByUse).map(t -> t.node).forEach(definer -> definer.usedBy.remove(phi));
+                    }
+                }
+            }
+        }
+    }
+
+    private void step6PeepholeOptimizations() {
     }
 
     private void visitNode(final CodeElement node, final Frame frame) {

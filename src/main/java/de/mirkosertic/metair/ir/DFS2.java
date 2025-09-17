@@ -35,7 +35,7 @@ public class DFS2 {
         workList.add(node);
         listhandling: while (!workList.isEmpty()) {
             safelock++;
-            if (safelock > 1000) {
+            if (safelock > 5000) {
                 throw new IllegalStateException("Unschedulable IR detected!");
             }
 

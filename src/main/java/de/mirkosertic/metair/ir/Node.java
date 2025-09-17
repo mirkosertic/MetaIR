@@ -135,6 +135,22 @@ public abstract class Node {
         return result;
     }
 
-    public record UseEdge(Node node, Use use) {
+    public static class UseEdge {
+
+        protected Node node;
+        protected final Use use;
+
+        public UseEdge(final Node node, final Use use) {
+            this.node = node;
+            this.use = use;
+        }
+
+        public Use use() {
+            return use;
+        }
+
+        public Node node() {
+            return node;
+        }
     }
 }

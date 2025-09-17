@@ -8,7 +8,8 @@ public class LoopInvariantTest {
     public static int forLoop(int a, int b, int c) {
         int j = 10;
         for (int i = 0; i < a; i++) {
-            j += i + b + c;
+            int x = b + c;
+            j += i + x;
         }
         return a;
     }
