@@ -2,7 +2,7 @@ digraph {
  ordering="in";
  node0[label="#0 LocalVariable[name=this, slot=0, type=Lde/mirkosertic/metair/ir/examples/SynchronizedTest;] Order: 0", shape=box, fillcolor=lightgrey, style=filled];
  node1[label="#1 LocalVariable[name=a, slot=1, type=I] Order: 1", shape=box, fillcolor=lightgrey, style=filled];
- node2[label="#2 Label[context=CodeModel[id=2058135834], bci=0] Order: 2", shape=box, fillcolor=lightgrey, style=filled];
+ node2[label="#2 Label[context=CodeModel[id=1153907750], bci=0] Order: 2", shape=box, fillcolor=lightgrey, style=filled];
  node3[label="#3 LineNumber[line=9] Order: 3", shape=box, fillcolor=lightgrey, style=filled];
  node4[label="#4 Load[OP=ILOAD_1, slot=1] Order: 4", shape=box, fillcolor=lightgrey, style=filled];
  node5[label="#5 UnboundIntrinsicConstantInstruction[op=ICONST_1] Order: 5", shape=box, fillcolor=lightgrey, style=filled];

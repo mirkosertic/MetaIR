@@ -5,14 +5,14 @@
   var0[arg1] = 10
   (block If_4_0
     (if (arg0 == 0)
-      // Label Frame24
-      var0[arg2] = 30
+      // Label Frame26
+      var0[arg2] = (arg1 - arg2)
       break If_4_0
     (else)
-      var0[arg2] = 20
+      var0[arg2] = (arg1 + arg2)
       break If_4_0
     )
   )
-  // Merge Merge30
+  // Merge Merge34
   return (var0[arg2])
 )

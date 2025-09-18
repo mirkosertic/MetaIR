@@ -153,7 +153,7 @@
 <g id="node7" class="node">
 <title>node6</title>
 <polygon fill="lightgrey" stroke="black" points="930.5,-255 778.5,-255 778.5,-219 930.5,-219 930.5,-255"/>
-<text text-anchor="middle" x="854.5" y="-233.3" font-family="Times,serif" font-size="14.00">#6 case0 Order : 9</text>
+<text text-anchor="middle" x="854.5" y="-233.3" font-family="Times,serif" font-size="14.00">#6 case1 Order : 9</text>
 </g>
 <!-- node4&#45;&gt;node6 -->
 <g id="edge13" class="edge">
@@ -165,7 +165,7 @@
 <g id="node8" class="node">
 <title>node7</title>
 <polygon fill="lightgrey" stroke="black" points="694.5,-255 542.5,-255 542.5,-219 694.5,-219 694.5,-255"/>
-<text text-anchor="middle" x="618.5" y="-233.3" font-family="Times,serif" font-size="14.00">#7 case1 Order : 5</text>
+<text text-anchor="middle" x="618.5" y="-233.3" font-family="Times,serif" font-size="14.00">#7 case0 Order : 5</text>
 </g>
 <!-- node4&#45;&gt;node7 -->
 <g id="edge15" class="edge">
@@ -261,7 +261,7 @@
 <g id="node14" class="node">
 <title>node13</title>
 <polygon fill="lightgreen" stroke="black" points="1031.26,-83.54 1031.26,-98.46 957,-109 852,-109 777.74,-98.46 777.74,-83.54 852,-73 957,-73 1031.26,-83.54"/>
-<text text-anchor="middle" x="904.5" y="-87.3" font-family="Times,serif" font-size="14.00">#13 int 100 Order : 11</text>
+<text text-anchor="middle" x="904.5" y="-87.3" font-family="Times,serif" font-size="14.00">#13 int 200 Order : 11</text>
 </g>
 <!-- node9&#45;&gt;node13 -->
 <g id="edge29" class="edge">
@@ -285,7 +285,7 @@
 <g id="node16" class="node">
 <title>node15</title>
 <polygon fill="lightgreen" stroke="black" points="721.59,-83.54 721.59,-98.46 651.24,-109 551.76,-109 481.41,-98.46 481.41,-83.54 551.76,-73 651.24,-73 721.59,-83.54"/>
-<text text-anchor="middle" x="601.5" y="-87.3" font-family="Times,serif" font-size="14.00">#15 int 200 Order : 7</text>
+<text text-anchor="middle" x="601.5" y="-87.3" font-family="Times,serif" font-size="14.00">#15 int 100 Order : 7</text>
 </g>
 <!-- node10&#45;&gt;node15 -->
 <g id="edge35" class="edge">

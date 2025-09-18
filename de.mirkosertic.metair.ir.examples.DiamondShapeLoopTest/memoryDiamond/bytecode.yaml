@@ -1,0 +1,67 @@
+
+  - method name: memoryDiamond
+    flags: [PUBLIC, STATIC]
+    method type: (ZII)I
+    attributes: [Code]
+    code: 
+        max stack: 4
+        max locals: 5
+        attributes: [LineNumberTable, LocalVariableTable, StackMapTable]
+        line numbers: 
+          - {start: 0, line number: 9}
+          - {start: 5, line number: 10}
+          - {start: 15, line number: 11}
+          - {start: 20, line number: 12}
+          - {start: 24, line number: 13}
+          - {start: 33, line number: 15}
+          - {start: 39, line number: 10}
+          - {start: 45, line number: 18}
+        local variables: 
+          - {start: 8, end: 45, slot: 4, name: i, type: I}
+          - {start: 0, end: 49, slot: 0, name: check, type: Z}
+          - {start: 0, end: 49, slot: 1, name: a, type: I}
+          - {start: 0, end: 49, slot: 2, name: b, type: I}
+          - {start: 5, end: 49, slot: 3, name: x, type: '[I'}
+        stack map frames: 
+            8: {locals: [int, int, int, '[I', int], stack: []}
+            33: {locals: [int, int, int, '[I', int], stack: []}
+            39: {locals: [int, int, int, '[I', int], stack: []}
+            45: {locals: [int, int, int, '[I'], stack: []}
+        //stack map frame @0: {locals: [int, int, int], stack: []}
+        0: {opcode: BIPUSH, constant value: 10}
+        2: {opcode: NEWARRAY, dimensions: 1, descriptor: int}
+        4: {opcode: ASTORE_3, slot: 3}
+        5: {opcode: ICONST_0, constant value: 0}
+        6: {opcode: ISTORE, slot: 4}
+        //stack map frame @8: {locals: [int, int, int, '[I', int], stack: []}
+        8: {opcode: ILOAD, slot: 4, type: I, variable name: i}
+        10: {opcode: BIPUSH, constant value: 10}
+        12: {opcode: IF_ICMPGE, target: 45}
+        15: {opcode: ALOAD_3, slot: 3, type: '[I', variable name: x}
+        16: {opcode: ILOAD_1, slot: 1, type: I, variable name: a}
+        17: {opcode: BIPUSH, constant value: 10}
+        19: {opcode: IASTORE}
+        20: {opcode: ILOAD_0, slot: 0, type: Z, variable name: check}
+        21: {opcode: IFEQ, target: 33}
+        24: {opcode: ALOAD_3, slot: 3, type: '[I', variable name: x}
+        25: {opcode: ILOAD_2, slot: 2, type: I, variable name: b}
+        26: {opcode: ILOAD_1, slot: 1, type: I, variable name: a}
+        27: {opcode: ILOAD_2, slot: 2, type: I, variable name: b}
+        28: {opcode: IADD}
+        29: {opcode: IASTORE}
+        30: {opcode: GOTO, target: 39}
+        //stack map frame @33: {locals: [int, int, int, '[I', int], stack: []}
+        33: {opcode: ALOAD_3, slot: 3, type: '[I', variable name: x}
+        34: {opcode: ILOAD_2, slot: 2, type: I, variable name: b}
+        35: {opcode: ILOAD_1, slot: 1, type: I, variable name: a}
+        36: {opcode: ILOAD_2, slot: 2, type: I, variable name: b}
+        37: {opcode: ISUB}
+        38: {opcode: IASTORE}
+        //stack map frame @39: {locals: [int, int, int, '[I', int], stack: []}
+        39: {opcode: IINC, slot: 4, const: 1, type: I, variable name: i}
+        42: {opcode: GOTO, target: 8}
+        //stack map frame @45: {locals: [int, int, int, '[I'], stack: []}
+        45: {opcode: ALOAD_3, slot: 3, type: '[I', variable name: x}
+        46: {opcode: ILOAD_2, slot: 2, type: I, variable name: b}
+        47: {opcode: IALOAD}
+        48: {opcode: IRETURN}

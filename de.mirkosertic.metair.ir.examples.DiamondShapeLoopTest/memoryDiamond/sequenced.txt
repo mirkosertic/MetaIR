@@ -1,0 +1,27 @@
+(method (int arg0) (int arg1) (int arg2)
+  // Label Frame5
+  int phi0 = 0
+  // Label Frame10
+  (block loop LoopHeaderNode_3
+    (if (phi0 >= 10)
+      // Label Frame46
+      int[] var1 = (new int[10])
+      return (var1[arg2])
+    (else)
+      var1[arg1] = 10
+      (block If_10_0
+        (if (arg0 == 0)
+          // Label Frame34
+          var1[arg2] = (arg1 - arg2)
+          break If_10_0
+        (else)
+          var1[arg2] = (arg1 + arg2)
+          break If_10_0
+        )
+      )
+      // Merge Merge42
+      phi0 = (phi0 + 1)
+      continue LoopHeaderNode_3
+    )
+  )
+)

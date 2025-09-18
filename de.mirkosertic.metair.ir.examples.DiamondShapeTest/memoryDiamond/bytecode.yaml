@@ -4,7 +4,7 @@
     method type: (ZII)I
     attributes: [Code]
     code: 
-        max stack: 3
+        max stack: 4
         max locals: 4
         attributes: [LineNumberTable, LocalVariableTable, StackMapTable]
         line numbers: 
@@ -12,16 +12,16 @@
           - {start: 5, line number: 10}
           - {start: 10, line number: 11}
           - {start: 14, line number: 12}
-          - {start: 22, line number: 14}
-          - {start: 27, line number: 16}
+          - {start: 23, line number: 14}
+          - {start: 29, line number: 16}
         local variables: 
-          - {start: 0, end: 31, slot: 0, name: check, type: Z}
-          - {start: 0, end: 31, slot: 1, name: a, type: I}
-          - {start: 0, end: 31, slot: 2, name: b, type: I}
-          - {start: 5, end: 31, slot: 3, name: x, type: '[I'}
+          - {start: 0, end: 33, slot: 0, name: check, type: Z}
+          - {start: 0, end: 33, slot: 1, name: a, type: I}
+          - {start: 0, end: 33, slot: 2, name: b, type: I}
+          - {start: 5, end: 33, slot: 3, name: x, type: '[I'}
         stack map frames: 
-            22: {locals: [int, int, int, '[I'], stack: []}
-            27: {locals: [int, int, int, '[I'], stack: []}
+            23: {locals: [int, int, int, '[I'], stack: []}
+            29: {locals: [int, int, int, '[I'], stack: []}
         //stack map frame @0: {locals: [int, int, int], stack: []}
         0: {opcode: BIPUSH, constant value: 10}
         2: {opcode: NEWARRAY, dimensions: 1, descriptor: int}
@@ -31,19 +31,23 @@
         7: {opcode: BIPUSH, constant value: 10}
         9: {opcode: IASTORE}
         10: {opcode: ILOAD_0, slot: 0, type: Z, variable name: check}
-        11: {opcode: IFEQ, target: 22}
+        11: {opcode: IFEQ, target: 23}
         14: {opcode: ALOAD_3, slot: 3, type: '[I', variable name: x}
         15: {opcode: ILOAD_2, slot: 2, type: I, variable name: b}
-        16: {opcode: BIPUSH, constant value: 20}
-        18: {opcode: IASTORE}
-        19: {opcode: GOTO, target: 27}
-        //stack map frame @22: {locals: [int, int, int, '[I'], stack: []}
-        22: {opcode: ALOAD_3, slot: 3, type: '[I', variable name: x}
-        23: {opcode: ILOAD_2, slot: 2, type: I, variable name: b}
-        24: {opcode: BIPUSH, constant value: 30}
-        26: {opcode: IASTORE}
-        //stack map frame @27: {locals: [int, int, int, '[I'], stack: []}
-        27: {opcode: ALOAD_3, slot: 3, type: '[I', variable name: x}
-        28: {opcode: ILOAD_2, slot: 2, type: I, variable name: b}
-        29: {opcode: IALOAD}
-        30: {opcode: IRETURN}
+        16: {opcode: ILOAD_1, slot: 1, type: I, variable name: a}
+        17: {opcode: ILOAD_2, slot: 2, type: I, variable name: b}
+        18: {opcode: IADD}
+        19: {opcode: IASTORE}
+        20: {opcode: GOTO, target: 29}
+        //stack map frame @23: {locals: [int, int, int, '[I'], stack: []}
+        23: {opcode: ALOAD_3, slot: 3, type: '[I', variable name: x}
+        24: {opcode: ILOAD_2, slot: 2, type: I, variable name: b}
+        25: {opcode: ILOAD_1, slot: 1, type: I, variable name: a}
+        26: {opcode: ILOAD_2, slot: 2, type: I, variable name: b}
+        27: {opcode: ISUB}
+        28: {opcode: IASTORE}
+        //stack map frame @29: {locals: [int, int, int, '[I'], stack: []}
+        29: {opcode: ALOAD_3, slot: 3, type: '[I', variable name: x}
+        30: {opcode: ILOAD_2, slot: 2, type: I, variable name: b}
+        31: {opcode: IALOAD}
+        32: {opcode: IRETURN}
