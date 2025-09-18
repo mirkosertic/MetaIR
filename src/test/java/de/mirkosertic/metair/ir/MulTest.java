@@ -19,6 +19,8 @@ public class MulTest {
 
         assertThat(mul.debugDescription()).isEqualTo("Mul : int");
 
+        assertThat(mul.sideeffectFree()).isTrue();
+
         assertThat(mul.type).isEqualTo(ConstantDescs.CD_int);
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).containsExactly(mul);

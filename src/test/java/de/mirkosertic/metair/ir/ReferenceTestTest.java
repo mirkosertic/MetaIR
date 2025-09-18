@@ -16,6 +16,8 @@ public class ReferenceTestTest {
 
         assertThat(referenceCondition.debugDescription()).isEqualTo("ReferenceTest : NONNULL");
 
+        assertThat(referenceCondition.sideeffectFree()).isTrue();
+
         assertThat(referenceCondition.type).isEqualTo(ConstantDescs.CD_int);
         assertThat(referenceCondition.operation).isEqualTo(ReferenceTest.Operation.NONNULL);
         assertThat(a).isInstanceOf(Value.class);

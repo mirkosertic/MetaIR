@@ -13,6 +13,8 @@ public class ExtractMethodArgProjectionTest {
         final Method m = new Method();
         final ExtractMethodArgProjection a = new ExtractMethodArgProjection(ConstantDescs.CD_String, m, 1);
 
+        assertThat(a.sideeffectFree()).isTrue();
+
         assertThat(a.type).isEqualTo(ConstantDescs.CD_String);
         assertThat(a.index()).isEqualTo(1);
         assertThat(a).isInstanceOf(Value.class);

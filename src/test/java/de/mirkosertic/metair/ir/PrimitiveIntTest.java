@@ -13,6 +13,8 @@ public class PrimitiveIntTest {
     public void testUsage() {
         final PrimitiveInt a = new PrimitiveInt(10);
 
+        assertThat(a.sideeffectFree()).isTrue();
+
         assertThat(a.type).isEqualTo(ConstantDescs.CD_int);
         assertThat(a.value).isEqualTo(10);
         assertThat(a).isInstanceOf(PrimitiveValue.class);

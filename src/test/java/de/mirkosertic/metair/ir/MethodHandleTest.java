@@ -16,6 +16,8 @@ class MethodHandleTest {
     public void testUsage() {
         final MethodHandle a = new MethodHandle(MethodHandleDesc.ofMethod(DirectMethodHandleDesc.Kind.INTERFACE_VIRTUAL, ClassDesc.of(MethodHandleTest.class.getName()), "testUsage", MethodTypeDesc.of(ConstantDescs.CD_void)));
 
+        assertThat(a.sideeffectFree()).isTrue();
+
         assertThat(a.type).isEqualTo(MethodHandleDesc.ofMethod(DirectMethodHandleDesc.Kind.INTERFACE_VIRTUAL, ClassDesc.of(MethodHandleTest.class.getName()), "testUsage", MethodTypeDesc.of(ConstantDescs.CD_void)));
         assertThat(a).isInstanceOf(ConstantValue.class);
         assertThat(a.usedBy).isEmpty();

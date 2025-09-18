@@ -2,7 +2,7 @@ package de.mirkosertic.metair.ir;
 
 import java.lang.constant.ConstantDescs;
 
-public class Null extends Value {
+public class Null extends ConstantValue {
 
     Null() {
         super(ConstantDescs.CD_Object);
@@ -11,10 +11,5 @@ public class Null extends Value {
     @Override
     public String debugDescription() {
         return "null";
-    }
-
-    @Override
-    public boolean isConstant() {
-        return true;
     }
 }

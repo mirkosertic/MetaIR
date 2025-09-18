@@ -31,6 +31,11 @@ public class NumericCompare extends Value {
     }
 
     @Override
+    public boolean sideeffectFree() {
+        return true;
+    }
+
+    @Override
     public String debugDescription() {
         return "NumericCompare : " + mode + " for " + TypeUtils.toString(compareType);
     }

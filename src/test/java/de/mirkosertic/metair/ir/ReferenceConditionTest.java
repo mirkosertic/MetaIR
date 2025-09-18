@@ -17,6 +17,8 @@ public class ReferenceConditionTest {
 
         assertThat(referenceCondition.debugDescription()).isEqualTo("ReferenceCondition : EQ");
 
+        assertThat(referenceCondition.sideeffectFree()).isTrue();
+
         assertThat(referenceCondition.type).isEqualTo(ConstantDescs.CD_int);
         assertThat(referenceCondition.operation).isEqualTo(ReferenceCondition.Operation.EQ);
         assertThat(a).isInstanceOf(Value.class);

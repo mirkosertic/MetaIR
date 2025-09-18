@@ -11,6 +11,11 @@ public class Truncate extends Value {
     }
 
     @Override
+    public boolean sideeffectFree() {
+        return true;
+    }
+
+    @Override
     public String debugDescription() {
         return "Truncate : " + TypeUtils.toString(type);
     }

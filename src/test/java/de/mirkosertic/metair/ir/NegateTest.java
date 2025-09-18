@@ -18,6 +18,8 @@ public class NegateTest {
 
         assertThat(negate.debugDescription()).isEqualTo("Negate : int");
 
+        assertThat(negate.sideeffectFree()).isTrue();
+
         assertThat(negate.type).isEqualTo(ConstantDescs.CD_int);
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).containsExactly(negate);

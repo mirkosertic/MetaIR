@@ -13,6 +13,8 @@ public class ExtractThisRefProjectionTest {
         final Method m = new Method();
         final ExtractThisRefProjection a = new ExtractThisRefProjection(ConstantDescs.CD_String, m);
 
+        assertThat(a.sideeffectFree()).isTrue();
+
         assertThat(a.type).isEqualTo(ConstantDescs.CD_String);
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).isEmpty();

@@ -100,13 +100,13 @@ public class MethodAnalyzer {
 
                 stackMapTableAttribute = code.findAttribute(Attributes.stackMapTable()).orElse(null);
 
-                step0PrepareTryCatchBlocks(code);
-                step1AnalyzeCFG(code);
-                step2ComputeTopologicalOrder();
-                step3ComputeFrameDominators();
-                step4FollowCFGAndInterpret(code);
-                step5RemoveSingularPHIs(code);
-                step6PeepholeOptimizations();
+                step1PrepareTryCatchBlocks(code);
+                step2AnalyzeCFG(code);
+                step3ComputeTopologicalOrder();
+                step4ComputeFrameDominators();
+                step5FollowCFGAndInterpret(code);
+                step6RemoveSingularPHIs(code);
+
             } catch (final IllegalParsingStateException ex) {
                 throw ex;
             } catch (final RuntimeException ex) {
@@ -115,7 +115,7 @@ public class MethodAnalyzer {
         }
     }
 
-    private void step0PrepareTryCatchBlocks(final CodeModel code) {
+    private void step1PrepareTryCatchBlocks(final CodeModel code) {
         for (final ExceptionCatch exceptionHandler : code.exceptionHandlers()) {
             if (exceptionHandler.tryStart() != exceptionHandler.handler()) {
                 final List<TryCatchBlock> blocks = tryCatchBlocks.computeIfAbsent(exceptionHandler.tryStart(), key -> new ArrayList<>());
@@ -203,7 +203,7 @@ public class MethodAnalyzer {
         return codeModelTopologicalOrder;
     }
 
-    private void step1AnalyzeCFG(final CodeModel code) {
+    private void step2AnalyzeCFG(final CodeModel code) {
 
         final List<CodeElement> codeElements = code.elementList();
 
@@ -438,7 +438,7 @@ public class MethodAnalyzer {
         }
     }
 
-    private void step2ComputeTopologicalOrder() {
+    private void step3ComputeTopologicalOrder() {
         // We compute the topological order of the bytecode cfg
         // We later iterate by this order to parse every node
         final List<Frame> reversePostOrder = new ArrayList<>();
@@ -503,7 +503,7 @@ public class MethodAnalyzer {
 
     }
 
-    private void step3ComputeFrameDominators() {
+    private void step4ComputeFrameDominators() {
         final Frame firstElement = codeModelTopologicalOrder.getFirst();
         firstElement.immediateDominator = firstElement;
 
@@ -650,7 +650,7 @@ public class MethodAnalyzer {
         }
     }
 
-    private void step4FollowCFGAndInterpret(final CodeModel code) {
+    private void step5FollowCFGAndInterpret(final CodeModel code) {
 
         final CodeAttribute cm = (CodeAttribute) code;
 
@@ -893,7 +893,7 @@ public class MethodAnalyzer {
         }
     }
 
-    private void step5RemoveSingularPHIs(final CodeModel code) {
+    private void step6RemoveSingularPHIs(final CodeModel code) {
         final List<Node> nodes = new DFS2(ir, true).getTopologicalOrder();
         for (final Node node : nodes) {
             for (final Node n : new ArrayList<>(node.usedBy)) {
@@ -919,9 +919,6 @@ public class MethodAnalyzer {
                 }
             }
         }
-    }
-
-    private void step6PeepholeOptimizations() {
     }
 
     private void visitNode(final CodeElement node, final Frame frame) {

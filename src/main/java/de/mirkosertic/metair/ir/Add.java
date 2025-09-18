@@ -19,6 +19,11 @@ public class Add extends Value {
     }
 
     @Override
+    public boolean sideeffectFree() {
+        return true;
+    }
+
+    @Override
     public String debugDescription() {
         return "Add : " + TypeUtils.toString(type);
     }

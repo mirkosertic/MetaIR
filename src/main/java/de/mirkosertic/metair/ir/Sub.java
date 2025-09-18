@@ -19,6 +19,11 @@ public class Sub extends Value {
     }
 
     @Override
+    public boolean sideeffectFree() {
+        return true;
+    }
+
+    @Override
     public String debugDescription() {
         return "Sub : " + TypeUtils.toString(type);
     }

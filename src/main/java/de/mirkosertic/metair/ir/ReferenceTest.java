@@ -19,6 +19,11 @@ public class ReferenceTest extends Value {
     }
 
     @Override
+    public boolean sideeffectFree() {
+        return true;
+    }
+
+    @Override
     public String debugDescription() {
         return "ReferenceTest : " + operation;
     }

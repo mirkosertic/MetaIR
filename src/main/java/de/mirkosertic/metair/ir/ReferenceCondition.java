@@ -20,6 +20,11 @@ public class ReferenceCondition extends Value {
     }
 
     @Override
+    public boolean sideeffectFree() {
+        return true;
+    }
+
+    @Override
     public String debugDescription() {
         return "ReferenceCondition : " + operation;
     }

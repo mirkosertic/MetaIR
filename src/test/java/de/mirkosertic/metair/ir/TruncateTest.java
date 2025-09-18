@@ -14,6 +14,8 @@ class TruncateTest {
         final Value v = new PrimitiveInt(10);
         final Truncate a = new Truncate(ConstantDescs.CD_char, v);
 
+        assertThat(a.sideeffectFree()).isTrue();
+
         assertThat(a.type).isEqualTo(ConstantDescs.CD_char);
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).isEmpty();

@@ -57,6 +57,10 @@ public abstract class Node {
         return false;
     }
 
+    public boolean sideeffectFree() {
+        return false;
+    }
+
     public Null defineNullReference() {
         final Null nullref = new Null();
         nullref.use(this, DefinedByUse.INSTANCE);

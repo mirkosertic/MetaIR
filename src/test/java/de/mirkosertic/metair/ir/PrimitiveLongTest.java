@@ -13,6 +13,8 @@ public class PrimitiveLongTest {
     public void testUsage() {
         final PrimitiveLong a = new PrimitiveLong(10L);
 
+        assertThat(a.sideeffectFree()).isTrue();
+
         assertThat(a.type).isEqualTo(ConstantDescs.CD_long);
         assertThat(a.value).isEqualTo(10L);
         assertThat(a).isInstanceOf(PrimitiveValue.class);

@@ -20,6 +20,11 @@ public class Extend extends Value {
     }
 
     @Override
+    public boolean sideeffectFree() {
+        return true;
+    }
+
+    @Override
     public String debugDescription() {
         return "Extend : " +extendType + " " + TypeUtils.toString(type);
     }

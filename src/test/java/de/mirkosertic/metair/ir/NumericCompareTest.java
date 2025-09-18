@@ -18,6 +18,8 @@ public class NumericCompareTest {
 
         assertThat(compare.debugDescription()).isEqualTo("NumericCompare : NAN_IS_MINUS_1 for float");
 
+        assertThat(compare.sideeffectFree()).isTrue();
+
         assertThat(compare.type).isEqualTo(ConstantDescs.CD_int);
         assertThat(compare.compareType).isEqualTo(ConstantDescs.CD_float);
         assertThat(compare.mode).isEqualTo(NumericCompare.Mode.NAN_IS_MINUS_1);

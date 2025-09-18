@@ -18,6 +18,7 @@ public class AddTest {
         final Add add = new Add(ConstantDescs.CD_int, a, b);
 
         assertThat(add.debugDescription()).isEqualTo("Add : int");
+        assertThat(add.sideeffectFree()).isTrue();
 
         assertThat(add.type).isEqualTo(ConstantDescs.CD_int);
         assertThat(a).isInstanceOf(Value.class);

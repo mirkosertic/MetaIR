@@ -12,4 +12,9 @@ public abstract class ConstantValue extends Value {
     public boolean isConstant() {
         return true;
     }
+
+    @Override
+    public boolean sideeffectFree() {
+        return true;
+    }
 }

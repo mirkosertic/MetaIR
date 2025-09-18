@@ -81,7 +81,9 @@ public class DominatorTree {
                             newIdom = edge.node();
                         } else {
                             /* compute the intersection of all defined predecessors of v */
-                            newIdom = intersectIDoms(edge.node(), newIdom);
+                            if (!(v instanceof PHI)) {
+                                newIdom = intersectIDoms(edge.node(), newIdom);
+                            }
                         }
                     }
                 }

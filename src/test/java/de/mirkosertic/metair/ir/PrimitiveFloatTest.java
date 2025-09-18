@@ -13,6 +13,8 @@ public class PrimitiveFloatTest {
     public void testUsage() {
         final PrimitiveFloat a = new PrimitiveFloat(10.0f);
 
+        assertThat(a.sideeffectFree()).isTrue();
+
         assertThat(a.type).isEqualTo(ConstantDescs.CD_float);
         assertThat(a.value).isEqualTo(10.0f);
         assertThat(a).isInstanceOf(PrimitiveValue.class);

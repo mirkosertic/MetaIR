@@ -17,6 +17,7 @@ public class ConvertTest {
         final Convert convert = new Convert(ConstantDescs.CD_byte, a, ConstantDescs.CD_int);
 
         assertThat(convert.debugDescription()).isEqualTo("Convert : int to byte");
+        assertThat(convert.sideeffectFree()).isTrue();
 
         assertThat(convert.type).isEqualTo(ConstantDescs.CD_byte);
         assertThat(a).isInstanceOf(Value.class);

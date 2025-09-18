@@ -14,6 +14,8 @@ class MethodTypeTest {
     public void testUsage() {
         final MethodType a = new MethodType(MethodTypeDesc.of(ConstantDescs.CD_String, List.of(ConstantDescs.CD_int)));
 
+        assertThat(a.sideeffectFree()).isTrue();
+
         assertThat(a.type).isEqualTo(MethodTypeDesc.of(ConstantDescs.CD_String, List.of(ConstantDescs.CD_int)));
         assertThat(a).isInstanceOf(ConstantValue.class);
         assertThat(a.usedBy).isEmpty();

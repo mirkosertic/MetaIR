@@ -15,6 +15,11 @@ public class Negate extends Value {
     }
 
     @Override
+    public boolean sideeffectFree() {
+        return true;
+    }
+
+    @Override
     public String debugDescription() {
         return "Negate : " + TypeUtils.toString(type);
     }

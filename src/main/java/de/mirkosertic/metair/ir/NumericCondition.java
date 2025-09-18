@@ -20,6 +20,11 @@ public class NumericCondition extends Value {
     }
 
     @Override
+    public boolean sideeffectFree() {
+        return true;
+    }
+
+    @Override
     public String debugDescription() {
         return "NumericCondition : " + operation;
     }

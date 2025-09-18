@@ -18,6 +18,11 @@ public class Convert extends Value {
     }
 
     @Override
+    public boolean sideeffectFree() {
+        return true;
+    }
+
+    @Override
     public String debugDescription() {
         return "Convert : " + TypeUtils.toString(from) + " to " + TypeUtils.toString(type);
     }

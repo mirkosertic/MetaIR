@@ -13,6 +13,10 @@ public class NullTest {
     public void testUsage() {
         final Null a = new Null();
 
+        assertThat(a.sideeffectFree()).isTrue();
+
+        assertThat(a.sideeffectFree()).isTrue();
+
         assertThat(a.type).isEqualTo(ConstantDescs.CD_Object);
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).isEmpty();

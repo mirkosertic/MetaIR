@@ -19,6 +19,11 @@ public class Mul extends Value {
     }
 
     @Override
+    public boolean sideeffectFree() {
+        return true;
+    }
+
+    @Override
     public String debugDescription() {
         return "Mul : " + TypeUtils.toString(type);
     }

@@ -19,6 +19,8 @@ public class SubTest {
 
         assertThat(sub.debugDescription()).isEqualTo("Sub : int");
 
+        assertThat(sub.sideeffectFree()).isTrue();
+
         assertThat(sub.type).isEqualTo(ConstantDescs.CD_int);
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).containsExactly(sub);

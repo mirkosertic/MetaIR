@@ -13,6 +13,8 @@ public class PrimitiveDoubleTest {
     public void testUsage() {
         final PrimitiveDouble a = new PrimitiveDouble(10.0d);
 
+        assertThat(a.sideeffectFree()).isTrue();
+
         assertThat(a.type).isEqualTo(ConstantDescs.CD_double);
         assertThat(a.value).isEqualTo(10.0d);
         assertThat(a).isInstanceOf(PrimitiveValue.class);
