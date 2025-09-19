@@ -14,13 +14,13 @@ digraph debugoutput {
  node4 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node1 -> node4[headlabel="*0", labeldistance=2];
  node3 -> node4[labeldistance=2, color=red, fontcolor=red];
- node5[label="#5 default Order : 13",shape=box, fillcolor=lightgrey, style=filled];
+ node5[label="#5 case0 Order : 13",shape=box, fillcolor=lightgrey, style=filled];
  node5 -> node4[dir="forward" color="fuchsia" penwidth="2"];
  node4 -> node5[labeldistance=2, color=red, fontcolor=red];
- node6[label="#6 case1 Order : 9",shape=box, fillcolor=lightgrey, style=filled];
+ node6[label="#6 default Order : 9",shape=box, fillcolor=lightgrey, style=filled];
  node6 -> node4[dir="forward" color="fuchsia" penwidth="2"];
  node4 -> node6[labeldistance=2, color=red, fontcolor=red];
- node7[label="#7 case0 Order : 5",shape=box, fillcolor=lightgrey, style=filled];
+ node7[label="#7 case1 Order : 5",shape=box, fillcolor=lightgrey, style=filled];
  node7 -> node4[dir="forward" color="fuchsia" penwidth="2"];
  node4 -> node7[labeldistance=2, color=red, fontcolor=red];
  node8[label="#8 LabelNode Order : 14",shape=box, fillcolor=lightgrey, style=filled];
@@ -32,7 +32,7 @@ digraph debugoutput {
  node10[label="#10 LabelNode Order : 6",shape=box, fillcolor=lightgrey, style=filled];
  node10 -> node7[dir="forward" color="fuchsia" penwidth="2"];
  node7 -> node10[labeldistance=2, color=red, fontcolor=red];
- node11[label="#11 int 300 Order : 15",shape=octagon, fillcolor=lightgreen, style=filled];
+ node11[label="#11 int 100 Order : 15",shape=octagon, fillcolor=lightgreen, style=filled];
  node11 -> node8[dir="forward" color="fuchsia" penwidth="2"];
  node8 -> node11[style=dotted];
  node12[label="#12 ReturnValue : int Order : 16",shape=box, fillcolor=lightgrey, style=filled];
@@ -40,7 +40,7 @@ digraph debugoutput {
  node11 -> node12[headlabel="*0", labeldistance=2];
  node8 -> node12[labeldistance=2, color=red, fontcolor=red];
  node0 -> node12[labeldistance=2, color=green, constraint=false];
- node13[label="#13 int 200 Order : 11",shape=octagon, fillcolor=lightgreen, style=filled];
+ node13[label="#13 int 300 Order : 11",shape=octagon, fillcolor=lightgreen, style=filled];
  node13 -> node9[dir="forward" color="fuchsia" penwidth="2"];
  node9 -> node13[style=dotted];
  node14[label="#14 ReturnValue : int Order : 12",shape=box, fillcolor=lightgrey, style=filled];
@@ -48,7 +48,7 @@ digraph debugoutput {
  node13 -> node14[headlabel="*0", labeldistance=2];
  node9 -> node14[labeldistance=2, color=red, fontcolor=red];
  node0 -> node14[labeldistance=2, color=green, constraint=false];
- node15[label="#15 int 100 Order : 7",shape=octagon, fillcolor=lightgreen, style=filled];
+ node15[label="#15 int 200 Order : 7",shape=octagon, fillcolor=lightgreen, style=filled];
  node15 -> node10[dir="forward" color="fuchsia" penwidth="2"];
  node10 -> node15[style=dotted];
  node16[label="#16 ReturnValue : int Order : 8",shape=box, fillcolor=lightgrey, style=filled];
