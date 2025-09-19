@@ -2,8 +2,6 @@ package de.mirkosertic.metair.ir;
 
 import org.junit.jupiter.api.Test;
 
-import java.lang.constant.ConstantDescs;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class MethodTest {
@@ -23,8 +21,8 @@ public class MethodTest {
     public void testSameClassRefs() {
         final Method method = new Method();
 
-        final RuntimeclassReference r1 = method.defineRuntimeclassReference(ConstantDescs.CD_String);
-        final RuntimeclassReference r2 = method.defineRuntimeclassReference(ConstantDescs.CD_String);
+        final RuntimeclassReference r1 = method.defineRuntimeclassReference(IRType.CD_String);
+        final RuntimeclassReference r2 = method.defineRuntimeclassReference(IRType.CD_String);
 
         assertThat(r1).isSameAs(r2);
         assertThat(r1.usedBy).isEmpty();

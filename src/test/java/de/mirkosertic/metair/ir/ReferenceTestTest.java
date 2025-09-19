@@ -3,8 +3,6 @@ package de.mirkosertic.metair.ir;
 import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
 import org.junit.jupiter.api.Test;
 
-import java.lang.constant.ConstantDescs;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ReferenceTestTest {
@@ -18,7 +16,7 @@ public class ReferenceTestTest {
 
         assertThat(referenceCondition.sideeffectFree()).isTrue();
 
-        assertThat(referenceCondition.type).isEqualTo(ConstantDescs.CD_int);
+        assertThat(referenceCondition.type).isEqualTo(IRType.CD_int);
         assertThat(referenceCondition.operation).isEqualTo(ReferenceTest.Operation.NONNULL);
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).containsExactly(referenceCondition);

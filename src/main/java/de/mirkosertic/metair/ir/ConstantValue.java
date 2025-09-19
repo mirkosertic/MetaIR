@@ -1,10 +1,8 @@
 package de.mirkosertic.metair.ir;
 
-import java.lang.constant.ConstantDesc;
-
 public abstract class ConstantValue extends Value {
 
-    ConstantValue(final ConstantDesc type) {
+    ConstantValue(final IRType<?> type) {
         super(type);
     }
 

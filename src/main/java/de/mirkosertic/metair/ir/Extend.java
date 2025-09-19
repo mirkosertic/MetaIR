@@ -1,8 +1,6 @@
 
 package de.mirkosertic.metair.ir;
 
-import java.lang.constant.ClassDesc;
-
 public class Extend extends Value {
 
     public enum ExtendType {
@@ -11,7 +9,7 @@ public class Extend extends Value {
 
     public final ExtendType extendType;
 
-    Extend(final ClassDesc targetType, final ExtendType extendType, final Value value) {
+    Extend(final IRType.MetaClass targetType, final ExtendType extendType, final Value value) {
         super(targetType);
 
         this.extendType = extendType;

@@ -3,8 +3,6 @@ package de.mirkosertic.metair.ir;
 import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
 import org.junit.jupiter.api.Test;
 
-import java.lang.constant.ConstantDescs;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ExtendTest {
@@ -12,11 +10,11 @@ class ExtendTest {
     @Test
     public void testUsage() {
         final Value v = new PrimitiveInt(10);
-        final Extend a = new Extend(ConstantDescs.CD_long, Extend.ExtendType.SIGN, v);
+        final Extend a = new Extend(IRType.CD_long, Extend.ExtendType.SIGN, v);
 
         assertThat(a.sideeffectFree()).isTrue();
 
-        assertThat(a.type).isEqualTo(ConstantDescs.CD_long);
+        assertThat(a.type).isEqualTo(IRType.CD_long);
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).isEmpty();
         assertThat(a.uses).hasSize(1);

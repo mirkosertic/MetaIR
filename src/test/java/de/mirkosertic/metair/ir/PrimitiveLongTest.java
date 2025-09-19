@@ -3,8 +3,6 @@ package de.mirkosertic.metair.ir;
 import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
 import org.junit.jupiter.api.Test;
 
-import java.lang.constant.ConstantDescs;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class PrimitiveLongTest {
@@ -15,7 +13,7 @@ public class PrimitiveLongTest {
 
         assertThat(a.sideeffectFree()).isTrue();
 
-        assertThat(a.type).isEqualTo(ConstantDescs.CD_long);
+        assertThat(a.type).isEqualTo(IRType.CD_long);
         assertThat(a.value).isEqualTo(10L);
         assertThat(a).isInstanceOf(PrimitiveValue.class);
         assertThat(a.usedBy).isEmpty();

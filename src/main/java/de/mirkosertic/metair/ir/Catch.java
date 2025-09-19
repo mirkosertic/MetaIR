@@ -1,13 +1,12 @@
 package de.mirkosertic.metair.ir;
 
-import java.lang.constant.ClassDesc;
 import java.util.List;
 
 public class Catch extends TupleNode {
 
-    public final List<ClassDesc> exceptionTypes;
+    public final List<IRType.MetaClass> exceptionTypes;
 
-    Catch(final List<ClassDesc> exceptionTypes, final Node source) {
+    Catch(final List<IRType.MetaClass> exceptionTypes, final Node source) {
 
         this.exceptionTypes = exceptionTypes;
 

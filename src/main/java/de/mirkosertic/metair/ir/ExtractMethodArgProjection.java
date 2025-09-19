@@ -1,12 +1,10 @@
 package de.mirkosertic.metair.ir;
 
-import java.lang.constant.ConstantDesc;
-
 public class ExtractMethodArgProjection extends ConstantValue implements Projection {
 
     private final int index;
 
-    ExtractMethodArgProjection(final ConstantDesc type, final Method source, final int index) {
+    ExtractMethodArgProjection(final IRType type, final Method source, final int index) {
         super(type);
         this.index = index;
 

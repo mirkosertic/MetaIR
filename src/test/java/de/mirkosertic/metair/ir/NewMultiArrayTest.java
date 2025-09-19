@@ -2,7 +2,6 @@ package de.mirkosertic.metair.ir;
 
 import org.junit.jupiter.api.Test;
 
-import java.lang.constant.ConstantDescs;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -14,11 +13,11 @@ public class NewMultiArrayTest {
     @Test
     public void testUsage() {
         final Value size = new PrimitiveInt(10);
-        final Value a = new NewMultiArray(ConstantDescs.CD_byte.arrayType(), List.of(size));
+        final Value a = new NewMultiArray(IRType.CD_byte.arrayType(), List.of(size));
 
         assertThat(a.debugDescription()).isEqualTo("NewMultiArray : byte[]");
 
-        assertThat(a.type).isEqualTo(ConstantDescs.CD_byte.arrayType());
+        assertThat(a.type).isEqualTo(IRType.CD_byte.arrayType());
 
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).isEmpty();
@@ -31,7 +30,7 @@ public class NewMultiArrayTest {
     @Test
     public void fail_wrong_length() {
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
-            new NewMultiArray(ConstantDescs.CD_int.arrayType(), List.of(new PrimitiveLong(10)));
+            new NewMultiArray(IRType.CD_int.arrayType(), List.of(new PrimitiveLong(10)));
             fail("Exception expected");
         }).withMessage("Array dimension must be int, but was long for dimension 1");
     }

@@ -1,7 +1,5 @@
 package de.mirkosertic.metair.ir;
 
-import java.lang.constant.ClassDesc;
-import java.lang.constant.ConstantDesc;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,7 +21,7 @@ public abstract class Node {
     // Incoming uses
     protected final List<UseEdge> uses;
     protected final Set<Node> usedBy;
-    private final Map<ClassDesc, RuntimeclassReference> runtimeclassReferences;
+    private final Map<IRType.MetaClass, RuntimeclassReference> runtimeclassReferences;
 
     protected Node() {
         this.uses = new ArrayList<>();
@@ -97,13 +95,13 @@ public abstract class Node {
         return v;
     }
 
-    public PHI definePHI(final ConstantDesc type) {
+    public PHI definePHI(final IRType<?> type) {
         final PHI p = new PHI(type);
         p.use(this, DefinedByUse.INSTANCE);
         return p;
     }
 
-    public RuntimeclassReference defineRuntimeclassReference(final ClassDesc type) {
+    public RuntimeclassReference defineRuntimeclassReference(final IRType.MetaClass type) {
         return runtimeclassReferences.computeIfAbsent(type, key -> {
             final RuntimeclassReference r = new RuntimeclassReference(key);
             r.use(this, DefinedByUse.INSTANCE);

@@ -1,7 +1,5 @@
 package de.mirkosertic.metair.ir;
 
-import java.lang.constant.ClassDesc;
-
 public class LabelNode extends Node {
 
     public final String label;
@@ -10,7 +8,7 @@ public class LabelNode extends Node {
         this.label = label;
     }
 
-    public PHI definePHI(final ClassDesc type) {
+    public PHI definePHI(final IRType.MetaClass type) {
         final PHI p = new PHI(type);
         p.use(this, DefinedByUse.INSTANCE);
         return p;

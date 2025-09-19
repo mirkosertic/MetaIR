@@ -1,10 +1,8 @@
 package de.mirkosertic.metair.ir;
 
-import java.lang.constant.ClassDesc;
-
 public class Rem extends Value {
 
-    Rem(final ClassDesc type, final Value arg1, final Value arg2) {
+    Rem(final IRType.MetaClass type, final Value arg1, final Value arg2) {
         super(type);
 
         if (!arg1.type.equals(type)) {

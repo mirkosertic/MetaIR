@@ -3,8 +3,6 @@ package de.mirkosertic.metair.ir;
 import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
 import org.junit.jupiter.api.Test;
 
-import java.lang.constant.ConstantDescs;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
@@ -14,7 +12,7 @@ public class GetFieldTest {
     @Test
     public void testUsage() {
         final Value v = new StringConstant("Hello");
-        final GetField get = new GetField(ConstantDescs.CD_String, ConstantDescs.CD_int, "field", v);
+        final GetField get = new GetField(IRType.CD_String, IRType.CD_int, "field", v);
 
         assertThat(v.usedBy).containsExactly(get);
 
@@ -31,7 +29,7 @@ public class GetFieldTest {
     @Test
     public void fail_get_on_primitive() {
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
-            new GetField(ConstantDescs.CD_String, ConstantDescs.CD_int, "fieldname", new PrimitiveInt(10));
+            new GetField(IRType.CD_String, IRType.CD_int, "fieldname", new PrimitiveInt(10));
             fail("Exception expected");
         }).withMessage("Cannot get field fieldname from non object source int");
     }

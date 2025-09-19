@@ -2,8 +2,6 @@ package de.mirkosertic.metair.ir;
 
 import org.junit.jupiter.api.Test;
 
-import java.lang.constant.ConstantDescs;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class LabelNodeTest {
@@ -23,8 +21,8 @@ public class LabelNodeTest {
         final LabelNode a = new LabelNode("label");
         assertThat(a.usedBy).isEmpty();
 
-        final PHI p = a.definePHI(ConstantDescs.CD_int);
-        assertThat(p.type).isEqualTo(ConstantDescs.CD_int);
+        final PHI p = a.definePHI(IRType.CD_int);
+        assertThat(p.type).isEqualTo(IRType.CD_int);
         assertThat(p.uses.getFirst().node()).isSameAs(a);
         assertThat(p.uses.getFirst().use()).isSameAs(DefinedByUse.INSTANCE);
         assertThat(p.usedBy).isEmpty();

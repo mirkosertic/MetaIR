@@ -3,7 +3,6 @@ package de.mirkosertic.metair.ir;
 import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
 import org.junit.jupiter.api.Test;
 
-import java.lang.constant.ConstantDescs;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -13,13 +12,13 @@ public class VarArgsArrayTest {
     @Test
     public void testUsage() {
         final Value elem = new PrimitiveInt(10);
-        final Value a = new VarArgsArray(ConstantDescs.CD_byte, List.of(elem));
+        final Value a = new VarArgsArray(IRType.CD_byte, List.of(elem));
 
         assertThat(a.arguments()).containsExactly(elem);
 
         assertThat(a.debugDescription()).isEqualTo("VarArgsArray : byte[]");
 
-        assertThat(a.type).isEqualTo(ConstantDescs.CD_byte.arrayType());
+        assertThat(a.type).isEqualTo(IRType.CD_byte.arrayType());
 
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).isEmpty();

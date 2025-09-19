@@ -3,8 +3,6 @@ package de.mirkosertic.metair.ir;
 import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
 import org.junit.jupiter.api.Test;
 
-import java.lang.constant.ConstantDescs;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class PrimitiveFloatTest {
@@ -15,7 +13,7 @@ public class PrimitiveFloatTest {
 
         assertThat(a.sideeffectFree()).isTrue();
 
-        assertThat(a.type).isEqualTo(ConstantDescs.CD_float);
+        assertThat(a.type).isEqualTo(IRType.CD_float);
         assertThat(a.value).isEqualTo(10.0f);
         assertThat(a).isInstanceOf(PrimitiveValue.class);
         assertThat(a.usedBy).isEmpty();

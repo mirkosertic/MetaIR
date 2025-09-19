@@ -3,8 +3,6 @@ package de.mirkosertic.metair.ir;
 import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
 import org.junit.jupiter.api.Test;
 
-import java.lang.constant.ConstantDescs;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
@@ -15,11 +13,11 @@ public class DivTest {
     public void testUsage() {
         final PrimitiveInt a = new PrimitiveInt(10);
         final PrimitiveInt b = new PrimitiveInt(20);
-        final Div div = new Div(ConstantDescs.CD_int, a, b);
+        final Div div = new Div(IRType.CD_int, a, b);
 
         assertThat(div.debugDescription()).isEqualTo("Div : int");
 
-        assertThat(div.type).isEqualTo(ConstantDescs.CD_int);
+        assertThat(div.type).isEqualTo(IRType.CD_int);
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).containsExactly(div);
         assertThat(b.usedBy).containsExactly(div);
@@ -36,7 +34,7 @@ public class DivTest {
     @Test
     public void fail_arg1_wrongtype() {
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
-            new Div(ConstantDescs.CD_int, new PrimitiveLong(10L), new PrimitiveInt(10));
+            new Div(IRType.CD_int, new PrimitiveLong(10L), new PrimitiveInt(10));
             fail("Exception expected");
         }).withMessage("Cannot divide non int value long for arg1");
     }
@@ -44,7 +42,7 @@ public class DivTest {
     @Test
     public void fail_arg2_wrongtype() {
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
-            new Div(ConstantDescs.CD_int, new PrimitiveInt(10), new PrimitiveLong(10L));
+            new Div(IRType.CD_int, new PrimitiveInt(10), new PrimitiveLong(10L));
             fail("Exception expected");
         }).withMessage("Cannot divide non int value long for arg2");
     }

@@ -1,10 +1,8 @@
 package de.mirkosertic.metair.ir;
 
-import java.lang.constant.ClassDesc;
-
 public class Negate extends Value {
 
-    Negate(final ClassDesc type, final Value arg1) {
+    Negate(final IRType.MetaClass type, final Value arg1) {
         super(type);
 
         if (!arg1.type.equals(type)) {

@@ -3,18 +3,16 @@ package de.mirkosertic.metair.ir;
 import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
 import org.junit.jupiter.api.Test;
 
-import java.lang.constant.ConstantDescs;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class NewTest {
 
     @Test
     public void testUsage() {
-        final RuntimeclassReference ri = new RuntimeclassReference(ConstantDescs.CD_String);
+        final RuntimeclassReference ri = new RuntimeclassReference(IRType.CD_String);
         final New a = new New(ri);
 
-        assertThat(a.type).isEqualTo(ConstantDescs.CD_String);
+        assertThat(a.type).isEqualTo(IRType.CD_String);
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).isEmpty();
         assertThat(a.uses).hasSize(1);

@@ -14,11 +14,11 @@ class MethodHandleTest {
 
     @Test
     public void testUsage() {
-        final MethodHandle a = new MethodHandle(MethodHandleDesc.ofMethod(DirectMethodHandleDesc.Kind.INTERFACE_VIRTUAL, ClassDesc.of(MethodHandleTest.class.getName()), "testUsage", MethodTypeDesc.of(ConstantDescs.CD_void)));
+        final MethodHandle a = new MethodHandle(new IRType.MethodHandle(MethodHandleDesc.ofMethod(DirectMethodHandleDesc.Kind.INTERFACE_VIRTUAL, ClassDesc.of(MethodHandleTest.class.getName()), "testUsage", MethodTypeDesc.of(ConstantDescs.CD_void))));
 
         assertThat(a.sideeffectFree()).isTrue();
 
-        assertThat(a.type).isEqualTo(MethodHandleDesc.ofMethod(DirectMethodHandleDesc.Kind.INTERFACE_VIRTUAL, ClassDesc.of(MethodHandleTest.class.getName()), "testUsage", MethodTypeDesc.of(ConstantDescs.CD_void)));
+        assertThat(a.type).isEqualTo(new IRType.MethodHandle(MethodHandleDesc.ofMethod(DirectMethodHandleDesc.Kind.INTERFACE_VIRTUAL, ClassDesc.of(MethodHandleTest.class.getName()), "testUsage", MethodTypeDesc.of(ConstantDescs.CD_void))));
         assertThat(a).isInstanceOf(ConstantValue.class);
         assertThat(a.usedBy).isEmpty();
         assertThat(a.uses).isEmpty();

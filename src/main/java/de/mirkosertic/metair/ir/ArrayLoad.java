@@ -1,18 +1,15 @@
 package de.mirkosertic.metair.ir;
 
-import java.lang.constant.ClassDesc;
-import java.lang.constant.ConstantDescs;
-
 public class ArrayLoad extends Value {
 
-    ArrayLoad(final ClassDesc arrayType, final Value array, final Value index) {
+    ArrayLoad(final IRType.MetaClass arrayType, final Value array, final Value index) {
         super(arrayType.componentType());
 
         if (!array.isArray()) {
             illegalArgument("Cannot store to non array of type " + TypeUtils.toString(array.type));
         }
 
-        if (!index.type.equals(ConstantDescs.CD_int)) {
+        if (!index.type.equals(IRType.CD_int)) {
             illegalArgument("Cannot store to non int index of type " + TypeUtils.toString(index.type));
         }
 

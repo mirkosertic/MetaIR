@@ -1,12 +1,10 @@
 package de.mirkosertic.metair.ir;
 
-import java.lang.constant.ClassDesc;
-
 public class Convert extends Value {
 
-    public final ClassDesc from;
+    public final IRType.MetaClass from;
 
-    Convert(final ClassDesc to, final Value arg1, final ClassDesc from) {
+    Convert(final IRType.MetaClass to, final Value arg1, final IRType.MetaClass from) {
         super(to);
 
         if (!arg1.type.equals(from)) {

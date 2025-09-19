@@ -1,10 +1,8 @@
 package de.mirkosertic.metair.ir;
 
-import java.lang.constant.ClassDesc;
-
 public abstract class PrimitiveValue extends ConstantValue {
 
-    public PrimitiveValue(final ClassDesc type) {
+    public PrimitiveValue(final IRType.MetaClass type) {
         super(type);
     }
 }

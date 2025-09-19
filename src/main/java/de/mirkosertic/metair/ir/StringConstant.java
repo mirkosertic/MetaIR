@@ -1,13 +1,11 @@
 package de.mirkosertic.metair.ir;
 
-import java.lang.constant.ConstantDescs;
-
 public class StringConstant extends ConstantValue {
 
     public final String value;
 
     StringConstant(final String value) {
-        super(ConstantDescs.CD_String);
+        super(IRType.CD_String);
         this.value = value;
     }
 

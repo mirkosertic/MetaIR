@@ -2,8 +2,6 @@ package de.mirkosertic.metair.ir;
 
 import org.junit.jupiter.api.Test;
 
-import java.lang.constant.ConstantDescs;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
@@ -13,7 +11,7 @@ public class ReturnValueTest {
     @Test
     public void testUsage() {
         final PrimitiveInt iv = new PrimitiveInt(10);
-        final ReturnValue ret = new ReturnValue(ConstantDescs.CD_int, iv);
+        final ReturnValue ret = new ReturnValue(IRType.CD_int, iv);
 
         assertThat(ret.debugDescription()).isEqualTo("ReturnValue : int");
         assertThat(ret.uses.size()).isEqualTo(1);
@@ -26,7 +24,7 @@ public class ReturnValueTest {
     @Test
     public void fail_wrong_type_object() {
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
-            new ReturnValue(ConstantDescs.CD_Object, new PrimitiveInt(1));
+            new ReturnValue(IRType.CD_Object, new PrimitiveInt(1));
             fail("Exception expected");
         }).withMessage("Expecting type Object as value, got int");
     }
@@ -34,7 +32,7 @@ public class ReturnValueTest {
     @Test
     public void fail_wrong_type_primitive() {
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
-            new ReturnValue(ConstantDescs.CD_int, new StringConstant("Hello"));
+            new ReturnValue(IRType.CD_int, new StringConstant("Hello"));
             fail("Exception expected");
         }).withMessage("Expecting type int as value, got String");
     }

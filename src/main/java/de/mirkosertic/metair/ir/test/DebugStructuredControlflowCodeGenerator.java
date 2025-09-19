@@ -17,6 +17,7 @@ import de.mirkosertic.metair.ir.ExtractThisRefProjection;
 import de.mirkosertic.metair.ir.GetField;
 import de.mirkosertic.metair.ir.GetStatic;
 import de.mirkosertic.metair.ir.Goto;
+import de.mirkosertic.metair.ir.IRType;
 import de.mirkosertic.metair.ir.If;
 import de.mirkosertic.metair.ir.InstanceOf;
 import de.mirkosertic.metair.ir.InvokeDynamic;
@@ -67,11 +68,6 @@ import de.mirkosertic.metair.ir.VarArgsArray;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.lang.constant.ClassDesc;
-import java.lang.constant.ConstantDesc;
-import java.lang.constant.ConstantDescs;
-import java.lang.constant.MethodHandleDesc;
-import java.lang.constant.MethodTypeDesc;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -81,7 +77,7 @@ import java.util.Set;
 
 public class DebugStructuredControlflowCodeGenerator extends StructuredControlflowCodeGenerator<DebugStructuredControlflowCodeGenerator.GeneratedCode> {
 
-    public record GeneratedCode(ConstantDesc type, String value) implements GeneratedThing {
+    public record GeneratedCode(IRType type, String value) implements GeneratedThing {
 
         @Override
         public String toString() {
@@ -112,22 +108,22 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
 
     @Override
     public GeneratedCode visit_PrimitiveInt(final PrimitiveInt node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
-        return new GeneratedCode(ConstantDescs.CD_int, Integer.toString(node.value));
+        return new GeneratedCode(IRType.CD_int, Integer.toString(node.value));
     }
 
     @Override
     public GeneratedCode visit_PrimitiveLong(final PrimitiveLong node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
-        return new GeneratedCode(ConstantDescs.CD_long, Long.toString(node.value));
+        return new GeneratedCode(IRType.CD_long, Long.toString(node.value));
     }
 
     @Override
     public GeneratedCode visit_PrimitiveFloat(final PrimitiveFloat node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
-        return new GeneratedCode(ConstantDescs.CD_float, Float.toString(node.value));
+        return new GeneratedCode(IRType.CD_float, Float.toString(node.value));
     }
 
     @Override
     public GeneratedCode visit_PrimitiveDouble(final PrimitiveDouble node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
-        return new GeneratedCode(ConstantDescs.CD_double, Double.toString(node.value));
+        return new GeneratedCode(IRType.CD_double, Double.toString(node.value));
     }
 
     @Override
@@ -197,12 +193,12 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
 
     @Override
     public GeneratedCode visit_StringConstant(final StringConstant node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
-        return new GeneratedCode(ConstantDescs.CD_String, "\"" + node.value + "\"");
+        return new GeneratedCode(IRType.CD_String, "\"" + node.value + "\"");
     }
 
     @Override
     public GeneratedCode visit_Null(final Null node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
-        return new GeneratedCode(ConstantDescs.CD_Object, "null");
+        return new GeneratedCode(IRType.CD_Object, "null");
     }
 
     @Override
@@ -231,7 +227,7 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
 
         final GeneratedCode arg1 = evaluationStack.pop();
 
-        return new GeneratedCode(node.type, "(new " + TypeUtils.toString(((ClassDesc) node.type).componentType()) + "[" + arg1 + "])");
+        return new GeneratedCode(node.type, "(new " + TypeUtils.toString(((IRType.MetaClass) node.type).componentType()) + "[" + arg1 + "])");
     }
 
     @Override
@@ -358,7 +354,7 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
 
         content = content.reversed();
 
-        final StringBuilder result = new StringBuilder("(new " + TypeUtils.toString(((ClassDesc) node.type).componentType()) + "{");
+        final StringBuilder result = new StringBuilder("(new " + TypeUtils.toString(((IRType.MetaClass) node.type).componentType()) + "{");
         for (int i = 0; i < content.size(); i++) {
             if (i > 0) {
                 result.append(",");
@@ -601,7 +597,7 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
     @Override
     public GeneratedCode visit_MethodType(final MethodType node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
 
-        final MethodTypeDesc desc = (MethodTypeDesc) node.type;
+        final IRType.MethodType desc = (IRType.MethodType.MethodType) node.type;
 
         final StringBuilder result = new StringBuilder("methodType(");
         result.append("(");
@@ -620,7 +616,7 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
     @Override
     public GeneratedCode visit_MethodHandle(final MethodHandle node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
 
-        final MethodHandleDesc desc = (MethodHandleDesc) node.type;
+        final IRType.MethodHandle desc = (IRType.MethodHandle) node.type;
 
         final String result = "methodHandle(" + desc.toString() + ")";
 
@@ -1156,7 +1152,7 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
     }
 
     @Override
-    public void startCatchHandler(final List<ClassDesc> exceptionTypes) {
+    public void startCatchHandler(final List<IRType.MetaClass> exceptionTypes) {
         writeIndentation();
         if (exceptionTypes.isEmpty()) {
             pw.println("(catch-all as $ex");

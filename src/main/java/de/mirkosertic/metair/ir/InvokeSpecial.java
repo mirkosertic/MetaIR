@@ -1,12 +1,10 @@
 package de.mirkosertic.metair.ir;
 
-import java.lang.constant.ClassDesc;
-import java.lang.constant.MethodTypeDesc;
 import java.util.List;
 
 public class InvokeSpecial extends Invoke {
 
-    public InvokeSpecial(final ClassDesc ownerType, final Value target, final String name, final MethodTypeDesc methodTypeDesc, final List<Value> arguments) {
+    public InvokeSpecial(final IRType.MetaClass ownerType, final Value target, final String name, final IRType.MethodType methodTypeDesc, final List<Value> arguments) {
         super(ownerType, target, name, methodTypeDesc, arguments);
     }
 

@@ -1,13 +1,11 @@
 package de.mirkosertic.metair.ir;
 
-import java.lang.constant.ClassDesc;
-
 public class GetField extends Value {
 
-    public final ClassDesc owner;
+    public final IRType.MetaClass owner;
     public final String fieldName;
 
-    GetField(final ClassDesc owner, final ClassDesc fieldType, final String fieldName, final Value source) {
+    GetField(final IRType.MetaClass owner, final IRType.MetaClass fieldType, final String fieldName, final Value source) {
         super(fieldType);
 
         if (source.isPrimitive() || source.isArray()) {

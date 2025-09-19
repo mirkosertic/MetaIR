@@ -1,7 +1,5 @@
 package de.mirkosertic.metair.ir;
 
-import java.lang.constant.ConstantDescs;
-
 public class ReferenceTest extends Value {
 
     public enum Operation {
@@ -11,7 +9,7 @@ public class ReferenceTest extends Value {
     public final Operation operation;
 
     ReferenceTest(final Operation operation, final Value a) {
-        super(ConstantDescs.CD_int);
+        super(IRType.MetaClass.CD_int);
 
         this.operation = operation;
 

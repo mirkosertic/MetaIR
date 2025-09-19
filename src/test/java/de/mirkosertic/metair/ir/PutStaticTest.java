@@ -2,8 +2,6 @@ package de.mirkosertic.metair.ir;
 
 import org.junit.jupiter.api.Test;
 
-import java.lang.constant.ConstantDescs;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
@@ -12,9 +10,9 @@ public class PutStaticTest {
 
     @Test
     public void testUsage() {
-        final RuntimeclassReference target = new RuntimeclassReference(ConstantDescs.CD_String);
+        final RuntimeclassReference target = new RuntimeclassReference(IRType.CD_String);
         final PrimitiveInt value = new PrimitiveInt(10);
-        final PutStatic put = new PutStatic(target, "fieldname", ConstantDescs.CD_int, value);
+        final PutStatic put = new PutStatic(target, "fieldname", IRType.CD_int, value);
 
         assertThat(target.usedBy).containsExactly(put);
 
@@ -32,15 +30,15 @@ public class PutStaticTest {
 
     @Test
     public void testUsage_put_int_to_boolean() {
-        final RuntimeclassReference target = new RuntimeclassReference(ConstantDescs.CD_String);
+        final RuntimeclassReference target = new RuntimeclassReference(IRType.CD_String);
         final PrimitiveInt value = new PrimitiveInt(10);
-        final PutStatic put = new PutStatic(target, "fieldname", ConstantDescs.CD_boolean, value);
+        final PutStatic put = new PutStatic(target, "fieldname", IRType.CD_boolean, value);
     }
 
     @Test
     public void fail_wrongtype_field_is_primitive() {
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
-            new PutStatic(new RuntimeclassReference(ConstantDescs.CD_String), "fieldname", ConstantDescs.CD_int, new StringConstant("hello"));
+            new PutStatic(new RuntimeclassReference(IRType.CD_String), "fieldname", IRType.CD_int, new StringConstant("hello"));
             fail("Exception expected");
         }).withMessage("Cannot put value of type String in field fieldname of type int");
     }
@@ -48,7 +46,7 @@ public class PutStaticTest {
     @Test
     public void fail_wrongtype_field_is_primitive_boolean() {
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
-            new PutStatic(new RuntimeclassReference(ConstantDescs.CD_String), "fieldname", ConstantDescs.CD_boolean, new StringConstant("hello"));
+            new PutStatic(new RuntimeclassReference(IRType.CD_String), "fieldname", IRType.CD_boolean, new StringConstant("hello"));
             fail("Exception expected");
         }).withMessage("Cannot put value of type String in field fieldname of type boolean");
     }

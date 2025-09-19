@@ -2,8 +2,6 @@ package de.mirkosertic.metair.ir;
 
 import org.junit.jupiter.api.Test;
 
-import java.lang.constant.ConstantDescs;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
@@ -14,14 +12,14 @@ public class NumericCompareTest {
     public void testUsage() {
         final PrimitiveFloat a = new PrimitiveFloat(10);
         final PrimitiveFloat b = new PrimitiveFloat(20);
-        final NumericCompare compare = new NumericCompare(NumericCompare.Mode.NAN_IS_MINUS_1, ConstantDescs.CD_float, a, b);
+        final NumericCompare compare = new NumericCompare(NumericCompare.Mode.NAN_IS_MINUS_1, IRType.CD_float, a, b);
 
         assertThat(compare.debugDescription()).isEqualTo("NumericCompare : NAN_IS_MINUS_1 for float");
 
         assertThat(compare.sideeffectFree()).isTrue();
 
-        assertThat(compare.type).isEqualTo(ConstantDescs.CD_int);
-        assertThat(compare.compareType).isEqualTo(ConstantDescs.CD_float);
+        assertThat(compare.type).isEqualTo(IRType.CD_int);
+        assertThat(compare.compareType).isEqualTo(IRType.CD_float);
         assertThat(compare.mode).isEqualTo(NumericCompare.Mode.NAN_IS_MINUS_1);
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).containsExactly(compare);
@@ -37,7 +35,7 @@ public class NumericCompareTest {
     @Test
     public void fail_wrongtype_arg1() {
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
-            new NumericCompare(NumericCompare.Mode.NAN_IS_1, ConstantDescs.CD_int, new PrimitiveLong(10L), new PrimitiveInt(10));
+            new NumericCompare(NumericCompare.Mode.NAN_IS_1, IRType.CD_int, new PrimitiveLong(10L), new PrimitiveInt(10));
             fail("Exception expected");
         }).withMessage("Cannot compare non int value long for arg1");
     }
@@ -45,7 +43,7 @@ public class NumericCompareTest {
     @Test
     public void fcmpg_fail_value2() {
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
-            new NumericCompare(NumericCompare.Mode.NAN_IS_1, ConstantDescs.CD_int, new PrimitiveInt(10), new PrimitiveLong(10L));
+            new NumericCompare(NumericCompare.Mode.NAN_IS_1, IRType.CD_int, new PrimitiveInt(10), new PrimitiveLong(10L));
             fail("Exception expected");
         }).withMessage("Cannot compare non int value long for arg2");
     }

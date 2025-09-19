@@ -1,10 +1,8 @@
 package de.mirkosertic.metair.ir;
 
-import java.lang.constant.ClassDesc;
-
 public class RuntimeclassReference extends Value {
 
-    RuntimeclassReference(final ClassDesc type) {
+    RuntimeclassReference(final IRType<?> type) {
         super(type);
     }
 

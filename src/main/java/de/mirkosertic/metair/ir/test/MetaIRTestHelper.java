@@ -3,6 +3,7 @@ package de.mirkosertic.metair.ir.test;
 import de.mirkosertic.metair.ir.CFGDominatorTree;
 import de.mirkosertic.metair.ir.DOTExporter;
 import de.mirkosertic.metair.ir.DominatorTree;
+import de.mirkosertic.metair.ir.IRType;
 import de.mirkosertic.metair.ir.IllegalParsingStateException;
 import de.mirkosertic.metair.ir.MethodAnalyzer;
 import de.mirkosertic.metair.ir.Node;
@@ -29,7 +30,7 @@ public class MetaIRTestHelper {
         }
 
         try {
-            final MethodAnalyzer analyzer = new MethodAnalyzer(model.thisClass().asSymbol(), method);
+            final MethodAnalyzer analyzer = new MethodAnalyzer(IRType.MetaClass.of(model.thisClass().asSymbol()), method);
 
             DOTExporter.writeTo(analyzer.ir(), new PrintStream(Files.newOutputStream(outputDirectory.resolve("ir.dot"))));
 

@@ -3,8 +3,6 @@ package de.mirkosertic.metair.ir;
 import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
 import org.junit.jupiter.api.Test;
 
-import java.lang.constant.ConstantDescs;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
@@ -13,9 +11,9 @@ public class ArrayLoadTest {
 
     @Test
     public void testUsage() {
-        final Value a = new NewArray(ConstantDescs.CD_byte, new PrimitiveInt(10));
+        final Value a = new NewArray(IRType.CD_byte, new PrimitiveInt(10));
         final Value index = new PrimitiveInt(0);
-        final ArrayLoad load = new ArrayLoad(ConstantDescs.CD_byte.arrayType(), a, index);
+        final ArrayLoad load = new ArrayLoad(IRType.CD_byte.arrayType(), a, index);
 
         assertThat(load.debugDescription()).isEqualTo("ArrayLoad : byte");
 
@@ -35,7 +33,7 @@ public class ArrayLoadTest {
     @Test
     public void fail_wrong_array() {
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
-            new ArrayLoad(ConstantDescs.CD_int.arrayType(), new PrimitiveInt(10), new PrimitiveInt(10));
+            new ArrayLoad(IRType.CD_int.arrayType(), new PrimitiveInt(10), new PrimitiveInt(10));
             fail("Exception expected");
         }).withMessage("Cannot store to non array of type int");
     }
@@ -43,7 +41,7 @@ public class ArrayLoadTest {
     @Test
     public void fail_wrong_index() {
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
-            new ArrayLoad(ConstantDescs.CD_int.arrayType(), new NewArray(ConstantDescs.CD_int.arrayType(), new PrimitiveInt(10)), new PrimitiveLong(10L));
+            new ArrayLoad(IRType.CD_int.arrayType(), new NewArray(IRType.CD_int.arrayType(), new PrimitiveInt(10)), new PrimitiveLong(10L));
             fail("Exception expected");
         }).withMessage("Cannot store to non int index of type long");
     }

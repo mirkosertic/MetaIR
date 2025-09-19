@@ -1,22 +1,19 @@
 package de.mirkosertic.metair.ir;
 
-import java.lang.constant.ClassDesc;
-import java.lang.constant.ConstantDescs;
-
 public class PutField extends Node {
 
-    public final ClassDesc owner;
+    public final IRType.MetaClass owner;
     public final String fieldName;
-    public final ClassDesc fieldType;
+    public final IRType.MetaClass fieldType;
 
-    PutField(final ClassDesc owner, final ClassDesc fieldType, final String fieldName, final Value target, final Value value) {
+    PutField(final IRType.MetaClass owner, final IRType.MetaClass fieldType, final String fieldName, final Value target, final Value value) {
 
         if (target.isPrimitive() || target.isArray()) {
             illegalArgument("Cannot put field " + fieldName + " on non object target " + TypeUtils.toString(target.type));
         }
 
-        if (fieldType.equals(ConstantDescs.CD_boolean)) {
-            if (!value.type.equals(ConstantDescs.CD_boolean) && !value.type.equals(ConstantDescs.CD_int)) {
+        if (fieldType.equals(IRType.CD_boolean)) {
+            if (!value.type.equals(IRType.CD_boolean) && !value.type.equals(IRType.CD_int)) {
                 illegalArgument("Cannot put value of type " + TypeUtils.toString(value.type) + " in field " + fieldName + " of type " + TypeUtils.toString(fieldType));
             }
         } else {

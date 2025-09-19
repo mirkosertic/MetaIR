@@ -3,8 +3,6 @@ package de.mirkosertic.metair.ir;
 import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
 import org.junit.jupiter.api.Test;
 
-import java.lang.constant.ConstantDescs;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
@@ -13,7 +11,7 @@ public class ArrayLengthTest {
 
     @Test
     public void testUsage() {
-        final Value a = new NewArray(ConstantDescs.CD_byte, new PrimitiveInt(10));
+        final Value a = new NewArray(IRType.CD_byte, new PrimitiveInt(10));
         final ArrayLength len = new ArrayLength(a);
 
         assertThat(len.debugDescription()).isEqualTo("ArrayLength");

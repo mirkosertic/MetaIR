@@ -2,8 +2,6 @@ package de.mirkosertic.metair.ir;
 
 import org.junit.jupiter.api.Test;
 
-import java.lang.constant.ConstantDescs;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
@@ -12,7 +10,7 @@ public class ArrayStoreTest {
 
     @Test
     public void testUsage() {
-        final Value a = new NewArray(ConstantDescs.CD_int, new PrimitiveInt(10));
+        final Value a = new NewArray(IRType.CD_int, new PrimitiveInt(10));
         final Value index = new PrimitiveInt(0);
         final Value value = new PrimitiveInt(42);
         final ArrayStore store = new ArrayStore(a, index, value);
@@ -43,7 +41,7 @@ public class ArrayStoreTest {
     @Test
     public void fail_wrong_index() {
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
-            new ArrayStore(new NewArray(ConstantDescs.CD_int, new PrimitiveInt(10)), new PrimitiveLong(10L), new PrimitiveInt(10));
+            new ArrayStore(new NewArray(IRType.CD_int, new PrimitiveInt(10)), new PrimitiveLong(10L), new PrimitiveInt(10));
             fail("Exception expected");
         }).withMessage("Cannot store to non int index of type long");
     }
@@ -51,7 +49,7 @@ public class ArrayStoreTest {
     @Test
     public void fail_wrong_value() {
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
-            new ArrayStore(new NewArray(ConstantDescs.CD_int, new PrimitiveInt(10)), new PrimitiveInt(10), new PrimitiveLong(10L));
+            new ArrayStore(new NewArray(IRType.CD_int, new PrimitiveInt(10)), new PrimitiveInt(10), new PrimitiveLong(10L));
             fail("Exception expected");
         }).withMessage("Cannot store non int value long to array of type int[]");
     }

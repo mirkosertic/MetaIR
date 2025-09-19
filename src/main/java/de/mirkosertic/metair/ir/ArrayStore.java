@@ -1,20 +1,17 @@
 package de.mirkosertic.metair.ir;
 
-import java.lang.constant.ClassDesc;
-import java.lang.constant.ConstantDescs;
-
 public class ArrayStore extends Node {
 
-    public final ClassDesc arrayType;
+    public final IRType.MetaClass arrayType;
 
     ArrayStore(final Value array, final Value index, final Value value) {
         if (!array.isArray()) {
             illegalArgument("Cannot store to non array of type " + TypeUtils.toString(array.type));
         }
 
-        arrayType = (ClassDesc) array.type;
+        arrayType = (IRType.MetaClass) array.type;
 
-        if (!index.type.equals(ConstantDescs.CD_int)) {
+        if (!index.type.equals(IRType.CD_int)) {
             illegalArgument("Cannot store to non int index of type " + TypeUtils.toString(index.type));
         }
 

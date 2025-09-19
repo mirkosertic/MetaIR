@@ -3,8 +3,6 @@ package de.mirkosertic.metair.ir;
 import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
 import org.junit.jupiter.api.Test;
 
-import java.lang.constant.ConstantDescs;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class NumericConditionTest {
@@ -17,7 +15,7 @@ public class NumericConditionTest {
 
         assertThat(numericCondition.debugDescription()).isEqualTo("NumericCondition : GE");
 
-        assertThat(numericCondition.type).isEqualTo(ConstantDescs.CD_int);
+        assertThat(numericCondition.type).isEqualTo(IRType.CD_int);
         assertThat(numericCondition.operation).isEqualTo(NumericCondition.Operation.GE);
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).containsExactly(numericCondition);

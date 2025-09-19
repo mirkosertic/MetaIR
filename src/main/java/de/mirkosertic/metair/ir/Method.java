@@ -1,10 +1,6 @@
 package de.mirkosertic.metair.ir;
 
 
-import java.lang.constant.ClassDesc;
-import java.lang.constant.ConstantDesc;
-import java.lang.constant.MethodHandleDesc;
-import java.lang.constant.MethodTypeDesc;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,8 +8,8 @@ import java.util.Map;
 
 public class Method extends TupleNode {
 
-    private final Map<MethodTypeDesc, MethodType> methodtypeReferences;
-    private final Map<MethodHandleDesc, MethodHandle> methodHandles;
+    private final Map<IRType.MethodType, MethodType> methodtypeReferences;
+    private final Map<IRType.MethodHandle, MethodHandle> methodHandles;
 
     public final List<Value> methodArguments;
 
@@ -25,7 +21,7 @@ public class Method extends TupleNode {
         registerAs("default", this);
     }
 
-    public MethodType defineMethodType(final MethodTypeDesc type) {
+    public MethodType defineMethodType(final IRType.MethodType type) {
         return methodtypeReferences.computeIfAbsent(type, key -> {
             final MethodType r = new MethodType(key);
             r.use(Method.this, DefinedByUse.INSTANCE);
@@ -33,7 +29,7 @@ public class Method extends TupleNode {
         });
     }
 
-    public MethodHandle defineMethodHandle(final MethodHandleDesc type) {
+    public MethodHandle defineMethodHandle(final IRType.MethodHandle type) {
         return methodHandles.computeIfAbsent(type, key -> {
             final MethodHandle r = new MethodHandle(key);
             r.use(Method.this, DefinedByUse.INSTANCE);
@@ -41,7 +37,7 @@ public class Method extends TupleNode {
         });
     }
 
-    public ExtractThisRefProjection defineThisRef(final ClassDesc type) {
+    public ExtractThisRefProjection defineThisRef(final IRType.MetaClass type) {
         final ExtractThisRefProjection n = new ExtractThisRefProjection(type, this);
         registerAs(n.name(), n);
 
@@ -50,7 +46,7 @@ public class Method extends TupleNode {
         return n;
     }
 
-    public ExtractMethodArgProjection defineMethodArgument(final ConstantDesc type, final int index) {
+    public ExtractMethodArgProjection defineMethodArgument(final IRType.MetaClass type, final int index) {
         final ExtractMethodArgProjection n = new ExtractMethodArgProjection(type, this, index);
         registerAs(n.name(), n);
 

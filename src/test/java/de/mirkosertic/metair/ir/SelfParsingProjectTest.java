@@ -35,7 +35,7 @@ public class SelfParsingProjectTest {
             for (final MethodModel method : model.methods()) {
                 if ("<clinit>".equals(method.methodName().stringValue())) {
                     try {
-                        final MethodAnalyzer analyzer = new MethodAnalyzer(model.thisClass().asSymbol(), method);
+                        final MethodAnalyzer analyzer = new MethodAnalyzer(IRType.MetaClass.of(model.thisClass().asSymbol()), method);
                     } catch (final IllegalParsingStateException e) {
                         final MethodAnalyzer analyzer = e.getAnalyzer();
                         System.out.println("Failed with testing method " + method.methodName() + " in class");
@@ -80,7 +80,7 @@ public class SelfParsingProjectTest {
 
                     tests.add(DynamicTest.dynamicTest(method.methodName().stringValue() + " " + method.methodType().stringValue(), () -> {
                         try {
-                            final MethodAnalyzer analyzer = new MethodAnalyzer(model.thisClass().asSymbol(), method);
+                            final MethodAnalyzer analyzer = new MethodAnalyzer(IRType.MetaClass.of(model.thisClass().asSymbol()), method);
                         } catch (final IllegalParsingStateException e) {
                             final MethodAnalyzer analyzer = e.getAnalyzer();
                             System.out.println("Failed with testing method " + method.methodName() + " in class " + aClass.getName());

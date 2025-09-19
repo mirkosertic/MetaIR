@@ -118,6 +118,6 @@ public class OpcodeLDCTest {
         assertThat(method).isPresent();
 
         final MethodAnalyzer analyzer = testHelper.analyzeAndReport(model, method.get());
-        assertThat(analyzer.ir().usedBy.stream().filter(t -> t instanceof RuntimeclassReference).map(t -> ((RuntimeclassReference) t).type).toList()).containsExactly(ConstantDescs.CD_String);
+        assertThat(analyzer.ir().usedBy.stream().filter(t -> t instanceof RuntimeclassReference).map(t -> ((RuntimeclassReference) t).type).toList()).containsExactly(IRType.CD_String);
     }
 }

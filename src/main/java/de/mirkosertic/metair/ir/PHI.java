@@ -1,11 +1,10 @@
 package de.mirkosertic.metair.ir;
 
-import java.lang.constant.ConstantDesc;
 import java.util.List;
 
 public class PHI extends Value {
 
-    PHI(final ConstantDesc type) {
+    PHI(final IRType<?> type) {
         super(type);
     }
 

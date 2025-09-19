@@ -1,14 +1,13 @@
 package de.mirkosertic.metair.ir;
 
-import java.lang.constant.ClassDesc;
 import java.util.List;
 
 public class CatchProjection extends Node implements Projection {
 
     public final int index;
-    public final List<ClassDesc> exceptionTypes;
+    public final List<IRType.MetaClass> exceptionTypes;
 
-    public static String nameFor(final int index, final List<ClassDesc> exceptionTypes) {
+    public static String nameFor(final int index, final List<IRType.MetaClass> exceptionTypes) {
         final StringBuilder result = new StringBuilder("catch : ");
         result.append(index);
         result.append(" : ");
@@ -24,7 +23,7 @@ public class CatchProjection extends Node implements Projection {
         return result.toString();
     }
 
-    CatchProjection(final int index, final List<ClassDesc> types) {
+    CatchProjection(final int index, final List<IRType.MetaClass> types) {
         this.index = index;
         this.exceptionTypes = types;
     }

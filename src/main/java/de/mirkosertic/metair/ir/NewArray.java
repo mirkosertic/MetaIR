@@ -1,14 +1,11 @@
 package de.mirkosertic.metair.ir;
 
-import java.lang.constant.ClassDesc;
-import java.lang.constant.ConstantDescs;
-
 public class NewArray extends Value {
 
-    NewArray(final ClassDesc componentType, final Value length) {
+    NewArray(final IRType.MetaClass componentType, final Value length) {
         super(componentType.arrayType());
 
-        if (!ConstantDescs.CD_int.equals(length.type)) {
+        if (!IRType.CD_int.equals(length.type)) {
             illegalArgument("Array length must be int, but was " + TypeUtils.toString(length.type));
         }
 

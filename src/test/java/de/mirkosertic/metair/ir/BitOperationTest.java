@@ -3,8 +3,6 @@ package de.mirkosertic.metair.ir;
 import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
 import org.junit.jupiter.api.Test;
 
-import java.lang.constant.ConstantDescs;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
@@ -15,11 +13,11 @@ public class BitOperationTest {
     public void testUsage() {
         final PrimitiveInt a = new PrimitiveInt(10);
         final PrimitiveInt b = new PrimitiveInt(20);
-        final BitOperation bit = new BitOperation(ConstantDescs.CD_int, BitOperation.Operation.AND, a, b);
+        final BitOperation bit = new BitOperation(IRType.CD_int, BitOperation.Operation.AND, a, b);
 
         assertThat(bit.debugDescription()).isEqualTo("BitOperation : AND(int)");
 
-        assertThat(bit.type).isEqualTo(ConstantDescs.CD_int);
+        assertThat(bit.type).isEqualTo(IRType.CD_int);
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).containsExactly(bit);
         assertThat(b.usedBy).containsExactly(bit);
@@ -36,7 +34,7 @@ public class BitOperationTest {
     @Test
     public void fail_arg1_wrongtype() {
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
-            new BitOperation(ConstantDescs.CD_int, BitOperation.Operation.OR, new PrimitiveLong(10L), new PrimitiveInt(10));
+            new BitOperation(IRType.CD_int, BitOperation.Operation.OR, new PrimitiveLong(10L), new PrimitiveInt(10));
             fail("Exception expected");
         }).withMessage("Cannot use non int value long for bit operation OR on arg1");
     }
@@ -44,7 +42,7 @@ public class BitOperationTest {
     @Test
     public void fail_arg2_wrongtype() {
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
-            new BitOperation(ConstantDescs.CD_int, BitOperation.Operation.OR, new PrimitiveInt(10), new PrimitiveLong(10L));
+            new BitOperation(IRType.CD_int, BitOperation.Operation.OR, new PrimitiveInt(10), new PrimitiveLong(10L));
             fail("Exception expected");
         }).withMessage("Cannot use non int value long for bit operation OR on arg2");
     }

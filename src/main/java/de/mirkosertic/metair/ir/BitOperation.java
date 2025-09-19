@@ -1,7 +1,5 @@
 package de.mirkosertic.metair.ir;
 
-import java.lang.constant.ClassDesc;
-
 public class BitOperation extends Value {
 
     public enum Operation {
@@ -10,7 +8,7 @@ public class BitOperation extends Value {
 
     public final Operation operation;
 
-    BitOperation(final ClassDesc type, final Operation operation, final Value arg1, final Value arg2) {
+    BitOperation(final IRType.MetaClass type, final Operation operation, final Value arg1, final Value arg2) {
         super(type);
 
         if (!arg1.type.equals(type)) {

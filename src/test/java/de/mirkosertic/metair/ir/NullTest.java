@@ -3,8 +3,6 @@ package de.mirkosertic.metair.ir;
 import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
 import org.junit.jupiter.api.Test;
 
-import java.lang.constant.ConstantDescs;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class NullTest {
@@ -17,7 +15,7 @@ public class NullTest {
 
         assertThat(a.sideeffectFree()).isTrue();
 
-        assertThat(a.type).isEqualTo(ConstantDescs.CD_Object);
+        assertThat(a.type).isEqualTo(IRType.CD_Object);
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).isEmpty();
         assertThat(a.uses).isEmpty();

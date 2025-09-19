@@ -1,19 +1,16 @@
 package de.mirkosertic.metair.ir;
 
-import java.lang.constant.ClassDesc;
-import java.lang.constant.ConstantDescs;
-
 public class NumericCompare extends Value {
 
     public enum Mode {
         NONFLOATINGPOINT, NAN_IS_1, NAN_IS_MINUS_1
     }
 
-    public final ClassDesc compareType;
+    public final IRType.MetaClass compareType;
     public final Mode mode;
 
-    NumericCompare(final Mode mode, final ClassDesc compareType, final Value arg1, final Value arg2) {
-        super(ConstantDescs.CD_int);
+    NumericCompare(final Mode mode, final IRType.MetaClass compareType, final Value arg1, final Value arg2) {
+        super(IRType.CD_int);
 
         if (!arg1.type.equals(compareType)) {
             illegalArgument("Cannot compare non " + TypeUtils.toString(compareType) + " value " + TypeUtils.toString(arg1.type) + " for arg1");

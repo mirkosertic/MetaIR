@@ -3,15 +3,13 @@ package de.mirkosertic.metair.ir;
 import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
 import org.junit.jupiter.api.Test;
 
-import java.lang.constant.ConstantDescs;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ClassInitializationTest {
 
     @Test
     public void testUsage() {
-        final RuntimeclassReference cr = new RuntimeclassReference(ConstantDescs.CD_String);
+        final RuntimeclassReference cr = new RuntimeclassReference(IRType.CD_String);
         final ClassInitialization ci = new ClassInitialization(cr);
 
         assertThat(ci.debugDescription()).isEqualTo("ClassInit");

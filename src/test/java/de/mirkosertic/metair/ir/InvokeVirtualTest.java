@@ -14,9 +14,9 @@ public class InvokeVirtualTest {
     @Test
     public void testUsage() {
         final Value target = new StringConstant("hello");
-        final InvokeVirtual a = new InvokeVirtual(ConstantDescs.CD_String, target, "bar", MethodTypeDesc.of(ConstantDescs.CD_void, List.of(ConstantDescs.CD_int)), List.of(new PrimitiveInt(10)));
+        final InvokeVirtual a = new InvokeVirtual(IRType.CD_String, target, "bar", new IRType.MethodType(MethodTypeDesc.of(ConstantDescs.CD_void, List.of(ConstantDescs.CD_int))), List.of(new PrimitiveInt(10)));
 
-        assertThat(a.type).isEqualTo(ConstantDescs.CD_void);
+        assertThat(a.type).isEqualTo(IRType.CD_void);
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).isEmpty();
         assertThat(a.uses).hasSize(2);

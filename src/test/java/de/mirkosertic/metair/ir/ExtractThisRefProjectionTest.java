@@ -2,8 +2,6 @@ package de.mirkosertic.metair.ir;
 
 import org.junit.jupiter.api.Test;
 
-import java.lang.constant.ConstantDescs;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ExtractThisRefProjectionTest {
@@ -11,11 +9,11 @@ public class ExtractThisRefProjectionTest {
     @Test
     public void testUsage() {
         final Method m = new Method();
-        final ExtractThisRefProjection a = new ExtractThisRefProjection(ConstantDescs.CD_String, m);
+        final ExtractThisRefProjection a = new ExtractThisRefProjection(IRType.CD_String, m);
 
         assertThat(a.sideeffectFree()).isTrue();
 
-        assertThat(a.type).isEqualTo(ConstantDescs.CD_String);
+        assertThat(a.type).isEqualTo(IRType.CD_String);
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).isEmpty();
         assertThat(a.uses).hasSize(1);

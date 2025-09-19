@@ -1,10 +1,8 @@
 package de.mirkosertic.metair.ir;
 
-import java.lang.constant.ClassDesc;
-
 public class Sub extends Value {
 
-    Sub(final ClassDesc type, final Value arg1, final Value arg2) {
+    Sub(final IRType<?> type, final Value arg1, final Value arg2) {
         super(type);
 
         if (!arg1.type.equals(type)) {

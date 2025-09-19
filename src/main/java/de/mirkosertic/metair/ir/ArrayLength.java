@@ -1,11 +1,9 @@
 package de.mirkosertic.metair.ir;
 
-import java.lang.constant.ConstantDescs;
-
 public class ArrayLength extends Value {
 
     ArrayLength(final Value array) {
-        super(ConstantDescs.CD_int);
+        super(IRType.CD_int);
 
         if (!array.isArray()) {
             illegalArgument("Cannot get array length of non array of type " + TypeUtils.toString(array.type));

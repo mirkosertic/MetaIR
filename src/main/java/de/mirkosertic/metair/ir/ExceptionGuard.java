@@ -1,11 +1,10 @@
 package de.mirkosertic.metair.ir;
 
-import java.lang.constant.ClassDesc;
 import java.util.List;
 
 public class ExceptionGuard extends TupleNode {
 
-    public record Catches(int index, List<ClassDesc> catchTypes) {
+    public record Catches(int index, List<IRType.MetaClass> catchTypes) {
     }
 
     final String startLabel;

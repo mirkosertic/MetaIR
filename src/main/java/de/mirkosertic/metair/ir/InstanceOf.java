@@ -1,11 +1,9 @@
 package de.mirkosertic.metair.ir;
 
-import java.lang.constant.ConstantDescs;
-
 public class InstanceOf extends Value {
 
     InstanceOf(final Value arg1, final Value arg2) {
-        super(ConstantDescs.CD_int);
+        super(IRType.CD_int);
         use(arg1, new ArgumentUse(0));
         use(arg2, new ArgumentUse(1));
     }

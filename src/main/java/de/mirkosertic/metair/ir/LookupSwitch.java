@@ -1,6 +1,5 @@
 package de.mirkosertic.metair.ir;
 
-import java.lang.constant.ConstantDescs;
 import java.util.List;
 
 public class LookupSwitch extends ConditionalNode {
@@ -10,7 +9,7 @@ public class LookupSwitch extends ConditionalNode {
 
     LookupSwitch(final Value value, final String defaultLabel, final List<Integer> cases) {
 
-        if (!value.type.equals(ConstantDescs.CD_int)) {
+        if (!value.type.equals(IRType.CD_int)) {
             illegalArgument("Cannot use non int value of type " + TypeUtils.toString(value.type) + " as switch value");
         }
 

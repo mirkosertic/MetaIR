@@ -1,6 +1,5 @@
 package de.mirkosertic.metair.ir;
 
-import java.lang.constant.ClassDesc;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
@@ -102,7 +101,7 @@ public abstract class StructuredControlflowCodeGenerator<T extends StructuredCon
 
     public abstract void startCatchBlock();
 
-    public abstract void startCatchHandler(final List<ClassDesc> exceptionTypes);
+    public abstract void startCatchHandler(final List<IRType.MetaClass> exceptionTypes);
 
     public abstract void writeRethrowException();
 

@@ -211,7 +211,7 @@ public class MethodAnalyzerTest {
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
-                final Value array = new NewArray(ConstantDescs.CD_boolean, new PrimitiveInt(100));
+                final Value array = new NewArray(IRType.CD_boolean, new PrimitiveInt(100));
                 final Value index = new PrimitiveInt(1);
 
                 frame.in.push(array);
@@ -226,7 +226,7 @@ public class MethodAnalyzerTest {
 
                 final Extend al = (Extend) frame.out.stack.getFirst();
                 assertThat(al.uses).hasSize(1);
-                assertThat(al.type).isEqualTo(ConstantDescs.CD_int);
+                assertThat(al.type).isEqualTo(IRType.CD_int);
                 assertThat(al.extendType).isEqualTo(Extend.ExtendType.SIGN);
             }
 
@@ -237,7 +237,7 @@ public class MethodAnalyzerTest {
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
-                final Value array = new NewArray(ConstantDescs.CD_char, new PrimitiveInt(100));
+                final Value array = new NewArray(IRType.CD_char, new PrimitiveInt(100));
                 final Value index = new PrimitiveInt(1);
 
                 frame.in.push(array);
@@ -252,7 +252,7 @@ public class MethodAnalyzerTest {
 
                 final Extend al = (Extend) frame.out.stack.getFirst();
                 assertThat(al.uses).hasSize(1);
-                assertThat(al.type).isEqualTo(ConstantDescs.CD_int);
+                assertThat(al.type).isEqualTo(IRType.CD_int);
                 assertThat(al.extendType).isEqualTo(Extend.ExtendType.ZERO);
             }
 
@@ -263,7 +263,7 @@ public class MethodAnalyzerTest {
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
-                final Value array = new NewArray(ConstantDescs.CD_short, new PrimitiveInt(100));
+                final Value array = new NewArray(IRType.CD_short, new PrimitiveInt(100));
                 final Value index = new PrimitiveInt(1);
 
                 frame.in.push(array);
@@ -278,7 +278,7 @@ public class MethodAnalyzerTest {
 
                 final Extend al = (Extend) frame.out.stack.getFirst();
                 assertThat(al.uses).hasSize(1);
-                assertThat(al.type).isEqualTo(ConstantDescs.CD_int);
+                assertThat(al.type).isEqualTo(IRType.CD_int);
                 assertThat(al.extendType).isEqualTo(Extend.ExtendType.SIGN);
             }
 
@@ -289,7 +289,7 @@ public class MethodAnalyzerTest {
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
-                final Value array = new NewArray(ConstantDescs.CD_int, new PrimitiveInt(100));
+                final Value array = new NewArray(IRType.CD_int, new PrimitiveInt(100));
                 final Value index = new PrimitiveInt(1);
 
                 frame.in.push(array);
@@ -306,7 +306,7 @@ public class MethodAnalyzerTest {
                 assertThat(al.uses).hasSize(3);
                 assertThat(al.uses.get(0).node()).isSameAs(array);
                 assertThat(al.uses.get(1).node()).isSameAs(index);
-                assertThat(al.type).isEqualTo(ConstantDescs.CD_int);
+                assertThat(al.type).isEqualTo(IRType.CD_int);
             }
 
             @Test
@@ -329,7 +329,7 @@ public class MethodAnalyzerTest {
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
-                final Value array = new NewArray(ConstantDescs.CD_long, new PrimitiveInt(100));
+                final Value array = new NewArray(IRType.CD_long, new PrimitiveInt(100));
                 final Value index = new PrimitiveInt(1);
 
                 frame.in.push(array);
@@ -346,7 +346,7 @@ public class MethodAnalyzerTest {
                 assertThat(al.uses).hasSize(3);
                 assertThat(al.uses.get(0).node()).isSameAs(array);
                 assertThat(al.uses.get(1).node()).isSameAs(index);
-                assertThat(al.type).isEqualTo(ConstantDescs.CD_long);
+                assertThat(al.type).isEqualTo(IRType.CD_long);
             }
 
             @Test
@@ -356,7 +356,7 @@ public class MethodAnalyzerTest {
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
-                final Value array = new NewArray(ConstantDescs.CD_float, new PrimitiveInt(100));
+                final Value array = new NewArray(IRType.CD_float, new PrimitiveInt(100));
                 final Value index = new PrimitiveInt(1);
 
                 frame.in.push(array);
@@ -373,7 +373,7 @@ public class MethodAnalyzerTest {
                 assertThat(al.uses).hasSize(3);
                 assertThat(al.uses.get(0).node()).isSameAs(array);
                 assertThat(al.uses.get(1).node()).isSameAs(index);
-                assertThat(al.type).isEqualTo(ConstantDescs.CD_float);
+                assertThat(al.type).isEqualTo(IRType.CD_float);
             }
 
             @Test
@@ -383,7 +383,7 @@ public class MethodAnalyzerTest {
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
-                final Value array = new NewArray(ConstantDescs.CD_double, new PrimitiveInt(100));
+                final Value array = new NewArray(IRType.CD_double, new PrimitiveInt(100));
                 final Value index = new PrimitiveInt(1);
 
                 frame.in.push(array);
@@ -400,7 +400,7 @@ public class MethodAnalyzerTest {
                 assertThat(al.uses).hasSize(3);
                 assertThat(al.uses.get(0).node()).isSameAs(array);
                 assertThat(al.uses.get(1).node()).isSameAs(index);
-                assertThat(al.type).isEqualTo(ConstantDescs.CD_double);
+                assertThat(al.type).isEqualTo(IRType.CD_double);
             }
 
             @Test
@@ -410,7 +410,7 @@ public class MethodAnalyzerTest {
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
-                final Value array = new NewArray(ConstantDescs.CD_Object, new PrimitiveInt(100));
+                final Value array = new NewArray(IRType.CD_Object, new PrimitiveInt(100));
                 final Value index = new PrimitiveInt(1);
 
                 frame.in.push(array);
@@ -453,7 +453,7 @@ public class MethodAnalyzerTest {
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
-                final Value array = new NewArray(ConstantDescs.CD_Object, new PrimitiveInt(100));
+                final Value array = new NewArray(IRType.CD_Object, new PrimitiveInt(100));
                 final Value index = new PrimitiveInt(1);
                 final Value value = new PrimitiveInt(10);
 
@@ -495,7 +495,7 @@ public class MethodAnalyzerTest {
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
-                final Value array = new NewArray(ConstantDescs.CD_char, new PrimitiveInt(100));
+                final Value array = new NewArray(IRType.CD_char, new PrimitiveInt(100));
                 final Value index = new PrimitiveInt(1);
                 final Value value = new PrimitiveInt(10);
 
@@ -525,7 +525,7 @@ public class MethodAnalyzerTest {
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
-                    final Value array = new NewArray(ConstantDescs.CD_char, new PrimitiveInt(100));
+                    final Value array = new NewArray(IRType.CD_char, new PrimitiveInt(100));
                     final Value index = new PrimitiveInt(1);
                     final Value value = new PrimitiveLong(10);
 
@@ -545,7 +545,7 @@ public class MethodAnalyzerTest {
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
-                final Value array = new NewArray(ConstantDescs.CD_boolean, new PrimitiveInt(100));
+                final Value array = new NewArray(IRType.CD_boolean, new PrimitiveInt(100));
                 final Value index = new PrimitiveInt(1);
                 final Value value = new PrimitiveInt(10);
 
@@ -574,7 +574,7 @@ public class MethodAnalyzerTest {
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
-                final Value array = new NewArray(ConstantDescs.CD_short, new PrimitiveInt(100));
+                final Value array = new NewArray(IRType.CD_short, new PrimitiveInt(100));
                 final Value index = new PrimitiveInt(1);
                 final Value value = new PrimitiveInt(10);
 
@@ -603,7 +603,7 @@ public class MethodAnalyzerTest {
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
-                final Value array = new NewArray(ConstantDescs.CD_int, new PrimitiveInt(100));
+                final Value array = new NewArray(IRType.CD_int, new PrimitiveInt(100));
                 final Value index = new PrimitiveInt(1);
                 final Value value = new PrimitiveInt(10);
 
@@ -645,7 +645,7 @@ public class MethodAnalyzerTest {
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
-                final Value array = new NewArray(ConstantDescs.CD_long, new PrimitiveInt(100));
+                final Value array = new NewArray(IRType.CD_long, new PrimitiveInt(100));
                 final Value index = new PrimitiveInt(1);
                 final Value value = new PrimitiveLong(10L);
 
@@ -674,7 +674,7 @@ public class MethodAnalyzerTest {
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
-                final Value array = new NewArray(ConstantDescs.CD_float, new PrimitiveInt(100));
+                final Value array = new NewArray(IRType.CD_float, new PrimitiveInt(100));
                 final Value index = new PrimitiveInt(1);
                 final Value value = new PrimitiveFloat(10.0F);
 
@@ -703,7 +703,7 @@ public class MethodAnalyzerTest {
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
-                final Value array = new NewArray(ConstantDescs.CD_double, new PrimitiveInt(100));
+                final Value array = new NewArray(IRType.CD_double, new PrimitiveInt(100));
                 final Value index = new PrimitiveInt(1);
                 final Value value = new PrimitiveDouble(10.0d);
 
@@ -993,7 +993,7 @@ public class MethodAnalyzerTest {
                 analyzer.visitFieldInstruction(Opcode.GETFIELD, ConstantDescs.CD_String, ConstantDescs.CD_int, "fieldname", frame);
 
                 final Value node = frame.out.stack.getFirst();
-                assertThat(node.type).isEqualTo(ConstantDescs.CD_int);
+                assertThat(node.type).isEqualTo(IRType.CD_int);
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
@@ -1027,7 +1027,7 @@ public class MethodAnalyzerTest {
                 analyzer.visitFieldInstruction(Opcode.GETSTATIC, ConstantDescs.CD_String, ConstantDescs.CD_int, "fieldname", frame);
 
                 final Value node = frame.out.stack.getFirst();
-                assertThat(node.type).isEqualTo(ConstantDescs.CD_int);
+                assertThat(node.type).isEqualTo(IRType.CD_int);
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
@@ -1094,7 +1094,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out.stack).hasSize(1);
 
                 final Value node = frame.out.stack.getFirst();
-                assertThat(node.type).isEqualTo(ConstantDescs.CD_Object.arrayType());
+                assertThat(node.type).isEqualTo(IRType.CD_Object.arrayType());
 
                 assertThat(frame.out.control).isSameAs(frame.in.control);
                 assertThat(frame.out.memory).isSameAs(node);
@@ -1115,7 +1115,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out.stack).hasSize(1);
 
                 final Value node = frame.out.stack.getFirst();
-                assertThat(node.type).isEqualTo(ConstantDescs.CD_Object.arrayType().arrayType());
+                assertThat(node.type).isEqualTo(IRType.CD_Object.arrayType().arrayType());
 
                 assertThat(frame.out.control).isSameAs(frame.in.control);
                 assertThat(frame.out.memory).isSameAs(node);
@@ -1152,7 +1152,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out.stack).hasSize(1);
 
                 final Value node = frame.out.stack.getFirst();
-                assertThat(node.type).isEqualTo(ConstantDescs.CD_Object.arrayType());
+                assertThat(node.type).isEqualTo(IRType.CD_Object.arrayType());
 
                 assertThat(frame.out.control).isSameAs(frame.in.control);
                 assertThat(frame.out.memory).isSameAs(node);
@@ -1185,7 +1185,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out.stack).hasSize(1);
 
                 final Value node = frame.out.stack.getFirst();
-                assertThat(node.type).isEqualTo(ConstantDescs.CD_byte.arrayType());
+                assertThat(node.type).isEqualTo(IRType.CD_byte.arrayType());
 
                 assertThat(frame.out.control).isSameAs(frame.in.control);
                 assertThat(frame.out.memory).isSameAs(node);
@@ -1218,7 +1218,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out.stack).hasSize(1);
 
                 final Value node = frame.out.stack.getFirst();
-                assertThat(node.type).isEqualTo(ConstantDescs.CD_char.arrayType());
+                assertThat(node.type).isEqualTo(IRType.CD_char.arrayType());
 
                 assertThat(frame.out.control).isSameAs(frame.in.control);
                 assertThat(frame.out.memory).isSameAs(node);
@@ -1238,7 +1238,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out.stack).hasSize(1);
 
                 final Value node = frame.out.stack.getFirst();
-                assertThat(node.type).isEqualTo(ConstantDescs.CD_short.arrayType());
+                assertThat(node.type).isEqualTo(IRType.CD_short.arrayType());
 
                 assertThat(frame.out.control).isSameAs(frame.in.control);
                 assertThat(frame.out.memory).isSameAs(node);
@@ -1258,7 +1258,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out.stack).hasSize(1);
 
                 final Value node = frame.out.stack.getFirst();
-                assertThat(node.type).isEqualTo(ConstantDescs.CD_boolean.arrayType());
+                assertThat(node.type).isEqualTo(IRType.CD_boolean.arrayType());
 
                 assertThat(frame.out.control).isSameAs(frame.in.control);
                 assertThat(frame.out.memory).isSameAs(node);
@@ -1278,7 +1278,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out.stack).hasSize(1);
 
                 final Value node = frame.out.stack.getFirst();
-                assertThat(node.type).isEqualTo(ConstantDescs.CD_int.arrayType());
+                assertThat(node.type).isEqualTo(IRType.CD_int.arrayType());
 
                 assertThat(frame.out.control).isSameAs(frame.in.control);
                 assertThat(frame.out.memory).isSameAs(node);
@@ -1298,7 +1298,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out.stack).hasSize(1);
 
                 final Value node = frame.out.stack.getFirst();
-                assertThat(node.type).isEqualTo(ConstantDescs.CD_long.arrayType());
+                assertThat(node.type).isEqualTo(IRType.CD_long.arrayType());
 
                 assertThat(frame.out.control).isSameAs(frame.in.control);
                 assertThat(frame.out.memory).isSameAs(node);
@@ -1318,7 +1318,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out.stack).hasSize(1);
 
                 final Value node = frame.out.stack.getFirst();
-                assertThat(node.type).isEqualTo(ConstantDescs.CD_float.arrayType());
+                assertThat(node.type).isEqualTo(IRType.CD_float.arrayType());
 
                 assertThat(frame.out.control).isSameAs(frame.in.control);
                 assertThat(frame.out.memory).isSameAs(node);
@@ -1338,7 +1338,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out.stack).hasSize(1);
 
                 final Value node = frame.out.stack.getFirst();
-                assertThat(node.type).isEqualTo(ConstantDescs.CD_double.arrayType());
+                assertThat(node.type).isEqualTo(IRType.CD_double.arrayType());
 
                 assertThat(frame.out.control).isSameAs(frame.in.control);
                 assertThat(frame.out.memory).isSameAs(node);
@@ -2663,7 +2663,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out.stack).hasSize(1);
 
                 final New n = (New) frame.out.stack.getFirst();
-                assertThat(n.type).isEqualTo(ConstantDescs.CD_Object);
+                assertThat(n.type).isEqualTo(IRType.CD_Object);
                 assertThat(n.uses).hasSize(2);
 
                 assertThat(frame.out.control).isInstanceOf(ClassInitialization.class);
@@ -3281,7 +3281,7 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(StringConstant.class).matches(t -> t.type.equals(ConstantDescs.CD_String));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(StringConstant.class).matches(t -> t.type.equals(IRType.CD_String));
             }
 
             @Test
@@ -3297,7 +3297,7 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(InstanceOf.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(InstanceOf.class).matches(t -> t.type.equals(IRType.CD_int));
             }
         }
 
@@ -3349,7 +3349,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
 
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Extend.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Extend.class).matches(t -> t.type.equals(IRType.CD_int));
             }
 
             @Test
@@ -3367,7 +3367,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
 
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Extend.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Extend.class).matches(t -> t.type.equals(IRType.CD_int));
             }
 
             @Test
@@ -3385,7 +3385,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
 
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Extend.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Extend.class).matches(t -> t.type.equals(IRType.CD_int));
             }
 
             @Test
@@ -3403,7 +3403,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
 
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Extend.class).matches(t -> t.type.equals(ConstantDescs.CD_long));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Extend.class).matches(t -> t.type.equals(IRType.CD_long));
             }
 
             @Test
@@ -3449,7 +3449,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
 
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Convert.class).matches(t -> t.type.equals(ConstantDescs.CD_float));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Convert.class).matches(t -> t.type.equals(IRType.CD_float));
             }
 
             @Test
@@ -3467,7 +3467,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
 
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Convert.class).matches(t -> t.type.equals(ConstantDescs.CD_double));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Convert.class).matches(t -> t.type.equals(IRType.CD_double));
             }
 
             @Test
@@ -3485,7 +3485,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
 
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Convert.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Convert.class).matches(t -> t.type.equals(IRType.CD_int));
             }
 
             @Test
@@ -3503,7 +3503,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
 
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Convert.class).matches(t -> t.type.equals(ConstantDescs.CD_float));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Convert.class).matches(t -> t.type.equals(IRType.CD_float));
             }
 
             @Test
@@ -3521,7 +3521,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
 
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Convert.class).matches(t -> t.type.equals(ConstantDescs.CD_double));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Convert.class).matches(t -> t.type.equals(IRType.CD_double));
             }
 
             @Test
@@ -3539,7 +3539,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
 
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Convert.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Convert.class).matches(t -> t.type.equals(IRType.CD_int));
             }
 
             @Test
@@ -3557,7 +3557,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
 
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Convert.class).matches(t -> t.type.equals(ConstantDescs.CD_long));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Convert.class).matches(t -> t.type.equals(IRType.CD_long));
             }
 
             @Test
@@ -3575,7 +3575,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
 
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Convert.class).matches(t -> t.type.equals(ConstantDescs.CD_double));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Convert.class).matches(t -> t.type.equals(IRType.CD_double));
             }
 
             @Test
@@ -3593,7 +3593,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
 
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Convert.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Convert.class).matches(t -> t.type.equals(IRType.CD_int));
             }
 
             @Test
@@ -3611,7 +3611,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
 
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Convert.class).matches(t -> t.type.equals(ConstantDescs.CD_long));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Convert.class).matches(t -> t.type.equals(IRType.CD_long));
             }
 
             @Test
@@ -3629,7 +3629,7 @@ public class MethodAnalyzerTest {
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
 
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Convert.class).matches(t -> t.type.equals(ConstantDescs.CD_float));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Convert.class).matches(t -> t.type.equals(IRType.CD_float));
             }
         }
 
@@ -3649,7 +3649,7 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Null.class).matches(t -> t.type.equals(ConstantDescs.CD_Object));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Null.class).matches(t -> t.type.equals(IRType.CD_Object));
             }
 
             @Test
@@ -3665,7 +3665,7 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(PrimitiveInt.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(PrimitiveInt.class).matches(t -> t.type.equals(IRType.CD_int));
             }
 
             @Test
@@ -3681,7 +3681,7 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(PrimitiveInt.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(PrimitiveInt.class).matches(t -> t.type.equals(IRType.CD_int));
             }
 
             @Test
@@ -4005,7 +4005,7 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(RuntimeclassReference.class).matches(t -> t.type.equals(ClassDesc.of(LDC.class.getName())));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(RuntimeclassReference.class).matches(t -> t.type.equals(IRType.MetaClass.of(LDC.class)));
             }
 
             @Test
@@ -4042,10 +4042,10 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(NumericCompare.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(NumericCompare.class).matches(t -> t.type.equals(IRType.CD_int));
 
                 final NumericCompare op = (NumericCompare) frame.out.stack.getFirst();
-                assertThat(op.compareType).isEqualTo(ConstantDescs.CD_float);
+                assertThat(op.compareType).isEqualTo(IRType.CD_float);
                 assertThat(op.mode).isEqualTo(NumericCompare.Mode.NAN_IS_1);
                 assertThat(op.uses).hasSize(2);
                 assertThat(op.uses.get(0).node()).isEqualTo(value1);
@@ -4084,10 +4084,10 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(NumericCompare.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(NumericCompare.class).matches(t -> t.type.equals(IRType.CD_int));
 
                 final NumericCompare op = (NumericCompare) frame.out.stack.getFirst();
-                assertThat(op.compareType).isEqualTo(ConstantDescs.CD_float);
+                assertThat(op.compareType).isEqualTo(IRType.CD_float);
                 assertThat(op.mode).isEqualTo(NumericCompare.Mode.NAN_IS_MINUS_1);
                 assertThat(op.uses).hasSize(2);
                 assertThat(op.uses.get(0).node()).isEqualTo(value1);
@@ -4113,10 +4113,10 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(NumericCompare.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(NumericCompare.class).matches(t -> t.type.equals(IRType.CD_int));
 
                 final NumericCompare op = (NumericCompare) frame.out.stack.getFirst();
-                assertThat(op.compareType).isEqualTo(ConstantDescs.CD_double);
+                assertThat(op.compareType).isEqualTo(IRType.CD_double);
                 assertThat(op.mode).isEqualTo(NumericCompare.Mode.NAN_IS_1);
                 assertThat(op.uses).hasSize(2);
                 assertThat(op.uses.get(0).node()).isEqualTo(value1);
@@ -4142,10 +4142,10 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(NumericCompare.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(NumericCompare.class).matches(t -> t.type.equals(IRType.CD_int));
 
                 final NumericCompare op = (NumericCompare) frame.out.stack.getFirst();
-                assertThat(op.compareType).isEqualTo(ConstantDescs.CD_double);
+                assertThat(op.compareType).isEqualTo(IRType.CD_double);
                 assertThat(op.mode).isEqualTo(NumericCompare.Mode.NAN_IS_MINUS_1);
                 assertThat(op.uses).hasSize(2);
                 assertThat(op.uses.get(0).node()).isEqualTo(value1);
@@ -4171,10 +4171,10 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(NumericCompare.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(NumericCompare.class).matches(t -> t.type.equals(IRType.CD_int));
 
                 final NumericCompare op = (NumericCompare) frame.out.stack.getFirst();
-                assertThat(op.compareType).isEqualTo(ConstantDescs.CD_long);
+                assertThat(op.compareType).isEqualTo(IRType.CD_long);
                 assertThat(op.mode).isEqualTo(NumericCompare.Mode.NONFLOATINGPOINT);
                 assertThat(op.uses).hasSize(2);
                 assertThat(op.uses.get(0).node()).isEqualTo(value1);
@@ -4205,13 +4205,13 @@ public class MethodAnalyzerTest {
                 frame.in.control = new LabelNode("control");
                 frame.in.memory = new LabelNode("memory");
 
-                frame.in.stack.push(new NewArray(ConstantDescs.CD_int, new PrimitiveInt(10)));
+                frame.in.stack.push(new NewArray(IRType.CD_int, new PrimitiveInt(10)));
 
                 analyzer.visitOperatorInstruction(Opcode.ARRAYLENGTH, frame);
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(ArrayLength.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(ArrayLength.class).matches(t -> t.type.equals(IRType.CD_int));
             }
 
             @Test
@@ -4227,7 +4227,7 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Negate.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Negate.class).matches(t -> t.type.equals(IRType.CD_int));
             }
 
             @Test
@@ -4243,7 +4243,7 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Negate.class).matches(t -> t.type.equals(ConstantDescs.CD_long));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Negate.class).matches(t -> t.type.equals(IRType.CD_long));
             }
 
             @Test
@@ -4259,7 +4259,7 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Negate.class).matches(t -> t.type.equals(ConstantDescs.CD_float));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Negate.class).matches(t -> t.type.equals(IRType.CD_float));
             }
 
             @Test
@@ -4275,7 +4275,7 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Negate.class).matches(t -> t.type.equals(ConstantDescs.CD_double));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Negate.class).matches(t -> t.type.equals(IRType.CD_double));
             }
 
             @Test
@@ -4295,7 +4295,7 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Sub.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Sub.class).matches(t -> t.type.equals(IRType.CD_int));
 
                 final Sub sub = (Sub) frame.out.stack.getFirst();
                 assertThat(sub.uses).hasSize(2);
@@ -4335,7 +4335,7 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Sub.class).matches(t -> t.type.equals(ConstantDescs.CD_long));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Sub.class).matches(t -> t.type.equals(IRType.CD_long));
 
                 final Sub sub = (Sub) frame.out.stack.getFirst();
                 assertThat(sub.uses).hasSize(2);
@@ -4362,7 +4362,7 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Sub.class).matches(t -> t.type.equals(ConstantDescs.CD_float));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Sub.class).matches(t -> t.type.equals(IRType.CD_float));
 
                 final Sub sub = (Sub) frame.out.stack.getFirst();
                 assertThat(sub.uses).hasSize(2);
@@ -4389,7 +4389,7 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Sub.class).matches(t -> t.type.equals(ConstantDescs.CD_double));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Sub.class).matches(t -> t.type.equals(IRType.CD_double));
 
                 final Sub sub = (Sub) frame.out.stack.getFirst();
                 assertThat(sub.uses).hasSize(2);
@@ -4416,7 +4416,7 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Add.class).matches(t -> t.type.equals(ConstantDescs.CD_int));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Add.class).matches(t -> t.type.equals(IRType.CD_int));
 
                 final Add add = (Add) frame.out.stack.getFirst();
                 assertThat(add.uses).hasSize(2);
@@ -4456,7 +4456,7 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Add.class).matches(t -> t.type.equals(ConstantDescs.CD_long));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Add.class).matches(t -> t.type.equals(IRType.CD_long));
 
                 final Add add = (Add) frame.out.stack.getFirst();
                 assertThat(add.uses).hasSize(2);
@@ -4483,7 +4483,7 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Add.class).matches(t -> t.type.equals(ConstantDescs.CD_float));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Add.class).matches(t -> t.type.equals(IRType.CD_float));
 
                 final Add add = (Add) frame.out.stack.getFirst();
                 assertThat(add.uses).hasSize(2);
@@ -4510,7 +4510,7 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(Add.class).matches(t -> t.type.equals(ConstantDescs.CD_double));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(Add.class).matches(t -> t.type.equals(IRType.CD_double));
 
                 final Add add = (Add) frame.out.stack.getFirst();
                 assertThat(add.uses).hasSize(2);
@@ -4532,7 +4532,7 @@ public class MethodAnalyzerTest {
                 frame.in.memory = new LabelNode("memory");
 
                 frame.in.stack.push(new StringConstant("hello"));
-                new MethodAnalyzer(MethodTypeDesc.of(ConstantDescs.CD_String)).visitReturnInstruction(Opcode.ARETURN, frame);
+                new MethodAnalyzer(new IRType.MethodType(MethodTypeDesc.of(ConstantDescs.CD_String))).visitReturnInstruction(Opcode.ARETURN, frame);
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
@@ -4548,7 +4548,7 @@ public class MethodAnalyzerTest {
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
-                    new MethodAnalyzer(MethodTypeDesc.of(ConstantDescs.CD_String)).visitReturnInstruction(Opcode.ARETURN, frame);
+                    new MethodAnalyzer(new IRType.MethodType(MethodTypeDesc.of(ConstantDescs.CD_String))).visitReturnInstruction(Opcode.ARETURN, frame);
                     fail("Exception expected");
                 }).withMessage("Expecting only one value on the stack");
             }
@@ -4603,7 +4603,7 @@ public class MethodAnalyzerTest {
                 frame.in.memory = new LabelNode("memory");
 
                 frame.in.push(new PrimitiveInt(10));
-                new MethodAnalyzer(MethodTypeDesc.of(ConstantDescs.CD_int)).visitReturnInstruction(Opcode.IRETURN, frame);
+                new MethodAnalyzer(new IRType.MethodType(MethodTypeDesc.of(ConstantDescs.CD_int))).visitReturnInstruction(Opcode.IRETURN, frame);
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
@@ -4619,7 +4619,7 @@ public class MethodAnalyzerTest {
                 frame.in.memory = new LabelNode("memory");
 
                 frame.in.push(new PrimitiveDouble(10d));
-                new MethodAnalyzer(MethodTypeDesc.of(ConstantDescs.CD_double)).visitReturnInstruction(Opcode.DRETURN, frame);
+                new MethodAnalyzer(new IRType.MethodType(MethodTypeDesc.of(ConstantDescs.CD_double))).visitReturnInstruction(Opcode.DRETURN, frame);
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
@@ -4635,7 +4635,7 @@ public class MethodAnalyzerTest {
                 frame.in.memory = new LabelNode("memory");
 
                 frame.in.push(new PrimitiveFloat(10f));
-                new MethodAnalyzer(MethodTypeDesc.of(ConstantDescs.CD_float)).visitReturnInstruction(Opcode.FRETURN, frame);
+                new MethodAnalyzer(new IRType.MethodType(MethodTypeDesc.of(ConstantDescs.CD_float))).visitReturnInstruction(Opcode.FRETURN, frame);
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
@@ -4651,7 +4651,7 @@ public class MethodAnalyzerTest {
                 frame.in.memory = new LabelNode("memory");
 
                 frame.in.push(new PrimitiveLong(10L));
-                new MethodAnalyzer(MethodTypeDesc.of(ConstantDescs.CD_long)).visitReturnInstruction(Opcode.LRETURN, frame);
+                new MethodAnalyzer(new IRType.MethodType(MethodTypeDesc.of(ConstantDescs.CD_long))).visitReturnInstruction(Opcode.LRETURN, frame);
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
@@ -4667,7 +4667,7 @@ public class MethodAnalyzerTest {
                 frame.in.memory = new LabelNode("memory");
 
                 frame.in.push(new PrimitiveInt(10));
-                new MethodAnalyzer(MethodTypeDesc.of(ConstantDescs.CD_boolean)).visitReturnInstruction(Opcode.IRETURN, frame);
+                new MethodAnalyzer(new IRType.MethodType(MethodTypeDesc.of(ConstantDescs.CD_boolean))).visitReturnInstruction(Opcode.IRETURN, frame);
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
@@ -4684,7 +4684,7 @@ public class MethodAnalyzerTest {
                     frame.in.memory = new LabelNode("memory");
 
                     frame.in.push(new PrimitiveLong(10));
-                    new MethodAnalyzer(MethodTypeDesc.of(ConstantDescs.CD_boolean)).visitReturnInstruction(Opcode.IRETURN, frame);
+                    new MethodAnalyzer(new IRType.MethodType(MethodTypeDesc.of(ConstantDescs.CD_boolean))).visitReturnInstruction(Opcode.IRETURN, frame);
                     fail("Exception expected");
                 }).withMessage("Cannot return value of type long as boolean is expected!");
             }

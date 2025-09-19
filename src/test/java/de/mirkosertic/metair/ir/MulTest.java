@@ -3,8 +3,6 @@ package de.mirkosertic.metair.ir;
 import de.mirkosertic.metair.ir.test.MetaIRTestHelper;
 import org.junit.jupiter.api.Test;
 
-import java.lang.constant.ConstantDescs;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
@@ -15,13 +13,13 @@ public class MulTest {
     public void testUsage() {
         final PrimitiveInt a = new PrimitiveInt(10);
         final PrimitiveInt b = new PrimitiveInt(20);
-        final Mul mul = new Mul(ConstantDescs.CD_int, a, b);
+        final Mul mul = new Mul(IRType.CD_int, a, b);
 
         assertThat(mul.debugDescription()).isEqualTo("Mul : int");
 
         assertThat(mul.sideeffectFree()).isTrue();
 
-        assertThat(mul.type).isEqualTo(ConstantDescs.CD_int);
+        assertThat(mul.type).isEqualTo(IRType.CD_int);
         assertThat(a).isInstanceOf(Value.class);
         assertThat(a.usedBy).containsExactly(mul);
         assertThat(b.usedBy).containsExactly(mul);
@@ -38,7 +36,7 @@ public class MulTest {
     @Test
     public void fail_arg1_wrong() {
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
-            new Mul(ConstantDescs.CD_int, new PrimitiveLong(10L), new PrimitiveInt(10));
+            new Mul(IRType.CD_int, new PrimitiveLong(10L), new PrimitiveInt(10));
             fail("Exception expected");
         }).withMessage("Cannot multiply non int value long for arg1");
     }
@@ -46,7 +44,7 @@ public class MulTest {
     @Test
     public void fail_arg2_wrong() {
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
-            new Mul(ConstantDescs.CD_int, new PrimitiveInt(10), new PrimitiveLong(10L));
+            new Mul(IRType.CD_int, new PrimitiveInt(10), new PrimitiveLong(10L));
             fail("Exception expected");
         }).withMessage("Cannot multiply non int value long for arg2");
     }

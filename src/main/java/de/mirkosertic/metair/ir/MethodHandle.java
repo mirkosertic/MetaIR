@@ -1,10 +1,8 @@
 package de.mirkosertic.metair.ir;
 
-import java.lang.constant.MethodHandleDesc;
-
 public class MethodHandle extends ConstantValue {
 
-    MethodHandle(final MethodHandleDesc type) {
+    MethodHandle(final IRType.MethodHandle type) {
         super(type);
     }
 

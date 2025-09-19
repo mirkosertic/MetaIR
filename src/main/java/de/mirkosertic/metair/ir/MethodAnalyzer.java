@@ -67,29 +67,31 @@ import java.util.stream.Collectors;
 
 public class MethodAnalyzer {
 
-    private ClassDesc owner;
+    private final ResolverContext resolverContext;
+    private IRType.MetaClass owner;
     private MethodModel method;
     private final Map<Label, Integer> labelToIndex;
     private final Method ir;
     private Frame[] frames;
     private List<Frame> codeModelTopologicalOrder;
-    private MethodTypeDesc methodTypeDesc;
+    private IRType.MethodType methodTypeDesc;
     private StackMapTableAttribute stackMapTableAttribute;
     private final Map<Label, List<TryCatchBlock>> tryCatchBlocks;
 
     MethodAnalyzer() {
+        this.resolverContext = new ResolverContext();
         this.ir = new Method();
         this.labelToIndex = new HashMap<>();
         this.tryCatchBlocks = new HashMap<>();
     }
 
-    MethodAnalyzer(final MethodTypeDesc methodTypeDesc) {
+    MethodAnalyzer(final IRType.MethodType methodTypeDesc) {
         this();
         this.methodTypeDesc = methodTypeDesc;
     }
 
-    public MethodAnalyzer(final ClassDesc owner, final MethodModel method) {
-        this(method.methodTypeSymbol());
+    public MethodAnalyzer(final IRType.MetaClass owner, final MethodModel method) {
+        this(new IRType.MethodType(method.methodTypeSymbol()));
         this.owner = owner;
         this.method = method;
 
@@ -151,7 +153,7 @@ public class MethodAnalyzer {
                 }
 
                 if (exceptionHandler.catchType().isPresent()) {
-                    handler.addCaughtException(exceptionHandler.catchType().get().asSymbol());
+                    handler.addCaughtException(resolverContext.resolveType(exceptionHandler.catchType().get().asSymbol()));
                 } else {
                     handler.markAsFinally();
                 }
@@ -552,7 +554,7 @@ public class MethodAnalyzer {
         return v1;
     }
 
-    static ConstantDesc meetTypesOf(final Collection<Value> values) {
+    static IRType<?> meetTypesOf(final Collection<Value> values) {
         final List<Value> l = values.stream().toList();
         final Value first = l.getFirst();
         if (first.isPrimitive()) {
@@ -614,7 +616,7 @@ public class MethodAnalyzer {
             if (values.size() > 1 || hasBackEdges) {
 
                 // Make sure all values are of the same type
-                final ConstantDesc type = meetTypesOf(values);
+                final IRType<?> type = meetTypesOf(values);
 
                 // We perform this only if the meet is possible
                 if (type != null) {
@@ -677,12 +679,12 @@ public class MethodAnalyzer {
                 p.use(ir.defineThisRef(owner), new PHIUse(FlowType.FORWARD, ir));
                 initStatus.setLocal(localIndex++, p);
             }
-            final ClassDesc[] argumentTypes = methodTypeDesc.parameterArray();
-            for (int i = 0; i < argumentTypes.length; i++) {
-                final PHI p = loop.definePHI(TypeUtils.jvmInternalTypeOf(argumentTypes[i]));
-                p.use(ir.defineMethodArgument(TypeUtils.jvmInternalTypeOf(argumentTypes[i]), i), new PHIUse(FlowType.FORWARD, ir));
+            for (int i = 0; i < methodTypeDesc.parameterCount(); i++) {
+                final IRType.MetaClass parameterType = methodTypeDesc.parameterType(i);
+                final PHI p = loop.definePHI(TypeUtils.jvmInternalTypeOf(parameterType));
+                p.use(ir.defineMethodArgument((IRType.MetaClass) TypeUtils.jvmInternalTypeOf(parameterType), i), new PHIUse(FlowType.FORWARD, ir));
                 initStatus.setLocal(localIndex++, p);
-                if (TypeUtils.isCategory2(argumentTypes[i])) {
+                if (TypeUtils.isCategory2(parameterType)) {
                     localIndex++;
                 }
             }
@@ -693,10 +695,10 @@ public class MethodAnalyzer {
             if (!method.flags().flags().contains(AccessFlag.STATIC)) {
                 initStatus.setLocal(localIndex++, ir.defineThisRef(owner));
             }
-            final ClassDesc[] argumentTypes = methodTypeDesc.parameterArray();
-            for (int i = 0; i < argumentTypes.length; i++) {
-                initStatus.setLocal(localIndex++, ir.defineMethodArgument(TypeUtils.jvmInternalTypeOf(argumentTypes[i]), i));
-                if (TypeUtils.isCategory2(argumentTypes[i])) {
+            for (int i = 0; i < methodTypeDesc.parameterCount(); i++) {
+                final IRType.MetaClass parameterType = methodTypeDesc.parameterType(i);
+                initStatus.setLocal(localIndex++, ir.defineMethodArgument((IRType.MetaClass) TypeUtils.jvmInternalTypeOf(parameterType), i));
+                if (TypeUtils.isCategory2(parameterType)) {
                     localIndex++;
                 }
             }
@@ -1127,7 +1129,7 @@ public class MethodAnalyzer {
         if (value == null) {
             illegalState("No local value for slot " + slot);
         }
-        frame.out.setLocal(slot, new Add(ConstantDescs.CD_int, value, outgoing.control.definePrimitiveInt(constant)));
+        frame.out.setLocal(slot, new Add(IRType.CD_int, value, outgoing.control.definePrimitiveInt(constant)));
     }
 
     protected void visitInvokeInstruction(final Opcode opcode, final ClassDesc owner, final String methodName, final MethodTypeDesc methodTypeDesc, final Frame frame) {
@@ -1147,13 +1149,13 @@ public class MethodAnalyzer {
             case Opcode.ALOAD, Opcode.ALOAD_3, Opcode.ALOAD_2, Opcode.ALOAD_1, Opcode.ALOAD_0, Opcode.ALOAD_W ->
                     parse_ALOAD(slot, frame);
             case Opcode.ILOAD, Opcode.ILOAD_3, Opcode.ILOAD_2, Opcode.ILOAD_1, Opcode.ILOAD_0, Opcode.ILOAD_W ->
-                    parse_LOAD_TYPE(slot, frame, ConstantDescs.CD_int);
+                    parse_LOAD_TYPE(slot, frame, IRType.CD_int);
             case Opcode.DLOAD, Opcode.DLOAD_3, Opcode.DLOAD_2, Opcode.DLOAD_1, Opcode.DLOAD_0, Opcode.DLOAD_W ->
-                    parse_LOAD_TYPE(slot, frame, ConstantDescs.CD_double);
+                    parse_LOAD_TYPE(slot, frame, IRType.CD_double);
             case Opcode.FLOAD, Opcode.FLOAD_3, Opcode.FLOAD_2, Opcode.FLOAD_1, Opcode.FLOAD_0, Opcode.FLOAD_W ->
-                    parse_LOAD_TYPE(slot, frame, ConstantDescs.CD_float);
+                    parse_LOAD_TYPE(slot, frame, IRType.CD_float);
             case Opcode.LLOAD, Opcode.LLOAD_3, Opcode.LLOAD_2, Opcode.LLOAD_1, Opcode.LLOAD_0, Opcode.LLOAD_W ->
-                    parse_LOAD_TYPE(slot, frame, ConstantDescs.CD_long);
+                    parse_LOAD_TYPE(slot, frame, IRType.CD_long);
             default -> throw new IllegalArgumentException("Not implemented yet : " + opcode);
         }
     }
@@ -1164,13 +1166,13 @@ public class MethodAnalyzer {
             case Opcode.ASTORE, Opcode.ASTORE_3, Opcode.ASTORE_2, Opcode.ASTORE_1, Opcode.ASTORE_0, Opcode.ASTORE_W ->
                     parse_ASTORE(slot, frame);
             case Opcode.ISTORE, Opcode.ISTORE_3, Opcode.ISTORE_2, Opcode.ISTORE_1, Opcode.ISTORE_0, Opcode.ISTORE_W ->
-                    parse_STORE_TYPE(slot, frame, ConstantDescs.CD_int);
+                    parse_STORE_TYPE(slot, frame, IRType.CD_int);
             case Opcode.LSTORE, Opcode.LSTORE_3, Opcode.LSTORE_2, Opcode.LSTORE_1, Opcode.LSTORE_0, Opcode.LSTORE_W ->
-                    parse_STORE_TYPE(slot, frame, ConstantDescs.CD_long);
+                    parse_STORE_TYPE(slot, frame, IRType.CD_long);
             case Opcode.FSTORE, Opcode.FSTORE_0, Opcode.FSTORE_1, Opcode.FSTORE_2, Opcode.FSTORE_3, Opcode.FSTORE_W ->
-                    parse_STORE_TYPE(slot, frame, ConstantDescs.CD_float);
+                    parse_STORE_TYPE(slot, frame, IRType.CD_float);
             case Opcode.DSTORE, Opcode.DSTORE_0, Opcode.DSTORE_1, Opcode.DSTORE_2, Opcode.DSTORE_3, Opcode.DSTORE_W ->
-                    parse_STORE_TYPE(slot, frame, ConstantDescs.CD_double);
+                    parse_STORE_TYPE(slot, frame, IRType.CD_double);
             default -> throw new IllegalArgumentException("Not implemented yet : " + opcode);
         }
     }
@@ -1264,7 +1266,7 @@ public class MethodAnalyzer {
         final ClassDesc lookupOwner = ClassDesc.of(MethodHandles.Lookup.class.getName());
 
         // Default bootstrap arguments
-        bootstrapArguments.add(new InvokeStatic(lookupOwner, invokerType, "in", MethodTypeDesc.of(lookupOwner, ClassDesc.of(Class.class.getName())), List.of(invokerType)));
+        bootstrapArguments.add(new InvokeStatic(resolverContext.resolveType(lookupOwner), invokerType, "in", new IRType.MethodType(MethodTypeDesc.of(lookupOwner, ClassDesc.of(Class.class.getName()))), List.of(invokerType)));
         bootstrapArguments.add(outgoing.control.defineStringConstant(node.name().stringValue()));
         bootstrapArguments.add(constantToValue(outgoing.control, node.typeSymbol()));
 
@@ -1283,7 +1285,7 @@ public class MethodAnalyzer {
                     varargsValues.add(constantToValue(outgoing.control, node.bootstrapArgs().get(argIndex++)));
                 }
 
-                final VarArgsArray varargs = new VarArgsArray(ConstantDescs.CD_Object, varargsValues);
+                final VarArgsArray varargs = new VarArgsArray(IRType.CD_Object, varargsValues);
                 // The array instance must be reachable by the graph...
                 // TODO: Maybe this should be factored out?
                 varargs.use(outgoing.control, DefinedByUse.INSTANCE);
@@ -1291,14 +1293,14 @@ public class MethodAnalyzer {
                 break;
             }
         }
-        final Value bootstrapInvocation = new InvokeStatic(bootstrapMethod.owner(), outgoing.control.defineRuntimeclassReference(bootstrapMethod.owner()), bootstrapMethod.methodName(), bootstrapMethodType, bootstrapArguments);
+        final Value bootstrapInvocation = new InvokeStatic(resolverContext.resolveType(bootstrapMethod.owner()), outgoing.control.defineRuntimeclassReference(resolverContext.resolveType(bootstrapMethod.owner())), bootstrapMethod.methodName(), new IRType.MethodType(bootstrapMethodType), bootstrapArguments);
 
         final List<Value> dynamicArguments = new ArrayList<>();
         for (int i = 0; i < expectedarguments; i++) {
             dynamicArguments.add(frame.out.pop());
         }
 
-        final Value invokeDynamic = new InvokeDynamic(owner, bootstrapInvocation, node.name().stringValue(), methodTypeDesc, dynamicArguments.reversed());
+        final Value invokeDynamic = new InvokeDynamic(owner, bootstrapInvocation, node.name().stringValue(), new IRType.MethodType(methodTypeDesc), dynamicArguments.reversed());
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(invokeDynamic);
         outgoing.control = outgoing.control.controlFlowsTo(invokeDynamic, FlowType.FORWARD);
@@ -1450,16 +1452,16 @@ public class MethodAnalyzer {
         assertMinimumStackSize(outgoing, 1);
 
         final Value length = frame.out.pop();
-        final ClassDesc type;
+        final IRType.MetaClass type;
         switch (kind) {
-            case BYTE -> type = ConstantDescs.CD_byte.arrayType();
-            case SHORT -> type = ConstantDescs.CD_short.arrayType();
-            case BOOLEAN -> type = ConstantDescs.CD_boolean.arrayType();
-            case CHAR -> type = ConstantDescs.CD_char.arrayType();
-            case INT -> type = ConstantDescs.CD_int.arrayType();
-            case LONG -> type = ConstantDescs.CD_long.arrayType();
-            case FLOAT -> type = ConstantDescs.CD_float.arrayType();
-            case DOUBLE -> type = ConstantDescs.CD_double.arrayType();
+            case BYTE -> type = IRType.CD_byte.arrayType();
+            case SHORT -> type = IRType.CD_short.arrayType();
+            case BOOLEAN -> type = IRType.CD_boolean.arrayType();
+            case CHAR -> type = IRType.CD_char.arrayType();
+            case INT -> type = IRType.CD_int.arrayType();
+            case LONG -> type = IRType.CD_long.arrayType();
+            case FLOAT -> type = IRType.CD_float.arrayType();
+            case DOUBLE -> type = IRType.CD_double.arrayType();
             default -> throw new IllegalArgumentException("Not implemented type kind for array creation " + kind);
         }
         final NewArray newArray = new NewArray(type.componentType(), length);
@@ -1508,7 +1510,7 @@ public class MethodAnalyzer {
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, 1);
 
-        final NewArray newArray = new NewArray(componentType, outgoing.pop());
+        final NewArray newArray = new NewArray(resolverContext.resolveType(componentType), outgoing.pop());
         outgoing.push(newArray);
         outgoing.memory = outgoing.memory.memoryFlowsTo(newArray);
         frame.entryPoint = newArray;
@@ -1520,14 +1522,14 @@ public class MethodAnalyzer {
         final Status outgoing = frame.copyIncomingToOutgoing();
 
         final Value value = frame.out.pop();
-        if (!ConstantDescs.CD_int.equals(value.type)) {
+        if (!IRType.CD_int.equals(value.type)) {
             illegalState("Expected an int on stack for " + opcode + ", but got a " + TypeUtils.toString(value.type));
         }
 
-        outgoing.push(new Extend(targetType, extendType, new Truncate(truncatedTo, value)));
+        outgoing.push(new Extend(resolverContext.resolveType(targetType), extendType, new Truncate(resolverContext.resolveType(truncatedTo), value)));
     }
 
-    private void parse_extend(final Opcode opcode, final Frame frame, final ClassDesc expectedType, final ClassDesc targetType, final Extend.ExtendType extendType) {
+    private void parse_extend(final Opcode opcode, final Frame frame, final IRType.MetaClass expectedType, final IRType.MetaClass targetType, final Extend.ExtendType extendType) {
         assertMinimumStackSize(frame.in, 1);
 
         final Status outgoing = frame.copyIncomingToOutgoing();
@@ -1548,18 +1550,18 @@ public class MethodAnalyzer {
             case Opcode.I2C -> parse_truncate_and_extend(opcode, frame, ConstantDescs.CD_int, ConstantDescs.CD_char, Extend.ExtendType.ZERO);
             case Opcode.I2S -> parse_truncate_and_extend(opcode, frame, ConstantDescs.CD_int, ConstantDescs.CD_short, Extend.ExtendType.SIGN);
             // TODO: Extend cases, maybe remove convert instruction?
-            case Opcode.I2L -> parse_extend(opcode, frame, ConstantDescs.CD_int, ConstantDescs.CD_long, Extend.ExtendType.SIGN);
-            case Opcode.I2F -> parse_CONVERT_X(frame, ConstantDescs.CD_int, ConstantDescs.CD_float);
-            case Opcode.I2D -> parse_CONVERT_X(frame, ConstantDescs.CD_int, ConstantDescs.CD_double);
-            case Opcode.L2I -> parse_CONVERT_X(frame, ConstantDescs.CD_long, ConstantDescs.CD_int);
-            case Opcode.L2F -> parse_CONVERT_X(frame, ConstantDescs.CD_long, ConstantDescs.CD_float);
-            case Opcode.L2D -> parse_CONVERT_X(frame, ConstantDescs.CD_long, ConstantDescs.CD_double);
-            case Opcode.F2I -> parse_CONVERT_X(frame, ConstantDescs.CD_float, ConstantDescs.CD_int);
-            case Opcode.F2L -> parse_CONVERT_X(frame, ConstantDescs.CD_float, ConstantDescs.CD_long);
-            case Opcode.F2D -> parse_CONVERT_X(frame, ConstantDescs.CD_float, ConstantDescs.CD_double);
-            case Opcode.D2I -> parse_CONVERT_X(frame, ConstantDescs.CD_double, ConstantDescs.CD_int);
-            case Opcode.D2L -> parse_CONVERT_X(frame, ConstantDescs.CD_double, ConstantDescs.CD_long);
-            case Opcode.D2F -> parse_CONVERT_X(frame, ConstantDescs.CD_double, ConstantDescs.CD_float);
+            case Opcode.I2L -> parse_extend(opcode, frame, IRType.CD_int, IRType.CD_long, Extend.ExtendType.SIGN);
+            case Opcode.I2F -> parse_CONVERT_X(frame, IRType.CD_int, IRType.CD_float);
+            case Opcode.I2D -> parse_CONVERT_X(frame, IRType.CD_int, IRType.CD_double);
+            case Opcode.L2I -> parse_CONVERT_X(frame, IRType.CD_long, IRType.CD_int);
+            case Opcode.L2F -> parse_CONVERT_X(frame, IRType.CD_long, IRType.CD_float);
+            case Opcode.L2D -> parse_CONVERT_X(frame, IRType.CD_long, IRType.CD_double);
+            case Opcode.F2I -> parse_CONVERT_X(frame, IRType.CD_float, IRType.CD_int);
+            case Opcode.F2L -> parse_CONVERT_X(frame, IRType.CD_float, IRType.CD_long);
+            case Opcode.F2D -> parse_CONVERT_X(frame, IRType.CD_float, IRType.CD_double);
+            case Opcode.D2I -> parse_CONVERT_X(frame, IRType.CD_double, IRType.CD_int);
+            case Opcode.D2L -> parse_CONVERT_X(frame, IRType.CD_double, IRType.CD_long);
+            case Opcode.D2F -> parse_CONVERT_X(frame, IRType.CD_double, IRType.CD_float);
             default -> throw new IllegalArgumentException("Not implemented yet : " + opcode);
         }
     }
@@ -1572,7 +1574,7 @@ public class MethodAnalyzer {
         for (int i = 0; i < dimensionSize; i++) {
             dimensions.add(outgoing.pop());
         }
-        final NewMultiArray newMultiArray = new NewMultiArray(arrayType, dimensions);
+        final NewMultiArray newMultiArray = new NewMultiArray(resolverContext.resolveType(arrayType), dimensions);
         outgoing.push(newMultiArray);
         outgoing.memory = outgoing.memory.memoryFlowsTo(newMultiArray);
         frame.entryPoint = newMultiArray;
@@ -1594,7 +1596,7 @@ public class MethodAnalyzer {
 
         final Value target = outgoing.pop();
 
-        final Value next = new InvokeSpecial(owner, target, methodName, methodTypeDesc, arguments.reversed());
+        final Value next = new InvokeSpecial(resolverContext.resolveType(owner), target, methodName, new IRType.MethodType(methodTypeDesc), arguments.reversed());
         outgoing.control = outgoing.control.controlFlowsTo(next, FlowType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(next);
 
@@ -1622,7 +1624,7 @@ public class MethodAnalyzer {
 
         final Value target = outgoing.pop();
 
-        final Invoke invoke = new InvokeVirtual(owner, target, methodName, methodTypeDesc, arguments.reversed());
+        final Invoke invoke = new InvokeVirtual(resolverContext.resolveType(owner), target, methodName, new IRType.MethodType(methodTypeDesc), arguments.reversed());
 
         outgoing.control = outgoing.control.controlFlowsTo(invoke, FlowType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(invoke);
@@ -1650,7 +1652,7 @@ public class MethodAnalyzer {
 
         final Value target = outgoing.pop();
 
-        final Invoke invoke = new InvokeInterface(owner, target, methodName, methodTypeDesc, arguments.reversed());
+        final Invoke invoke = new InvokeInterface(resolverContext.resolveType(owner), target, methodName, new IRType.MethodType(methodTypeDesc), arguments.reversed());
 
         outgoing.control = outgoing.control.controlFlowsTo(invoke, FlowType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(invoke);
@@ -1670,7 +1672,7 @@ public class MethodAnalyzer {
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, args.length);
 
-        final RuntimeclassReference runtimeClass = outgoing.control.defineRuntimeclassReference(owner);
+        final RuntimeclassReference runtimeClass = outgoing.control.defineRuntimeclassReference(resolverContext.resolveType(owner));
         final ClassInitialization init = new ClassInitialization(runtimeClass);
 
         final List<Value> arguments = new ArrayList<>();
@@ -1679,7 +1681,7 @@ public class MethodAnalyzer {
             arguments.add(v);
         }
 
-        final Invoke invoke = new InvokeStatic(owner, init, methodName, methodTypeDesc, arguments.reversed());
+        final Invoke invoke = new InvokeStatic(resolverContext.resolveType(owner), init, methodName, new IRType.MethodType(methodTypeDesc), arguments.reversed());
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(init);
         outgoing.memory = outgoing.memory.memoryFlowsTo(invoke);
@@ -1706,7 +1708,7 @@ public class MethodAnalyzer {
         outgoing.push(v);
     }
 
-    private void parse_LOAD_TYPE(final int slot, final Frame frame, final ClassDesc type) {
+    private void parse_LOAD_TYPE(final int slot, final Frame frame, final IRType.MetaClass type) {
         final Value v = frame.in.getLocal(slot);
         if (v == null) {
             illegalState("Slot " + slot + " is null");
@@ -1730,7 +1732,7 @@ public class MethodAnalyzer {
         frame.out.setLocal(slot, v);
     }
 
-    private void parse_STORE_TYPE(final int slot, final Frame frame, final ClassDesc type) {
+    private void parse_STORE_TYPE(final int slot, final Frame frame, final IRType.MetaClass type) {
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, 1);
 
@@ -1887,9 +1889,9 @@ public class MethodAnalyzer {
             case final Long l -> control.definePrimitiveLong(l);
             case final Float f -> control.definePrimitiveFloat(f);
             case final Double d -> control.definePrimitiveDouble(d);
-            case final ClassDesc classDesc -> control.defineRuntimeclassReference(classDesc);
-            case final MethodTypeDesc mtd -> ir.defineMethodType(mtd);
-            case final MethodHandleDesc mh -> ir.defineMethodHandle(mh);
+            case final ClassDesc classDesc -> control.defineRuntimeclassReference(resolverContext.resolveType(classDesc));
+            case final MethodTypeDesc mtd -> ir.defineMethodType(new IRType.MethodType(mtd));
+            case final MethodHandleDesc mh -> ir.defineMethodHandle(new IRType.MethodHandle(mh));
             case null, default -> {
                 illegalState("Cannot convert " + constantDesc + " to IR value");
                 yield null;
@@ -1944,7 +1946,7 @@ public class MethodAnalyzer {
         assertMinimumStackSize(outgoing, 1);
 
         final Value v = outgoing.pop();
-        final GetField get = new GetField(owner, fieldType, fieldName, v);
+        final GetField get = new GetField(resolverContext.resolveType(owner), resolverContext.resolveType(fieldType), fieldName, v);
         outgoing.push(get);
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(get);
@@ -1957,7 +1959,7 @@ public class MethodAnalyzer {
         final Value v = outgoing.pop();
         final Value target = outgoing.pop();
 
-        final PutField put = new PutField(owner, fieldType, fieldName, target, v);
+        final PutField put = new PutField(resolverContext.resolveType(owner), resolverContext.resolveType(fieldType), fieldName, target, v);
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(put);
         outgoing.control = outgoing.control.controlFlowsTo(put, FlowType.FORWARD);
@@ -1966,12 +1968,12 @@ public class MethodAnalyzer {
     private void parse_GETSTATIC(final ClassDesc owner, final ClassDesc fieldType, final String fieldName, final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
 
-        final RuntimeclassReference ri = outgoing.control.defineRuntimeclassReference(owner);
+        final RuntimeclassReference ri = outgoing.control.defineRuntimeclassReference(resolverContext.resolveType(owner));
         final ClassInitialization init = new ClassInitialization(ri);
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(init);
 
-        final GetStatic get = new GetStatic(ri, fieldName, fieldType);
+        final GetStatic get = new GetStatic(ri, fieldName, resolverContext.resolveType(fieldType));
         outgoing.push(get);
 
         outgoing.control = outgoing.control.controlFlowsTo(init, FlowType.FORWARD);
@@ -1982,14 +1984,14 @@ public class MethodAnalyzer {
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, 1);
 
-        final RuntimeclassReference ri = outgoing.control.defineRuntimeclassReference(owner);
+        final RuntimeclassReference ri = outgoing.control.defineRuntimeclassReference(resolverContext.resolveType(owner));
         final ClassInitialization init = new ClassInitialization(ri);
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(init);
 
         final Value v = outgoing.pop();
 
-        final PutStatic put = new PutStatic(ri, fieldName, fieldType, v);
+        final PutStatic put = new PutStatic(ri, fieldName, resolverContext.resolveType(fieldType), v);
         outgoing.memory = outgoing.memory.memoryFlowsTo(put);
         outgoing.control = outgoing.control.controlFlowsTo(init, FlowType.FORWARD);
         outgoing.control = outgoing.control.controlFlowsTo(put, FlowType.FORWARD);
@@ -1998,7 +2000,7 @@ public class MethodAnalyzer {
     private void parse_NEW(final ClassDesc type, final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
 
-        final RuntimeclassReference ri = outgoing.control.defineRuntimeclassReference(type);
+        final RuntimeclassReference ri = outgoing.control.defineRuntimeclassReference(resolverContext.resolveType(type));
         final ClassInitialization init = new ClassInitialization(ri);
 
         final New n = new New(init);
@@ -2056,7 +2058,7 @@ public class MethodAnalyzer {
         final Status outgoing = frame.copyIncomingToOutgoing();
 
         final Value objectToCheck = outgoing.peek();
-        final RuntimeclassReference expectedType = outgoing.control.defineRuntimeclassReference(typeToCheck);
+        final RuntimeclassReference expectedType = outgoing.control.defineRuntimeclassReference(resolverContext.resolveType(typeToCheck));
 
         final ClassInitialization classInit = new ClassInitialization(expectedType);
         outgoing.control = outgoing.control.controlFlowsTo(classInit, FlowType.FORWARD);
@@ -2070,7 +2072,7 @@ public class MethodAnalyzer {
         assertMinimumStackSize(outgoing, 1);
 
         final Value objectToCheck = outgoing.pop();
-        final RuntimeclassReference expectedType = outgoing.control.defineRuntimeclassReference(typeToCheck);
+        final RuntimeclassReference expectedType = outgoing.control.defineRuntimeclassReference(resolverContext.resolveType(typeToCheck));
 
         final ClassInitialization classInit = new ClassInitialization(expectedType);
         outgoing.control = outgoing.control.controlFlowsTo(classInit, FlowType.FORWARD);
@@ -2250,17 +2252,17 @@ public class MethodAnalyzer {
     }
 
     private void parse_ADD_X(final Frame frame, final Value value1, final Value value2, final ClassDesc desc) {
-        final Add add = new Add(desc, value1, value2);
+        final Add add = new Add(resolverContext.resolveType(desc), value1, value2);
         frame.out.push(add);
     }
 
     private void parse_SUB_X(final Frame frame, final Value value1, final Value value2, final ClassDesc desc) {
-        final Sub sub = new Sub(desc, value1, value2);
+        final Sub sub = new Sub(resolverContext.resolveType(desc), value1, value2);
         frame.out.push(sub);
     }
 
     private void parse_MUL_X(final Frame frame, final Value value1, final Value value2, final ClassDesc desc) {
-        final Mul mul = new Mul(desc, value1, value2);
+        final Mul mul = new Mul(resolverContext.resolveType(desc), value1, value2);
         frame.out.push(mul);
     }
 
@@ -2275,11 +2277,11 @@ public class MethodAnalyzer {
         final Status outgoing = frame.copyIncomingToOutgoing();
 
         final Value a = outgoing.pop();
-        outgoing.push(new Negate(desc, a));
+        outgoing.push(new Negate(resolverContext.resolveType(desc), a));
     }
 
     private void parse_DIV_X(final Frame frame, final Value value1, final Value value2, final ClassDesc desc) {
-        final Div div = new Div(desc, value1, value2);
+        final Div div = new Div(resolverContext.resolveType(desc), value1, value2);
 
         final Status outgoing = frame.out;
         outgoing.control = outgoing.control.controlFlowsTo(div, FlowType.FORWARD);
@@ -2288,19 +2290,19 @@ public class MethodAnalyzer {
     }
 
     private void parse_REM_X(final Frame frame, final Value value1, final Value value2, final ClassDesc desc) {
-        final Rem rem = new Rem(desc, value1, value2);
+        final Rem rem = new Rem(resolverContext.resolveType(desc), value1, value2);
         final Status outgoing = frame.out;
         outgoing.control = outgoing.control.controlFlowsTo(rem, FlowType.FORWARD);
         outgoing.push(rem);
     }
 
     private void parse_BITOPERATION_X(final Frame frame, final Value value1, final Value value2, final ClassDesc desc, final BitOperation.Operation operation) {
-        final BitOperation rem = new BitOperation(desc, operation, value1, value2);
+        final BitOperation rem = new BitOperation(resolverContext.resolveType(desc), operation, value1, value2);
         frame.out.push(rem);
     }
 
     protected void parse_NUMERICCOMPARE_X(final Frame frame, final Value value1, final Value value2, final ClassDesc compareType, final NumericCompare.Mode mode) {
-        final NumericCompare compare = new NumericCompare(mode, compareType, value1, value2);
+        final NumericCompare compare = new NumericCompare(mode, resolverContext.resolveType(compareType), value1, value2);
         frame.out.push(compare);
     }
 
@@ -2328,11 +2330,11 @@ public class MethodAnalyzer {
         final Value index = outgoing.pop();
         final Value array = outgoing.pop();
 
-        if (!value.type.equals(ConstantDescs.CD_int)) {
+        if (!value.type.equals(IRType.CD_int)) {
             illegalState("Expected value of type int for " + opcode);
         }
 
-        final ClassDesc arrayType = (ClassDesc) array.type;
+        final IRType.MetaClass arrayType = (IRType.MetaClass) array.type;
 
         final ArrayStore store = new ArrayStore(array, index, new Truncate(arrayType.componentType(), value));
 
@@ -2375,11 +2377,11 @@ public class MethodAnalyzer {
         final Value index = outgoing.pop();
         final Value array = outgoing.pop();
 
-        final ClassDesc arrayType = (ClassDesc) array.type;
+        final IRType.MetaClass arrayType = (IRType.MetaClass) array.type;
 
         final Value load = new ArrayLoad(arrayType, array, index);
 
-        final Value value = new Extend(ConstantDescs.CD_int, type, load);
+        final Value value = new Extend(IRType.CD_int, type, load);
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(load);
         //outgoing.control = outgoing.control.controlFlowsTo(load, FlowType.FORWARD);
@@ -2392,7 +2394,7 @@ public class MethodAnalyzer {
 
         final Value index = outgoing.pop();
         final Value array = outgoing.pop();
-        final Value value = new ArrayLoad(arrayType, array, index);
+        final Value value = new ArrayLoad(resolverContext.resolveType(arrayType), array, index);
         outgoing.memory = outgoing.memory.memoryFlowsTo(value);
         //outgoing.control = outgoing.control.controlFlowsTo(value, FlowType.FORWARD);
         outgoing.push(value);
@@ -2405,7 +2407,7 @@ public class MethodAnalyzer {
         final Value index = outgoing.pop();
         final Value array = outgoing.pop();
 
-        final ClassDesc arrayType = (ClassDesc) array.type;
+        final IRType.MetaClass arrayType = (IRType.MetaClass) array.type;
 
         final Value value = new ArrayLoad(arrayType, array, index);
         outgoing.memory = outgoing.memory.memoryFlowsTo(value);
@@ -2413,7 +2415,7 @@ public class MethodAnalyzer {
         outgoing.push(value);
     }
 
-    private void parse_CONVERT_X(final Frame frame, final ClassDesc from, final ClassDesc to) {
+    private void parse_CONVERT_X(final Frame frame, final IRType.MetaClass from, final IRType.MetaClass to) {
         final Status outgoing = frame.copyIncomingToOutgoing();
 
         outgoing.push(new Convert(to, outgoing.pop(), from));
@@ -2428,7 +2430,7 @@ public class MethodAnalyzer {
 
     private static class CatchHandler {
         private final Label handler;
-        private final List<ClassDesc> exceptionTypes;
+        private final List<IRType.MetaClass> exceptionTypes;
         private boolean finallyHandler;
 
         public CatchHandler(final Label handler) {
@@ -2444,7 +2446,7 @@ public class MethodAnalyzer {
             }
         }
 
-        public void addCaughtException(final ClassDesc classEntry) {
+        public void addCaughtException(final IRType.MetaClass classEntry) {
             if (!finallyHandler) {
                 exceptionTypes.add(classEntry);
             } else {
