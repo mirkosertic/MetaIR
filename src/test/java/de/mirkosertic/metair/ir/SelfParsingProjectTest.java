@@ -62,26 +62,22 @@ public class SelfParsingProjectTest {
 
     @TestFactory
     public List<DynamicContainer> testAllProjectClasses() {
+
+        final ResolverContext resolverContext = new ResolverContext();
+
         return ReflectionSupport.findAllClassesInPackage("de.mirkosertic", _ -> true, s -> true).stream().map(aClass -> {
 
             final List<DynamicTest> tests = new ArrayList<>();
 
-            final URL resource = aClass.getClassLoader().getResource(aClass.getName().replace('.', File.separatorChar) + ".class");
-            if (resource == null) {
-                throw new IllegalStateException("Cannot find class file for " + aClass.getName());
-            }
+            try {
+                final ResolvedClass resolvedClass = resolverContext.resolveClass(aClass.getName());
 
-            try (final InputStream inputStream = resource.openStream()) {
-                final byte[] data = inputStream.readAllBytes();
-
-                final ClassFile cf = ClassFile.of();
-                final ClassModel model = cf.parse(data);
+                final ClassModel model = resolvedClass.classModel();
 
                 for (final MethodModel method : model.methods()) {
 
                     tests.add(DynamicTest.dynamicTest(method.methodName().stringValue() + " " + method.methodType().stringValue(), () -> {
                         try {
-                            final ResolverContext resolverContext = new ResolverContext();
                             final MethodAnalyzer analyzer = new MethodAnalyzer(resolverContext, IRType.MetaClass.of(model.thisClass().asSymbol()), method);
                         } catch (final IllegalParsingStateException e) {
                             final MethodAnalyzer analyzer = e.getAnalyzer();
@@ -100,12 +96,12 @@ public class SelfParsingProjectTest {
                         }
                     }));
                 }
-            } catch (final IOException e) {
+
+            } catch (final Exception e) {
                 throw new RuntimeException("Failed to load class data for " + aClass.getName(), e);
             }
 
             return DynamicContainer.dynamicContainer(aClass.getName(), tests);
-
         }).toList();
     }
 }

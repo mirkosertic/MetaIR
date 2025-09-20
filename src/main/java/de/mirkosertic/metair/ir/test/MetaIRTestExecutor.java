@@ -1,17 +1,14 @@
 package de.mirkosertic.metair.ir.test;
 
+import de.mirkosertic.metair.ir.ResolvedClass;
+import de.mirkosertic.metair.ir.ResolverContext;
 import org.junit.platform.engine.ExecutionRequest;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.support.descriptor.EngineDescriptor;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.classfile.ClassFile;
 import java.lang.classfile.ClassModel;
 import java.lang.classfile.MethodModel;
-import java.net.URL;
 import java.nio.file.Path;
 
 public class MetaIRTestExecutor {
@@ -42,28 +39,19 @@ public class MetaIRTestExecutor {
         try {
             final Class<?> origin = descriptor.getTestClass();
 
-            final URL resource = origin.getClassLoader().getResource(origin.getName().replace('.', File.separatorChar) + ".class");
-            if (resource == null) {
-                throw new IllegalStateException("Cannot find class file for " + origin.getName());
-            }
+            final ResolverContext ctx = new ResolverContext();
+            final ResolvedClass resolvedClass = ctx.resolveClass(origin.getName());
 
-            try (final InputStream inputStream = resource.openStream()) {
-                final byte[] data = inputStream.readAllBytes();
+            final ClassModel model = resolvedClass.classModel();
 
-                final ClassFile cf = ClassFile.of();
-                final ClassModel model = cf.parse(data);
+            for (final MethodModel method : model.methods()) {
 
-                for (final MethodModel method : model.methods()) {
+                if (method.methodName().stringValue().equals(descriptor.getMethodName())) {
 
-                    if (method.methodName().stringValue().equals(descriptor.getMethodName())) {
+                    final Path targetDir = request.getOutputDirectoryProvider().createOutputDirectory(descriptor);
 
-                        final Path targetDir = request.getOutputDirectoryProvider().createOutputDirectory(descriptor);
-
-                        new MetaIRTestHelper(targetDir).analyzeAndReport(model, method);
-                    }
+                    new MetaIRTestHelper(targetDir).analyzeAndReport(model, method);
                 }
-            } catch (final IOException e) {
-                throw new RuntimeException("Failed to load class data for " + origin.getName(), e);
             }
 
             request.getEngineExecutionListener().executionFinished(descriptor, TestExecutionResult.successful());
