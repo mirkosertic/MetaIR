@@ -26,7 +26,7 @@ public class MethodAnalyzerTest {
 
         @BeforeEach
         public void setup() {
-            analyzer = new MethodAnalyzer();
+            analyzer = new MethodAnalyzer(new ResolverContext());
         }
 
         @Test
@@ -164,7 +164,7 @@ public class MethodAnalyzerTest {
 
         @BeforeEach
         public void setup() {
-            analyzer = new MethodAnalyzer();
+            analyzer = new MethodAnalyzer(new ResolverContext());
         }
 
         @Nested
@@ -4532,7 +4532,8 @@ public class MethodAnalyzerTest {
                 frame.in.memory = new LabelNode("memory");
 
                 frame.in.stack.push(new StringConstant("hello"));
-                new MethodAnalyzer(new IRType.MethodType(MethodTypeDesc.of(ConstantDescs.CD_String))).visitReturnInstruction(Opcode.ARETURN, frame);
+                final ResolverContext resolverContext = new ResolverContext();
+                new MethodAnalyzer(resolverContext, resolverContext.resolveMethodType(MethodTypeDesc.of(ConstantDescs.CD_String))).visitReturnInstruction(Opcode.ARETURN, frame);
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
@@ -4548,7 +4549,8 @@ public class MethodAnalyzerTest {
                     frame.in.control = new LabelNode("control");
                     frame.in.memory = new LabelNode("memory");
 
-                    new MethodAnalyzer(new IRType.MethodType(MethodTypeDesc.of(ConstantDescs.CD_String))).visitReturnInstruction(Opcode.ARETURN, frame);
+                    final ResolverContext resolverContext = new ResolverContext();
+                    new MethodAnalyzer(resolverContext, resolverContext.resolveMethodType(MethodTypeDesc.of(ConstantDescs.CD_String))).visitReturnInstruction(Opcode.ARETURN, frame);
                     fail("Exception expected");
                 }).withMessage("Expecting only one value on the stack");
             }
@@ -4603,7 +4605,9 @@ public class MethodAnalyzerTest {
                 frame.in.memory = new LabelNode("memory");
 
                 frame.in.push(new PrimitiveInt(10));
-                new MethodAnalyzer(new IRType.MethodType(MethodTypeDesc.of(ConstantDescs.CD_int))).visitReturnInstruction(Opcode.IRETURN, frame);
+
+                final ResolverContext resolverContext = new ResolverContext();
+                new MethodAnalyzer(resolverContext, resolverContext.resolveMethodType(MethodTypeDesc.of(ConstantDescs.CD_int))).visitReturnInstruction(Opcode.IRETURN, frame);
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
@@ -4619,7 +4623,9 @@ public class MethodAnalyzerTest {
                 frame.in.memory = new LabelNode("memory");
 
                 frame.in.push(new PrimitiveDouble(10d));
-                new MethodAnalyzer(new IRType.MethodType(MethodTypeDesc.of(ConstantDescs.CD_double))).visitReturnInstruction(Opcode.DRETURN, frame);
+
+                final ResolverContext resolverContext = new ResolverContext();
+                new MethodAnalyzer(resolverContext, resolverContext.resolveMethodType(MethodTypeDesc.of(ConstantDescs.CD_double))).visitReturnInstruction(Opcode.DRETURN, frame);
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
@@ -4635,7 +4641,9 @@ public class MethodAnalyzerTest {
                 frame.in.memory = new LabelNode("memory");
 
                 frame.in.push(new PrimitiveFloat(10f));
-                new MethodAnalyzer(new IRType.MethodType(MethodTypeDesc.of(ConstantDescs.CD_float))).visitReturnInstruction(Opcode.FRETURN, frame);
+
+                final ResolverContext resolverContext = new ResolverContext();
+                new MethodAnalyzer(resolverContext, resolverContext.resolveMethodType(MethodTypeDesc.of(ConstantDescs.CD_float))).visitReturnInstruction(Opcode.FRETURN, frame);
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
@@ -4651,7 +4659,9 @@ public class MethodAnalyzerTest {
                 frame.in.memory = new LabelNode("memory");
 
                 frame.in.push(new PrimitiveLong(10L));
-                new MethodAnalyzer(new IRType.MethodType(MethodTypeDesc.of(ConstantDescs.CD_long))).visitReturnInstruction(Opcode.LRETURN, frame);
+
+                final ResolverContext resolverContext = new ResolverContext();
+                new MethodAnalyzer(resolverContext, resolverContext.resolveMethodType(MethodTypeDesc.of(ConstantDescs.CD_long))).visitReturnInstruction(Opcode.LRETURN, frame);
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
@@ -4667,7 +4677,8 @@ public class MethodAnalyzerTest {
                 frame.in.memory = new LabelNode("memory");
 
                 frame.in.push(new PrimitiveInt(10));
-                new MethodAnalyzer(new IRType.MethodType(MethodTypeDesc.of(ConstantDescs.CD_boolean))).visitReturnInstruction(Opcode.IRETURN, frame);
+                final ResolverContext resolverContext = new ResolverContext();
+                new MethodAnalyzer(resolverContext, resolverContext.resolveMethodType(MethodTypeDesc.of(ConstantDescs.CD_boolean))).visitReturnInstruction(Opcode.IRETURN, frame);
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).isEmpty();
@@ -4684,7 +4695,9 @@ public class MethodAnalyzerTest {
                     frame.in.memory = new LabelNode("memory");
 
                     frame.in.push(new PrimitiveLong(10));
-                    new MethodAnalyzer(new IRType.MethodType(MethodTypeDesc.of(ConstantDescs.CD_boolean))).visitReturnInstruction(Opcode.IRETURN, frame);
+
+                    final ResolverContext resolverContext = new ResolverContext();
+                    new MethodAnalyzer(resolverContext, resolverContext.resolveMethodType(MethodTypeDesc.of(ConstantDescs.CD_boolean))).visitReturnInstruction(Opcode.IRETURN, frame);
                     fail("Exception expected");
                 }).withMessage("Cannot return value of type long as boolean is expected!");
             }

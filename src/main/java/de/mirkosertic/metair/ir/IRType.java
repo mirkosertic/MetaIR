@@ -5,6 +5,7 @@ import java.lang.constant.ConstantDesc;
 import java.lang.constant.ConstantDescs;
 import java.lang.constant.MethodHandleDesc;
 import java.lang.constant.MethodTypeDesc;
+import java.util.List;
 
 public abstract class IRType<T extends ConstantDesc> {
 
@@ -79,8 +80,13 @@ public abstract class IRType<T extends ConstantDesc> {
 
     public static class MethodType extends IRType<MethodTypeDesc> {
 
-        public MethodType(final MethodTypeDesc type) {
+        private final MetaClass returnType;
+        private final List<MetaClass> parameterTypes;
+
+        public MethodType(final MethodTypeDesc type, final MetaClass returnType, final List<MetaClass> parameterTypes) {
             super(type);
+            this.returnType = returnType;
+            this.parameterTypes = parameterTypes;
         }
 
         @Override
@@ -99,15 +105,15 @@ public abstract class IRType<T extends ConstantDesc> {
         }
 
         public MetaClass returnType() {
-            return new MetaClass(type.returnType());
+            return returnType;
         }
 
         public int parameterCount() {
-            return type.parameterCount();
+            return parameterTypes.size();
         }
 
         public MetaClass parameterType(final int i) {
-            return new MetaClass(type.parameterType(i));
+            return parameterTypes.get(i);
         }
     }
 

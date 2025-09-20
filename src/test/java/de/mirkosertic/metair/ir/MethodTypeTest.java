@@ -12,11 +12,12 @@ class MethodTypeTest {
 
     @Test
     public void testUsage() {
-        final MethodType a = new MethodType(new IRType.MethodType(MethodTypeDesc.of(ConstantDescs.CD_String, List.of(ConstantDescs.CD_int))));
+        final ResolverContext resolverContext = new ResolverContext();
+        final MethodType a = new MethodType(resolverContext.resolveMethodType(MethodTypeDesc.of(ConstantDescs.CD_String, List.of(ConstantDescs.CD_int))));
 
         assertThat(a.sideeffectFree()).isTrue();
 
-        assertThat(a.type).isEqualTo(new IRType.MethodType(MethodTypeDesc.of(ConstantDescs.CD_String, List.of(ConstantDescs.CD_int))));
+        assertThat(a.type).isEqualTo(resolverContext.resolveMethodType(MethodTypeDesc.of(ConstantDescs.CD_String, List.of(ConstantDescs.CD_int))));
         assertThat(a).isInstanceOf(ConstantValue.class);
         assertThat(a.usedBy).isEmpty();
         assertThat(a.uses).isEmpty();

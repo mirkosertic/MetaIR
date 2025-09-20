@@ -13,8 +13,9 @@ public class InvokeInterfaceTest {
 
     @Test
     public void testUsage() {
+        final ResolverContext resolverContext = new ResolverContext();
         final Value target = new StringConstant("hello");
-        final InvokeInterface a = new InvokeInterface(IRType.CD_String, target, "bar", new IRType.MethodType(MethodTypeDesc.of(ConstantDescs.CD_void, List.of(ConstantDescs.CD_int))), List.of(new PrimitiveInt(10)));
+        final InvokeInterface a = new InvokeInterface(IRType.CD_String, target, "bar", resolverContext.resolveMethodType(MethodTypeDesc.of(ConstantDescs.CD_void, List.of(ConstantDescs.CD_int))), List.of(new PrimitiveInt(10)));
 
         assertThat(a.type).isEqualTo(IRType.CD_void);
         assertThat(a).isInstanceOf(Value.class);

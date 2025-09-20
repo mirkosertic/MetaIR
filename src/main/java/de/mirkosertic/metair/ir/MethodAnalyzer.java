@@ -78,20 +78,24 @@ public class MethodAnalyzer {
     private StackMapTableAttribute stackMapTableAttribute;
     private final Map<Label, List<TryCatchBlock>> tryCatchBlocks;
 
-    MethodAnalyzer() {
-        this.resolverContext = new ResolverContext();
+    MethodAnalyzer(final ResolverContext resolverContext) {
+        this.resolverContext = resolverContext;
         this.ir = new Method();
         this.labelToIndex = new HashMap<>();
         this.tryCatchBlocks = new HashMap<>();
     }
 
-    MethodAnalyzer(final IRType.MethodType methodTypeDesc) {
-        this();
+    MethodAnalyzer(final ResolverContext resolverContext, final IRType.MethodType methodTypeDesc) {
+        this(resolverContext);
         this.methodTypeDesc = methodTypeDesc;
     }
 
-    public MethodAnalyzer(final IRType.MetaClass owner, final MethodModel method) {
-        this(new IRType.MethodType(method.methodTypeSymbol()));
+    ResolverContext resolverContext() {
+        return resolverContext;
+    }
+
+    public MethodAnalyzer(final ResolverContext resolverContext, final IRType.MetaClass owner, final MethodModel method) {
+        this(resolverContext, resolverContext.resolveMethodType(method.methodTypeSymbol()));
         this.owner = owner;
         this.method = method;
 
@@ -1266,7 +1270,7 @@ public class MethodAnalyzer {
         final ClassDesc lookupOwner = ClassDesc.of(MethodHandles.Lookup.class.getName());
 
         // Default bootstrap arguments
-        bootstrapArguments.add(new InvokeStatic(resolverContext.resolveType(lookupOwner), invokerType, "in", new IRType.MethodType(MethodTypeDesc.of(lookupOwner, ClassDesc.of(Class.class.getName()))), List.of(invokerType)));
+        bootstrapArguments.add(new InvokeStatic(resolverContext.resolveType(lookupOwner), invokerType, "in", resolverContext.resolveMethodType(MethodTypeDesc.of(lookupOwner, ClassDesc.of(Class.class.getName()))), List.of(invokerType)));
         bootstrapArguments.add(outgoing.control.defineStringConstant(node.name().stringValue()));
         bootstrapArguments.add(constantToValue(outgoing.control, node.typeSymbol()));
 
@@ -1293,14 +1297,14 @@ public class MethodAnalyzer {
                 break;
             }
         }
-        final Value bootstrapInvocation = new InvokeStatic(resolverContext.resolveType(bootstrapMethod.owner()), outgoing.control.defineRuntimeclassReference(resolverContext.resolveType(bootstrapMethod.owner())), bootstrapMethod.methodName(), new IRType.MethodType(bootstrapMethodType), bootstrapArguments);
+        final Value bootstrapInvocation = new InvokeStatic(resolverContext.resolveType(bootstrapMethod.owner()), outgoing.control.defineRuntimeclassReference(resolverContext.resolveType(bootstrapMethod.owner())), bootstrapMethod.methodName(), resolverContext.resolveMethodType(bootstrapMethodType), bootstrapArguments);
 
         final List<Value> dynamicArguments = new ArrayList<>();
         for (int i = 0; i < expectedarguments; i++) {
             dynamicArguments.add(frame.out.pop());
         }
 
-        final Value invokeDynamic = new InvokeDynamic(owner, bootstrapInvocation, node.name().stringValue(), new IRType.MethodType(methodTypeDesc), dynamicArguments.reversed());
+        final Value invokeDynamic = new InvokeDynamic(owner, bootstrapInvocation, node.name().stringValue(), resolverContext.resolveMethodType(methodTypeDesc), dynamicArguments.reversed());
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(invokeDynamic);
         outgoing.control = outgoing.control.controlFlowsTo(invokeDynamic, FlowType.FORWARD);
@@ -1596,7 +1600,7 @@ public class MethodAnalyzer {
 
         final Value target = outgoing.pop();
 
-        final Value next = new InvokeSpecial(resolverContext.resolveType(owner), target, methodName, new IRType.MethodType(methodTypeDesc), arguments.reversed());
+        final Value next = new InvokeSpecial(resolverContext.resolveType(owner), target, methodName, resolverContext.resolveMethodType(methodTypeDesc), arguments.reversed());
         outgoing.control = outgoing.control.controlFlowsTo(next, FlowType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(next);
 
@@ -1624,7 +1628,7 @@ public class MethodAnalyzer {
 
         final Value target = outgoing.pop();
 
-        final Invoke invoke = new InvokeVirtual(resolverContext.resolveType(owner), target, methodName, new IRType.MethodType(methodTypeDesc), arguments.reversed());
+        final Invoke invoke = new InvokeVirtual(resolverContext.resolveType(owner), target, methodName, resolverContext.resolveMethodType(methodTypeDesc), arguments.reversed());
 
         outgoing.control = outgoing.control.controlFlowsTo(invoke, FlowType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(invoke);
@@ -1652,7 +1656,7 @@ public class MethodAnalyzer {
 
         final Value target = outgoing.pop();
 
-        final Invoke invoke = new InvokeInterface(resolverContext.resolveType(owner), target, methodName, new IRType.MethodType(methodTypeDesc), arguments.reversed());
+        final Invoke invoke = new InvokeInterface(resolverContext.resolveType(owner), target, methodName, resolverContext.resolveMethodType(methodTypeDesc), arguments.reversed());
 
         outgoing.control = outgoing.control.controlFlowsTo(invoke, FlowType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(invoke);
@@ -1681,7 +1685,7 @@ public class MethodAnalyzer {
             arguments.add(v);
         }
 
-        final Invoke invoke = new InvokeStatic(resolverContext.resolveType(owner), init, methodName, new IRType.MethodType(methodTypeDesc), arguments.reversed());
+        final Invoke invoke = new InvokeStatic(resolverContext.resolveType(owner), init, methodName, resolverContext.resolveMethodType(methodTypeDesc), arguments.reversed());
 
         outgoing.memory = outgoing.memory.memoryFlowsTo(init);
         outgoing.memory = outgoing.memory.memoryFlowsTo(invoke);
@@ -1890,7 +1894,7 @@ public class MethodAnalyzer {
             case final Float f -> control.definePrimitiveFloat(f);
             case final Double d -> control.definePrimitiveDouble(d);
             case final ClassDesc classDesc -> control.defineRuntimeclassReference(resolverContext.resolveType(classDesc));
-            case final MethodTypeDesc mtd -> ir.defineMethodType(new IRType.MethodType(mtd));
+            case final MethodTypeDesc mtd -> ir.defineMethodType(resolverContext.resolveMethodType(mtd));
             case final MethodHandleDesc mh -> ir.defineMethodHandle(new IRType.MethodHandle(mh));
             case null, default -> {
                 illegalState("Cannot convert " + constantDesc + " to IR value");

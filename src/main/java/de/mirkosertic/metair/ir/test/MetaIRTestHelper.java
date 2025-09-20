@@ -7,6 +7,7 @@ import de.mirkosertic.metair.ir.IRType;
 import de.mirkosertic.metair.ir.IllegalParsingStateException;
 import de.mirkosertic.metair.ir.MethodAnalyzer;
 import de.mirkosertic.metair.ir.Node;
+import de.mirkosertic.metair.ir.ResolverContext;
 import de.mirkosertic.metair.ir.Sequencer;
 
 import java.io.IOException;
@@ -30,7 +31,8 @@ public class MetaIRTestHelper {
         }
 
         try {
-            final MethodAnalyzer analyzer = new MethodAnalyzer(IRType.MetaClass.of(model.thisClass().asSymbol()), method);
+            final ResolverContext resolverContext = new ResolverContext();
+            final MethodAnalyzer analyzer = new MethodAnalyzer(resolverContext, IRType.MetaClass.of(model.thisClass().asSymbol()), method);
 
             DOTExporter.writeTo(analyzer.ir(), new PrintStream(Files.newOutputStream(outputDirectory.resolve("ir.dot"))));
 

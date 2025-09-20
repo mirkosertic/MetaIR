@@ -16,8 +16,9 @@ public class InvokeSpecialTest {
 
     @Test
     public void testUsage() {
+        final ResolverContext resolverContext = new ResolverContext();
         final Value target = new StringConstant("hello");
-        final InvokeSpecial a = new InvokeSpecial(IRType.CD_String, target, "bar", new IRType.MethodType(MethodTypeDesc.of(ConstantDescs.CD_void, List.of(ConstantDescs.CD_int))), List.of(new PrimitiveInt(10)));
+        final InvokeSpecial a = new InvokeSpecial(IRType.CD_String, target, "bar", resolverContext.resolveMethodType(MethodTypeDesc.of(ConstantDescs.CD_void, List.of(ConstantDescs.CD_int))), List.of(new PrimitiveInt(10)));
 
         assertThat(a.type).isEqualTo(IRType.CD_void);
         assertThat(a).isInstanceOf(Value.class);
@@ -34,32 +35,36 @@ public class InvokeSpecialTest {
 
     @Test
     public void fail_invalid_target() {
+        final ResolverContext resolverContext = new ResolverContext();
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
-            new InvokeSpecial(IRType.CD_String, new PrimitiveInt(10), "bar", new IRType.MethodType(MethodTypeDesc.of(ConstantDescs.CD_void)), new ArrayList<>());
+            new InvokeSpecial(IRType.CD_String, new PrimitiveInt(10), "bar", resolverContext.resolveMethodType(MethodTypeDesc.of(ConstantDescs.CD_void)), new ArrayList<>());
             fail("Exception expected");
         }).withMessage("Cannot invoke a method on a primitive value");
     }
 
     @Test
     public void fail_argumentcount_1() {
+        final ResolverContext resolverContext = new ResolverContext();
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
-            new InvokeSpecial(IRType.CD_String, new StringConstant("hello"), "bar", new IRType.MethodType(MethodTypeDesc.of(ConstantDescs.CD_void)), List.of(new PrimitiveInt(10)));
+            new InvokeSpecial(IRType.CD_String, new StringConstant("hello"), "bar", resolverContext.resolveMethodType(MethodTypeDesc.of(ConstantDescs.CD_void)), List.of(new PrimitiveInt(10)));
             fail("Exception expected");
         }).withMessage("Wrong number of arguments for method bar : 0 expected, but got 1");
     }
 
     @Test
     public void fail_argumentcount_2() {
+        final ResolverContext resolverContext = new ResolverContext();
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
-            new InvokeSpecial(IRType.CD_String, new StringConstant("hello"), "bar", new IRType.MethodType(MethodTypeDesc.of(ConstantDescs.CD_void, List.of(ConstantDescs.CD_int))), List.of());
+            new InvokeSpecial(IRType.CD_String, new StringConstant("hello"), "bar", resolverContext.resolveMethodType(MethodTypeDesc.of(ConstantDescs.CD_void, List.of(ConstantDescs.CD_int))), List.of());
             fail("Exception expected");
         }).withMessage("Wrong number of arguments for method bar : 1 expected, but got 0");
     }
 
     @Test
     public void fail_parametertype_mismatch() {
+        final ResolverContext resolverContext = new ResolverContext();
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
-            new InvokeSpecial(IRType.CD_String, new StringConstant("hello"), "bar", new IRType.MethodType(MethodTypeDesc.of(ConstantDescs.CD_void, List.of(ConstantDescs.CD_int))), List.of(new PrimitiveLong(10L)));
+            new InvokeSpecial(IRType.CD_String, new StringConstant("hello"), "bar", resolverContext.resolveMethodType(MethodTypeDesc.of(ConstantDescs.CD_void, List.of(ConstantDescs.CD_int))), List.of(new PrimitiveLong(10L)));
             fail("Exception expected");
         }).withMessage("Parameter 0 of method bar is a int type, but got long");
     }
