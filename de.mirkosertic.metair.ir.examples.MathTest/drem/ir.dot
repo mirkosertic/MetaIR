@@ -1,12 +1,12 @@
 digraph {
  ordering="in";
- node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="3">#0 Method</td></tr><tr><td port="prj1" bgcolor="yellow">arg0 : double</td><td port="prj2" bgcolor="yellow">arg1 : double</td><td port="prj3" bgcolor="yellow">this : MathTest</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
+ node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="3">#0 Method</td></tr><tr><td port="prj2" bgcolor="yellow">arg0 : double</td><td port="prj1" bgcolor="yellow">arg1 : double</td><td port="prj3" bgcolor="yellow">this : MathTest</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
+ node5[label="#5 Rem : double",shape=octagon, fillcolor=orange, style=filled];
+ node0:prj2 -> node5[headlabel="*0", labeldistance=2];
+ node0:prj1 -> node5[headlabel="*1", labeldistance=2];
+ node4 -> node5[labeldistance=2, color=red, fontcolor=red];
  node4[label="#4 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
  node0 -> node4[labeldistance=2, color=red, fontcolor=red];
- node5[label="#5 Rem : double",shape=octagon, fillcolor=orange, style=filled];
- node0:prj1 -> node5[headlabel="*0", labeldistance=2];
- node0:prj2 -> node5[headlabel="*1", labeldistance=2];
- node4 -> node5[labeldistance=2, color=red, fontcolor=red];
  node6[label="#6 ReturnValue : double",shape=box, fillcolor=lightgrey, style=filled];
  node5 -> node6[headlabel="*0", labeldistance=2];
  node5 -> node6[labeldistance=2, color=red, fontcolor=red];

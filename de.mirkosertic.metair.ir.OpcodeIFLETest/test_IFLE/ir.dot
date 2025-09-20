@@ -1,22 +1,22 @@
 digraph {
  ordering="in";
  node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#0 Method</td></tr><tr><td port="prj1" bgcolor="yellow">this : Test</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
- node3[label="#3 int 0",shape=octagon, fillcolor=lightgreen, style=filled];
- node0 -> node3[style=dotted];
- node4[label="#4 NumericCondition : LE",shape=octagon, fillcolor=orange, style=filled];
- node3 -> node4[headlabel="*0", labeldistance=2];
- node2 -> node4[headlabel="*1", labeldistance=2];
- node2[label="#2 int 0",shape=octagon, fillcolor=lightgreen, style=filled];
- node0 -> node2[style=dotted];
  node5[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="2">#5 If</td></tr><tr><td port="prj7" bgcolor="yellow">false</td><td port="prj6" bgcolor="yellow">true</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
  node4 -> node5[headlabel="*0", labeldistance=2];
  node0 -> node5[labeldistance=2, color=red, fontcolor=red];
+ node4[label="#4 NumericCondition : LE",shape=octagon, fillcolor=orange, style=filled];
+ node2 -> node4[headlabel="*0", labeldistance=2];
+ node3 -> node4[headlabel="*1", labeldistance=2];
+ node3[label="#3 int 0",shape=octagon, fillcolor=lightgreen, style=filled];
+ node0 -> node3[style=dotted];
+ node2[label="#2 int 0",shape=octagon, fillcolor=lightgreen, style=filled];
+ node0 -> node2[style=dotted];
+ node9[label="#9 int 1",shape=octagon, fillcolor=lightgreen, style=filled];
+ node5:prj7 -> node9[style=dotted];
  node10[label="#10 ReturnValue : int",shape=box, fillcolor=lightgrey, style=filled];
  node9 -> node10[headlabel="*0", labeldistance=2];
  node5:prj7 -> node10[labeldistance=2, color=red, fontcolor=red];
  node0 -> node10[labeldistance=2, color=green, constraint=false];
- node9[label="#9 int 1",shape=octagon, fillcolor=lightgreen, style=filled];
- node5:prj7 -> node9[style=dotted];
  node8[label="#8 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
  node5:prj6 -> node8[labeldistance=2, color=red, fontcolor=red];
  node12[label="#12 ReturnValue : int",shape=box, fillcolor=lightgrey, style=filled];
@@ -27,18 +27,18 @@ digraph {
  node8 -> node11[style=dotted];
  subgraph cluster_0 {
   color=lightgray;
+  node8;
+  node11;
+ }
+ subgraph cluster_1 {
+  color=lightgray;
   node0;
   node2;
   node3;
  }
- subgraph cluster_1 {
-  color=lightgray;
-  node9;
- }
  subgraph cluster_2 {
   color=lightgray;
-  node8;
-  node11;
+  node9;
  }
  subgraph cluster_000 {
   label = "Legend";

@@ -18,12 +18,12 @@ digraph {
  node4[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#4 Catch : IllegalArgumentException</td></tr><tr><td port="prj7" bgcolor="yellow">exception : IllegalArgumentException</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
  node1 -> node4[headlabel="*0", labeldistance=2];
  node1:prj3 -> node4[labeldistance=2, color=red, fontcolor=red];
- node8[label="#8 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
- node4 -> node8[labeldistance=2, color=red, fontcolor=red];
  node9[label="#9 Throw",shape=box, fillcolor=lightgrey, style=filled];
  node4:prj7 -> node9[headlabel="*0", labeldistance=2];
  node8 -> node9[labeldistance=2, color=red, fontcolor=red];
  node0 -> node9[labeldistance=2, color=green, constraint=false];
+ node8[label="#8 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
+ node4 -> node8[labeldistance=2, color=red, fontcolor=red];
  subgraph cluster_0 {
   color=lightgray;
   node11;
