@@ -1600,6 +1600,8 @@ public class MethodAnalyzer {
 
         final Value target = outgoing.pop();
 
+        final ResolvedMethod resolvedMethod = resolverContext.resolveInvokeSpecial(owner, methodName, methodTypeDesc);
+
         final Value next = new InvokeSpecial(resolverContext.resolveType(owner), target, methodName, resolverContext.resolveMethodType(methodTypeDesc), arguments.reversed());
         outgoing.control = outgoing.control.controlFlowsTo(next, FlowType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(next);
@@ -1627,6 +1629,8 @@ public class MethodAnalyzer {
         }
 
         final Value target = outgoing.pop();
+
+        final ResolvedMethod resolvedMethod = resolverContext.resolveInvokeVirtual(owner, methodName, methodTypeDesc);
 
         final Invoke invoke = new InvokeVirtual(resolverContext.resolveType(owner), target, methodName, resolverContext.resolveMethodType(methodTypeDesc), arguments.reversed());
 
@@ -1656,6 +1660,8 @@ public class MethodAnalyzer {
 
         final Value target = outgoing.pop();
 
+        final ResolvedMethod resolvedMethod = resolverContext.resolveInvokeInterface(owner, methodName, methodTypeDesc);
+
         final Invoke invoke = new InvokeInterface(resolverContext.resolveType(owner), target, methodName, resolverContext.resolveMethodType(methodTypeDesc), arguments.reversed());
 
         outgoing.control = outgoing.control.controlFlowsTo(invoke, FlowType.FORWARD);
@@ -1675,6 +1681,8 @@ public class MethodAnalyzer {
 
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, args.length);
+
+        final ResolvedMethod resolvedMethod = resolverContext.resolveInvokeStatic(owner, methodName, methodTypeDesc);
 
         final RuntimeclassReference runtimeClass = outgoing.control.defineRuntimeclassReference(resolverContext.resolveType(owner));
         final ClassInitialization init = new ClassInitialization(runtimeClass);
@@ -1949,6 +1957,8 @@ public class MethodAnalyzer {
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, 1);
 
+        resolverContext.resolveMemberField(owner, fieldName, fieldType);
+
         final Value v = outgoing.pop();
         final GetField get = new GetField(resolverContext.resolveType(owner), resolverContext.resolveType(fieldType), fieldName, v);
         outgoing.push(get);
@@ -1959,6 +1969,8 @@ public class MethodAnalyzer {
     private void parse_PUTFIELD(final ClassDesc owner, final ClassDesc fieldType, final String fieldName, final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, 2);
+
+        resolverContext.resolveMemberField(owner, fieldName, fieldType);
 
         final Value v = outgoing.pop();
         final Value target = outgoing.pop();
@@ -1971,6 +1983,8 @@ public class MethodAnalyzer {
 
     private void parse_GETSTATIC(final ClassDesc owner, final ClassDesc fieldType, final String fieldName, final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
+
+        resolverContext.resolveStaticField(owner, fieldName, fieldType);
 
         final RuntimeclassReference ri = outgoing.control.defineRuntimeclassReference(resolverContext.resolveType(owner));
         final ClassInitialization init = new ClassInitialization(ri);
@@ -1988,6 +2002,8 @@ public class MethodAnalyzer {
         final Status outgoing = frame.copyIncomingToOutgoing();
         assertMinimumStackSize(outgoing, 1);
 
+        resolverContext.resolveStaticField(owner, fieldName, fieldType);
+
         final RuntimeclassReference ri = outgoing.control.defineRuntimeclassReference(resolverContext.resolveType(owner));
         final ClassInitialization init = new ClassInitialization(ri);
 
@@ -2003,6 +2019,8 @@ public class MethodAnalyzer {
 
     private void parse_NEW(final ClassDesc type, final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
+
+        resolverContext.resolveClass(type);
 
         final RuntimeclassReference ri = outgoing.control.defineRuntimeclassReference(resolverContext.resolveType(type));
         final ClassInitialization init = new ClassInitialization(ri);

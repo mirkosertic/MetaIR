@@ -19,6 +19,18 @@ import static org.assertj.core.api.Assertions.fail;
 
 public class MethodAnalyzerTest {
 
+    public static class NoRecursionResolverContext extends ResolverContext {
+        @Override
+        public ResolvedField resolveMemberField(final ClassDesc owner, final String fieldName, final ClassDesc fieldType) {
+            return null;
+        }
+
+        @Override
+        public ResolvedField resolveStaticField(final ClassDesc owner, final String fieldName, final ClassDesc fieldType) {
+            return null;
+        }
+    }
+
     @Nested
     public class Helper {
 
@@ -26,7 +38,7 @@ public class MethodAnalyzerTest {
 
         @BeforeEach
         public void setup() {
-            analyzer = new MethodAnalyzer(new ResolverContext());
+            analyzer = new MethodAnalyzer(new NoRecursionResolverContext());
         }
 
         @Test
@@ -164,7 +176,7 @@ public class MethodAnalyzerTest {
 
         @BeforeEach
         public void setup() {
-            analyzer = new MethodAnalyzer(new ResolverContext());
+            analyzer = new MethodAnalyzer(new NoRecursionResolverContext());
         }
 
         @Nested

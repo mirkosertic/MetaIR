@@ -1,7 +1,10 @@
 package de.mirkosertic.metair.ir.test;
 
 import de.mirkosertic.metair.ir.ResolvedClass;
+import de.mirkosertic.metair.ir.ResolvedMethod;
 import de.mirkosertic.metair.ir.ResolverContext;
+import org.junit.platform.commons.logging.Logger;
+import org.junit.platform.commons.logging.LoggerFactory;
 import org.junit.platform.engine.ExecutionRequest;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestExecutionResult;
@@ -12,6 +15,8 @@ import java.lang.classfile.MethodModel;
 import java.nio.file.Path;
 
 public class MetaIRTestExecutor {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MetaIRTestExecutor.class);
 
     public void execute(final ExecutionRequest request, final TestDescriptor descriptor) {
         if (descriptor instanceof EngineDescriptor) {
@@ -48,11 +53,15 @@ public class MetaIRTestExecutor {
 
                 if (method.methodName().stringValue().equals(descriptor.getMethodName())) {
 
+                    final ResolvedMethod resolvedMethod = resolvedClass.resolveMethod(method);
+
                     final Path targetDir = request.getOutputDirectoryProvider().createOutputDirectory(descriptor);
 
-                    new MetaIRTestHelper(targetDir).analyzeAndReport(model, method);
+                    new MetaIRTestHelper(targetDir, ctx).analyzeAndReport(resolvedMethod);
                 }
             }
+
+            LOGGER.info(() -> "Resolved " + ctx.numberOrResolvedClasses() + " classes during test run");
 
             request.getEngineExecutionListener().executionFinished(descriptor, TestExecutionResult.successful());
 

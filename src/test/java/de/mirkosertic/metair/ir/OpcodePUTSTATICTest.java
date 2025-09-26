@@ -20,9 +20,9 @@ public class OpcodePUTSTATICTest {
 
     @Test
     public void test_PUTSTATIC(final MetaIRTestHelper testHelper) throws IOException {
-        final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
+        final ClassModel model = ClassModelFactory.createModelFrom(classBuilder -> classBuilder.withField("field", ConstantDescs.CD_int, AccessFlag.STATIC.mask()).withMethod("test", MethodTypeDesc.of(ConstantDescs.CD_void), AccessFlag.PUBLIC.mask(), methodBuilder -> methodBuilder.withCode(codeBuilder -> {
             codeBuilder.iconst_1();
-            codeBuilder.putstatic(ConstantDescs.CD_String, "field", ConstantDescs.CD_int);
+            codeBuilder.putstatic(ClassModelFactory.TEST_CLASS, "field", ConstantDescs.CD_int);
             codeBuilder.return_();
         })));
         final Optional<MethodModel> method = model.methods().stream().filter(m -> "test".contentEquals(m.methodName())).findFirst();

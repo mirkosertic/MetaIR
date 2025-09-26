@@ -9,7 +9,7 @@ public class NumericCondition extends Value {
     public final Operation operation;
 
     NumericCondition(final Operation operation, final Value a, final Value b) {
-        super(IRType.MetaClass.CD_int);
+        super(IRType.CD_int);
 
         this.operation = operation;
 

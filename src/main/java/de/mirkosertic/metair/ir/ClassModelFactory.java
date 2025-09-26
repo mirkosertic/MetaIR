@@ -10,12 +10,14 @@ import java.util.function.Consumer;
 
 public final class ClassModelFactory {
 
+    public static final ClassDesc TEST_CLASS = ClassDesc.of("de.mirkosertic.test", "Test");
+
     private ClassModelFactory() {
     }
 
     public static ClassModel createModelFrom(final Consumer<ClassBuilder> consumer) throws IOException {
         final File temp = File.createTempFile("code", ".class");
-        ClassFile.of().buildTo(temp.toPath(), ClassDesc.of("de.mirkosertic.test", "Test"), consumer);
+        ClassFile.of().buildTo(temp.toPath(), TEST_CLASS, consumer);
         return ClassFile.of().parse(temp.toPath());
     }
 }

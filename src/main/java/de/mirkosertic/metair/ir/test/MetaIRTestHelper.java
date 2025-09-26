@@ -3,10 +3,11 @@ package de.mirkosertic.metair.ir.test;
 import de.mirkosertic.metair.ir.CFGDominatorTree;
 import de.mirkosertic.metair.ir.DOTExporter;
 import de.mirkosertic.metair.ir.DominatorTree;
-import de.mirkosertic.metair.ir.IRType;
 import de.mirkosertic.metair.ir.IllegalParsingStateException;
 import de.mirkosertic.metair.ir.MethodAnalyzer;
 import de.mirkosertic.metair.ir.Node;
+import de.mirkosertic.metair.ir.ResolvedClass;
+import de.mirkosertic.metair.ir.ResolvedMethod;
 import de.mirkosertic.metair.ir.ResolverContext;
 import de.mirkosertic.metair.ir.Sequencer;
 
@@ -19,20 +20,26 @@ import java.nio.file.Path;
 
 public class MetaIRTestHelper {
 
+    private final ResolverContext resolverContext;
     private final Path outputDirectory;
 
-    public MetaIRTestHelper(final Path outputDirectory) {
+    public MetaIRTestHelper(final Path outputDirectory, final ResolverContext resolverContext) {
         this.outputDirectory = outputDirectory;
+        this.resolverContext = resolverContext;
     }
 
     public MethodAnalyzer analyzeAndReport(final ClassModel model, final MethodModel method) throws IOException {
+        final ResolvedClass resolvedClass = resolverContext.resolveClass(model);
+        return analyzeAndReport(new ResolvedMethod(resolverContext, resolvedClass, method));
+    }
+
+    public MethodAnalyzer analyzeAndReport(final ResolvedMethod resolvedMethod) throws IOException {
         try (final PrintStream ps = new PrintStream(Files.newOutputStream(outputDirectory.resolve("bytecode.yaml")))) {
-            ps.print(method.toDebugString());
+            ps.print(resolvedMethod.methodModel().toDebugString());
         }
 
         try {
-            final ResolverContext resolverContext = new ResolverContext();
-            final MethodAnalyzer analyzer = new MethodAnalyzer(resolverContext, IRType.MetaClass.of(model.thisClass().asSymbol()), method);
+            final MethodAnalyzer analyzer = resolvedMethod.analyze();
 
             DOTExporter.writeTo(analyzer.ir(), new PrintStream(Files.newOutputStream(outputDirectory.resolve("ir.dot"))));
 

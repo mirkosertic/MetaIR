@@ -78,7 +78,8 @@ public class SelfParsingProjectTest {
 
                     tests.add(DynamicTest.dynamicTest(method.methodName().stringValue() + " " + method.methodType().stringValue(), () -> {
                         try {
-                            final MethodAnalyzer analyzer = new MethodAnalyzer(resolverContext, IRType.MetaClass.of(model.thisClass().asSymbol()), method);
+                            final ResolvedMethod resolvedMethod = resolvedClass.resolveMethod(method);
+                            final MethodAnalyzer analyzer = resolvedMethod.analyze();
                         } catch (final IllegalParsingStateException e) {
                             final MethodAnalyzer analyzer = e.getAnalyzer();
                             System.out.println("Failed with testing method " + method.methodName() + " in class " + aClass.getName());

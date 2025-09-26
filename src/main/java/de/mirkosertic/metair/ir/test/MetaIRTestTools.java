@@ -1,5 +1,6 @@
 package de.mirkosertic.metair.ir.test;
 
+import de.mirkosertic.metair.ir.ResolverContext;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolver;
@@ -46,6 +47,6 @@ public class MetaIRTestTools implements ParameterResolver {
             throw new RuntimeException("Failed to create output directory: " + outputPath, e);
         }
 
-        return new MetaIRTestHelper(outputPath);
+        return new MetaIRTestHelper(outputPath, new ResolverContext());
     }
 }
