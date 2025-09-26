@@ -11,7 +11,7 @@
 <polygon fill="white" stroke="transparent" points="-4,4 -4,-457 1003,-457 1003,4 -4,4"/>
 <g id="clust1" class="cluster">
 <title>cluster_0</title>
-<polygon fill="none" stroke="lightgray" points="174,-65 174,-190 310,-190 310,-65 174,-65"/>
+<polygon fill="none" stroke="lightgray" points="8,-302 8,-445 130,-445 130,-302 8,-302"/>
 </g>
 <g id="clust2" class="cluster">
 <title>cluster_1</title>
@@ -19,7 +19,7 @@
 </g>
 <g id="clust3" class="cluster">
 <title>cluster_2</title>
-<polygon fill="none" stroke="lightgray" points="8,-302 8,-445 130,-445 130,-302 8,-302"/>
+<polygon fill="none" stroke="lightgray" points="174,-65 174,-190 310,-190 310,-65 174,-65"/>
 </g>
 <g id="clust4" class="cluster">
 <title>cluster_000</title>

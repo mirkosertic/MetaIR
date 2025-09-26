@@ -1,7 +1,7 @@
 (method (InvokeDynamicTest this) (List arg0) (int arg1)
   // Label Frame4
   Stream var0 = (arg0.stream())
-  Predicate var1 = invokedynamic_test((LambdaMetafactory.class.metafactory((InvokeDynamicTest.class.in(InvokeDynamicTest.class)),"test",methodType((Predicate)(int(),methodType((boolean)(Object(),methodHandle(de.mirkosertic.metair.ir.IRType$MethodHandle@6ca320ab),methodType((boolean)(Integer())),arg1))
+  Predicate var1 = invokedynamic_test((LambdaMetafactory.class.metafactory((InvokeDynamicTest.class.in(InvokeDynamicTest.class)),"test",methodType((Predicate)(int(),methodType((boolean)(Object(),methodHandle(de.mirkosertic.metair.ir.IRType$MethodHandle@2e16b08d),methodType((boolean)(Integer())),arg1))
   Stream var2 = (var0.filter(var1))
   long var3 = (var2.count())
   return var3

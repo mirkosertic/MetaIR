@@ -9,5 +9,5 @@
         attributes: []
         //stack map frame @0: {locals: [de/mirkosertic/test/Test], stack: []}
         0: {opcode: ICONST_1, constant value: 1}
-        1: {opcode: PUTSTATIC, owner: java/lang/String, field name: field, field type: I}
+        1: {opcode: PUTSTATIC, owner: de/mirkosertic/test/Test, field name: field, field type: I}
         4: {opcode: RETURN}

@@ -6,19 +6,19 @@
     )
   )
   // Merge Merge4
-  (block ExceptionGuard_4_0
-    (block ExceptionGuard_4_1
+  (block ExceptionGuard_5_0
+    (block ExceptionGuard_5_1
       (try 
-        break ExceptionGuard_4_1
+        break ExceptionGuard_5_1
         (catch $ex as IllegalArgumentException
           // Label Frame9
-          break ExceptionGuard_4_0
+          break ExceptionGuard_5_0
         )
         rethrowifnotcaught $ex
       )
     )
     // Merge EndOfGuardedBlock7
-    break ExceptionGuard_4_0
+    break ExceptionGuard_5_0
   )
   // Merge Merge11
   return
