@@ -1,7 +1,7 @@
 digraph {
  ordering="in";
  node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#0 Method</td></tr><tr><td port="prj2" bgcolor="yellow">this : Test</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
- node1[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="4">#1 ExceptionGuard</td></tr><tr><td port="prj3" bgcolor="yellow">catch : 0 : IllegalArgumentException</td><td port="prj5" bgcolor="yellow">catch : 1 : RuntimeException</td><td port="prj8" bgcolor="yellow">default</td><td port="prj7" bgcolor="yellow">exit</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
+ node1[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="4">#1 ExceptionGuard</td></tr><tr><td port="prj3" bgcolor="yellow">catch : 0 : IllegalArgumentException</td><td port="prj5" bgcolor="yellow">catch : 1 : RuntimeException</td><td port="prj7" bgcolor="yellow">default</td><td port="prj8" bgcolor="yellow">exit</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
  node0 -> node1[labeldistance=2, color=red, fontcolor=red];
  node6[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#6 Catch : RuntimeException</td></tr><tr><td port="prj11" bgcolor="yellow">exception : RuntimeException</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
  node1 -> node6[headlabel="*0", labeldistance=2];
@@ -22,10 +22,10 @@ digraph {
  node16[label="#16 Goto",shape=box, fillcolor=lightgrey, style=filled];
  node13 -> node16[labeldistance=2, color=red, fontcolor=red];
  node13[label="#13 Merge : EndOfGuardedBlock5",shape=box, fillcolor=lightgrey, style=filled];
- node1:prj8 -> node13[labeldistance=2, color=red, fontcolor=red];
  node1:prj7 -> node13[labeldistance=2, color=red, fontcolor=red];
+ node1:prj8 -> node13[labeldistance=2, color=red, fontcolor=red];
  node14[label="#14 int 3",shape=octagon, fillcolor=lightgreen, style=filled];
- node1:prj8 -> node14[style=dotted];
+ node1:prj7 -> node14[style=dotted];
  node18[label="#18 Return",shape=box, fillcolor=lightgrey, style=filled];
  node17 -> node18[labeldistance=2, color=red, fontcolor=red];
  node0 -> node18[labeldistance=2, color=green, constraint=false];

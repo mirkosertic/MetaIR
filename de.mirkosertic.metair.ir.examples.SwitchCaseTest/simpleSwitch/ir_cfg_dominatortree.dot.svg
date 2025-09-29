@@ -60,7 +60,7 @@
 <g id="node4" class="node">
 <title>node3</title>
 <polygon fill="lightgrey" stroke="black" points="267,-182 115,-182 115,-146 267,-146 267,-182"/>
-<text text-anchor="middle" x="191" y="-160.3" font-family="Times,serif" font-size="14.00">#3 case1 Order : 9</text>
+<text text-anchor="middle" x="191" y="-160.3" font-family="Times,serif" font-size="14.00">#3 case0 Order : 9</text>
 </g>
 <!-- node2&#45;&gt;node3 -->
 <g id="edge6" class="edge">
@@ -84,7 +84,7 @@
 <g id="node6" class="node">
 <title>node5</title>
 <polygon fill="lightgrey" stroke="black" points="661,-182 509,-182 509,-146 661,-146 661,-182"/>
-<text text-anchor="middle" x="585" y="-160.3" font-family="Times,serif" font-size="14.00">#5 case0 Order : 3</text>
+<text text-anchor="middle" x="585" y="-160.3" font-family="Times,serif" font-size="14.00">#5 case1 Order : 3</text>
 </g>
 <!-- node2&#45;&gt;node5 -->
 <g id="edge10" class="edge">

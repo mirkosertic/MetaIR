@@ -1,14 +1,14 @@
 digraph {
  ordering="in";
  node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#0 Method</td></tr><tr><td port="prj1" bgcolor="yellow">this : MethodInvokeTest</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
- node4[label="#4 ClassInit",shape=box, fillcolor=lightgrey, style=filled];
- node3 -> node4[headlabel="*0", labeldistance=2];
- node2 -> node4[labeldistance=2, color=red, fontcolor=red];
- node0 -> node4[labeldistance=2, color=green, constraint=false];
  node2[label="#2 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
  node0 -> node2[labeldistance=2, color=red, fontcolor=red];
  node3[label="#3 Class MethodInvokeTest$Source",shape=octagon, fillcolor=lightgreen, style=filled];
  node2 -> node3[style=dotted];
+ node4[label="#4 ClassInit",shape=box, fillcolor=lightgrey, style=filled];
+ node3 -> node4[headlabel="*0", labeldistance=2];
+ node2 -> node4[labeldistance=2, color=red, fontcolor=red];
+ node0 -> node4[labeldistance=2, color=green, constraint=false];
  node6[label="#6 Invoke special <init> : ()void",shape=box, fillcolor=lightgrey, style=filled];
  node5 -> node6[headlabel="*0", labeldistance=2];
  node4 -> node6[labeldistance=2, color=red, fontcolor=red];
@@ -16,12 +16,6 @@ digraph {
  node5[label="#5 New",shape=octagon, fillcolor=orange, style=filled];
  node4 -> node5[headlabel="*0", labeldistance=2];
  node4 -> node5[labeldistance=2, color=green, constraint=false];
- node11[label="#11 GetField : int_field : int",shape=octagon, fillcolor=orange, style=filled];
- node5 -> node11[headlabel="*0", labeldistance=2];
- node10 -> node11[labeldistance=2, color=green, constraint=false];
- node10[label="#10 GetField : char_field : char",shape=octagon, fillcolor=orange, style=filled];
- node5 -> node10[headlabel="*0", labeldistance=2];
- node9 -> node10[labeldistance=2, color=green, constraint=false];
  node9[label="#9 GetField : short_field : short",shape=octagon, fillcolor=orange, style=filled];
  node5 -> node9[headlabel="*0", labeldistance=2];
  node8 -> node9[labeldistance=2, color=green, constraint=false];
@@ -68,6 +62,12 @@ digraph {
  node12[label="#12 GetField : long_field : long",shape=octagon, fillcolor=orange, style=filled];
  node5 -> node12[headlabel="*0", labeldistance=2];
  node11 -> node12[labeldistance=2, color=green, constraint=false];
+ node11[label="#11 GetField : int_field : int",shape=octagon, fillcolor=orange, style=filled];
+ node5 -> node11[headlabel="*0", labeldistance=2];
+ node10 -> node11[labeldistance=2, color=green, constraint=false];
+ node10[label="#10 GetField : char_field : char",shape=octagon, fillcolor=orange, style=filled];
+ node5 -> node10[headlabel="*0", labeldistance=2];
+ node9 -> node10[labeldistance=2, color=green, constraint=false];
  node21[label="#21 ReturnValue : int",shape=box, fillcolor=lightgrey, style=filled];
  node20 -> node21[headlabel="*0", labeldistance=2];
  node20 -> node21[labeldistance=2, color=red, fontcolor=red];

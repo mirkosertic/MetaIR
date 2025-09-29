@@ -141,7 +141,7 @@
 <g id="node6" class="node">
 <title>node5</title>
 <polygon fill="lightgrey" stroke="black" points="514,-255 353,-255 353,-219 514,-219 514,-255"/>
-<text text-anchor="middle" x="433.5" y="-233.3" font-family="Times,serif" font-size="14.00">#5 case1 Order : 13</text>
+<text text-anchor="middle" x="433.5" y="-233.3" font-family="Times,serif" font-size="14.00">#5 case0 Order : 13</text>
 </g>
 <!-- node4&#45;&gt;node5 -->
 <g id="edge11" class="edge">
@@ -165,7 +165,7 @@
 <g id="node8" class="node">
 <title>node7</title>
 <polygon fill="lightgrey" stroke="black" points="692.5,-255 540.5,-255 540.5,-219 692.5,-219 692.5,-255"/>
-<text text-anchor="middle" x="616.5" y="-233.3" font-family="Times,serif" font-size="14.00">#7 case0 Order : 5</text>
+<text text-anchor="middle" x="616.5" y="-233.3" font-family="Times,serif" font-size="14.00">#7 case1 Order : 5</text>
 </g>
 <!-- node4&#45;&gt;node7 -->
 <g id="edge15" class="edge">
@@ -237,7 +237,7 @@
 <g id="node12" class="node">
 <title>node11</title>
 <polygon fill="lightgreen" stroke="black" points="407.26,-83.54 407.26,-98.46 333,-109 228,-109 153.74,-98.46 153.74,-83.54 228,-73 333,-73 407.26,-83.54"/>
-<text text-anchor="middle" x="280.5" y="-87.3" font-family="Times,serif" font-size="14.00">#11 int 200 Order : 15</text>
+<text text-anchor="middle" x="280.5" y="-87.3" font-family="Times,serif" font-size="14.00">#11 int 100 Order : 15</text>
 </g>
 <!-- node8&#45;&gt;node11 -->
 <g id="edge23" class="edge">
@@ -285,7 +285,7 @@
 <g id="node16" class="node">
 <title>node15</title>
 <polygon fill="lightgreen" stroke="black" points="721.59,-83.54 721.59,-98.46 651.24,-109 551.76,-109 481.41,-98.46 481.41,-83.54 551.76,-73 651.24,-73 721.59,-83.54"/>
-<text text-anchor="middle" x="601.5" y="-87.3" font-family="Times,serif" font-size="14.00">#15 int 100 Order : 7</text>
+<text text-anchor="middle" x="601.5" y="-87.3" font-family="Times,serif" font-size="14.00">#15 int 200 Order : 7</text>
 </g>
 <!-- node10&#45;&gt;node15 -->
 <g id="edge35" class="edge">

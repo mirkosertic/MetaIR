@@ -32,7 +32,7 @@
 <g id="node2" class="node">
 <title>node3</title>
 <polygon fill="lightgreen" stroke="black" points="223.27,-83.54 223.27,-98.46 175.17,-109 107.14,-109 59.03,-98.46 59.03,-83.54 107.14,-73 175.17,-73 223.27,-83.54"/>
-<text text-anchor="middle" x="141.15" y="-87.3" font-family="Times,serif" font-size="14.00">#3 double 0.0</text>
+<text text-anchor="middle" x="141.15" y="-87.3" font-family="Times,serif" font-size="14.00">#3 double 1.0</text>
 </g>
 <!-- node0&#45;&gt;node3 -->
 <g id="edge1" class="edge">
@@ -44,7 +44,7 @@
 <g id="node4" class="node">
 <title>node2</title>
 <polygon fill="lightgreen" stroke="black" points="406.27,-83.54 406.27,-98.46 358.17,-109 290.14,-109 242.03,-98.46 242.03,-83.54 290.14,-73 358.17,-73 406.27,-83.54"/>
-<text text-anchor="middle" x="324.15" y="-87.3" font-family="Times,serif" font-size="14.00">#2 double 1.0</text>
+<text text-anchor="middle" x="324.15" y="-87.3" font-family="Times,serif" font-size="14.00">#2 double 0.0</text>
 </g>
 <!-- node0&#45;&gt;node2 -->
 <g id="edge4" class="edge">
@@ -77,18 +77,18 @@
 <text text-anchor="middle" x="232.15" y="-14.3" font-family="Times,serif" font-size="14.00">#5 NumericCompare : NAN_IS_1 for double</text>
 </g>
 <!-- node3&#45;&gt;node5 -->
-<g id="edge3" class="edge">
+<g id="edge2" class="edge">
 <title>node3&#45;&gt;node5</title>
 <path fill="none" stroke="black" d="M163.18,-72.81C174.92,-63.66 189.52,-52.26 202.27,-42.32"/>
 <polygon fill="black" stroke="black" points="204.6,-44.94 210.33,-36.03 200.29,-39.42 204.6,-44.94"/>
-<text text-anchor="middle" x="201.24" y="-50.14" font-family="Times,serif" font-size="14.00">*1</text>
+<text text-anchor="middle" x="201.24" y="-50.14" font-family="Times,serif" font-size="14.00">*0</text>
 </g>
 <!-- node2&#45;&gt;node5 -->
-<g id="edge2" class="edge">
+<g id="edge3" class="edge">
 <title>node2&#45;&gt;node5</title>
 <path fill="none" stroke="black" d="M301.88,-72.81C290.02,-63.66 275.25,-52.26 262.36,-42.32"/>
 <polygon fill="black" stroke="black" points="264.27,-39.37 254.22,-36.03 260,-44.91 264.27,-39.37"/>
-<text text-anchor="middle" x="273.73" y="-36.71" font-family="Times,serif" font-size="14.00">*0</text>
+<text text-anchor="middle" x="273.73" y="-36.71" font-family="Times,serif" font-size="14.00">*1</text>
 </g>
 <!-- c0 -->
 <!-- c1 -->

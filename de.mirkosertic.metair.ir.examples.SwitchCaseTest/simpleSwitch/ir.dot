@@ -7,33 +7,33 @@ digraph {
  node0 -> node16[labeldistance=2, color=green, constraint=false];
  node10[label="#10 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
  node4:prj7 -> node10[labeldistance=2, color=red, fontcolor=red];
- node4[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="3">#4 LookupSwitch</td></tr><tr><td port="prj7" bgcolor="yellow">case0</td><td port="prj5" bgcolor="yellow">case1</td><td port="prj6" bgcolor="yellow">default</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
+ node4[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="3">#4 LookupSwitch</td></tr><tr><td port="prj5" bgcolor="yellow">case0</td><td port="prj7" bgcolor="yellow">case1</td><td port="prj6" bgcolor="yellow">default</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
  node0:prj1 -> node4[headlabel="*0", labeldistance=2];
  node3 -> node4[labeldistance=2, color=red, fontcolor=red];
  node3[label="#3 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
  node0 -> node3[labeldistance=2, color=red, fontcolor=red];
  node9[label="#9 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
  node4:prj6 -> node9[labeldistance=2, color=red, fontcolor=red];
- node13[label="#13 int 300",shape=octagon, fillcolor=lightgreen, style=filled];
- node9 -> node13[style=dotted];
  node14[label="#14 ReturnValue : int",shape=box, fillcolor=lightgrey, style=filled];
  node13 -> node14[headlabel="*0", labeldistance=2];
  node9 -> node14[labeldistance=2, color=red, fontcolor=red];
  node0 -> node14[labeldistance=2, color=green, constraint=false];
+ node13[label="#13 int 300",shape=octagon, fillcolor=lightgreen, style=filled];
+ node9 -> node13[style=dotted];
  node8[label="#8 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
  node4:prj5 -> node8[labeldistance=2, color=red, fontcolor=red];
+ node11[label="#11 int 100",shape=octagon, fillcolor=lightgreen, style=filled];
+ node8 -> node11[style=dotted];
  node12[label="#12 ReturnValue : int",shape=box, fillcolor=lightgrey, style=filled];
  node11 -> node12[headlabel="*0", labeldistance=2];
  node8 -> node12[labeldistance=2, color=red, fontcolor=red];
  node0 -> node12[labeldistance=2, color=green, constraint=false];
- node11[label="#11 int 200",shape=octagon, fillcolor=lightgreen, style=filled];
- node8 -> node11[style=dotted];
- node15[label="#15 int 100",shape=octagon, fillcolor=lightgreen, style=filled];
+ node15[label="#15 int 200",shape=octagon, fillcolor=lightgreen, style=filled];
  node10 -> node15[style=dotted];
  subgraph cluster_0 {
   color=lightgray;
-  node9;
-  node13;
+  node10;
+  node15;
  }
  subgraph cluster_1 {
   color=lightgray;
@@ -42,8 +42,8 @@ digraph {
  }
  subgraph cluster_2 {
   color=lightgray;
-  node10;
-  node15;
+  node9;
+  node13;
  }
  subgraph cluster_000 {
   label = "Legend";
