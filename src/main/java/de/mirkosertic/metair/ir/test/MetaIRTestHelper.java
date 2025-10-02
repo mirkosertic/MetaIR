@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.classfile.ClassModel;
 import java.lang.classfile.MethodModel;
+import java.lang.constant.ClassDesc;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -34,8 +35,19 @@ public class MetaIRTestHelper {
     }
 
     public MethodAnalyzer analyzeAndReport(final ResolvedMethod resolvedMethod) throws IOException {
-        try (final PrintStream ps = new PrintStream(Files.newOutputStream(outputDirectory.resolve("bytecode.yaml")))) {
+        try (final var ps = new PrintStream(Files.newOutputStream(outputDirectory.resolve("bytecode.yaml")))) {
             ps.print(resolvedMethod.methodModel().toDebugString());
+        }
+
+        final ClassDesc thisType = resolvedMethod.thisClass().thisType().type();
+        final String fullQualifiedClassNameOfMethod = thisType.packageName() + "." + thisType.displayName();
+        final String sourceFileNameURL = "https://raw.githubusercontent.com/mirkosertic/MetaIR/refs/heads/main/src/test/java/" + fullQualifiedClassNameOfMethod.replace(".", "/") + ".java";
+
+        try (final PrintStream ps = new PrintStream(Files.newOutputStream(outputDirectory.resolve("report.html")))) {
+            try (final var is = MetaIRTestHelper.class.getResourceAsStream("/report-template.html")) {
+                final String content = new String(is.readAllBytes());
+                ps.print(content.replace("${sourcefileurl}", sourceFileNameURL));
+            }
         }
 
         try {
@@ -56,7 +68,7 @@ public class MetaIRTestHelper {
             new Sequencer<>(analyzer.ir(), debugStructuredControlflowCodeGenerator);
             final PrintStream sequenced = new PrintStream(Files.newOutputStream(outputDirectory.resolve("sequenced.txt")));
             sequenced.print(debugStructuredControlflowCodeGenerator);
-
+            
             return analyzer;
         } catch (final IllegalParsingStateException ex) {
 
