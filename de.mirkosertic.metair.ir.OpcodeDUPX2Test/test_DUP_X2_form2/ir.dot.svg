@@ -50,7 +50,7 @@
 <g id="node3" class="node">
 <title>node4</title>
 <polygon fill="lightgreen" stroke="black" points="121.52,-26.54 121.52,-41.46 90.76,-52 47.24,-52 16.48,-41.46 16.48,-26.54 47.24,-16 90.76,-16 121.52,-26.54"/>
-<text text-anchor="middle" x="69" y="-30.3" font-family="Times,serif" font-size="14.00">#4 int 2</text>
+<text text-anchor="middle" x="69" y="-30.3" font-family="Times,serif" font-size="14.00">#4 int 1</text>
 </g>
 <!-- node0&#45;&gt;node4 -->
 <g id="edge3" class="edge">
@@ -74,7 +74,7 @@
 <g id="node5" class="node">
 <title>node2</title>
 <polygon fill="lightgreen" stroke="black" points="369.52,-26.54 369.52,-41.46 338.76,-52 295.24,-52 264.48,-41.46 264.48,-26.54 295.24,-16 338.76,-16 369.52,-26.54"/>
-<text text-anchor="middle" x="317" y="-30.3" font-family="Times,serif" font-size="14.00">#2 int 1</text>
+<text text-anchor="middle" x="317" y="-30.3" font-family="Times,serif" font-size="14.00">#2 int 2</text>
 </g>
 <!-- node0&#45;&gt;node2 -->
 <g id="edge5" class="edge">

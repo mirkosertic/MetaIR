@@ -1,0 +1,53 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/java.min.js"></script>
+    </head>
+    <body>
+        <h1>Summary of MetaIR Analysis Results</h1>
+        <h2 id="source1">Java Source Code</h2>
+        <pre id="source2"><code id="java" class="language-java"></code></pre>
+        <h2>Analyzed JVM Bytecode (Debug-YAML from Java Class-File API)</h2>
+        <pre><code id="yaml" class="language-yaml"></code></pre>
+        <h2>Extracted Control Flow Graph</h2>
+        <img id="cfg" src="bytedcodecfg.dot.svg" alt="Bytecode Control Flow Graph" />
+        <h2>Generated MetaIR Graph</h2>
+        <img id="metair" src="ir.dot.svg" alt="MetaIR Graph" />
+        <h2>MetaIR Dominator Tree for Code Generation</h2>
+        <img id="sequencing" src="ir.dominatortree.dot.svg" alt="MetaIR Dominator Tree" />
+        <h2>MetaIR Generated Pseudo-Code</h2>
+        <pre><code id="pseudocode"></code></pre>
+        <script>
+            var loader1 = fetch('bytecode.yaml')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('yaml').textContent = data;
+                });
+            var loader2 = fetch('https://raw.githubusercontent.com/mirkosertic/MetaIR/refs/heads/main/src/test/java/de/mirkosertic/metair/ir/examples/FieldAccessTest.java')
+                .then(response => {
+                    if (response.status === 404) {
+                        document.getElementById('source1').remove();
+                        document.getElementById('source2').remove();
+                        return "";
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    if (data.length > 0) {
+                        document.getElementById('java').textContent = data;
+                    }
+                });
+            var loader3 = fetch('sequenced.txt')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('pseudocode').textContent = data;
+                });
+
+            Promise.all([loader1, loader2, loader3]).then(() => {
+                hljs.highlightAll();
+            });
+        </script>
+    </body>
+</html>
