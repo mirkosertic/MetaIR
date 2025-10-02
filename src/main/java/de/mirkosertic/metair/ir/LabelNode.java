@@ -8,12 +8,6 @@ public class LabelNode extends Node {
         this.label = label;
     }
 
-    public PHI definePHI(final IRType.MetaClass type) {
-        final PHI p = new PHI(type);
-        p.use(this, DefinedByUse.INSTANCE);
-        return p;
-    }
-
     @Override
     public String debugDescription() {
         return getClass().getSimpleName();

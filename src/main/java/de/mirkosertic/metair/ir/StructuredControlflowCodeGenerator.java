@@ -9,8 +9,8 @@ import java.util.Map;
 public abstract class StructuredControlflowCodeGenerator<T extends StructuredControlflowCodeGenerator.GeneratedThing> {
 
     public interface GeneratedThing {
-
     }
+
     private final Map<Node, T> committedToTemporary;
 
     public StructuredControlflowCodeGenerator() {
@@ -33,7 +33,7 @@ public abstract class StructuredControlflowCodeGenerator<T extends StructuredCon
 
     public abstract void write(final ReturnValue node);
 
-    public abstract void writePreGoto(final Goto node);
+    public abstract void writePreJump(final Node node);
 
     public abstract void write(final Throw node);
 

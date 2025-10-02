@@ -85,76 +85,91 @@ public class Sequencer<T extends StructuredControlflowCodeGenerator.GeneratedThi
                         break;
                     }
                     case final ArrayStore arrayStore: {
+                        codegenerator.writePHINodesFor(arrayStore);
                         codegenerator.write(arrayStore);
                         current = followUpProcessor.apply(current);
                         break;
                     }
                     case final ArrayLoad arrayLoad: {
+                        codegenerator.writePHINodesFor(arrayLoad);
                         codegenerator.write(arrayLoad);
                         current = followUpProcessor.apply(current);
                         break;
                     }
                     case final ClassInitialization classInitialization: {
+                        codegenerator.writePHINodesFor(classInitialization);
                         codegenerator.write(classInitialization);
                         current = followUpProcessor.apply(current);
                         break;
                     }
                     case final PutStatic putStatic: {
+                        codegenerator.writePHINodesFor(putStatic);
                         codegenerator.write(putStatic);
                         current = followUpProcessor.apply(current);
                         break;
                     }
                     case final PutField putField: {
+                        codegenerator.writePHINodesFor(putField);
                         codegenerator.write(putField);
                         current = followUpProcessor.apply(current);
                         break;
                     }
                     case final Div div: {
+                        codegenerator.writePHINodesFor(div);
                         codegenerator.write(div);
                         current = followUpProcessor.apply(current);
                         break;
                     }
                     case final Rem rem: {
+                        codegenerator.writePHINodesFor(rem);
                         codegenerator.write(rem);
                         current = followUpProcessor.apply(current);
                         break;
                     }
                     case final InvokeSpecial invokeSpecial: {
+                        codegenerator.writePHINodesFor(invokeSpecial);
                         codegenerator.write(invokeSpecial);
                         current = followUpProcessor.apply(current);
                         break;
                     }
                     case final InvokeStatic invokeStatic: {
+                        codegenerator.writePHINodesFor(invokeStatic);
                         codegenerator.write(invokeStatic);
                         current = followUpProcessor.apply(current);
                         break;
                     }
                     case final InvokeInterface invokeInterface: {
+                        codegenerator.writePHINodesFor(invokeInterface);
                         codegenerator.write(invokeInterface);
                         current = followUpProcessor.apply(current);
                         break;
                     }
                     case final InvokeVirtual invokeVirtual: {
+                        codegenerator.writePHINodesFor(invokeVirtual);
                         codegenerator.write(invokeVirtual);
                         current = followUpProcessor.apply(current);
                         break;
                     }
                     case final InvokeDynamic invokeDynamic: {
+                        codegenerator.writePHINodesFor(invokeDynamic);
                         codegenerator.write(invokeDynamic);
                         current = followUpProcessor.apply(current);
                         break;
                     }
                     case final MonitorEnter monitorEnter: {
+                        codegenerator.writePHINodesFor(monitorEnter);
                         codegenerator.write(monitorEnter);
                         current = followUpProcessor.apply(current);
                         break;
                     }
                     case final MonitorExit monitorExit: {
+                        codegenerator.writePHINodesFor(monitorExit);
                         codegenerator.write(monitorExit);
                         current = followUpProcessor.apply(current);
                         break;
                     }
                     case final CheckCast checkCast: {
+                        codegenerator.writePHINodesFor(checkCast);
                         codegenerator.write(checkCast);
                         current = followUpProcessor.apply(current);
                         break;
@@ -182,7 +197,7 @@ public class Sequencer<T extends StructuredControlflowCodeGenerator.GeneratedThi
                         break;
                     }
                      case final Goto gto: {
-                        codegenerator.writePreGoto(gto);
+                        codegenerator.writePreJump(gto);
                         final Node next = gto.getJumpTarget();
                         if (dominatorTree.getIDom(next) == current) {
                             current = next;

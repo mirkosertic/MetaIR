@@ -582,7 +582,7 @@ public class MethodAnalyzer {
             illegalState("dominatorFrame == null !, for frame with index " + targetFrame.elementIndex);
         }
         // Walk up the dominator frame till we find something we can work with
-        while (dominatorFrame != null && dominatorFrame.entryPoint == null && dominatorFrame.immediateDominator != dominatorFrame) {
+        while (dominatorFrame != null && dominatorFrame.immediateDominator != dominatorFrame) {
             dominatorFrame = dominatorFrame.immediateDominator;
         }
         if (dominatorFrame == null) {

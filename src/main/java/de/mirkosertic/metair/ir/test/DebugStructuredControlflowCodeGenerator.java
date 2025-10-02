@@ -16,7 +16,6 @@ import de.mirkosertic.metair.ir.ExtractMethodArgProjection;
 import de.mirkosertic.metair.ir.ExtractThisRefProjection;
 import de.mirkosertic.metair.ir.GetField;
 import de.mirkosertic.metair.ir.GetStatic;
-import de.mirkosertic.metair.ir.Goto;
 import de.mirkosertic.metair.ir.IRType;
 import de.mirkosertic.metair.ir.If;
 import de.mirkosertic.metair.ir.InstanceOf;
@@ -985,7 +984,7 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
     }
 
     @Override
-    public void writePreGoto(final Goto node) {
+    public void writePreJump(final Node node) {
 
         for (final PHI phi : phiNodes) {
             final Node value = phi.initExpressionFor(node);
