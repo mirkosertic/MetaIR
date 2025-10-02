@@ -14,12 +14,12 @@ digraph {
  node2 -> node3[headlabel="*0", labeldistance=2];
  node2[label="#2 null",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node2[style=dotted];
- node7[label="#7 int 1",shape=octagon, fillcolor=lightgreen, style=filled];
- node4:prj5 -> node7[style=dotted];
  node8[label="#8 ReturnValue : int",shape=box, fillcolor=lightgrey, style=filled];
  node7 -> node8[headlabel="*0", labeldistance=2];
  node4:prj5 -> node8[labeldistance=2, color=red, fontcolor=red];
  node0 -> node8[labeldistance=2, color=green, constraint=false];
+ node7[label="#7 int 1",shape=octagon, fillcolor=lightgreen, style=filled];
+ node4:prj5 -> node7[style=dotted];
  node10[label="#10 int 0",shape=octagon, fillcolor=lightgreen, style=filled];
  node9 -> node10[style=dotted];
  subgraph cluster_0 {
@@ -29,12 +29,12 @@ digraph {
  }
  subgraph cluster_1 {
   color=lightgray;
-  node7;
+  node9;
+  node10;
  }
  subgraph cluster_2 {
   color=lightgray;
-  node9;
-  node10;
+  node7;
  }
  subgraph cluster_000 {
   label = "Legend";

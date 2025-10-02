@@ -112,11 +112,11 @@
 <text text-anchor="middle" x="477.5" y="-379.3" font-family="Times,serif" font-size="14.00">#4 NumericCondition : GT Order : 3</text>
 </g>
 <!-- node2&#45;&gt;node4 -->
-<g id="edge9" class="edge">
+<g id="edge8" class="edge">
 <title>node2&#45;&gt;node4</title>
 <path fill="none" stroke="black" d="M518.43,-437.81C511.86,-429.18 503.78,-418.56 496.54,-409.03"/>
 <polygon fill="black" stroke="black" points="499.29,-406.87 490.45,-401.03 493.72,-411.11 499.29,-406.87"/>
-<text text-anchor="middle" x="508.15" y="-406.64" font-family="Times,serif" font-size="14.00">*1</text>
+<text text-anchor="middle" x="508.15" y="-406.64" font-family="Times,serif" font-size="14.00">*0</text>
 </g>
 <!-- node3&#45;&gt;node0 -->
 <g id="edge5" class="edge">
@@ -125,11 +125,11 @@
 <polygon fill="fuchsia" stroke="fuchsia" stroke-width="2" points="473.83,-511.17 484.42,-510.99 476.03,-504.53 473.83,-511.17"/>
 </g>
 <!-- node3&#45;&gt;node4 -->
-<g id="edge8" class="edge">
+<g id="edge9" class="edge">
 <title>node3&#45;&gt;node4</title>
 <path fill="none" stroke="black" d="M350.5,-437.99C373.77,-428.1 403.3,-415.54 428.03,-405.03"/>
 <polygon fill="black" stroke="black" points="429.41,-408.25 437.25,-401.11 426.67,-401.81 429.41,-408.25"/>
-<text text-anchor="middle" x="423.87" y="-412.28" font-family="Times,serif" font-size="14.00">*0</text>
+<text text-anchor="middle" x="423.87" y="-412.28" font-family="Times,serif" font-size="14.00">*1</text>
 </g>
 <!-- node4&#45;&gt;node0 -->
 <g id="edge7" class="edge">

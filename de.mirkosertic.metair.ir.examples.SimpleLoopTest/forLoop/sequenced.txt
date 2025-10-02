@@ -1,5 +1,5 @@
 (method (int arg0)
-  int phi0 = 0
+  int phi0 = <<uninitialized>>
   // Label Frame2
   (block loop LoopHeaderNode_2
     (if (phi0 >= arg0)

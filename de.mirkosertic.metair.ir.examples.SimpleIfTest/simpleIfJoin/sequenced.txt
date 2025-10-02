@@ -1,6 +1,6 @@
 (method (int arg0) (int arg1) (int arg2) (int arg3)
-  // Label Frame6
   int phi0 = <<uninitialized>>
+  // Label Frame6
   (block If_2_0
     (if (arg0 <= arg1)
       // Label Frame16
