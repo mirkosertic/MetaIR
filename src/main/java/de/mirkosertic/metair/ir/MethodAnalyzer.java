@@ -801,7 +801,15 @@ public class MethodAnalyzer {
                             // the outgoing status for this node is not computed yet.
                             if (edge.flowType() == FlowType.FORWARD) {
                                 final Frame incomingFrame = posToFrame.get(edge.fromIndex());
-                                incomingFrame.out.control.controlFlowsTo(target, FlowType.FORWARD);
+                                Node source = incomingFrame.out.control;
+                                if (source instanceof TupleNode) {
+                                    source = ((TupleNode) source).getNamedNode(edge.projection().name());
+                                } else if (FrameNamedProjection.DEFAULT.equals(edge.projection())) {
+                                    // No nothing in this case, we just keep the incoming control node
+                                } else {
+                                    illegalState("Unknown projection type " + edge.projection() + " or unsupported node : " + incomingStatus.control);
+                                }
+                                source.controlFlowsTo(target, FlowType.FORWARD);
                             }
                         }
 

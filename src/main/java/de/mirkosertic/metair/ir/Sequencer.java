@@ -55,6 +55,7 @@ public class Sequencer<T extends StructuredControlflowCodeGenerator.GeneratedThi
                                 // We can continue to the child
                                 return user;
                             }
+                            codegenerator.writePreJump(node);
                             generateGOTO(node, user, activeStack);
                         }
                     }
