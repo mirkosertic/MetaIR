@@ -1,4 +1,6 @@
-package de.mirkosertic.metair.opencl;
+package de.mirkosertic.metair.opencl.hwa;
+
+import de.mirkosertic.metair.opencl.OpenCL;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
@@ -7,7 +9,7 @@ import java.nio.charset.Charset;
 
 public final class Test {
 
-    public static void main(final String[] args) {
+    static void main(final String[] args) {
 
         final OpenCL cl = new OpenCL();
 

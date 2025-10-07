@@ -39,6 +39,7 @@ import de.mirkosertic.metair.ir.NewArray;
 import de.mirkosertic.metair.ir.NewMultiArray;
 import de.mirkosertic.metair.ir.Node;
 import de.mirkosertic.metair.ir.Null;
+import de.mirkosertic.metair.ir.NumericCompare;
 import de.mirkosertic.metair.ir.NumericCondition;
 import de.mirkosertic.metair.ir.PHI;
 import de.mirkosertic.metair.ir.PrimitiveDouble;
@@ -336,6 +337,17 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
             case LT -> new GeneratedCode(node.type, "(" + arg1 + " < " + arg2 + ")");
             case LE -> new GeneratedCode(node.type, "(" + arg1 + " <= " + arg2 + ")");
         };
+    }
+
+    @Override
+    public GeneratedCode visit_NumericCompare(final NumericCompare node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
+
+        emitArguments(node, 2, expressionStack, evaluationStack);
+
+        final GeneratedCode arg2 = evaluationStack.pop();
+        final GeneratedCode arg1 = evaluationStack.pop();
+
+        return new GeneratedCode(node.type, "numcomp(" + node.compareType + "," + arg1 + ", " + arg2 + ")");
     }
 
     @Override

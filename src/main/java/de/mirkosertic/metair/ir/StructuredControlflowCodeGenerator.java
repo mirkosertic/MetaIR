@@ -162,6 +162,8 @@ public abstract class StructuredControlflowCodeGenerator<T extends StructuredCon
 
     public abstract T visit_NumericCondition(final NumericCondition node, final Deque<Node> expressionStack, final Deque<T> evaluationStack);
 
+    public abstract T visit_NumericCompare(final NumericCompare node, final Deque<Node> expressionStack, final Deque<T> evaluationStack);
+
     public abstract T visit_VarArgsArray(final VarArgsArray node, final Deque<Node> expressionStack, final Deque<T> evaluationStack);
 
     public abstract T visit_Convert(final Convert node, final Deque<Node> expressionStack, final Deque<T> evaluationStack);
@@ -284,8 +286,9 @@ public abstract class StructuredControlflowCodeGenerator<T extends StructuredCon
             return visit_MethodHandle(methodHandle, expressionStack, evaluationStack);
         } else if (node instanceof final CaughtExceptionProjection caughtExceptionProjection) {
             return visit_CaughtExceptionProjection(caughtExceptionProjection, expressionStack, evaluationStack);
+        } else if (node instanceof final NumericCompare numericCompare) {
+            return visit_NumericCompare(numericCompare, expressionStack, evaluationStack);
         }
-
         throw new IllegalArgumentException("Unsupported node " + node+ " of type " + node.getClass());
     }
 

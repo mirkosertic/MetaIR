@@ -1,0 +1,78 @@
+package de.mirkosertic.metair.opencl.hwa;
+
+import de.mirkosertic.metair.ir.CFGDominatorTree;
+import de.mirkosertic.metair.ir.DOTExporter;
+import de.mirkosertic.metair.ir.DominatorTree;
+import de.mirkosertic.metair.ir.MethodAnalyzer;
+import de.mirkosertic.metair.ir.ResolvedClass;
+import de.mirkosertic.metair.ir.ResolvedMethod;
+import de.mirkosertic.metair.ir.ResolverContext;
+import de.mirkosertic.metair.ir.Sequencer;
+import de.mirkosertic.metair.ir.test.DebugStructuredControlflowCodeGenerator;
+import de.mirkosertic.metair.opencl.api.Kernel;
+
+import java.io.IOException;
+import java.io.PrintStream;
+import java.lang.classfile.ClassModel;
+import java.lang.classfile.MethodModel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+public class HWACompiledKernel {
+
+    private final ResolverContext resolverContext;
+    private final ResolvedClass resolvedKernelClass;
+    private ResolvedMethod resolvedKernelMethod;
+    private MethodAnalyzer analyzer;
+
+    public HWACompiledKernel(final Kernel kernel) {
+        final Class<?> origin = kernel.getClass();
+
+        resolverContext = new ResolverContext();
+        resolvedKernelClass = resolverContext.resolveClass(origin.getName());
+
+        final ClassModel model = resolvedKernelClass.classModel();
+        // We resolve all methods of the kernel claas, but keep also
+        // track of the "processWorkItem" main method"
+        for (final MethodModel method : model.methods()) {
+
+            final ResolvedMethod m = resolvedKernelClass.resolveMethod(method);
+            final MethodAnalyzer ma = m.analyze();
+
+            if ("processWorkItem".equals(method.methodName().stringValue())) {
+                resolvedKernelMethod = m;
+                analyzer = ma;
+            }
+        }
+
+        if (resolvedKernelMethod == null) {
+            throw new IllegalArgumentException("The kernel class " + origin.getName() + " does not contain a method processWorkItem");
+        }
+
+        try {
+            final Path outputDirectory = Path.of("target", "openclkernels");
+            outputDirectory.toFile().mkdirs();
+
+            DOTExporter.writeTo(analyzer.ir(), new PrintStream(Files.newOutputStream(outputDirectory.resolve("ir.dot"))));
+
+            final DominatorTree dominatorTree = new DominatorTree(analyzer.ir());
+
+            DOTExporter.writeTo(dominatorTree, new PrintStream(Files.newOutputStream(outputDirectory.resolve("ir_dominatortree.dot"))));
+
+            DOTExporter.writeBytecodeCFGTo(analyzer, new PrintStream(Files.newOutputStream(outputDirectory.resolve("bytecodecfg.dot"))));
+
+            final CFGDominatorTree cfgDominatorTree = new CFGDominatorTree(analyzer.ir());
+            DOTExporter.writeTo(cfgDominatorTree, new PrintStream(Files.newOutputStream(outputDirectory.resolve("ir_cfg_dominatortree.dot"))));
+
+            final DebugStructuredControlflowCodeGenerator debugStructuredControlflowCodeGenerator = new DebugStructuredControlflowCodeGenerator();
+            new Sequencer<>(analyzer.ir(), debugStructuredControlflowCodeGenerator);
+            final PrintStream sequenced = new PrintStream(Files.newOutputStream(outputDirectory.resolve("sequenced.txt")));
+            sequenced.print(debugStructuredControlflowCodeGenerator);
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void close() {
+    }
+}
