@@ -1,6 +1,7 @@
 (method (Test this)
   (block If_1_0
     (if (0 == 0)
+      break If_1_0
     (else)
       break If_1_0
     )

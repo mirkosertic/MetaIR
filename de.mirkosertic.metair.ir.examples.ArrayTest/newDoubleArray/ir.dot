@@ -24,8 +24,6 @@ digraph {
  node3 -> node6[style=dotted];
  node7[label="#7 int 0",shape=octagon, fillcolor=lightgreen, style=filled];
  node3 -> node7[style=dotted];
- node11[label="#11 int 1",shape=octagon, fillcolor=lightgreen, style=filled];
- node8 -> node11[style=dotted];
  node10[label="#10 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
  node8 -> node10[labeldistance=2, color=red, fontcolor=red];
  node13[label="#13 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
@@ -33,6 +31,8 @@ digraph {
  node14[label="#14 Return",shape=box, fillcolor=lightgrey, style=filled];
  node13 -> node14[labeldistance=2, color=red, fontcolor=red];
  node12 -> node14[labeldistance=2, color=green, constraint=false];
+ node11[label="#11 int 1",shape=octagon, fillcolor=lightgreen, style=filled];
+ node8 -> node11[style=dotted];
  node9[label="#9 ArrayLength",shape=octagon, fillcolor=orange, style=filled];
  node5 -> node9[headlabel="*0", labeldistance=2];
  subgraph cluster_0 {
@@ -43,13 +43,13 @@ digraph {
  }
  subgraph cluster_1 {
   color=lightgray;
-  node8;
-  node11;
+  node2;
+  node4;
  }
  subgraph cluster_2 {
   color=lightgray;
-  node2;
-  node4;
+  node8;
+  node11;
  }
  subgraph cluster_000 {
   label = "Legend";

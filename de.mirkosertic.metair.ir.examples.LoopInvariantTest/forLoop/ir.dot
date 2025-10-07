@@ -1,19 +1,12 @@
 digraph {
  ordering="in";
  node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="3">#0 Method</td></tr><tr><td port="prj2" bgcolor="yellow">arg0 : int</td><td port="prj3" bgcolor="yellow">arg1 : int</td><td port="prj1" bgcolor="yellow">arg2 : int</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
- node8[label="#8 Φ int",shape=octagon, fillcolor=orange, style=filled];
- node0 -> node8[style=dotted];
- node7 -> node8[headlabel="if #6", labeldistance=2, color=blue, constraint=false];
- node14 -> node8[headlabel="if #22", labeldistance=2, color=blue, constraint=false, style=dashed];
- node14[label="#14 Add : int",shape=octagon, fillcolor=orange, style=filled];
- node8 -> node14[headlabel="*0", labeldistance=2];
- node13 -> node14[headlabel="*1", labeldistance=2];
- node13[label="#13 Add : int",shape=octagon, fillcolor=orange, style=filled];
- node11 -> node13[headlabel="*0", labeldistance=2];
- node5 -> node13[headlabel="*1", labeldistance=2];
  node5[label="#5 Add : int",shape=octagon, fillcolor=orange, style=filled];
  node0:prj3 -> node5[headlabel="*0", labeldistance=2];
  node0:prj1 -> node5[headlabel="*1", labeldistance=2];
+ node13[label="#13 Add : int",shape=octagon, fillcolor=orange, style=filled];
+ node11 -> node13[headlabel="*0", labeldistance=2];
+ node5 -> node13[headlabel="*1", labeldistance=2];
  node11[label="#11 Φ int",shape=octagon, fillcolor=orange, style=filled];
  node0 -> node11[style=dotted];
  node10 -> node11[headlabel="if #6", labeldistance=2, color=blue, constraint=false];
@@ -41,6 +34,13 @@ digraph {
  node0 -> node4[labeldistance=2, color=red, fontcolor=red];
  node7[label="#7 int 10",shape=octagon, fillcolor=lightgreen, style=filled];
  node4 -> node7[style=dotted];
+ node8[label="#8 Φ int",shape=octagon, fillcolor=orange, style=filled];
+ node0 -> node8[style=dotted];
+ node7 -> node8[headlabel="if #6", labeldistance=2, color=blue, constraint=false];
+ node14 -> node8[headlabel="if #22", labeldistance=2, color=blue, constraint=false, style=dashed];
+ node14[label="#14 Add : int",shape=octagon, fillcolor=orange, style=filled];
+ node8 -> node14[headlabel="*0", labeldistance=2];
+ node13 -> node14[headlabel="*1", labeldistance=2];
  node10[label="#10 int 0",shape=octagon, fillcolor=lightgreen, style=filled];
  node6 -> node10[style=dotted];
  node12[label="#12 NumericCondition : GE",shape=octagon, fillcolor=orange, style=filled];
@@ -54,8 +54,9 @@ digraph {
  node15:prj16 -> node18[labeldistance=2, color=red, fontcolor=red];
  subgraph cluster_0 {
   color=lightgray;
-  node6;
-  node10;
+  node0;
+  node8;
+  node11;
  }
  subgraph cluster_1 {
   color=lightgray;
@@ -64,14 +65,13 @@ digraph {
  }
  subgraph cluster_2 {
   color=lightgray;
-  node0;
-  node8;
-  node11;
+  node4;
+  node7;
  }
  subgraph cluster_3 {
   color=lightgray;
-  node4;
-  node7;
+  node6;
+  node10;
  }
  subgraph cluster_000 {
   label = "Legend";

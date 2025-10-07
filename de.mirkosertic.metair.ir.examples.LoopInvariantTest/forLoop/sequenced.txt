@@ -4,14 +4,14 @@
   // Label Frame6
   // Label Frame10
   (block loop LoopHeaderNode_3
-    (if (phi0 >= arg0)
+    (if (phi1 >= arg0)
       // Label Frame35
       return arg0
     (else)
       // Label Frame23
       // Label Frame31
-      phi0 = (phi0 + 1)
-      phi1 = (phi1 + (phi0 + (arg1 + arg2)))
+      phi0 = (phi0 + (phi1 + (arg1 + arg2)))
+      phi1 = (phi1 + 1)
       continue LoopHeaderNode_3
     )
   )

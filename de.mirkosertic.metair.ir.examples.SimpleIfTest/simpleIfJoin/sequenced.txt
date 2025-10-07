@@ -4,6 +4,7 @@
   (block If_2_0
     (if (arg0 <= arg1)
       // Label Frame16
+      phi0 = arg3
       break If_2_0
     (else)
       // Label Frame14

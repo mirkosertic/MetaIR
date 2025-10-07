@@ -13,11 +13,11 @@ digraph {
  node0 -> node5[style=dotted];
  node4[label="#4 long 1",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node4[style=dotted];
+ node3[label="#3 long 1",shape=octagon, fillcolor=lightgreen, style=filled];
+ node0 -> node3[style=dotted];
  node10[label="#10 Return",shape=box, fillcolor=lightgrey, style=filled];
  node0 -> node10[labeldistance=2, color=red, fontcolor=red];
  node0 -> node10[labeldistance=2, color=green, constraint=false];
- node3[label="#3 long 1",shape=octagon, fillcolor=lightgreen, style=filled];
- node0 -> node3[style=dotted];
  node2[label="#2 long 1",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node2[style=dotted];
  subgraph cluster_0 {
