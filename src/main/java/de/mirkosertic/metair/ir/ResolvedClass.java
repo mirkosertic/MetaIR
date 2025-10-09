@@ -32,6 +32,10 @@ public class ResolvedClass {
         return loaded;
     }
 
+    public List<ResolvedField> resolvedFields() {
+        return new ArrayList<>(fields.values());
+    }
+
     public void loaded(final ClassModel classModel, final ResolvedClass superClass, final List<ResolvedClass> interfaces) {
         this.classModel = classModel;
         this.loaded = true;

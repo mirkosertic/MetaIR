@@ -15,4 +15,20 @@ public class ResolvedField {
         this.type = type;
         this.fieldModel = fieldModel;
     }
+
+    public ResolvedClass owner() {
+        return owner;
+    }
+
+    public String fieldName() {
+        return fieldName;
+    }
+
+    public IRType.MetaClass type() {
+        return type;
+    }
+
+    public FieldModel fieldModel() {
+        return fieldModel;
+    }
 }

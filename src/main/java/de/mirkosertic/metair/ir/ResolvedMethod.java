@@ -15,6 +15,10 @@ public class ResolvedMethod {
         this.methodModel = methodModel;
     }
 
+    public boolean isConstructor() {
+        return "<init>".equals(methodModel.methodName().stringValue());
+    }
+
     public MethodModel methodModel() {
         return methodModel;
     }
