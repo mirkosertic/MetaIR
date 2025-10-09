@@ -5,9 +5,6 @@ digraph {
  node0 -> node10[style=dotted];
  node9[label="#9 String : test",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node9[style=dotted];
- node2[label="#2 Return",shape=box, fillcolor=lightgrey, style=filled];
- node0 -> node2[labeldistance=2, color=red, fontcolor=red];
- node0 -> node2[labeldistance=2, color=green, constraint=false];
  node8[label="#8 String : test",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node8[style=dotted];
  node7[label="#7 String : test",shape=octagon, fillcolor=lightgreen, style=filled];
@@ -16,6 +13,9 @@ digraph {
  node0 -> node6[style=dotted];
  node5[label="#5 String : test",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node5[style=dotted];
+ node2[label="#2 Return",shape=box, fillcolor=lightgrey, style=filled];
+ node0 -> node2[labeldistance=2, color=red, fontcolor=red];
+ node0 -> node2[labeldistance=2, color=green, constraint=false];
  node4[label="#4 String : test",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node4[style=dotted];
  node3[label="#3 String : test",shape=octagon, fillcolor=lightgreen, style=filled];
