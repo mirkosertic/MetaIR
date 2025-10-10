@@ -65,7 +65,7 @@ public class MetaIRTestHelper {
             DOTExporter.writeTo(cfgDominatorTree, new PrintStream(Files.newOutputStream(outputDirectory.resolve("ir_cfg_dominatortree.dot"))));
 
             final DebugStructuredControlflowCodeGenerator debugStructuredControlflowCodeGenerator = new DebugStructuredControlflowCodeGenerator();
-            new Sequencer<>(analyzer.ir(), debugStructuredControlflowCodeGenerator);
+            new Sequencer<>(resolvedMethod, analyzer.ir(), debugStructuredControlflowCodeGenerator);
             final PrintStream sequenced = new PrintStream(Files.newOutputStream(outputDirectory.resolve("sequenced.txt")));
             sequenced.print(debugStructuredControlflowCodeGenerator);
             

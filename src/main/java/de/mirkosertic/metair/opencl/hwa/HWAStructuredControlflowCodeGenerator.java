@@ -52,6 +52,9 @@ import de.mirkosertic.metair.ir.PutStatic;
 import de.mirkosertic.metair.ir.ReferenceCondition;
 import de.mirkosertic.metair.ir.ReferenceTest;
 import de.mirkosertic.metair.ir.Rem;
+import de.mirkosertic.metair.ir.ResolvedClass;
+import de.mirkosertic.metair.ir.ResolvedMethod;
+import de.mirkosertic.metair.ir.ResolverContext;
 import de.mirkosertic.metair.ir.Return;
 import de.mirkosertic.metair.ir.ReturnValue;
 import de.mirkosertic.metair.ir.RuntimeclassReference;
@@ -65,14 +68,26 @@ import de.mirkosertic.metair.ir.Truncate;
 import de.mirkosertic.metair.ir.TypeUtils;
 import de.mirkosertic.metair.ir.Value;
 import de.mirkosertic.metair.ir.VarArgsArray;
+import de.mirkosertic.metair.opencl.api.OpenCLType;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.classfile.Annotation;
+import java.lang.classfile.AnnotationElement;
+import java.lang.classfile.AnnotationValue;
+import java.lang.classfile.Attributes;
+import java.lang.classfile.ClassModel;
+import java.lang.classfile.attribute.RuntimeInvisibleAnnotationsAttribute;
+import java.lang.classfile.attribute.RuntimeVisibleAnnotationsAttribute;
+import java.lang.constant.ClassDesc;
+import java.lang.constant.ConstantDescs;
+import java.lang.constant.MethodTypeDesc;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public class HWAStructuredControlflowCodeGenerator extends StructuredControlflowCodeGenerator<HWAStructuredControlflowCodeGenerator.GeneratedCode> {
@@ -91,13 +106,15 @@ public class HWAStructuredControlflowCodeGenerator extends StructuredControlflow
     private int temporaryVariablesCounter;
     private int indentationLevel = 0;
     private final Set<PHI> phiNodes;
+    private final ResolverContext resolverContext;
 
-    public HWAStructuredControlflowCodeGenerator(final List<HWAKernelArgument> kernelArguments) {
+    public HWAStructuredControlflowCodeGenerator(final ResolverContext resolverContext, final List<HWAKernelArgument> kernelArguments) {
         this.kernelArguments = kernelArguments;
         this.sw = new StringWriter();
         this.pw = new PrintWriter(sw);
         this.temporaryVariablesCounter = 0;
         this.phiNodes = new HashSet<>();
+        this.resolverContext = resolverContext;
     }
 
     private void writeIndentation() {
@@ -733,20 +750,101 @@ public class HWAStructuredControlflowCodeGenerator extends StructuredControlflow
 
     // CFG - Generation
 
+    private String typeNameOf(final ClassDesc classDesc) {
+        if (ConstantDescs.CD_void.equals(classDesc)) {
+            return "void";
+        }
+        throw new IllegalArgumentException("Not implemented yet : " + classDesc);
+    }
+
+    private String typeNameOf(final IRType type) {
+        if (IRType.CD_void.equals(type)) {
+            return "void";
+        }
+        if (type instanceof final IRType.MetaClass metaClass) {
+            if (metaClass.isPrimitive()) {
+                if (IRType.CD_int.equals(type)) {
+                    return "int";
+                }
+                if (IRType.CD_float.equals(type)) {
+                    return "float";
+                }
+                if (IRType.CD_double.equals(type)) {
+                    return "double";
+                }
+                throw new IllegalArgumentException("Not implemented yet : " + type);
+            }
+            if (metaClass.isArray()) {
+                return typeNameOf(metaClass.componentType()) + "*";
+            }
+
+            final ResolvedClass cls = resolverContext.resolveClass(metaClass.type());
+            final ClassModel classModel = cls.classModel();
+
+            final Optional<RuntimeVisibleAnnotationsAttribute> annotations = classModel.findAttribute(Attributes.runtimeVisibleAnnotations());
+            if (annotations.isPresent()) {
+                final RuntimeVisibleAnnotationsAttribute attribute = annotations.get();
+                for (final Annotation annotation : attribute.annotations()) {
+                    if (annotation.classSymbol().equals(ClassDesc.of(OpenCLType.class.getName()))) {
+                        for (final AnnotationElement element : annotation.elements()) {
+                            if ("name".equals(element.name().stringValue())) {
+                                return ((AnnotationValue.OfString) element.value()).resolvedValue();
+                            }
+                        }
+                    }
+                }
+            }
+            throw new IllegalArgumentException("Not implemented yet : " + type);
+        }
+        throw new IllegalArgumentException("Not implemented yet : " + type);
+    }
+
     @Override
-    public void begin(final Method method) {
+    public void begin(final ResolvedMethod resolvedMethod, final Method method) {
         writeIndentation();
-        pw.print("(method");
+
+        final String methodName = resolvedMethod.methodModel().methodName().stringValue();
+
+        if ("processWorkItem".equals(methodName)) {
+            pw.print("__kernel ");
+        }
+
+        final MethodTypeDesc methodTypeDesc = resolvedMethod.methodModel().methodTypeSymbol();
+        pw.print(typeNameOf(methodTypeDesc.returnType()));
+        pw.print(" ");
+        pw.print(methodName);
+        pw.print("(");
+
+        boolean first = true;
+        for (HWAKernelArgument argument : kernelArguments) {
+            if (!first) {
+                pw.print(", ");
+            }
+            pw.print("__global ");
+            pw.print(argument.name());
+            pw.print(" ");
+            pw.print(typeNameOf(argument.type()));
+
+            first = false;
+        }
 
         for (final Value arg : method.methodArguments) {
-            if (arg instanceof final Projection proj) {
-                pw.print(" (");
-                pw.print(TypeUtils.toString(arg.type));
-                pw.print(" ");
+            // Extract thisref not supported in OpenCL kerels...
+            if (arg instanceof final ExtractMethodArgProjection proj) {
+
+                if (!first) {
+                    pw.print(", ");
+                }
+                pw.print("__global ");
                 pw.print(proj.name());
-                pw.print(")");
-            } else throw new IllegalArgumentException("Unknown argument type " + arg.getClass());
+                pw.print(" ");
+                pw.print(typeNameOf(arg.type));
+
+                first = false;
+            }
         }
+
+        pw.print(") {");
         pw.println();
         indentationLevel++;
     }
@@ -1096,7 +1194,8 @@ public class HWAStructuredControlflowCodeGenerator extends StructuredControlflow
     public void finished() {
         indentationLevel--;
         writeIndentation();
-        pw.println(")");
+        pw.println("}");
+        pw.println();
     }
 
     @Override

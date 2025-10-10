@@ -52,6 +52,7 @@ import de.mirkosertic.metair.ir.PutStatic;
 import de.mirkosertic.metair.ir.ReferenceCondition;
 import de.mirkosertic.metair.ir.ReferenceTest;
 import de.mirkosertic.metair.ir.Rem;
+import de.mirkosertic.metair.ir.ResolvedMethod;
 import de.mirkosertic.metair.ir.Return;
 import de.mirkosertic.metair.ir.ReturnValue;
 import de.mirkosertic.metair.ir.RuntimeclassReference;
@@ -786,7 +787,7 @@ public class DebugStructuredControlflowCodeGenerator extends StructuredControlfl
     // CFG - Generation
 
     @Override
-    public void begin(final Method method) {
+    public void begin(final ResolvedMethod resolvedMethod, final Method method) {
         writeIndentation();
         pw.print("(method");
 

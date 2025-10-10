@@ -64,15 +64,13 @@ public class HWACompiledKernel {
         this.arguments = arguments;
 
         // Generate the code for the kernel
-        final HWAStructuredControlflowCodeGenerator controlFlowGenerator = new HWAStructuredControlflowCodeGenerator(this.arguments);
+        final HWAStructuredControlflowCodeGenerator controlFlowGenerator = new HWAStructuredControlflowCodeGenerator(this.resolverContext, this.arguments);
         for (final ResolvedMethod m : kernelMethods) {
             if (!m.isConstructor()) {
                 final MethodAnalyzer analyzer = m.analyze();
-                new Sequencer<>(analyzer.ir(), controlFlowGenerator);
+                new Sequencer<>(m, analyzer.ir(), controlFlowGenerator);
             }
         }
-
-        new Sequencer<>(analyzer.ir(), controlFlowGenerator);
 
         try {
             final Path outputDirectory = Path.of("target", "openclkernels");

@@ -10,4 +10,12 @@ public class HWAKernelArgument {
         this.name = name;
         this.type = type;
     }
+
+    public String name() {
+        return name;
+    }
+
+    public IRType type() {
+        return type;
+    }
 }

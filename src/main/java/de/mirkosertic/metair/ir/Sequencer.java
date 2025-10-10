@@ -32,7 +32,10 @@ public class Sequencer<T extends StructuredControlflowCodeGenerator.GeneratedThi
 
     private final StructuredControlflowCodeGenerator<T> codegenerator;
 
-    public Sequencer(final Method method, final StructuredControlflowCodeGenerator<T> codegenerator) {
+    private final ResolvedMethod resolvedMethod;
+
+    public Sequencer(final ResolvedMethod resolvedMethod, final Method method, final StructuredControlflowCodeGenerator<T> codegenerator) {
+        this.resolvedMethod = resolvedMethod;
         this.dominatorTree = new CFGDominatorTree(method);
         this.codegenerator = codegenerator;
 
@@ -68,7 +71,7 @@ public class Sequencer<T extends StructuredControlflowCodeGenerator.GeneratedThi
             try {
                 switch (current) {
                     case final Method method: {
-                        codegenerator.begin(method);
+                        codegenerator.begin(resolvedMethod, method);
                         codegenerator.writePHINodesFor(method);
                         current = followUpProcessor.apply(current);
                         break;

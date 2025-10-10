@@ -17,7 +17,7 @@ public abstract class StructuredControlflowCodeGenerator<T extends StructuredCon
         committedToTemporary = new HashMap<>();
     }
 
-    public abstract void begin(final Method method);
+    public abstract void begin(final ResolvedMethod resolvedMethod, final Method method);
 
     public abstract void startBlock(final Sequencer.Block b);
 
