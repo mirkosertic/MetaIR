@@ -46,10 +46,10 @@ digraph debugoutput {
  node14 -> node11[dir="forward" color="fuchsia" penwidth="2"];
  node11 -> node14[headlabel="*0", labeldistance=2];
  node13 -> node14[labeldistance=2, color=red, fontcolor=red];
- node15[label="#15 default Order : 13",shape=box, fillcolor=lightgrey, style=filled];
+ node15[label="#15 exit Order : 14",shape=box, fillcolor=lightgrey, style=filled];
  node15 -> node11[dir="forward" color="fuchsia" penwidth="2"];
  node11 -> node15[labeldistance=2, color=red, fontcolor=red];
- node16[label="#16 exit Order : 12",shape=box, fillcolor=lightgrey, style=filled];
+ node16[label="#16 default Order : 12",shape=box, fillcolor=lightgrey, style=filled];
  node16 -> node11[dir="forward" color="fuchsia" penwidth="2"];
  node11 -> node16[labeldistance=2, color=red, fontcolor=red];
  node17[label="#17 exception : RuntimeException Order : 22",shape=box, fillcolor=lightgrey, style=filled];
@@ -60,11 +60,11 @@ digraph debugoutput {
  node14 -> node18[labeldistance=2, color=red, fontcolor=red];
  node19[label="#19 Merge : EndOfGuardedBlock12 Order : 15",shape=box, fillcolor=lightgrey, style=filled];
  node19 -> node11[dir="forward" color="fuchsia" penwidth="2"];
- node15 -> node19[labeldistance=2, color=red, fontcolor=red];
  node16 -> node19[labeldistance=2, color=red, fontcolor=red];
- node20[label="#20 int 2 Order : 14",shape=octagon, fillcolor=lightgreen, style=filled];
- node20 -> node15[dir="forward" color="fuchsia" penwidth="2"];
- node15 -> node20[style=dotted];
+ node15 -> node19[labeldistance=2, color=red, fontcolor=red];
+ node20[label="#20 int 2 Order : 13",shape=octagon, fillcolor=lightgreen, style=filled];
+ node20 -> node16[dir="forward" color="fuchsia" penwidth="2"];
+ node16 -> node20[style=dotted];
  node21[label="#21 Goto Order : 16",shape=box, fillcolor=lightgrey, style=filled];
  node21 -> node19[dir="forward" color="fuchsia" penwidth="2"];
  node19 -> node21[labeldistance=2, color=red, fontcolor=red];

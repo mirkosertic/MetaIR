@@ -5,15 +5,15 @@ digraph {
  node0 -> node8[style=dotted];
  node7[label="#7 int 0",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node7[style=dotted];
+ node9[label="#9 Return",shape=box, fillcolor=lightgrey, style=filled];
+ node0 -> node9[labeldistance=2, color=red, fontcolor=red];
+ node0 -> node9[labeldistance=2, color=green, constraint=false];
  node6[label="#6 int 0",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node6[style=dotted];
  node5[label="#5 int 0",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node5[style=dotted];
  node4[label="#4 int 0",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node4[style=dotted];
- node9[label="#9 Return",shape=box, fillcolor=lightgrey, style=filled];
- node0 -> node9[labeldistance=2, color=red, fontcolor=red];
- node0 -> node9[labeldistance=2, color=green, constraint=false];
  node3[label="#3 int 0",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node3[style=dotted];
  node2[label="#2 int 0",shape=octagon, fillcolor=lightgreen, style=filled];
