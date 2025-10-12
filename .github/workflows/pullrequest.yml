@@ -1,7 +1,7 @@
 name: Pull Request
 on:
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 jobs:
   build:
     if: github.repository == 'mirkosertic/MetaIR'
