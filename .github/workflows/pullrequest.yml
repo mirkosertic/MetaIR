@@ -14,4 +14,6 @@ jobs:
           java-version: 25
           distribution: "temurin"
           cache: maven
+      - name: Install OpenCL
+        run: sudo apt-get install ocl-icd-opencl-dev          
       - run: mvn --no-transfer-progress --batch-mode --settings .mvn/settings.xml clean javadoc:jar verify
