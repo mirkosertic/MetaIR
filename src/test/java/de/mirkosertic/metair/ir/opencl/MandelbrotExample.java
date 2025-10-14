@@ -15,23 +15,26 @@
  */
 package de.mirkosertic.metair.ir.opencl;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+import javax.swing.*;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 
 public class MandelbrotExample extends JPanel {
 
     private final MandelbrotOpenCL am;
     private final MandelbrotKernel kernel;
     private final ColorGradient colorGradient;
+    private float pendingZoomAmount;
+    private final Timer timer;
 
     public MandelbrotExample() throws Exception {
         am = new MandelbrotOpenCL();
         kernel = am.compute();
+        pendingZoomAmount = 0;
 
         colorGradient = new ColorGradient(new ColorGradient.ControlPoint[] {
             new ColorGradient.ControlPoint(0f, new Color(80, 80, 80)),
@@ -44,17 +47,28 @@ public class MandelbrotExample extends JPanel {
         }, kernel.getMaxIterations());
 
         setPreferredSize(new Dimension(kernel.getWidth(), kernel.getHeight()));
-        addMouseWheelListener(e -> {
-            kernel.zoomInOut(e.getScrollAmount() * e.getWheelRotation());
-            refreshDisplay();
-        });
+        addMouseWheelListener(e -> pendingZoomAmount += e.getScrollAmount() * e.getWheelRotation());
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(final MouseEvent e) {
                 kernel.focusOn(e.getX(), e.getY());
-                refreshDisplay();
             }
         });
+
+        final float zoomAmount = 0.3f;
+
+        timer = new Timer(5, e -> {
+            if (pendingZoomAmount > 0) {
+                kernel.zoomInOut(zoomAmount);
+                pendingZoomAmount = Math.min(0f, pendingZoomAmount - zoomAmount);
+            } else if (pendingZoomAmount < 0) {
+                kernel.zoomInOut(-zoomAmount);
+                pendingZoomAmount = Math.max(0f, pendingZoomAmount + zoomAmount);
+            }
+            refreshDisplay();
+        });
+        timer.setRepeats(true);
+        timer.start();
     }
 
     private void refreshDisplay() {
@@ -68,21 +82,20 @@ public class MandelbrotExample extends JPanel {
     }
 
     @Override
-    public void paint (final Graphics g) {
+    public void paint(final Graphics g) {
         final int[] imageData = kernel.getImageData();
         final int width = kernel.getWidth();
+        final int height = kernel.getHeight();
         final int maxIterations = kernel.getMaxIterations();
-        for (int pixelIndex=0;pixelIndex<imageData.length;pixelIndex++) {
-            final int x = pixelIndex % width;
-            final int y = pixelIndex / width;
+
+        final BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        for (int pixelIndex = 0; pixelIndex < imageData.length; pixelIndex++) {
             final int iterCount = imageData[pixelIndex];
-            if (iterCount == maxIterations) {
-                g.setColor(Color.black);
-            } else {
-                g.setColor(colorGradient.colorAt(iterCount));
-            }
-            g.drawLine(x,y,x,y);
+            final Color color = iterCount == maxIterations ? Color.black : colorGradient.colorAt(iterCount);
+            image.setRGB(pixelIndex % width, pixelIndex / width, color.getRGB());
         }
+        g.drawImage(image, 0, 0, null);
+
         g.setColor(Color.white);
         g.drawString(String.format("MetaIR OpenCL Frame Time : %dms", am.getComputingTime()), 10, 20);
     }

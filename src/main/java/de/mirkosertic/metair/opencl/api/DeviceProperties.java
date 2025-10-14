@@ -13,4 +13,6 @@ public interface DeviceProperties {
     long getMaxWorkGroupSize();
 
     long getClockFrequency();
+
+    int memoryAlignment();
 }

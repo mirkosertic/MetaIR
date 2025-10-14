@@ -16,14 +16,12 @@ import java.util.Optional;
 
 public class HWAPlatform implements Platform {
 
-    private final OpenCLOptions openCLOptions;
     private final PlatformProperties platformProperties;
     private final DeviceProperties deviceProperties;
     private final OpenCL openCL;
 
     public HWAPlatform(final OpenCL openCL, final OpenCLOptions openCLOptions) {
         this.openCL = openCL;
-        this.openCLOptions = openCLOptions;
 
         final Optional<PlatformProperties> platform = getPlatforms().stream().filter(openCLOptions.getPlatformFilter()).findFirst();
         if (platform.isEmpty()) {
@@ -190,6 +188,31 @@ public class HWAPlatform implements Platform {
                 }
 
                 final int maxClockFrequency = computeInitsBuffer.get(ValueLayout.JAVA_INT, 0);
+
+                result = openCL.clGetDeviceInfo(deviceIds[j], OpenCL.CL_DEVICE_MEM_BASE_ADDR_ALIGN, computeInitsBuffer.byteSize(), computeInitsBuffer, MemorySegment.NULL);
+                if (result != OpenCL.CL_SUCCESS) {
+                    throw new RuntimeException("clGetDeviceInfo failed: " + result);
+                }
+
+                final int memoryAlignment = computeInitsBuffer.get(ValueLayout.JAVA_INT, 0) / 8;
+
+                result = openCL.clGetDeviceInfo(deviceIds[j], OpenCL.CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, computeInitsBuffer.byteSize(), computeInitsBuffer, MemorySegment.NULL);
+                if (result != OpenCL.CL_SUCCESS) {
+                    throw new RuntimeException("clGetDeviceInfo failed: " + result);
+                }
+
+                final int workItemDimensions = computeInitsBuffer.get(ValueLayout.JAVA_INT, 0);
+                final MemorySegment dimensionsSizeRet = arena.allocate(ValueLayout.JAVA_LONG, workItemDimensions);
+                result = openCL.clGetDeviceInfo(deviceIds[j], OpenCL.CL_DEVICE_MAX_WORK_ITEM_SIZES, ValueLayout.JAVA_LONG.byteSize() * workItemDimensions, dimensionsSizeRet, MemorySegment.NULL);
+                if (result != OpenCL.CL_SUCCESS) {
+                    throw new RuntimeException("clGetDeviceInfo failed: " + result);
+                }
+
+                final long[] workItemSizes = new long[workItemDimensions];
+                for (int k = 0; k < workItemDimensions; k++) {
+                    workItemSizes[k] = dimensionsSizeRet.getAtIndex(ValueLayout.JAVA_LONG, k);
+                }
+
                 final long deviceId = deviceIds[j];
 
                 retDevices.add(new DeviceProperties() {
@@ -210,7 +233,7 @@ public class HWAPlatform implements Platform {
 
                     @Override
                     public long[] getMaxWorkItemSizes() {
-                        return new long[0];
+                        return workItemSizes;
                     }
 
                     @Override
@@ -222,6 +245,11 @@ public class HWAPlatform implements Platform {
                     public long getClockFrequency() {
                         return maxClockFrequency;
                     }
+
+                    @Override
+                    public int memoryAlignment() {
+                        return memoryAlignment;
+                    }
                 });
             }
         }
@@ -230,7 +258,7 @@ public class HWAPlatform implements Platform {
 
     @Override
     public Context createContext() {
-        return new HWAContext(openCL, openCLOptions);
+        return new HWAContext(openCL, platformProperties, deviceProperties);
     }
 
     @Override

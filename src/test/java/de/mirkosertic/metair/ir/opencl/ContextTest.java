@@ -6,14 +6,12 @@ import de.mirkosertic.metair.opencl.api.Kernel;
 import de.mirkosertic.metair.opencl.api.OpenCLOptions;
 import de.mirkosertic.metair.opencl.api.Platform;
 import de.mirkosertic.metair.opencl.api.PlatformFactory;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static de.mirkosertic.metair.opencl.api.Float2.float2;
 import static de.mirkosertic.metair.opencl.api.GlobalFunctions.get_global_id;
 import static de.mirkosertic.metair.opencl.api.VectorFunctions.normalize;
 
-@Disabled
 public class ContextTest {
 
     @Test
@@ -23,6 +21,8 @@ public class ContextTest {
         final float[] theA = {10f, 20f, 30f, 40f};
         final float[] theB = {100f, 200f, 300f, 400f};
         final float[] theResult = new float[4];
+
+        theResult[0] = 99f;
 
         try (final Context theContext = thePlatform.createContext()) {
             theContext.compute(4, new Kernel() {
@@ -36,9 +36,19 @@ public class ContextTest {
             });
         }
 
+        System.out.println("Result");
         for (final float aTheResult : theResult) {
             System.out.println(aTheResult);
         }
+        System.out.println("A");
+        for (final float aTheResult : theA) {
+            System.out.println(aTheResult);
+        }
+        System.out.println("B");
+        for (final float aTheResult : theB) {
+            System.out.println(aTheResult);
+        }
+
     }
 
     @Test
@@ -145,7 +155,6 @@ public class ContextTest {
     public void testMandelbrot() throws Exception {
 
         final Platform thePlatform = PlatformFactory.resolve().createPlatform(new OpenCLOptions.Builder().build());
-        // final Platform thePlatform = new CPUPlatform(new Slf4JLogger());
 
         final int iteration = 30;
         final float cellSize = 0.00625f;
@@ -159,8 +168,8 @@ public class ContextTest {
         try (final Context theContext = thePlatform.createContext()) {
             theContext.compute(imageData.length, new Kernel() {
 
-                private int checkC(final double reC, final double imC) {
-                    double reZ=0,imZ=0,reZ_minus1=0,imZ_minus1=0;
+                private int checkC(final float reC, final float imC) {
+                    float reZ=0,imZ=0,reZ_minus1=0,imZ_minus1=0;
                     int i;
                     for (i=0;i<iteration;i++) {
                         imZ=2*reZ_minus1*imZ_minus1+imC;

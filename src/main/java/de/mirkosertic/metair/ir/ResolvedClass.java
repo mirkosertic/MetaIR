@@ -3,6 +3,7 @@ package de.mirkosertic.metair.ir;
 import java.lang.classfile.ClassModel;
 import java.lang.classfile.FieldModel;
 import java.lang.classfile.MethodModel;
+import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
 import java.lang.reflect.AccessFlag;
 import java.util.ArrayList;
@@ -34,6 +35,15 @@ public class ResolvedClass {
 
     public List<ResolvedField> resolvedFields() {
         return new ArrayList<>(fields.values());
+    }
+
+    public boolean hasInterface(final ClassDesc interfaceType) {
+        for (final ResolvedClass i : interfaces) {
+            if (i.thisType().type().equals(interfaceType)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void loaded(final ClassModel classModel, final ResolvedClass superClass, final List<ResolvedClass> interfaces) {

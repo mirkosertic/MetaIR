@@ -77,12 +77,14 @@ public class Sequencer<T extends StructuredControlflowCodeGenerator.GeneratedThi
                         break;
                     }
                     case final LabelNode labelNode: {
+                        codegenerator.writePreJump(labelNode);
                         codegenerator.writePHINodesFor(labelNode);
                         codegenerator.write(labelNode);
                         current = followUpProcessor.apply(current);
                         break;
                     }
                     case final MergeNode mergeNode: {
+                        codegenerator.writePreJump(mergeNode);
                         codegenerator.writePHINodesFor(mergeNode);
                         codegenerator.write(mergeNode);
                         current = followUpProcessor.apply(current);

@@ -46,7 +46,6 @@ import de.mirkosertic.metair.ir.PrimitiveDouble;
 import de.mirkosertic.metair.ir.PrimitiveFloat;
 import de.mirkosertic.metair.ir.PrimitiveInt;
 import de.mirkosertic.metair.ir.PrimitiveLong;
-import de.mirkosertic.metair.ir.Projection;
 import de.mirkosertic.metair.ir.PutField;
 import de.mirkosertic.metair.ir.PutStatic;
 import de.mirkosertic.metair.ir.ReferenceCondition;
@@ -68,6 +67,8 @@ import de.mirkosertic.metair.ir.Truncate;
 import de.mirkosertic.metair.ir.TypeUtils;
 import de.mirkosertic.metair.ir.Value;
 import de.mirkosertic.metair.ir.VarArgsArray;
+import de.mirkosertic.metair.opencl.api.Kernel;
+import de.mirkosertic.metair.opencl.api.OpenCLFunction;
 import de.mirkosertic.metair.opencl.api.OpenCLType;
 
 import java.io.PrintWriter;
@@ -77,7 +78,7 @@ import java.lang.classfile.AnnotationElement;
 import java.lang.classfile.AnnotationValue;
 import java.lang.classfile.Attributes;
 import java.lang.classfile.ClassModel;
-import java.lang.classfile.attribute.RuntimeInvisibleAnnotationsAttribute;
+import java.lang.classfile.MethodModel;
 import java.lang.classfile.attribute.RuntimeVisibleAnnotationsAttribute;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.ConstantDescs;
@@ -100,6 +101,7 @@ public class HWAStructuredControlflowCodeGenerator extends StructuredControlflow
         }
     }
 
+    private final Kernel kernel;
     private final List<HWAKernelArgument> kernelArguments;
     private final StringWriter sw;
     private final PrintWriter pw;
@@ -107,14 +109,19 @@ public class HWAStructuredControlflowCodeGenerator extends StructuredControlflow
     private int indentationLevel = 0;
     private final Set<PHI> phiNodes;
     private final ResolverContext resolverContext;
+    private final Set<String> requiredExitLabels;
 
-    public HWAStructuredControlflowCodeGenerator(final ResolverContext resolverContext, final List<HWAKernelArgument> kernelArguments) {
+    public HWAStructuredControlflowCodeGenerator(final ResolverContext resolverContext, final Kernel kernel, final List<HWAKernelArgument> kernelArguments) {
+        this.kernel = kernel;
         this.kernelArguments = kernelArguments;
         this.sw = new StringWriter();
         this.pw = new PrintWriter(sw);
         this.temporaryVariablesCounter = 0;
         this.phiNodes = new HashSet<>();
         this.resolverContext = resolverContext;
+        this.requiredExitLabels = new HashSet<>();
+
+        generateUtilityFunctions();
     }
 
     private void writeIndentation() {
@@ -123,7 +130,31 @@ public class HWAStructuredControlflowCodeGenerator extends StructuredControlflow
         }
     }
 
-        // Expression generation
+    private String removeParentheses(final String value) {
+        return value;
+    }
+
+    private void generateUtilityFunctions() {
+        pw.println("// Utility functions for the OpenCL code generation");
+        pw.println("__inline int numcomp_int(int a, int b) {");
+        pw.println("    return (a < b) ? -1 : (a == b) ? 0 : 1;");
+        pw.println("}");
+        pw.println();
+        pw.println("__inline int numcomp_long(long a, long b) {");
+        pw.println("    return (a < b) ? -1 : (a == b) ? 0 : 1;");
+        pw.println("}");
+        pw.println();
+        pw.println("__inline int numcomp_float(float a, float b) {");
+        pw.println("    return (a < b) ? -1 : (a == b) ? 0 : 1;");
+        pw.println("}");
+        pw.println();
+        pw.println("__inline int numcomp_double(double a, double b) {");
+        pw.println("    return (a < b) ? -1 : (a == b) ? 0 : 1;");
+        pw.println("}");
+        pw.println();
+    }
+
+    // Expression generation
 
     @Override
     public GeneratedCode visit_PrimitiveInt(final PrimitiveInt node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
@@ -285,17 +316,18 @@ public class HWAStructuredControlflowCodeGenerator extends StructuredControlflow
 
         final GeneratedCode arg1 = evaluationStack.pop();
 
+        final ClassDesc kernelClassDesc = ClassDesc.of(kernel.getClass().getName());
+        if (kernelClassDesc.equals(node.owner.type())) {
+            // Access to a kernel member, which is passed as an argument to the method.
+            return new GeneratedCode(node.type, node.fieldName);
+        }
+
         return new GeneratedCode(node.type, "(" + arg1 + "." + node.fieldName + ")");
     }
 
     @Override
     public GeneratedCode visit_GetStatic(final GetStatic node, final Deque<Node> expressionStack, final Deque<GeneratedCode> evaluationStack) {
-
-        emitArguments(node, 1, expressionStack, evaluationStack);
-
-        final GeneratedCode arg1 = evaluationStack.pop();
-
-        return new GeneratedCode(node.type, "(" + arg1 + "." + node.fieldName + ")");
+        throw new IllegalStateException("Not supported by OpenCL!");
     }
 
     @Override
@@ -349,12 +381,12 @@ public class HWAStructuredControlflowCodeGenerator extends StructuredControlflow
         final GeneratedCode arg1 = evaluationStack.pop();
 
         return switch (node.operation) {
-            case EQ -> new GeneratedCode(node.type, "(" + arg1 + " == " + arg2 + ")");
-            case NE -> new GeneratedCode(node.type, "(" + arg1 + " != " + arg2 + ")");
-            case GT -> new GeneratedCode(node.type, "(" + arg1 + " > " + arg2 + ")");
-            case GE -> new GeneratedCode(node.type, "(" + arg1 + " >= " + arg2 + ")");
-            case LT -> new GeneratedCode(node.type, "(" + arg1 + " < " + arg2 + ")");
-            case LE -> new GeneratedCode(node.type, "(" + arg1 + " <= " + arg2 + ")");
+            case EQ -> new GeneratedCode(node.type, "(" + arg1.value + " == " + arg2.value + ")");
+            case NE -> new GeneratedCode(node.type, "(" + arg1.value + " != " + arg2.value + ")");
+            case GT -> new GeneratedCode(node.type, "(" + arg1.value + " > " + arg2.value + ")");
+            case GE -> new GeneratedCode(node.type, "(" + arg1.value + " >= " + arg2.value + ")");
+            case LT -> new GeneratedCode(node.type, "(" + arg1.value + " < " + arg2.value + ")");
+            case LE -> new GeneratedCode(node.type, "(" + arg1.value + " <= " + arg2.value + ")");
         };
     }
 
@@ -366,7 +398,17 @@ public class HWAStructuredControlflowCodeGenerator extends StructuredControlflow
         final GeneratedCode arg2 = evaluationStack.pop();
         final GeneratedCode arg1 = evaluationStack.pop();
 
-        return new GeneratedCode(node.type, "numcomp(" + node.compareType + "," + arg1 + ", " + arg2 + ")");
+        if (arg1.type.equals(IRType.CD_int) && arg2.type.equals(IRType.CD_int)) {
+            return new GeneratedCode(node.type, "numcomp_int(" + removeParentheses(arg1.value) + ", " + removeParentheses(arg2.value) + ")");
+        } else if (arg1.type.equals(IRType.CD_float) && arg2.type.equals(IRType.CD_float)) {
+            return new GeneratedCode(node.type, "numcomp_float(" + removeParentheses(arg1.value) + ", " + removeParentheses(arg2.value) + ")");
+        } else if (arg1.type.equals(IRType.CD_long) && arg2.type.equals(IRType.CD_long)) {
+            return new GeneratedCode(node.type, "numcomp_long(" + removeParentheses(arg1.value) + ", " + removeParentheses(arg2.value) + ")");
+        } else if (arg1.type.equals(IRType.CD_double) && arg2.type.equals(IRType.CD_double)) {
+            return new GeneratedCode(node.type, "numcomp_double(" + removeParentheses(arg1.value) + ", " + removeParentheses(arg2.value) + ")");
+        }
+
+        throw new IllegalStateException("Not supported by OpenCL! Types are " + arg1.type.type() + " and " + arg2.type.type());
     }
 
     @Override
@@ -498,22 +540,38 @@ public class HWAStructuredControlflowCodeGenerator extends StructuredControlflow
 
         content = content.reversed();
 
-        final StringBuilder result = new StringBuilder("(");
-        result.append(content.getFirst());
-        result.append(".");
-        result.append(node.name);
-        result.append("(");
+        final ClassDesc kernelClassDesc = ClassDesc.of(kernel.getClass().getName());
+        if (kernelClassDesc.equals(content.getFirst().type.type())) {
+            final StringBuilder result = new StringBuilder(node.name);
+            result.append(node.name);
+            result.append("(");
 
-        for (int i = 1; i < content.size(); i++) {
-            if (i > 1) {
-                result.append(",");
+            boolean first = true;
+            for (final HWAKernelArgument argument : kernelArguments) {
+                if (!first) {
+                    result.append(",");
+                }
+
+                result.append(argument.name());
+
+                first = false;
             }
-            result.append(content.get(i));
+
+            for (int i = 1; i < content.size(); i++) {
+                if (!first) {
+                    result.append(",");
+                }
+                result.append(content.get(i));
+
+                first = false;
+            }
+
+            result.append(")");
+
+            return new GeneratedCode(node.type, result.toString());
         }
 
-        result.append("))");
-
-        return new GeneratedCode(node.type, result.toString());
+        throw new IllegalStateException("Not supported by OpenCL!");
     }
 
     @Override
@@ -531,22 +589,37 @@ public class HWAStructuredControlflowCodeGenerator extends StructuredControlflow
 
         content = content.reversed();
 
-        final StringBuilder result = new StringBuilder("(");
-        result.append(content.getFirst());
-        result.append(".");
-        result.append(node.name);
-        result.append("(");
+        final ClassDesc kernelClassDesc = ClassDesc.of(kernel.getClass().getName());
+        if (kernelClassDesc.equals(content.getFirst().type.type())) {
+            final StringBuilder result = new StringBuilder(node.name);
+            result.append("(");
 
-        for (int i = 1; i < content.size(); i++) {
-            if (i > 1) {
-                result.append(",");
+            boolean first = true;
+            for (final HWAKernelArgument argument : kernelArguments) {
+                if (!first) {
+                    result.append(",");
+                }
+
+                result.append(argument.name());
+
+                first = false;
             }
-            result.append(content.get(i));
+
+            for (int i = 1; i < content.size(); i++) {
+                if (!first) {
+                    result.append(",");
+                }
+                result.append(content.get(i));
+
+                first = false;
+            }
+
+            result.append(")");
+
+            return new GeneratedCode(node.type, result.toString());
         }
 
-        result.append("))");
-
-        return new GeneratedCode(node.type, result.toString());
+        throw new IllegalStateException("Not supported by OpenCL!");
     }
 
     @Override
@@ -564,22 +637,50 @@ public class HWAStructuredControlflowCodeGenerator extends StructuredControlflow
 
         content = content.reversed();
 
-        final StringBuilder result = new StringBuilder("(");
-        result.append(content.getFirst());
-        result.append(".");
-        result.append(node.name);
-        result.append("(");
+        final ResolvedClass owner = resolverContext.resolveClass(node.ownerType.type());
+        for (final MethodModel methodModel : owner.classModel().methods()) {
+            if (methodModel.methodName().stringValue().equals(node.name)) {
+                // We found a candidate
+                String openCLFunctionMame = null;
+                boolean isLiteral = false;
+                final Optional<RuntimeVisibleAnnotationsAttribute> annotations = methodModel.findAttribute(Attributes.runtimeVisibleAnnotations());
+                if (annotations.isPresent()) {
+                    final RuntimeVisibleAnnotationsAttribute attribute = annotations.get();
+                    for (final Annotation annotation : attribute.annotations()) {
+                        if (annotation.classSymbol().equals(ClassDesc.of(OpenCLFunction.class.getName()))) {
+                            for (final AnnotationElement element : annotation.elements()) {
+                                if ("value".equals(element.name().stringValue())) {
+                                    openCLFunctionMame = ((AnnotationValue.OfString) element.value()).resolvedValue();
+                                }
+                                if ("literal".equals(element.name().stringValue())) {
+                                    isLiteral = ((AnnotationValue.OfBoolean) element.value()).resolvedValue();
+                                }
+                            }
+                        }
+                    }
+                }
 
-        for (int i = 1; i < content.size(); i++) {
-            if (i > 1) {
-                result.append(",");
+                if (openCLFunctionMame == null) {
+                    throw new IllegalStateException("No OpenCL function name found for " + node.name);
+                }
+
+                final StringBuilder result = new StringBuilder(isLiteral ? "(" + openCLFunctionMame + ")" : openCLFunctionMame);
+                result.append("(");
+
+                for (int i = 1; i < content.size(); i++) {
+                    if (i > 1) {
+                        result.append(",");
+                    }
+                    result.append(removeParentheses(content.get(i).value));
+                }
+
+                result.append(")");
+
+                return new GeneratedCode(node.type, result.toString());
             }
-            result.append(content.get(i));
         }
 
-        result.append("))");
-
-        return new GeneratedCode(node.type, result.toString());
+        throw new IllegalStateException("No OpenCL function name found for " + node.name);
     }
 
     @Override
@@ -618,9 +719,9 @@ public class HWAStructuredControlflowCodeGenerator extends StructuredControlflow
     public void write(final ClassInitialization node) {
         final Deque<GeneratedCode> evaluationStack = new ArrayDeque<>();
 
-        final GeneratedCode generatedCode = visit_ClassInitialization(node, new ArrayDeque<>(), evaluationStack);
-
-        emitWithTemporary(node, generatedCode, evaluationStack);
+        visit_ClassInitialization(node, new ArrayDeque<>(), evaluationStack);
+        // We just ignore the initialization code as OpenCL does not support this.
+        // Classes and methods are fully transformed to OpenCL functions, so we don't need to initialize them.'
     }
 
     @Override
@@ -724,12 +825,14 @@ public class HWAStructuredControlflowCodeGenerator extends StructuredControlflow
         final String varname = prefix + temporaryVariablesCounter++;
 
         writeIndentation();
-
-        pw.print(TypeUtils.toString(value.type));
+        pw.print(typeNameOf(value.type()));
         pw.print(" ");
         pw.print(varname);
-        pw.print(" = ");
-        pw.print(value);
+        if (value.value != null) {
+            pw.print(" = ");
+            pw.print(removeParentheses(value.value));
+        }
+        pw.print(";");
         pw.print(System.lineSeparator());
 
         return new GeneratedCode(value.type, varname);
@@ -753,6 +856,15 @@ public class HWAStructuredControlflowCodeGenerator extends StructuredControlflow
     private String typeNameOf(final ClassDesc classDesc) {
         if (ConstantDescs.CD_void.equals(classDesc)) {
             return "void";
+        }
+        if (ConstantDescs.CD_int.equals(classDesc)) {
+            return "int";
+        }
+        if (ConstantDescs.CD_long.equals(classDesc)) {
+            return "long";
+        }
+        if (ConstantDescs.CD_float.equals(classDesc)) {
+            return "float";
         }
         throw new IllegalArgumentException("Not implemented yet : " + classDesc);
     }
@@ -794,13 +906,17 @@ public class HWAStructuredControlflowCodeGenerator extends StructuredControlflow
                     }
                 }
             }
-            throw new IllegalArgumentException("Not implemented yet : " + type);
+            // TODO: This should raise a exception
+            return TypeUtils.toString(type);
         }
         throw new IllegalArgumentException("Not implemented yet : " + type);
     }
 
     @Override
     public void begin(final ResolvedMethod resolvedMethod, final Method method) {
+
+        requiredExitLabels.clear();
+
         writeIndentation();
 
         final String methodName = resolvedMethod.methodModel().methodName().stringValue();
@@ -816,29 +932,32 @@ public class HWAStructuredControlflowCodeGenerator extends StructuredControlflow
         pw.print("(");
 
         boolean first = true;
-        for (HWAKernelArgument argument : kernelArguments) {
+        for (final HWAKernelArgument argument : kernelArguments) {
             if (!first) {
                 pw.print(", ");
             }
-            pw.print("__global ");
-            pw.print(argument.name());
-            pw.print(" ");
+            if (argument.type().isArray()) {
+                pw.print("__global ");
+            }
             pw.print(typeNameOf(argument.type()));
+            pw.print(" ");
+            pw.print(argument.name());
 
             first = false;
         }
 
         for (final Value arg : method.methodArguments) {
-            // Extract thisref not supported in OpenCL kerels...
+            // Extract thisref not supported in OpenCL kernels...
             if (arg instanceof final ExtractMethodArgProjection proj) {
-
                 if (!first) {
                     pw.print(", ");
                 }
-                pw.print("__global ");
-                pw.print(proj.name());
-                pw.print(" ");
+                if (arg.type.isArray()) {
+                    pw.print("__global ");
+                }
                 pw.print(typeNameOf(arg.type));
+                pw.print(" ");
+                pw.print(proj.name());
 
                 first = false;
             }
@@ -852,34 +971,47 @@ public class HWAStructuredControlflowCodeGenerator extends StructuredControlflow
     @Override
     public void writeBreakTo(final String label, final Node currentNode, final Node targetNode) {
         writeIndentation();
-        pw.print("break ");
+        pw.print("goto $");
         pw.print(label);
-        pw.println();
+        pw.println("_exit;");
+
+        requiredExitLabels.add(label);
     }
 
     @Override
     public void writeContinueTo(final String label, final Node currentNode, final Node targetNode) {
         writeIndentation();
-        pw.print("continue ");
+        pw.print("goto $");
         pw.print(label);
-        pw.println();
+        pw.println(";");
     }
 
     @Override
     public void finishBlock(final Sequencer.Block block) {
         indentationLevel--;
         writeIndentation();
-        pw.println(")");
+        pw.println("}");
+
+        if (requiredExitLabels.contains(block.label)) {
+            writeIndentation();
+            pw.print("$");
+            pw.print(block.label);
+            pw.print("_exit: ");
+            pw.println();
+        }
     }
 
     @Override
     public void startBlock(final Sequencer.Block b) {
         writeIndentation();
-        pw.print("(block ");
-        if (b.type == Sequencer.Block.Type.LOOP) {
-            pw.print("loop ");
-        }
+        pw.print("$");
         pw.print(b.label);
+        pw.print(": ");
+        if (b.type == Sequencer.Block.Type.LOOP) {
+            pw.print("while (true) {");
+        } else {
+            pw.print("{");
+        }
         pw.println();
         indentationLevel++;
     }
@@ -895,9 +1027,9 @@ public class HWAStructuredControlflowCodeGenerator extends StructuredControlflow
         }
 
         writeIndentation();
-        pw.print("(if ");
-        pw.print(stack.pop().value);
-        pw.println();
+        pw.print("if (");
+        pw.print(removeParentheses(stack.pop().value));
+        pw.println(") {");
 
         indentationLevel++;
     }
@@ -906,7 +1038,7 @@ public class HWAStructuredControlflowCodeGenerator extends StructuredControlflow
     public void startIfElseBlock(final If node) {
         indentationLevel--;
         writeIndentation();
-        pw.println("(else)");
+        pw.println("} else {");
 
         indentationLevel++;
     }
@@ -915,13 +1047,13 @@ public class HWAStructuredControlflowCodeGenerator extends StructuredControlflow
     public void finishIfBlock() {
         indentationLevel--;
         writeIndentation();
-        pw.println(")");
+        pw.println("}");
     }
 
     @Override
     public void write(final Return node) {
         writeIndentation();
-        pw.println("return");
+        pw.println("return;");
     }
 
     @Override
@@ -937,7 +1069,7 @@ public class HWAStructuredControlflowCodeGenerator extends StructuredControlflow
         writeIndentation();
         pw.print("return ");
         pw.print(stack.pop().value);
-        pw.println();
+        pw.println(";");
     }
 
     @Override
@@ -957,10 +1089,10 @@ public class HWAStructuredControlflowCodeGenerator extends StructuredControlflow
         writeIndentation();
         pw.print(arg0.value);
         pw.print("[");
-        pw.print(arg1.value);
+        pw.print(removeParentheses(arg1.value));
         pw.print("] = ");
-        pw.print(arg2.value);
-        pw.println();
+        pw.print(removeParentheses(arg2.value));
+        pw.println(";");
     }
 
     @Override
@@ -1004,7 +1136,7 @@ public class HWAStructuredControlflowCodeGenerator extends StructuredControlflow
         pw.print(node.fieldName);
         pw.print(" = ");
         pw.print(arg1.value);
-        pw.println();
+        pw.println(";");
     }
 
     @Override
@@ -1041,7 +1173,8 @@ public class HWAStructuredControlflowCodeGenerator extends StructuredControlflow
                 writeIndentation();
                 pw.print(var.value);
                 pw.print(" = ");
-                pw.println(arg0.value);
+                pw.print(removeParentheses(arg0.value));
+                pw.println(";");
             }
         }
     }
@@ -1204,7 +1337,7 @@ public class HWAStructuredControlflowCodeGenerator extends StructuredControlflow
             if (defs instanceof final PHI phi) {
                 final Node initializedByThis = phi.initExpressionFor(node);
                 if (initializedByThis == null) {
-                    emitWithTemporary("phi", phi, new GeneratedCode(phi.type, "<<uninitialized>>"), new ArrayDeque<>());
+                    emitWithTemporary("phi", phi, new GeneratedCode(phi.type, null), new ArrayDeque<>());
                 } else {
                     final Deque<GeneratedCode> stack = new ArrayDeque<>();
                     emit(initializedByThis, new ArrayDeque<>(), stack);

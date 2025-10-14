@@ -8,7 +8,6 @@ import de.mirkosertic.metair.opencl.api.OpenCLOptions;
 import de.mirkosertic.metair.opencl.api.Platform;
 import de.mirkosertic.metair.opencl.api.PlatformFactory;
 import de.mirkosertic.metair.opencl.api.PlatformProperties;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static de.mirkosertic.metair.opencl.api.Float4.float4;
@@ -17,7 +16,6 @@ import static de.mirkosertic.metair.opencl.api.GlobalFunctions.get_global_size;
 import static de.mirkosertic.metair.opencl.api.VectorFunctions.dot;
 import static de.mirkosertic.metair.opencl.api.VectorFunctions.length;
 
-@Disabled
 public class AliceBobCarolDaveTest {
 
     @Test

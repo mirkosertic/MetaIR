@@ -71,6 +71,11 @@ public class CPUPlatform implements Platform {
             public long getClockFrequency() {
                 return 1;
             }
+
+            @Override
+            public int memoryAlignment() {
+                return 4;
+            }
         };
     }
 

@@ -13,10 +13,10 @@ public class PlatformFactoryImpl extends PlatformFactory {
         try {
             // Try hardware acceleration first
             final OpenCL openCL = new OpenCL();
-            // We wont get to this point in case system does not support OpenCL
+            // We won't get to this point in case the system does not support OpenCL
             return new HWAPlatform(openCL, aOptions);
         } catch (final Exception e) {
-            // Default to CPU
+            // Default to CPU emulation
             return new CPUPlatform(aOptions);
         }
     }

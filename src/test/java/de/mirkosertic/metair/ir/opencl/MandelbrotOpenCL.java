@@ -31,7 +31,6 @@ public class MandelbrotOpenCL {
 
     public MandelbrotOpenCL() {
         platform = PlatformFactory.resolve().createPlatform(new OpenCLOptions.Builder().build());
-        //platform = new CPUPlatform(new Slf4JLogger());
         context = platform.createContext();
         kernel = new MandelbrotKernel(1024, 768, 512);
     }

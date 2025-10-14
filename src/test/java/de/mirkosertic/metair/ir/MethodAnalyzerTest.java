@@ -3293,7 +3293,7 @@ public class MethodAnalyzerTest {
 
                 assertThat(frame.out).isNotNull().isNotSameAs(frame.in);
                 assertThat(frame.out.stack).hasSize(1);
-                assertThat(frame.out.stack.getFirst()).isInstanceOf(StringConstant.class).matches(t -> t.type.equals(IRType.CD_String));
+                assertThat(frame.out.stack.getFirst()).isInstanceOf(CheckCast.class).matches(t -> t.type.equals(IRType.CD_String));
             }
 
             @Test

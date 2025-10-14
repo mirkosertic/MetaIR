@@ -44,7 +44,7 @@ public class MandelbrotKernel extends Kernel {
         fitCellSize();
     }
 
-    private void fitCellSize() {
+    public void fitCellSize() {
         cellSize_width = (x_max - x_min) / width;
         cellSize_height = (y_max - y_min) / height;
     }
@@ -90,7 +90,7 @@ public class MandelbrotKernel extends Kernel {
         return imageData;
     }
 
-    public void zoomInOut(final int amount) {
+    public void zoomInOut(final float amount) {
         final float width = x_max - x_min;
         final float height = y_max - y_min;
 

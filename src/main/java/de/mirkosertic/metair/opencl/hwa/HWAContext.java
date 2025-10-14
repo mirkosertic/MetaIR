@@ -2,44 +2,54 @@ package de.mirkosertic.metair.opencl.hwa;
 
 import de.mirkosertic.metair.opencl.OpenCL;
 import de.mirkosertic.metair.opencl.api.Context;
+import de.mirkosertic.metair.opencl.api.DeviceProperties;
 import de.mirkosertic.metair.opencl.api.Kernel;
-import de.mirkosertic.metair.opencl.api.OpenCLOptions;
+import de.mirkosertic.metair.opencl.api.PlatformProperties;
 
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.IntStream;
-
-import static de.mirkosertic.metair.opencl.api.GlobalFunctions.set_global_id;
-import static de.mirkosertic.metair.opencl.api.GlobalFunctions.set_global_size;
 
 public class HWAContext implements Context {
 
     private final OpenCL openCl;
-    private final OpenCLOptions openCLOptions;
+    private final DeviceProperties deviceProperties;
     private final Map<Kernel, HWACompiledKernel> compiledKernels;
+    private final Arena arena;
+    private final MemorySegment context;
+    private final MemorySegment commandQueue;
 
-    public HWAContext(final OpenCL openCl, final OpenCLOptions openCLOptions) {
+    public HWAContext(final OpenCL openCl, final PlatformProperties platformProperties, final DeviceProperties deviceProperties) {
         this.openCl = openCl;
-        this.openCLOptions = openCLOptions;
+        this.deviceProperties = deviceProperties;
         this.compiledKernels = new HashMap<>();
+        this.arena = Arena.ofConfined();
+
+        final MemorySegment properties = arena.allocate(ValueLayout.JAVA_LONG, 3 * 8L);
+        properties.set(ValueLayout.JAVA_LONG, 0, OpenCL.CL_CONTEXT_PLATFORM);
+        properties.set(ValueLayout.JAVA_LONG, 8, platformProperties.getId());
+        properties.set(ValueLayout.JAVA_LONG, 16, 0);
+
+        final MemorySegment deviceId = arena.allocateFrom(ValueLayout.JAVA_LONG, deviceProperties.getId());
+        final MemorySegment errorRet = arena.allocate(ValueLayout.JAVA_INT);
+
+        context = openCl.clCreateContext(properties, 1, deviceId, MemorySegment.NULL, MemorySegment.NULL, errorRet);
+        if (errorRet.get(ValueLayout.JAVA_INT, 0) != OpenCL.CL_SUCCESS) {
+            throw new RuntimeException("clCreateContext failed: " + errorRet.get(ValueLayout.JAVA_INT, 0));
+        }
+
+        commandQueue = openCl.clCreateCommandQueue(context, deviceProperties.getId(), MemorySegment.NULL, errorRet);
+        if (errorRet.get(ValueLayout.JAVA_INT, 0) != OpenCL.CL_SUCCESS) {
+            throw new RuntimeException("clCreateContext failed: " + errorRet.get(ValueLayout.JAVA_INT, 0));
+        }
     }
 
     @Override
     public void compute(final int numberOfStreams, final Kernel kernel) {
-
-        final HWACompiledKernel c = compiledKernels.computeIfAbsent(kernel, HWACompiledKernel::new);
-
-        IntStream.range(0, numberOfStreams)
-                .parallel()
-                .forEach(workItemId->{
-                    try {
-                        set_global_size(0, numberOfStreams);
-                        set_global_id(0, workItemId);
-                        kernel.processWorkItem();
-                    } catch (final Exception e) {
-                        throw new IllegalStateException("Kernel execution (single work item) failed.", e);
-                    }
-                }); // blocks until all work-items are complete
+        final HWACompiledKernel compiledKernel = compiledKernels.computeIfAbsent(kernel, key -> new HWACompiledKernel(openCl, deviceProperties, key, arena, context, commandQueue));
+        compiledKernel.compute(numberOfStreams);
     }
 
     @Override
@@ -47,5 +57,8 @@ public class HWAContext implements Context {
         for (final HWACompiledKernel c : compiledKernels.values()) {
             c.close();
         }
+        openCl.clReleaseCommandQueue(commandQueue);
+        openCl.clReleaseContext(context);
+        arena.close();
     }
 }

@@ -2087,14 +2087,16 @@ public class MethodAnalyzer {
     private void parse_CHECKCAST(final ClassDesc typeToCheck, final Frame frame) {
         final Status outgoing = frame.copyIncomingToOutgoing();
 
-        final Value objectToCheck = outgoing.peek();
+        final Value objectToCheck = outgoing.pop();
         final RuntimeclassReference expectedType = outgoing.control.defineRuntimeclassReference(resolverContext.resolveType(typeToCheck));
 
         final ClassInitialization classInit = new ClassInitialization(expectedType);
         outgoing.control = outgoing.control.controlFlowsTo(classInit, FlowType.FORWARD);
         outgoing.memory = outgoing.memory.memoryFlowsTo(classInit);
 
-        outgoing.control = outgoing.control.controlFlowsTo(new CheckCast(objectToCheck, classInit), FlowType.FORWARD);
+        final CheckCast checkCast = new CheckCast(expectedType, objectToCheck);
+        outgoing.control = outgoing.control.controlFlowsTo(checkCast, FlowType.FORWARD);
+        outgoing.push(checkCast);
     }
 
     private void parse_INSTANCEOF(final ClassDesc typeToCheck, final Frame frame) {
