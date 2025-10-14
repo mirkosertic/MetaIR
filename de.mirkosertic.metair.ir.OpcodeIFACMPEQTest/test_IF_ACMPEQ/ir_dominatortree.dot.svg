@@ -112,11 +112,11 @@
 <text text-anchor="middle" x="497.5" y="-379.3" font-family="Times,serif" font-size="14.00">#4 ReferenceCondition : EQ Order : 3</text>
 </g>
 <!-- node2&#45;&gt;node4 -->
-<g id="edge8" class="edge">
+<g id="edge9" class="edge">
 <title>node2&#45;&gt;node4</title>
 <path fill="none" stroke="black" d="M584.95,-437.99C569.7,-428.58 550.55,-416.76 534.06,-406.57"/>
 <polygon fill="black" stroke="black" points="535.57,-403.39 525.22,-401.11 531.89,-409.35 535.57,-403.39"/>
-<text text-anchor="middle" x="545.08" y="-399.74" font-family="Times,serif" font-size="14.00">*0</text>
+<text text-anchor="middle" x="545.08" y="-399.74" font-family="Times,serif" font-size="14.00">*1</text>
 </g>
 <!-- node3&#45;&gt;node0 -->
 <g id="edge5" class="edge">
@@ -125,11 +125,11 @@
 <polygon fill="fuchsia" stroke="fuchsia" stroke-width="2" points="453.04,-508.87 463.42,-510.99 456.63,-502.86 453.04,-508.87"/>
 </g>
 <!-- node3&#45;&gt;node4 -->
-<g id="edge9" class="edge">
+<g id="edge8" class="edge">
 <title>node3&#45;&gt;node4</title>
 <path fill="none" stroke="black" d="M394.84,-437.99C413.15,-428.36 436.26,-416.21 455.92,-405.87"/>
 <polygon fill="black" stroke="black" points="457.74,-408.87 464.96,-401.11 454.48,-402.67 457.74,-408.87"/>
-<text text-anchor="middle" x="452.85" y="-413.33" font-family="Times,serif" font-size="14.00">*1</text>
+<text text-anchor="middle" x="452.85" y="-413.33" font-family="Times,serif" font-size="14.00">*0</text>
 </g>
 <!-- node4&#45;&gt;node0 -->
 <g id="edge7" class="edge">

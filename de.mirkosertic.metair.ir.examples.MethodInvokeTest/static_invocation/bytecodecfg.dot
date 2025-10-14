@@ -2,13 +2,13 @@ digraph {
  ordering="in";
  node0[label="#0 LocalVariable[name=this, slot=0, type=Lde/mirkosertic/metair/ir/examples/MethodInvokeTest;] Order: 0", shape=box, fillcolor=lightgrey, style=filled];
  node1[label="#1 LocalVariable[name=source, slot=1, type=Lde/mirkosertic/metair/ir/examples/MethodInvokeTest$Source;] Order: 1", shape=box, fillcolor=lightgrey, style=filled];
- node2[label="#2 Label[context=CodeModel[id=1270383967], bci=0] Order: 2", shape=box, fillcolor=lightgrey, style=filled];
+ node2[label="#2 Label[context=CodeModel[id=614635686], bci=0] Order: 2", shape=box, fillcolor=lightgrey, style=filled];
  node3[label="#3 LineNumber[line=86] Order: 3", shape=box, fillcolor=lightgrey, style=filled];
  node4[label="#4 NewObj[OP=NEW, type=de/mirkosertic/metair/ir/examples/MethodInvokeTest$Source] Order: 4", shape=box, fillcolor=lightgrey, style=filled];
  node5[label="#5 UnboundStackInstruction[op=DUP] Order: 5", shape=box, fillcolor=lightgrey, style=filled];
  node6[label="#6 Invoke[OP=INVOKESPECIAL, m=de/mirkosertic/metair/ir/examples/MethodInvokeTest$Source.<init>()V] Order: 6", shape=box, fillcolor=lightgrey, style=filled];
  node7[label="#7 Store[OP=ASTORE_1, slot=1] Order: 7", shape=box, fillcolor=lightgrey, style=filled];
- node8[label="#8 Label[context=CodeModel[id=1270383967], bci=8] Order: 8", shape=box, fillcolor=lightgrey, style=filled];
+ node8[label="#8 Label[context=CodeModel[id=614635686], bci=8] Order: 8", shape=box, fillcolor=lightgrey, style=filled];
  node9[label="#9 LineNumber[line=87] Order: 9", shape=box, fillcolor=lightgrey, style=filled];
  node10[label="#10 Load[OP=ALOAD_1, slot=1] Order: 10", shape=box, fillcolor=lightgrey, style=filled];
  node11[label="#11 Field[OP=GETFIELD, field=de/mirkosertic/metair/ir/examples/MethodInvokeTest$Source.byte_field:B] Order: 11", shape=box, fillcolor=lightgrey, style=filled];

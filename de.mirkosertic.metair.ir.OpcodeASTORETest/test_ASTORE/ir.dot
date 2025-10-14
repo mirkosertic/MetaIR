@@ -9,11 +9,11 @@ digraph {
  node0 -> node8[style=dotted];
  node7[label="#7 String : test",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node7[style=dotted];
+ node6[label="#6 String : test",shape=octagon, fillcolor=lightgreen, style=filled];
+ node0 -> node6[style=dotted];
  node2[label="#2 Return",shape=box, fillcolor=lightgrey, style=filled];
  node0 -> node2[labeldistance=2, color=red, fontcolor=red];
  node0 -> node2[labeldistance=2, color=green, constraint=false];
- node6[label="#6 String : test",shape=octagon, fillcolor=lightgreen, style=filled];
- node0 -> node6[style=dotted];
  node5[label="#5 String : test",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node5[style=dotted];
  node4[label="#4 String : test",shape=octagon, fillcolor=lightgreen, style=filled];

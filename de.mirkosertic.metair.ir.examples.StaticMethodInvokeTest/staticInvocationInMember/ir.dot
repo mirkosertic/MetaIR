@@ -7,6 +7,8 @@ digraph {
  node2 -> node5[labeldistance=2, color=red, fontcolor=red];
  node2[label="#2 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
  node0 -> node2[labeldistance=2, color=red, fontcolor=red];
+ node4[label="#4 Class StaticMethodInvokeTest",shape=octagon, fillcolor=lightgreen, style=filled];
+ node2 -> node4[style=dotted];
  node3[label="#3 int 10",shape=octagon, fillcolor=lightgreen, style=filled];
  node2 -> node3[style=dotted];
  node6[label="#6 Invoke static compute : (int)int",shape=box, fillcolor=lightgrey, style=filled];
@@ -18,8 +20,6 @@ digraph {
  node6 -> node7[headlabel="*0", labeldistance=2];
  node6 -> node7[labeldistance=2, color=red, fontcolor=red];
  node6 -> node7[labeldistance=2, color=green, constraint=false];
- node4[label="#4 Class StaticMethodInvokeTest",shape=octagon, fillcolor=lightgreen, style=filled];
- node2 -> node4[style=dotted];
  subgraph cluster_0 {
   color=lightgray;
   node2;

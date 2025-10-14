@@ -18,8 +18,6 @@ digraph {
  node0 -> node5[labeldistance=2, color=green, constraint=false];
  node4[label="#4 int 10",shape=octagon, fillcolor=lightgreen, style=filled];
  node2 -> node4[style=dotted];
- node8[label="#8 ArrayLength",shape=octagon, fillcolor=orange, style=filled];
- node5 -> node8[headlabel="*0", labeldistance=2];
  node11[label="#11 ArrayLoad : Object",shape=box, fillcolor=lightgrey, style=filled];
  node5 -> node11[headlabel="*0", labeldistance=2];
  node10 -> node11[headlabel="*1", labeldistance=2];
@@ -33,6 +31,8 @@ digraph {
  node9 -> node12[labeldistance=2, color=red, fontcolor=red];
  node9[label="#9 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
  node7 -> node9[labeldistance=2, color=red, fontcolor=red];
+ node8[label="#8 ArrayLength",shape=octagon, fillcolor=orange, style=filled];
+ node5 -> node8[headlabel="*0", labeldistance=2];
  subgraph cluster_0 {
   color=lightgray;
   node7;
