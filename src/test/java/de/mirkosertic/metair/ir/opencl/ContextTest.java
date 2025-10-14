@@ -6,14 +6,12 @@ import de.mirkosertic.metair.opencl.api.Kernel;
 import de.mirkosertic.metair.opencl.api.OpenCLOptions;
 import de.mirkosertic.metair.opencl.api.Platform;
 import de.mirkosertic.metair.opencl.api.PlatformFactory;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static de.mirkosertic.metair.opencl.api.Float2.float2;
 import static de.mirkosertic.metair.opencl.api.GlobalFunctions.get_global_id;
 import static de.mirkosertic.metair.opencl.api.VectorFunctions.normalize;
 
-@Disabled
 public class ContextTest {
 
     @Test
