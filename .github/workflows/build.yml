@@ -15,7 +15,7 @@ jobs:
           distribution: "temurin"
           cache: maven
       - name: Install Graphviz
-        run: sudo apt-get install graphviz
+        run: sudo apt-get install graphviz ocl-icd-opencl-dev
       - run: |
           cat <(echo -e "${{ secrets.OSSRH_GPG_SECRET_KEY }}") | gpg --batch --import
           gpg --list-secret-keys --keyid-format LONG
