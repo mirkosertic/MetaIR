@@ -1,7 +1,7 @@
 digraph {
  ordering="in";
  node0[label="#0 LocalVariable[name=this, slot=0, type=Lde/mirkosertic/metair/ir/examples/StaticFieldAccessTest;] Order: 0", shape=box, fillcolor=lightgrey, style=filled];
- node1[label="#1 Label[context=CodeModel[id=656349395], bci=0] Order: 1", shape=box, fillcolor=lightgrey, style=filled];
+ node1[label="#1 Label[context=CodeModel[id=508760925], bci=0] Order: 1", shape=box, fillcolor=lightgrey, style=filled];
  node2[label="#2 LineNumber[line=103] Order: 2", shape=box, fillcolor=lightgrey, style=filled];
  node3[label="#3 Field[OP=GETSTATIC, field=de/mirkosertic/metair/ir/examples/StaticFieldAccessTest$Source.string_field:Ljava/lang/String;] Order: 3", shape=box, fillcolor=lightgrey, style=filled];
  node4[label="#4 Return[OP=ARETURN] Order: 4", shape=box, fillcolor=lightgrey, style=filled];
