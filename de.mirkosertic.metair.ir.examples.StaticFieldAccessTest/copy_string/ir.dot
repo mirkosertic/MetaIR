@@ -1,10 +1,6 @@
 digraph {
  ordering="in";
  node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#0 Method</td></tr><tr><td port="prj1" bgcolor="yellow">this : StaticFieldAccessTest</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
- node4[label="#4 ClassInit",shape=box, fillcolor=lightgrey, style=filled];
- node3 -> node4[headlabel="*0", labeldistance=2];
- node0 -> node4[labeldistance=2, color=green, constraint=false];
- node2 -> node4[labeldistance=2, color=red, fontcolor=red];
  node2[label="#2 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
  node0 -> node2[labeldistance=2, color=red, fontcolor=red];
  node3[label="#3 Class StaticFieldAccessTest$Source",shape=octagon, fillcolor=lightgreen, style=filled];
@@ -12,6 +8,10 @@ digraph {
  node5[label="#5 GetStaticField : string_field : String",shape=octagon, fillcolor=orange, style=filled];
  node3 -> node5[headlabel="*0", labeldistance=2];
  node4 -> node5[labeldistance=2, color=green, constraint=false];
+ node4[label="#4 ClassInit",shape=box, fillcolor=lightgrey, style=filled];
+ node3 -> node4[headlabel="*0", labeldistance=2];
+ node0 -> node4[labeldistance=2, color=green, constraint=false];
+ node2 -> node4[labeldistance=2, color=red, fontcolor=red];
  node7[label="#7 ClassInit",shape=box, fillcolor=lightgrey, style=filled];
  node6 -> node7[headlabel="*0", labeldistance=2];
  node5 -> node7[labeldistance=2, color=green, constraint=false];
@@ -28,13 +28,13 @@ digraph {
  node8 -> node9[labeldistance=2, color=green, constraint=false];
  subgraph cluster_0 {
   color=lightgray;
-  node2;
-  node3;
+  node4;
+  node6;
  }
  subgraph cluster_1 {
   color=lightgray;
-  node4;
-  node6;
+  node2;
+  node3;
  }
  subgraph cluster_000 {
   label = "Legend";
