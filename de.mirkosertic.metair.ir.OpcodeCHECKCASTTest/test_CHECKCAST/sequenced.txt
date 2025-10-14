@@ -1,5 +1,5 @@
 (method (Test this)
   String var0 = (String.class.$init$)
-  typecheck "Test" is instance of var0
+  typecheck String.class is instance of "Test"
   return
 )

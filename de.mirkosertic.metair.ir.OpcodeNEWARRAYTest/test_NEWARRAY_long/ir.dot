@@ -29,15 +29,15 @@ digraph {
  node0 -> node5[style=dotted];
  subgraph cluster_0 {
   color=lightgray;
+  node6;
+  node8;
+ }
+ subgraph cluster_1 {
+  color=lightgray;
   node0;
   node2;
   node4;
   node5;
- }
- subgraph cluster_1 {
-  color=lightgray;
-  node6;
-  node8;
  }
  subgraph cluster_000 {
   label = "Legend";
