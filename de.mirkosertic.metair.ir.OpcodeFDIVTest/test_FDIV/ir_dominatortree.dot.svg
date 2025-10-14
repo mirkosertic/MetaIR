@@ -94,11 +94,11 @@
 <polygon fill="fuchsia" stroke="fuchsia" stroke-width="2" points="510.73,-219.63 521.3,-218.99 512.64,-212.9 510.73,-219.63"/>
 </g>
 <!-- node2&#45;&gt;node4 -->
-<g id="edge8" class="edge">
+<g id="edge9" class="edge">
 <title>node2&#45;&gt;node4</title>
 <path fill="none" stroke="black" d="M384.15,-148.12C432.62,-136.87 499.29,-121.4 550.36,-109.55"/>
 <polygon fill="black" stroke="black" points="551.4,-112.9 560.35,-107.23 549.82,-106.08 551.4,-112.9"/>
-<text text-anchor="middle" x="544.61" y="-115.86" font-family="Times,serif" font-size="14.00">*0</text>
+<text text-anchor="middle" x="544.61" y="-115.86" font-family="Times,serif" font-size="14.00">*1</text>
 </g>
 <!-- node3&#45;&gt;node0 -->
 <g id="edge5" class="edge">
@@ -107,11 +107,11 @@
 <polygon fill="fuchsia" stroke="fuchsia" stroke-width="2" points="580.09,-208.59 582.88,-218.81 587.07,-209.08 580.09,-208.59"/>
 </g>
 <!-- node3&#45;&gt;node4 -->
-<g id="edge9" class="edge">
+<g id="edge8" class="edge">
 <title>node3&#45;&gt;node4</title>
 <path fill="none" stroke="black" d="M588.86,-145.81C594.76,-137.27 602,-126.77 608.52,-117.32"/>
 <polygon fill="black" stroke="black" points="611.45,-119.25 614.25,-109.03 605.69,-115.27 611.45,-119.25"/>
-<text text-anchor="middle" x="610.91" y="-125.05" font-family="Times,serif" font-size="14.00">*1</text>
+<text text-anchor="middle" x="610.91" y="-125.05" font-family="Times,serif" font-size="14.00">*0</text>
 </g>
 <!-- node4&#45;&gt;node0 -->
 <g id="edge7" class="edge">
