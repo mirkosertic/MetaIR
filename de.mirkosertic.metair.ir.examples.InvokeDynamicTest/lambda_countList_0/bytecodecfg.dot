@@ -2,7 +2,7 @@ digraph {
  ordering="in";
  node0[label="#0 LocalVariable[name=min, slot=0, type=I] Order: 0", shape=box, fillcolor=lightgrey, style=filled];
  node1[label="#1 LocalVariable[name=t, slot=1, type=Ljava/lang/Integer;] Order: 1", shape=box, fillcolor=lightgrey, style=filled];
- node2[label="#2 Label[context=CodeModel[id=231351829], bci=0] Order: 2", shape=box, fillcolor=lightgrey, style=filled];
+ node2[label="#2 Label[context=CodeModel[id=496425074], bci=0] Order: 2", shape=box, fillcolor=lightgrey, style=filled];
  node3[label="#3 LineNumber[line=11] Order: 3", shape=box, fillcolor=lightgrey, style=filled];
  node4[label="#4 Load[OP=ALOAD_1, slot=1] Order: 4", shape=box, fillcolor=lightgrey, style=filled];
  node5[label="#5 Invoke[OP=INVOKEVIRTUAL, m=java/lang/Integer.intValue()I] Order: 5", shape=box, fillcolor=lightgrey, style=filled];
@@ -10,9 +10,9 @@ digraph {
  node7[label="#7 Branch[OP=IF_ICMPLT] Order: 7", shape=box, fillcolor=lightgrey, style=filled];
  node8[label="#8 UnboundIntrinsicConstantInstruction[op=ICONST_1] Order: 8", shape=box, fillcolor=lightgrey, style=filled];
  node9[label="#9 Branch[OP=GOTO] Order: 9", shape=box, fillcolor=lightgrey, style=filled];
- node10[label="#10 Label[context=CodeModel[id=231351829], bci=12] Order: 10", shape=box, fillcolor=lightgrey, style=filled];
+ node10[label="#10 Label[context=CodeModel[id=496425074], bci=12] Order: 10", shape=box, fillcolor=lightgrey, style=filled];
  node11[label="#11 UnboundIntrinsicConstantInstruction[op=ICONST_0] Order: 11", shape=box, fillcolor=lightgrey, style=filled];
- node12[label="#12 Label[context=CodeModel[id=231351829], bci=13] Order: 12", shape=box, fillcolor=lightgrey, style=filled];
+ node12[label="#12 Label[context=CodeModel[id=496425074], bci=13] Order: 12", shape=box, fillcolor=lightgrey, style=filled];
  node13[label="#13 Return[OP=IRETURN] Order: 13", shape=box, fillcolor=lightgrey, style=filled];
  node0 -> node0[color=fuchsia];
  node0 -> node1[color=red];
