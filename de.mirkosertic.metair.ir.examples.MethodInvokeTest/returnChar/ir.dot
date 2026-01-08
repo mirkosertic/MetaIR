@@ -3,12 +3,12 @@ digraph {
  node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="1">#0 Method</td></tr><tr><td port="prj1" bgcolor="yellow">this : MethodInvokeTest</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
  node2[label="#2 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
  node0 -> node2[labeldistance=2, color=red, fontcolor=red];
- node4[label="#4 Class MethodInvokeTest",shape=octagon, fillcolor=lightgreen, style=filled];
- node2 -> node4[style=dotted];
  node5[label="#5 ClassInit",shape=box, fillcolor=lightgrey, style=filled];
  node4 -> node5[headlabel="*0", labeldistance=2];
  node0 -> node5[labeldistance=2, color=green, constraint=false];
  node2 -> node5[labeldistance=2, color=red, fontcolor=red];
+ node4[label="#4 Class MethodInvokeTest",shape=octagon, fillcolor=lightgreen, style=filled];
+ node2 -> node4[style=dotted];
  node6[label="#6 Invoke static staticReturnChar : (char)char",shape=box, fillcolor=lightgrey, style=filled];
  node5 -> node6[headlabel="*0", labeldistance=2];
  node3 -> node6[headlabel="*1", labeldistance=2];
