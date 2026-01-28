@@ -43,15 +43,15 @@ digraph {
  node6 -> node9[headlabel="*0", labeldistance=2];
  subgraph cluster_0 {
   color=lightgray;
-  node3;
-  node7;
-  node8;
- }
- subgraph cluster_1 {
-  color=lightgray;
   node2;
   node4;
   node5;
+ }
+ subgraph cluster_1 {
+  color=lightgray;
+  node3;
+  node7;
+  node8;
  }
  subgraph cluster_2 {
   color=lightgray;

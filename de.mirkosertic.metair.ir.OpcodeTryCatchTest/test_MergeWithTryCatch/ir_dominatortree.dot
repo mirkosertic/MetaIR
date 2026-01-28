@@ -38,10 +38,10 @@ digraph debugoutput {
  node11 -> node9[dir="forward" color="fuchsia" penwidth="2"];
  node9 -> node11[headlabel="*0", labeldistance=2];
  node10 -> node11[labeldistance=2, color=red, fontcolor=red];
- node12[label="#12 exit Order : 11",shape=box, fillcolor=lightgrey, style=filled];
+ node12[label="#12 default Order : 10",shape=box, fillcolor=lightgrey, style=filled];
  node12 -> node9[dir="forward" color="fuchsia" penwidth="2"];
  node9 -> node12[labeldistance=2, color=red, fontcolor=red];
- node13[label="#13 default Order : 9",shape=box, fillcolor=lightgrey, style=filled];
+ node13[label="#13 exit Order : 9",shape=box, fillcolor=lightgrey, style=filled];
  node13 -> node9[dir="forward" color="fuchsia" penwidth="2"];
  node9 -> node13[labeldistance=2, color=red, fontcolor=red];
  node14[label="#14 exception : IllegalArgumentException Order : 19",shape=box, fillcolor=lightgrey, style=filled];
@@ -52,11 +52,11 @@ digraph debugoutput {
  node11 -> node15[labeldistance=2, color=red, fontcolor=red];
  node16[label="#16 Merge : EndOfGuardedBlock7 Order : 12",shape=box, fillcolor=lightgrey, style=filled];
  node16 -> node9[dir="forward" color="fuchsia" penwidth="2"];
- node13 -> node16[labeldistance=2, color=red, fontcolor=red];
  node12 -> node16[labeldistance=2, color=red, fontcolor=red];
- node17[label="#17 int 3 Order : 10",shape=octagon, fillcolor=lightgreen, style=filled];
- node17 -> node13[dir="forward" color="fuchsia" penwidth="2"];
- node13 -> node17[style=dotted];
+ node13 -> node16[labeldistance=2, color=red, fontcolor=red];
+ node17[label="#17 int 3 Order : 11",shape=octagon, fillcolor=lightgreen, style=filled];
+ node17 -> node12[dir="forward" color="fuchsia" penwidth="2"];
+ node12 -> node17[style=dotted];
  node18[label="#18 Goto Order : 13",shape=box, fillcolor=lightgrey, style=filled];
  node18 -> node16[dir="forward" color="fuchsia" penwidth="2"];
  node16 -> node18[labeldistance=2, color=red, fontcolor=red];
