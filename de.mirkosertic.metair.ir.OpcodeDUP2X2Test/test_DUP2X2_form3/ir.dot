@@ -4,12 +4,12 @@ digraph {
  node5[label="#5 Return",shape=box, fillcolor=lightgrey, style=filled];
  node0 -> node5[labeldistance=2, color=red, fontcolor=red];
  node0 -> node5[labeldistance=2, color=green, constraint=false];
- node4[label="#4 long 1",shape=octagon, fillcolor=lightgreen, style=filled];
- node0 -> node4[style=dotted];
  node3[label="#3 int 1",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node3[style=dotted];
  node2[label="#2 int 1",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node2[style=dotted];
+ node4[label="#4 long 1",shape=octagon, fillcolor=lightgreen, style=filled];
+ node0 -> node4[style=dotted];
  subgraph cluster_0 {
   color=lightgray;
   node0;

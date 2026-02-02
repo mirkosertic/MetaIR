@@ -41,8 +41,8 @@
 <!-- node2 -->
 <g id="node3" class="node">
 <title>node2</title>
-<polygon fill="lightgrey" stroke="black" points="470,-547 325,-547 325,-511 470,-511 470,-547"/>
-<text text-anchor="middle" x="397.5" y="-525.3" font-family="Times,serif" font-size="14.00">#2 false Order : 3</text>
+<polygon fill="lightgrey" stroke="black" points="468,-547 327,-547 327,-511 468,-511 468,-547"/>
+<text text-anchor="middle" x="397.5" y="-525.3" font-family="Times,serif" font-size="14.00">#2 true Order : 3</text>
 </g>
 <!-- node1&#45;&gt;node2 -->
 <g id="edge4" class="edge">
@@ -53,8 +53,8 @@
 <!-- node3 -->
 <g id="node4" class="node">
 <title>node3</title>
-<polygon fill="lightgrey" stroke="black" points="629,-547 488,-547 488,-511 629,-511 629,-547"/>
-<text text-anchor="middle" x="558.5" y="-525.3" font-family="Times,serif" font-size="14.00">#3 true Order : 2</text>
+<polygon fill="lightgrey" stroke="black" points="631,-547 486,-547 486,-511 631,-511 631,-547"/>
+<text text-anchor="middle" x="558.5" y="-525.3" font-family="Times,serif" font-size="14.00">#3 false Order : 2</text>
 </g>
 <!-- node1&#45;&gt;node3 -->
 <g id="edge6" class="edge">
@@ -75,7 +75,7 @@
 <text text-anchor="middle" x="558.5" y="-452.3" font-family="Times,serif" font-size="14.00">#4 Merge : Merge4 Order : 4</text>
 </g>
 <!-- node2&#45;&gt;node4 -->
-<g id="edge9" class="edge">
+<g id="edge8" class="edge">
 <title>node2&#45;&gt;node4</title>
 <path fill="none" stroke="red" d="M436.06,-510.99C458.4,-501.14 486.72,-488.66 510.49,-478.17"/>
 <polygon fill="red" stroke="red" points="511.96,-481.35 519.69,-474.11 509.13,-474.95 511.96,-481.35"/>
@@ -87,7 +87,7 @@
 <polygon fill="fuchsia" stroke="fuchsia" stroke-width="2" points="561.59,-573.59 564.38,-583.81 568.57,-574.08 561.59,-573.59"/>
 </g>
 <!-- node3&#45;&gt;node4 -->
-<g id="edge8" class="edge">
+<g id="edge9" class="edge">
 <title>node3&#45;&gt;node4</title>
 <path fill="none" stroke="red" d="M558.5,-510.81C558.5,-502.79 558.5,-493.05 558.5,-484.07"/>
 <polygon fill="red" stroke="red" points="562,-484.03 558.5,-474.03 555,-484.03 562,-484.03"/>
@@ -95,8 +95,8 @@
 <!-- node4&#45;&gt;node1 -->
 <g id="edge7" class="edge">
 <title>node4&#45;&gt;node1</title>
-<path fill="none" stroke="fuchsia" stroke-width="2" d="M598.37,-474.13C613.47,-482.82 629.05,-494.99 637.5,-511 644.97,-525.15 644.97,-532.85 637.5,-547 630.7,-559.89 619.28,-570.28 607.22,-578.38"/>
-<polygon fill="fuchsia" stroke="fuchsia" stroke-width="2" points="605.02,-575.63 598.37,-583.87 608.71,-581.57 605.02,-575.63"/>
+<path fill="none" stroke="fuchsia" stroke-width="2" d="M599.78,-474.14C615.13,-482.78 630.89,-494.91 639.5,-511 647.05,-525.11 647.05,-532.89 639.5,-547 632.5,-560.08 620.78,-570.53 608.41,-578.63"/>
+<polygon fill="fuchsia" stroke="fuchsia" stroke-width="2" points="606.51,-575.68 599.78,-583.86 610.14,-581.67 606.51,-575.68"/>
 </g>
 <!-- node5 -->
 <g id="node6" class="node">

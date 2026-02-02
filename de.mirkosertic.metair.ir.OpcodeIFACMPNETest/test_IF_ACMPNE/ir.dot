@@ -19,20 +19,20 @@ digraph {
  node11 -> node12[headlabel="*0", labeldistance=2];
  node10 -> node12[labeldistance=2, color=red, fontcolor=red];
  node0 -> node12[labeldistance=2, color=green, constraint=false];
- node8[label="#8 int 1",shape=octagon, fillcolor=lightgreen, style=filled];
- node5:prj6 -> node8[style=dotted];
  node9[label="#9 ReturnValue : int",shape=box, fillcolor=lightgrey, style=filled];
  node8 -> node9[headlabel="*0", labeldistance=2];
  node5:prj6 -> node9[labeldistance=2, color=red, fontcolor=red];
  node0 -> node9[labeldistance=2, color=green, constraint=false];
+ node8[label="#8 int 1",shape=octagon, fillcolor=lightgreen, style=filled];
+ node5:prj6 -> node8[style=dotted];
  subgraph cluster_0 {
-  color=lightgray;
-  node8;
- }
- subgraph cluster_1 {
   color=lightgray;
   node10;
   node11;
+ }
+ subgraph cluster_1 {
+  color=lightgray;
+  node8;
  }
  subgraph cluster_2 {
   color=lightgray;
