@@ -22,6 +22,20 @@ but were rewritten to be more flexible and extensible.
 
 Please take a look at the [Mandelbrot OpenCL example](doc/OPENCL.md) to see it in action. More tutorials will follow.
 
+## Documentation
+
+| Document                                          | What you will find                                                                                                                                                                                    |
+|---------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [IR Architecture](doc/IR.md)                      | How MetaIR represents JVM bytecode as a graph — node types, edge semantics, the six-step parsing pipeline, PHI nodes, and exception handling. Start here if you want to understand or extend the IR. |
+| [Sequencer & Code Generation](doc/SEQUEMCER.md)   | How the graph is re-linearised into structured output code — dominator-guided sequencing, the block stack, break/continue resolution, and the backend interface for new targets.                      |
+| [API Reference](doc/API.md)                       | Programmatic entry point — `ResolverContext`, `ResolvedClass`, `ResolvedMethod`, `ResolvedField`, `IRType`, graph traversal, and `DOTExporter`. Start here to use MetaIR from your own code.         |
+| [Testing Infrastructure](doc/TESTING.md)          | The `@MetaIRTest` JUnit Platform integration — how tests are discovered and executed, the six output artifacts written per method, and how to write assertion-based JUnit 5 tests.                    |
+| [Visualization](doc/VISUALIZATION.md)             | The four DOT graph types, visual conventions (node shapes, edge colors), how to render them with Graphviz, and the online test-suite browser.                                                        |
+| [Graph Optimization](doc/OPTIMIZATION.md)         | Graph invariants, safe edge-mutation patterns, how to write analysis and optimization passes, worked constant-folding and dead-code-elimination examples.                                             |
+| [OpenCL Example](doc/OPENCL.md)                   | End-to-end walkthrough of the Mandelbrot kernel compiled to OpenCL C via MetaIR.                                                                                                                     |
+| [Not yet implemented](doc/NOTIMPLEMENTED.md)      | Known gaps and unsupported bytecode features.                                                                                                                                                        |
+| [TODO](doc/TODO.md)                               | Planned work and open design questions.                                                                                                                                                              |
+
 ## Technical Details
 - Built on [Java Class-File API (JEP 484)](https://openjdk.org/jeps/484)
 - Implements Sea-of-Nodes IR design

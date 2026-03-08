@@ -165,35 +165,31 @@ public class MethodAnalyzer {
         }
     }
 
-    protected void illegalState(final String message) {
+    private IllegalParsingStateException buildException(final String message) {
         final IllegalParsingStateException ex = new IllegalParsingStateException(this, message);
         final StackTraceElement[] old = ex.getStackTrace();
-        final StackTraceElement[] newTrace = new StackTraceElement[old.length - 1];
-        System.arraycopy(old, 1, newTrace, 0, old.length - 1);
+        // Strip both buildException and the assert*/illegalState caller so that
+        // the first visible frame is the actual site that triggered the error.
+        final StackTraceElement[] newTrace = new StackTraceElement[old.length - 2];
+        System.arraycopy(old, 2, newTrace, 0, old.length - 2);
         ex.setStackTrace(newTrace);
-        throw ex;
+        return ex;
+    }
+
+    protected void illegalState(final String message) {
+        throw buildException(message);
     }
 
     protected void assertMinimumStackSize(final Status status, final int minStackSize) {
         final int stackSize = status.stack.size();
         if (stackSize < minStackSize) {
-            final IllegalParsingStateException ex = new IllegalParsingStateException(this, "A minimum stack size of " + minStackSize + " is required, but only " + stackSize + " is available!");
-            final StackTraceElement[] old = ex.getStackTrace();
-            final StackTraceElement[] newTrace = new StackTraceElement[old.length - 1];
-            System.arraycopy(old, 1, newTrace, 0, old.length - 1);
-            ex.setStackTrace(newTrace);
-            throw ex;
+            throw buildException("A minimum stack size of " + minStackSize + " is required, but only " + stackSize + " is available!");
         }
     }
 
     protected void assertEmptyStack(final Status status) {
         if (!status.stack.isEmpty()) {
-            final IllegalParsingStateException ex = new IllegalParsingStateException(this, "The stack should be empty, but it is not! It still has " + status.stack.size() + " element(s).");
-            final StackTraceElement[] old = ex.getStackTrace();
-            final StackTraceElement[] newTrace = new StackTraceElement[old.length - 1];
-            System.arraycopy(old, 1, newTrace, 0, old.length - 1);
-            ex.setStackTrace(newTrace);
-            throw ex;
+            throw buildException("The stack should be empty, but it is not! It still has " + status.stack.size() + " element(s).");
         }
     }
 
@@ -549,7 +545,7 @@ public class MethodAnalyzer {
 
     private Frame intersectIDoms(Frame v1, Frame v2) {
         while (v1 != v2) {
-            if (codeModelTopologicalOrder.indexOf(v1) < codeModelTopologicalOrder.indexOf(v2)) {
+            if (v1.indexInTopologicalOrder < v2.indexInTopologicalOrder) {
                 v2 = v2.immediateDominator;
             } else {
                 v1 = v1.immediateDominator;
@@ -1043,6 +1039,13 @@ public class MethodAnalyzer {
     }
 
     private ExceptionGuard exceptionGuardsFromHere(final Node node, final String label) {
+        return exceptionGuardsFromHere(node, label, new HashSet<>());
+    }
+
+    private ExceptionGuard exceptionGuardsFromHere(final Node node, final String label, final Set<Node> visited) {
+        if (!visited.add(node)) {
+            return null;
+        }
         if (node instanceof final ExceptionGuard guard) {
             if (guard.startLabel.equals(label)) {
                 return guard;
@@ -1051,7 +1054,7 @@ public class MethodAnalyzer {
         for (final Node.UseEdge edge : node.uses) {
             if (edge.use() instanceof final ControlFlowUse cfu) {
                 if (cfu.type == FlowType.FORWARD) {
-                    final ExceptionGuard guard = exceptionGuardsFromHere(edge.node(), label);
+                    final ExceptionGuard guard = exceptionGuardsFromHere(edge.node(), label, visited);
                     if (guard != null) {
                         return guard;
                     }

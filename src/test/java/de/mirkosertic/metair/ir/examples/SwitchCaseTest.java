@@ -6,13 +6,10 @@ import de.mirkosertic.metair.ir.test.MetaIRTest;
 public class SwitchCaseTest {
 
     int simpleSwitch(final int value) {
-        switch (value) {
-            case 10:
-                return 100;
-            case 20:
-                return 200;
-            default:
-                return 300;
-        }
+        return switch (value) {
+            case 10 -> 100;
+            case 20 -> 200;
+            default -> 300;
+        };
     }
 }
