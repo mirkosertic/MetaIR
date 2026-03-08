@@ -1,17 +1,22 @@
 (method (SwitchCaseTest this) (int arg0)
   // Label Frame2
-  lookupswitch(arg0) (
-    case(0) (
-      // Label Frame6
-      return 100
-    )
-    case(1) (
-      // Label Frame10
-      return 200
-    )
-    default (
-      // Label Frame14
-      return 300
+  (block LookupSwitch_2_0
+    lookupswitch(arg0) (
+      case(0) (
+        // Label Frame6
+        break LookupSwitch_2_0
+      )
+      case(1) (
+        // Label Frame10
+        break LookupSwitch_2_0
+      )
+      default (
+        // Label Frame14
+        break LookupSwitch_2_0
+      )
     )
   )
+  int phi0 = <<uninitialized>>
+  // Merge Merge17
+  return phi0
 )

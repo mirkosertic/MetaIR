@@ -20,11 +20,11 @@ digraph {
  node7 -> node10[labeldistance=2, color=green, constraint=false];
  node9[label="#9 int 1",shape=octagon, fillcolor=lightgreen, style=filled];
  node7 -> node9[style=dotted];
+ node12[label="#12 Extend : SIGN int",shape=octagon, fillcolor=orange, style=filled];
+ node10 -> node12[headlabel="*0", labeldistance=2];
  node11[label="#11 Return",shape=box, fillcolor=lightgrey, style=filled];
  node7 -> node11[labeldistance=2, color=red, fontcolor=red];
  node10 -> node11[labeldistance=2, color=green, constraint=false];
- node12[label="#12 Extend : SIGN int",shape=octagon, fillcolor=orange, style=filled];
- node10 -> node12[headlabel="*0", labeldistance=2];
  node8[label="#8 ArrayLength",shape=octagon, fillcolor=orange, style=filled];
  node4 -> node8[headlabel="*0", labeldistance=2];
  node6[label="#6 Truncate : byte",shape=octagon, fillcolor=orange, style=filled];
