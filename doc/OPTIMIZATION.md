@@ -7,7 +7,7 @@ analysis or optimization passes on top of it.
 Companion documents:
 
 - [IR Architecture](IR.md) — node types, edge semantics, the parsing pipeline
-- [Sequencer & Code Generation](SEQUEMCER.md) — how the finished graph is linearised
+- [Sequencer & Code Generation](SEQUENCER.md) — how the finished graph is linearised
 - [API Reference](API.md) — class-loading and programmatic analysis entry points
 - [Visualization](VISUALIZATION.md) — rendering the graph to understand what a pass did
 
@@ -478,4 +478,4 @@ ready for the real backend.
 
 ---
 
-*See also: [IR.md](IR.md) · [SEQUEMCER.md](SEQUEMCER.md) · [API.md](API.md) · [VISUALIZATION.md](VISUALIZATION.md) · [TESTING.md](TESTING.md)*
+*See also: [IR.md](IR.md) · [SEQUENCER.md](SEQUENCER.md) · [API.md](API.md) · [VISUALIZATION.md](VISUALIZATION.md) · [TESTING.md](TESTING.md)*

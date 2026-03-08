@@ -822,7 +822,7 @@ all paths that fed into it.
 ## 11. Consuming the IR — The `Sequencer`
 
 > A comprehensive description of the sequencer and the code-generation backend
-> interface is in [Sequencer.md](SEQUEMCER.md). This section provides a brief overview.
+> interface is in [SEQUENCER.md](SEQUENCER.md). This section provides a brief overview.
 
 
 After construction, the graph is a pure dependency graph with no inherent textual order.

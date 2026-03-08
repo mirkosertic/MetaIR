@@ -7,7 +7,7 @@ every graph, and how to render them locally or interpret them in the browser.
 Companion documents:
 
 - [IR Architecture](IR.md) — node types and edge semantics
-- [Sequencer & Code Generation](SEQUEMCER.md) — how the graph is linearised
+- [Sequencer & Code Generation](SEQUENCER.md) — how the graph is linearised
 - [Testing Infrastructure](TESTING.md) — how artifact files are written during test runs
 - [API Reference](API.md) — how to trigger export programmatically
 
@@ -299,4 +299,4 @@ writes the files to the configured output directory — see
 
 ---
 
-*See also: [IR.md](IR.md) · [API.md](API.md) · [TESTING.md](TESTING.md) · [SEQUEMCER.md](SEQUEMCER.md)*
+*See also: [IR.md](IR.md) · [API.md](API.md) · [TESTING.md](TESTING.md) · [SEQUENCER.md](SEQUENCER.md)*

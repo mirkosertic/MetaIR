@@ -7,7 +7,7 @@ resulting IR graph without going through the JUnit test engine.
 Companion documents:
 
 - [IR Architecture](IR.md) — node types, edge semantics, the full parsing pipeline
-- [Sequencer & Code Generation](SEQUEMCER.md) — linearising the graph into output code
+- [Sequencer & Code Generation](SEQUENCER.md) — linearising the graph into output code
 - [Testing Infrastructure](TESTING.md) — the `@MetaIRTest` JUnit integration
 - [Visualization](VISUALIZATION.md) — rendering the DOT graphs produced by the API
 
@@ -437,7 +437,7 @@ MyCodeGenerator backend = new MyCodeGenerator();    // implements StructuredCont
 new Sequencer(analyzer.ir(), backend).sequence();
 ```
 
-See [SEQUEMCER.md](SEQUEMCER.md) for the full Sequencer API and how to
+See [SEQUENCER.md](SEQUENCER.md) for the full Sequencer API and how to
 implement a backend.
 
 ### Export graphs to DOT
@@ -489,4 +489,4 @@ ResolvedField f = ctx.resolveMemberField(ownerDesc, "missing", typeDesc);
 
 ---
 
-*See also: [IR.md](IR.md) · [SEQUEMCER.md](SEQUEMCER.md) · [TESTING.md](TESTING.md) · [VISUALIZATION.md](VISUALIZATION.md) · [OPTIMIZATION.md](OPTIMIZATION.md)*
+*See also: [IR.md](IR.md) · [SEQUENCER.md](SEQUENCER.md) · [TESTING.md](TESTING.md) · [VISUALIZATION.md](VISUALIZATION.md) · [OPTIMIZATION.md](OPTIMIZATION.md)*
