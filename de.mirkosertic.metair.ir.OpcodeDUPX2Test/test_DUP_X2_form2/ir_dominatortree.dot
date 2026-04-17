@@ -7,10 +7,10 @@ digraph debugoutput {
  node2[label="#2 int 2 Order : 4",shape=octagon, fillcolor=lightgreen, style=filled];
  node2 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node0 -> node2[style=dotted];
- node3[label="#3 int 2 Order : 3",shape=octagon, fillcolor=lightgreen, style=filled];
+ node3[label="#3 int 1 Order : 3",shape=octagon, fillcolor=lightgreen, style=filled];
  node3 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node0 -> node3[style=dotted];
- node4[label="#4 int 1 Order : 2",shape=octagon, fillcolor=lightgreen, style=filled];
+ node4[label="#4 int 2 Order : 2",shape=octagon, fillcolor=lightgreen, style=filled];
  node4 -> node0[dir="forward" color="fuchsia" penwidth="2"];
  node0 -> node4[style=dotted];
  node5[label="#5 Return Order : 1",shape=box, fillcolor=lightgrey, style=filled];
