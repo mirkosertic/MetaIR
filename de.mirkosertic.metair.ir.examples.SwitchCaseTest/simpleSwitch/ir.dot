@@ -1,59 +1,59 @@
 digraph {
  ordering="in";
  node0[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="2">#0 Method</td></tr><tr><td port="prj1" bgcolor="yellow">arg0 : int</td><td port="prj2" bgcolor="yellow">this : SwitchCaseTest</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
- node18[label="#18 ReturnValue : int",shape=box, fillcolor=lightgrey, style=filled];
- node17 -> node18[headlabel="*0", labeldistance=2];
- node15 -> node18[labeldistance=2, color=red, fontcolor=red];
- node0 -> node18[labeldistance=2, color=green, constraint=false];
- node15[label="#15 Merge : Merge17",shape=box, fillcolor=lightgrey, style=filled];
- node11 -> node15[labeldistance=2, color=red, fontcolor=red];
- node13 -> node15[labeldistance=2, color=red, fontcolor=red];
- node10 -> node15[labeldistance=2, color=red, fontcolor=red];
- node10[label="#10 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
- node4:prj7 -> node10[labeldistance=2, color=red, fontcolor=red];
+ node3[label="#3 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
+ node0 -> node3[labeldistance=2, color=red, fontcolor=red];
  node4[margin="0", label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td colspan="3">#4 LookupSwitch</td></tr><tr><td port="prj5" bgcolor="yellow">case0</td><td port="prj6" bgcolor="yellow">case1</td><td port="prj7" bgcolor="yellow">default</td></tr></table>>,shape=none, fillcolor=lightgrey, style=filled];
  node0:prj1 -> node4[headlabel="*0", labeldistance=2];
  node3 -> node4[labeldistance=2, color=red, fontcolor=red];
- node3[label="#3 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
- node0 -> node3[labeldistance=2, color=red, fontcolor=red];
- node9[label="#9 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
- node4:prj6 -> node9[labeldistance=2, color=red, fontcolor=red];
- node14[label="#14 int 200",shape=octagon, fillcolor=lightgreen, style=filled];
- node9 -> node14[style=dotted];
+ node10[label="#10 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
+ node4:prj7 -> node10[labeldistance=2, color=red, fontcolor=red];
+ node16[label="#16 int 300",shape=octagon, fillcolor=lightgreen, style=filled];
+ node10 -> node16[style=dotted];
  node17[label="#17 Φ int",shape=octagon, fillcolor=orange, style=filled];
  node15 -> node17[style=dotted];
  node12 -> node17[headlabel="if #11", labeldistance=2, color=blue, constraint=false];
  node14 -> node17[headlabel="if #13", labeldistance=2, color=blue, constraint=false];
  node16 -> node17[headlabel="if #10", labeldistance=2, color=blue, constraint=false];
- node16[label="#16 int 300",shape=octagon, fillcolor=lightgreen, style=filled];
- node10 -> node16[style=dotted];
- node12[label="#12 int 100",shape=octagon, fillcolor=lightgreen, style=filled];
- node8 -> node12[style=dotted];
- node8[label="#8 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
- node4:prj5 -> node8[labeldistance=2, color=red, fontcolor=red];
- node11[label="#11 Goto",shape=box, fillcolor=lightgrey, style=filled];
- node8 -> node11[labeldistance=2, color=red, fontcolor=red];
+ node14[label="#14 int 200",shape=octagon, fillcolor=lightgreen, style=filled];
+ node9 -> node14[style=dotted];
+ node9[label="#9 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
+ node4:prj6 -> node9[labeldistance=2, color=red, fontcolor=red];
  node13[label="#13 Goto",shape=box, fillcolor=lightgrey, style=filled];
  node9 -> node13[labeldistance=2, color=red, fontcolor=red];
+ node15[label="#15 Merge : Merge17",shape=box, fillcolor=lightgrey, style=filled];
+ node11 -> node15[labeldistance=2, color=red, fontcolor=red];
+ node13 -> node15[labeldistance=2, color=red, fontcolor=red];
+ node10 -> node15[labeldistance=2, color=red, fontcolor=red];
+ node11[label="#11 Goto",shape=box, fillcolor=lightgrey, style=filled];
+ node8 -> node11[labeldistance=2, color=red, fontcolor=red];
+ node8[label="#8 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
+ node4:prj5 -> node8[labeldistance=2, color=red, fontcolor=red];
+ node12[label="#12 int 100",shape=octagon, fillcolor=lightgreen, style=filled];
+ node8 -> node12[style=dotted];
+ node18[label="#18 ReturnValue : int",shape=box, fillcolor=lightgrey, style=filled];
+ node17 -> node18[headlabel="*0", labeldistance=2];
+ node15 -> node18[labeldistance=2, color=red, fontcolor=red];
+ node0 -> node18[labeldistance=2, color=green, constraint=false];
  subgraph cluster_0 {
-  color=lightgray;
-  node10;
-  node16;
- }
- subgraph cluster_1 {
-  color=lightgray;
-  node8;
-  node12;
- }
- subgraph cluster_2 {
   color=lightgray;
   node15;
   node17;
  }
- subgraph cluster_3 {
+ subgraph cluster_1 {
   color=lightgray;
   node9;
   node14;
+ }
+ subgraph cluster_2 {
+  color=lightgray;
+  node8;
+  node12;
+ }
+ subgraph cluster_3 {
+  color=lightgray;
+  node10;
+  node16;
  }
  subgraph cluster_000 {
   label = "Legend";

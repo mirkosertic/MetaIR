@@ -26,8 +26,6 @@ digraph {
  node10 -> node13[labeldistance=2, color=green, constraint=false];
  node12[label="#12 int 1",shape=octagon, fillcolor=lightgreen, style=filled];
  node10 -> node12[style=dotted];
- node15[label="#15 Extend : ZERO int",shape=octagon, fillcolor=orange, style=filled];
- node13 -> node15[headlabel="*0", labeldistance=2];
  node16[label="#16 Return",shape=box, fillcolor=lightgrey, style=filled];
  node14 -> node16[labeldistance=2, color=red, fontcolor=red];
  node13 -> node16[labeldistance=2, color=green, constraint=false];
@@ -35,6 +33,8 @@ digraph {
  node11 -> node14[labeldistance=2, color=red, fontcolor=red];
  node11[label="#11 LabelNode",shape=box, fillcolor=lightgrey, style=filled];
  node10 -> node11[labeldistance=2, color=red, fontcolor=red];
+ node15[label="#15 Extend : ZERO int",shape=octagon, fillcolor=orange, style=filled];
+ node13 -> node15[headlabel="*0", labeldistance=2];
  node9[label="#9 Truncate : char",shape=octagon, fillcolor=orange, style=filled];
  node6 -> node9[headlabel="*0", labeldistance=2];
  node6[label="#6 int 10",shape=octagon, fillcolor=lightgreen, style=filled];

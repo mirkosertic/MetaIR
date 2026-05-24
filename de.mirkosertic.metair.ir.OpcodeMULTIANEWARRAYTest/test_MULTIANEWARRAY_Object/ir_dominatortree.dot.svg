@@ -37,7 +37,7 @@
 <g id="node3" class="node">
 <title>node2</title>
 <polygon fill="lightgreen" stroke="black" points="415.77,-83.54 415.77,-98.46 352.64,-109 263.36,-109 200.23,-98.46 200.23,-83.54 263.36,-73 352.64,-73 415.77,-83.54"/>
-<text text-anchor="middle" x="308" y="-87.3" font-family="Times,serif" font-size="14.00">#2 int 10 Order : 2</text>
+<text text-anchor="middle" x="308" y="-87.3" font-family="Times,serif" font-size="14.00">#2 int 20 Order : 2</text>
 </g>
 <!-- node0&#45;&gt;node2 -->
 <g id="edge4" class="edge">
@@ -49,7 +49,7 @@
 <g id="node4" class="node">
 <title>node3</title>
 <polygon fill="lightgreen" stroke="black" points="648.77,-83.54 648.77,-98.46 585.64,-109 496.36,-109 433.23,-98.46 433.23,-83.54 496.36,-73 585.64,-73 648.77,-83.54"/>
-<text text-anchor="middle" x="541" y="-87.3" font-family="Times,serif" font-size="14.00">#3 int 20 Order : 1</text>
+<text text-anchor="middle" x="541" y="-87.3" font-family="Times,serif" font-size="14.00">#3 int 10 Order : 1</text>
 </g>
 <!-- node0&#45;&gt;node3 -->
 <g id="edge6" class="edge">
@@ -94,11 +94,11 @@
 <polygon fill="fuchsia" stroke="fuchsia" stroke-width="2" points="480.46,-146.34 491.05,-145.99 482.56,-139.66 480.46,-146.34"/>
 </g>
 <!-- node2&#45;&gt;node4 -->
-<g id="edge9" class="edge">
+<g id="edge8" class="edge">
 <title>node2&#45;&gt;node4</title>
 <path fill="none" stroke="black" d="M360,-74.15C394.1,-63.76 438.98,-50.09 475.51,-38.96"/>
 <polygon fill="black" stroke="black" points="476.55,-42.3 485.09,-36.04 474.5,-35.6 476.55,-42.3"/>
-<text text-anchor="middle" x="470.22" y="-45.71" font-family="Times,serif" font-size="14.00">*1</text>
+<text text-anchor="middle" x="470.22" y="-45.71" font-family="Times,serif" font-size="14.00">*0</text>
 </g>
 <!-- node3&#45;&gt;node0 -->
 <g id="edge5" class="edge">
@@ -107,11 +107,11 @@
 <polygon fill="fuchsia" stroke="fuchsia" stroke-width="2" points="544.09,-135.59 546.88,-145.81 551.07,-136.08 544.09,-135.59"/>
 </g>
 <!-- node3&#45;&gt;node4 -->
-<g id="edge8" class="edge">
+<g id="edge9" class="edge">
 <title>node3&#45;&gt;node4</title>
 <path fill="none" stroke="black" d="M541,-72.81C541,-64.79 541,-55.05 541,-46.07"/>
 <polygon fill="black" stroke="black" points="544.5,-46.03 541,-36.03 537.5,-46.03 544.5,-46.03"/>
-<text text-anchor="middle" x="549.45" y="-50.45" font-family="Times,serif" font-size="14.00">*0</text>
+<text text-anchor="middle" x="549.45" y="-50.45" font-family="Times,serif" font-size="14.00">*1</text>
 </g>
 <!-- node4&#45;&gt;node0 -->
 <g id="edge7" class="edge">

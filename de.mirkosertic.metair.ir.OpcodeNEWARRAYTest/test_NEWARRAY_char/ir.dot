@@ -16,6 +16,8 @@ digraph {
  node0 -> node3[labeldistance=2, color=green, constraint=false];
  node2[label="#2 int 10",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node2[style=dotted];
+ node6[label="#6 ArrayLength",shape=octagon, fillcolor=orange, style=filled];
+ node3 -> node6[headlabel="*0", labeldistance=2];
  node10[label="#10 ArrayLoad : char",shape=box, fillcolor=lightgrey, style=filled];
  node3 -> node10[headlabel="*0", labeldistance=2];
  node9 -> node10[headlabel="*1", labeldistance=2];
@@ -27,8 +29,6 @@ digraph {
  node10 -> node11[labeldistance=2, color=green, constraint=false];
  node12[label="#12 Extend : ZERO int",shape=octagon, fillcolor=orange, style=filled];
  node10 -> node12[headlabel="*0", labeldistance=2];
- node6[label="#6 ArrayLength",shape=octagon, fillcolor=orange, style=filled];
- node3 -> node6[headlabel="*0", labeldistance=2];
  node4[label="#4 int 0",shape=octagon, fillcolor=lightgreen, style=filled];
  node0 -> node4[style=dotted];
  subgraph cluster_0 {

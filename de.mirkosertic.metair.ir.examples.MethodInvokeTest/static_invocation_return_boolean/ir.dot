@@ -12,6 +12,9 @@ digraph {
  node5[label="#5 New",shape=octagon, fillcolor=orange, style=filled];
  node4 -> node5[headlabel="*0", labeldistance=2];
  node4 -> node5[labeldistance=2, color=green, constraint=false];
+ node16[label="#16 GetField : array_field : int[]",shape=octagon, fillcolor=orange, style=filled];
+ node5 -> node16[headlabel="*0", labeldistance=2];
+ node15 -> node16[labeldistance=2, color=green, constraint=false];
  node15[label="#15 GetField : string_field : String",shape=octagon, fillcolor=orange, style=filled];
  node5 -> node15[headlabel="*0", labeldistance=2];
  node14 -> node15[labeldistance=2, color=green, constraint=false];
@@ -51,9 +54,6 @@ digraph {
  node18 -> node19[headlabel="*0", labeldistance=2];
  node16 -> node19[labeldistance=2, color=green, constraint=false];
  node17 -> node19[labeldistance=2, color=red, fontcolor=red];
- node16[label="#16 GetField : array_field : int[]",shape=octagon, fillcolor=orange, style=filled];
- node5 -> node16[headlabel="*0", labeldistance=2];
- node15 -> node16[labeldistance=2, color=green, constraint=false];
  node20[label="#20 Invoke static simple_method_return_boolean : (byte,boolean,short,char,int,long,float,double,String,int[])boolean",shape=box, fillcolor=lightgrey, style=filled];
  node19 -> node20[headlabel="*0", labeldistance=2];
  node7 -> node20[headlabel="*1", labeldistance=2];
@@ -74,13 +74,13 @@ digraph {
  node20 -> node21[labeldistance=2, color=green, constraint=false];
  subgraph cluster_0 {
   color=lightgray;
-  node2;
-  node3;
+  node17;
+  node18;
  }
  subgraph cluster_1 {
   color=lightgray;
-  node17;
-  node18;
+  node2;
+  node3;
  }
  subgraph cluster_000 {
   label = "Legend";

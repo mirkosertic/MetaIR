@@ -12,15 +12,6 @@ digraph {
  node5[label="#5 New",shape=octagon, fillcolor=orange, style=filled];
  node4 -> node5[headlabel="*0", labeldistance=2];
  node4 -> node5[labeldistance=2, color=green, constraint=false];
- node16[label="#16 GetField : array_field : int[]",shape=octagon, fillcolor=orange, style=filled];
- node5 -> node16[headlabel="*0", labeldistance=2];
- node15 -> node16[labeldistance=2, color=green, constraint=false];
- node15[label="#15 GetField : string_field : String",shape=octagon, fillcolor=orange, style=filled];
- node5 -> node15[headlabel="*0", labeldistance=2];
- node14 -> node15[labeldistance=2, color=green, constraint=false];
- node14[label="#14 GetField : double_field : double",shape=octagon, fillcolor=orange, style=filled];
- node5 -> node14[headlabel="*0", labeldistance=2];
- node13 -> node14[labeldistance=2, color=green, constraint=false];
  node13[label="#13 GetField : float_field : float",shape=octagon, fillcolor=orange, style=filled];
  node5 -> node13[headlabel="*0", labeldistance=2];
  node12 -> node13[labeldistance=2, color=green, constraint=false];
@@ -52,8 +43,15 @@ digraph {
  node18 -> node19[headlabel="*0", labeldistance=2];
  node16 -> node19[labeldistance=2, color=green, constraint=false];
  node17 -> node19[labeldistance=2, color=red, fontcolor=red];
- node18[label="#18 Class MethodInvokeTest",shape=octagon, fillcolor=lightgreen, style=filled];
- node17 -> node18[style=dotted];
+ node16[label="#16 GetField : array_field : int[]",shape=octagon, fillcolor=orange, style=filled];
+ node5 -> node16[headlabel="*0", labeldistance=2];
+ node15 -> node16[labeldistance=2, color=green, constraint=false];
+ node15[label="#15 GetField : string_field : String",shape=octagon, fillcolor=orange, style=filled];
+ node5 -> node15[headlabel="*0", labeldistance=2];
+ node14 -> node15[labeldistance=2, color=green, constraint=false];
+ node14[label="#14 GetField : double_field : double",shape=octagon, fillcolor=orange, style=filled];
+ node5 -> node14[headlabel="*0", labeldistance=2];
+ node13 -> node14[labeldistance=2, color=green, constraint=false];
  node20[label="#20 Invoke static simple_method_return_char : (byte,boolean,short,char,int,long,float,double,String,int[])char",shape=box, fillcolor=lightgrey, style=filled];
  node19 -> node20[headlabel="*0", labeldistance=2];
  node7 -> node20[headlabel="*1", labeldistance=2];
@@ -72,6 +70,8 @@ digraph {
  node20 -> node21[headlabel="*0", labeldistance=2];
  node20 -> node21[labeldistance=2, color=red, fontcolor=red];
  node20 -> node21[labeldistance=2, color=green, constraint=false];
+ node18[label="#18 Class MethodInvokeTest",shape=octagon, fillcolor=lightgreen, style=filled];
+ node17 -> node18[style=dotted];
  subgraph cluster_0 {
   color=lightgray;
   node17;
