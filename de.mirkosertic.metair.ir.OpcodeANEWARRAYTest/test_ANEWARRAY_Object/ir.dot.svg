@@ -11,11 +11,11 @@
 <polygon fill="white" stroke="transparent" points="-4,4 -4,-439 1344,-439 1344,4 -4,4"/>
 <g id="clust1" class="cluster">
 <title>cluster_0</title>
-<polygon fill="none" stroke="lightgray" points="98,-284 98,-427 471,-427 471,-284 98,-284"/>
+<polygon fill="none" stroke="lightgray" points="299,-65 299,-190 507,-190 507,-65 299,-65"/>
 </g>
 <g id="clust2" class="cluster">
 <title>cluster_1</title>
-<polygon fill="none" stroke="lightgray" points="299,-65 299,-190 507,-190 507,-65 299,-65"/>
+<polygon fill="none" stroke="lightgray" points="98,-284 98,-427 471,-427 471,-284 98,-284"/>
 </g>
 <g id="clust3" class="cluster">
 <title>cluster_000</title>
