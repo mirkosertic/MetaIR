@@ -47,13 +47,13 @@ digraph {
  }
  subgraph cluster_2 {
   color=lightgray;
-  node8;
-  node12;
+  node9;
+  node14;
  }
  subgraph cluster_3 {
   color=lightgray;
-  node9;
-  node14;
+  node8;
+  node12;
  }
  subgraph cluster_000 {
   label = "Legend";
