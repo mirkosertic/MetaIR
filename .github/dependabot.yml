@@ -9,9 +9,11 @@ updates:
     open-pull-requests-limit: 5
     labels:
       - "dependencies"
+      - "actions"
   - package-ecosystem: "maven"
     directory: "/"
     schedule:
       interval: "daily"
     labels:
       - "dependencies"  
+      - "maven"
