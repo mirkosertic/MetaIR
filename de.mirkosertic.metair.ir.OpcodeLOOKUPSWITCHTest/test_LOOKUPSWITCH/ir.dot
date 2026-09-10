@@ -24,13 +24,13 @@ digraph {
  node6 -> node8[style=dotted];
  subgraph cluster_0 {
   color=lightgray;
-  node6;
-  node8;
+  node0;
+  node2;
  }
  subgraph cluster_1 {
   color=lightgray;
-  node0;
-  node2;
+  node6;
+  node8;
  }
  subgraph cluster_2 {
   color=lightgray;
